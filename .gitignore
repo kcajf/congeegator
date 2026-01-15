@@ -25,3 +25,6 @@ vite.config.ts.timestamp-*
 # pixi environments
 .pixi/*
 !.pixi/config.toml
+
+
+cache/
