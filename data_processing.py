@@ -15,6 +15,7 @@ import orjson
 import polars as pl
 import requests
 import zstandard
+from rich.pretty import pprint
 from tqdm import tqdm
 
 log = logging.getLogger(__name__)
@@ -158,7 +159,7 @@ class CacheManager:
 
 class Form(msgspec.Struct, frozen=True):
     form: Optional[str] = None
-    tags: tuple[str, ...] = ()
+    tags: set[str] = set()
     source: Optional[str] = None
 
 
@@ -188,6 +189,124 @@ def find_in_tags(tags: set[str], values: tuple[str, ...]) -> Optional[str]:
     return None
 
 
+def matches_tags(tags: set[str], want_tags: tuple[str, ...]) -> bool:
+    for t in want_tags:
+        if t not in tags:
+            return False
+    return True
+
+
+PERSONS = ("first-person", "second-person", "third-person")
+NUMBERS = ("singular", "plural")
+PERSONS_NUMBERS = tuple((person, number) for number in NUMBERS for person in PERSONS)
+
+
+class FormMatcher(msgspec.Struct, frozen=True):
+    tags: tuple[str, ...]
+    formatter: str = "{}"
+
+    def matches(self, form: Form) -> bool:
+        for t in self.tags:
+            if t not in form.tags:
+                return False
+        return True
+
+    def format(self, form: Form) -> str:
+        return self.formatter.format(form.form)
+
+
+GREEK_CONFIG = {
+    "active present": tuple(
+        FormMatcher(tags=(*pn, "present", "indicative", "imperfective", "active"))
+        for pn in PERSONS_NUMBERS
+    ),
+    "passive present": tuple(
+        FormMatcher(tags=(*pn, "present", "indicative", "imperfective", "passive"))
+        for pn in PERSONS_NUMBERS
+    ),
+    "active imperfect": tuple(
+        FormMatcher(tags=(*pn, "imperfect", "indicative", "imperfective", "active"))
+        for pn in PERSONS_NUMBERS
+    ),
+    "passive imperfect": tuple(
+        FormMatcher(tags=(*pn, "imperfect", "indicative", "imperfective", "passive"))
+        for pn in PERSONS_NUMBERS
+    ),
+    "active aorist": tuple(
+        FormMatcher(tags=(*pn, "past", "indicative", "perfective", "active"))
+        for pn in PERSONS_NUMBERS
+    ),
+    "passive aorist": tuple(
+        FormMatcher(tags=(*pn, "past", "indicative", "perfective", "passive"))
+        for pn in PERSONS_NUMBERS
+    ),
+    "active imperative": tuple(
+        FormMatcher(tags=("second-person", n, "imperative", "imperfective", "active"))
+        for n in NUMBERS
+    ),
+    "passive imperative": tuple(
+        FormMatcher(tags=("second-person", n, "imperative", "imperfective", "passive"))
+        for n in NUMBERS
+    ),
+    "active future continuous": tuple(
+        FormMatcher(tags=("active", *pn, "present", "indicative", "imperfective"), formatter="θα {}")
+        for pn in PERSONS_NUMBERS
+    ),
+    "active present participle": FormMatcher(tags=("active", "present", "participle")),
+    "active perfect participle": FormMatcher(tags=("active", "past", "participle")),
+    "passive perfect participle": FormMatcher(tags=("passive", "past", "participle")),
+    "passive present participle": FormMatcher(
+        tags=("passive", "present", "participle")
+    ),
+    "active infinitive aorist": FormMatcher(tags=("active", "infinitive-aorist")),
+    "passive infinitive aorist": FormMatcher(tags=("passive", "infinitive-aorist")),
+}
+
+
+def structure_map(f, s):
+    if isinstance(s, list):
+        return [structure_map(f, x) for x in s]
+    if isinstance(s, tuple):
+        return tuple(structure_map(f, x) for x in s)
+    if isinstance(s, dict):
+        return {k: structure_map(f, v) for k, v in s.items()}
+    return f(s)
+
+
+def extract_one(matcher: FormMatcher, forms: list[Form]) -> str:
+    ret = ""
+    for form in forms:
+        if form.source != "conjugation":
+            continue
+        assert form.form is not None
+        if matcher.matches(form):
+            if ret != "":
+                ret += "|"
+            ret += matcher.format(form)
+    return ret
+
+
+def extract_conjugations_from_forms(config, forms: list[Form]):
+    return structure_map(lambda matcher: extract_one(matcher, forms), config)
+
+
+def form_is_clean_conjugation(form: Form) -> bool:
+    if form.source != "conjugation":
+        return False
+    if form.form in {
+        "Formed using present",
+        "dependent (for simple past)",
+        "present perfect from above with a particle (να, ας).",
+        "no-table-tags",
+    }:
+        return False
+    if "table-tags" in form.tags:
+        return False
+    if "inflection-template" in form.tags:
+        return False
+    return True
+
+
 # msgspec.json.decode(line, type=Target)
 # This is significantly faster than general dict parsing.
 def main():
@@ -202,8 +321,6 @@ def main():
 
     data = cache.get_lang_filtered_raw_data(wiki_lang, lang)
     i = 0
-
-    from pprint import pprint
 
     for line in data:
         # pprint(orjson.loads(line))
@@ -236,6 +353,7 @@ def main():
             # "δανείζω",
             # "ταξιδεύω",
             "πλένω",
+            # "βρίσκω",
             # "είμαι",
             "comer",
             "manger",
@@ -250,43 +368,45 @@ def main():
                 is_root = False
 
         if is_root and obj.word in WORDS:
-            pprint(orjson.loads(line))
-            # print(obj)
+            pprint(orjson.loads(line), indent_guides=False)
+            # pprint(obj)
+
+            filtered_forms = [f for f in obj.forms if form_is_clean_conjugation(f)]
+            pprint(filtered_forms)
+            pprint(extract_conjugations_from_forms(GREEK_CONFIG, filtered_forms))
             print("---")
+            # rows = []
 
-            # tag_set = obj.
+            # for form in obj.forms:
+            #     if form.source != 'conjugation':
+            #         continue
 
-            rows = []
+            #     form_tag_set = set(form.tags)
+            #     plurality = find_in_tags(form_tag_set, ("singular", "plural"))
+            #     person = find_in_tags(
+            #         form_tag_set, ("first-person", "second-person", "third-person")
+            #     )
+            #     mood = find_in_tags(form_tag_set, ("indicative", 'imperative', 'subjunctive'))
+            #     voice = find_in_tags(form_tag_set, ("active", "passive"))
+            #     aspect = find_in_tags(form_tag_set, ("perfective", "imperfective"))
+            #     tense = find_in_tags(form_tag_set, ("present", 'dependent', 'imperfect', 'past', 'future'))
 
-            for form in obj.forms:
-                if form.source != 'conjugation':
-                    continue
-                form_tag_set = set(form.tags)
-                plurality = find_in_tags(form_tag_set, ("singular", "plural"))
-                person = find_in_tags(
-                    form_tag_set, ("first-person", "second-person", "third-person")
-                )
-                mood = find_in_tags(form_tag_set, ("indicative", 'imperative', 'subjunctive'))
-                voice = find_in_tags(form_tag_set, ("active", "passive"))
-                aspect = find_in_tags(form_tag_set, ("perfective", "imperfective"))
-                tense = find_in_tags(form_tag_set, ("present", 'dependent', 'imperfect', 'past', 'future'))
+            #     rows.append(
+            #         {
+            #             'form': form.form,
+            #             "plurality": plurality,
+            #             "person": person,
+            #             "mood": mood,
+            #             "voice": voice,
+            #             "aspect": aspect,
+            #             "tense": tense,
+            #             'tags': form.tags,
+            #             'source': form.source,
+            #         }
+            #     )
 
-                rows.append(
-                    {
-                        'form': form.form,
-                        "plurality": plurality,
-                        "person": person,
-                        "mood": mood,
-                        "voice": voice,
-                        "aspect": aspect,
-                        "tense": tense,
-                        'tags': form.tags,
-                        'source': form.source,
-                    }
-                )
-            
-            with pl.Config(tbl_rows=1000, fmt_str_lengths=1000, fmt_table_cell_list_len=1000):
-                print(pl.from_records(rows))
+            # with pl.Config(tbl_rows=1000, fmt_str_lengths=1000, fmt_table_cell_list_len=1000):
+            #     print(pl.from_records(rows))
 
         # pprint(orjson.loads(line))
         # pprint(obj)
