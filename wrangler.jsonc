@@ -1,23 +1,29 @@
 {
-	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "congeegator",
-	"main": ".svelte-kit/cloudflare/_worker.js",
-	"compatibility_date": "2026-01-01",
-	"compatibility_flags": [
-		"nodejs_compat"
-	],
-	"assets": {
-		"binding": "ASSETS",
-		"directory": ".svelte-kit/cloudflare",
-	},
-	"observability": {
-		"enabled": true
-	},
-	"r2_buckets": [
-		{
-			"binding": "DATA_BUCKET",
-			"bucket_name": "congeegator",
+    "$schema": "node_modules/wrangler/config-schema.json",
+    "name": "congeegator",
+    "main": ".svelte-kit/cloudflare/_worker.js",
+    "compatibility_date": "2026-01-01",
+    "compatibility_flags": [
+        "nodejs_compat"
+    ],
+    "assets": {
+        "binding": "ASSETS",
+        "directory": ".svelte-kit/cloudflare",
+    },
+    "observability": {
+        "enabled": true
+    },
+    "r2_buckets": [
+        {
+            "binding": "DATA_BUCKET",
+            "bucket_name": "congeegator",
             "preview_bucket_name": "congeegator-dev"
-		},
-	]
+        },
+    ],
+    "routes": [
+        {
+            "pattern": "shop.example.com",
+            "custom_domain": true
+        }
+    ]
 }
