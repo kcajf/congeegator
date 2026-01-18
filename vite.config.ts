@@ -6,8 +6,22 @@ export default defineConfig({
 	plugins: [sveltekit(),
 
 	SvelteKitPWA({
+		strategies: 'generateSW',
 		registerType: 'prompt', // Shows a "New Version" button to users
-		manifest: { /* PWA metadata */ }
+		manifest: { /* PWA metadata */ },
+		workbox: {
+			// 1. Precache the basics
+			globPatterns: ['client/**/*.{js,css,ico,png,svg,webp}'],
+
+			// This tells the Service Worker: "If you can't find this specific HTML file 
+			// (like /item/123), just give them the root index.html instead." 
+			// SvelteKit's client-side router will then take over and render the page.
+			navigateFallback: '/',
+			
+			// 3. Prevent the Service Worker from trying to cache your data fetches
+			// since Dexie handles it.
+			navigateFallbackDenylist: [/^\/data/],
+		}
 	})
 	]
 });
