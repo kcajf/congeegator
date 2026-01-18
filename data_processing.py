@@ -427,9 +427,10 @@ def main():
 
     # print(i)
     
-    static_dir = os.path.join(os.path.dirname(__file__), "src", "static")
-    schema_version = "1"
-    data_dir = os.path.join(static_dir, "data", f"v{schema_version}")
+    DATA_VERSION = "1"
+
+    static_dir = os.path.join(os.path.dirname(__file__), "static")
+    data_dir = os.path.join(static_dir, "data", f"v{DATA_VERSION}")
     lang_dir = os.path.join(data_dir, lang)
     os.makedirs(lang_dir, exist_ok=True)
 
@@ -450,27 +451,25 @@ def main():
     # index file
     with open(os.path.join(lang_dir, "index.json"), 'w') as f:
         json.dump(list(out.keys()), f, indent=2, ensure_ascii=False)
-
     
     # write data-manifest.json
-    
     language_hashes = {}
     for path in os.listdir(data_dir):
-        if not path.endswith(".json"):
+        data_path = os.path.join(data_dir, path, "data.json")
+        if not os.path.exists(data_path):
             continue
-        language = path.removesuffix(".json")
-        fullpath = os.path.join(data_dir, path)
-        with open(fullpath, 'rb') as f:
+
+        language = path
+        with open(data_path, 'rb') as f:
             h = hashlib.file_digest(f, "md5").hexdigest()[:8]
-        language_hashes[language] = {"hash": h, "path": os.path.relpath(fullpath, static_dir)}
+        language_hashes[language] = {"hash": h}
     
     with open(os.path.join(data_dir, "data-manifest.json"), "w") as f:
         json.dump({
-            "schemaVersion": schema_version,
             "languages": language_hashes,
         }, f, indent=2)
 
-
+    shutil.copyfile(os.path.join(data_dir, "data-manifest.json"), os.path.join("src", "lib", "data-manifest.json"))
 
 
 

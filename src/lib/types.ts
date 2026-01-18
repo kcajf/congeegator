@@ -1,5 +1,4 @@
 export interface DataManifest {
-  schemaVersion: number;
   languages: {
     [key: string]: {
       hash: string;

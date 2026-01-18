@@ -1,6 +1,6 @@
 import { browser } from '$app/environment';
 import { db } from "./db";
-import type { DataManifest, VerbData } from "./types";
+import type { DataManifest, VerbData, VerbRecord } from "./types";
 
 const DATA_VERSION = 1;
 
@@ -13,11 +13,8 @@ export async function syncLanguage(lang: string) {
     };
 
     try {
-        const manifest: DataManifest = await fetch(`/data/${DATA_VERSION}/data-manifest.json`).then(r => r.json());
-
-        if (manifest.schemaVersion > DATA_VERSION) {
-            return 'app-update-required'; // Signal UI to show "Please Refresh App"
-        }
+        const manifest: DataManifest = await fetch(`/data/v${DATA_VERSION}/data-manifest.json`).then(r => r.json());
+        console.log('data manifest', manifest);
 
         const remote = manifest.languages[lang];
         if (!remote) return 'not-supported';
@@ -25,7 +22,7 @@ export async function syncLanguage(lang: string) {
         const local = await db.metadata.get(lang);
 
         if (!local || local.hash !== remote.hash) {
-            const raw: Record<string, VerbData> = await fetch(remote.path).then(r => r.json());
+            const raw: Record<string, VerbData> = await fetch(`/data/v${DATA_VERSION}/${lang}/data.json`).then(r => r.json());
             const records = Object.entries(raw).map(([name, conjugations]) => ({ name, lang, conjugations }));
 
             await db.transaction('rw', [db.verbs, db.metadata], async () => {
@@ -34,17 +31,20 @@ export async function syncLanguage(lang: string) {
                 await db.metadata.put({ lang, hash: remote.hash });
             });
 
-            return 'updated';
+            console.log(`Inserted ${records.length} ${lang} verbs. sync finished`)
+        } else {
+            console.log(`${lang} data is already up-to-date (hash: ${local.hash})`)
+
         }
 
-        return 'up-to-date';
+        return 'updated';
     } catch (e) {
         console.error('Background sync failed', e);
         return 'error';
     }
 }
 
-export async function loadSingleVerb(lang: string, verb: string) {
+export async function loadSingleVerb(lang: string, verb: string, fetcher: typeof fetch): Promise<VerbRecord> {
     // 1. Check IndexedDB first (Browser only)
     if (browser) {
         const cached = await db.verbs.get({ lang, name: verb.toLowerCase() });
@@ -56,31 +56,28 @@ export async function loadSingleVerb(lang: string, verb: string) {
 
     // 2. Fetch from Network (SSR or Cache Miss)
     // This works on both Server (Cloudflare Worker) and Browser
-    const url = `/data/${DATA_VERSION}/${lang}/verbs/${verb.toLowerCase()}.json`;
-    const response = await fetch(url);
+    const url = `/data/v${DATA_VERSION}/${lang}/verbs/${verb.toLowerCase()}.json`;
+    const response = await fetcher(url);
 
     if (!response.ok) {
         throw new Error(`Verb ${verb} not found`);
     }
 
-    const verbData = await response.json();
-
-    // // 3. Save to IndexedDB in the background (Don't 'await' this)
-    // // This ensures the next time the user views this verb, it's offline-ready.
-    // if (browser) {
-    //     db.verbs.put({ ...verbData, lang });
-    // }
-
-    return verbData;
+    const conjugations = await response.json();
+    return {
+        name: verb,
+        lang,
+        conjugations,
+    } as VerbRecord;
 }
 
-export async function loadVerbIndex(lang: string): Promise<string[]> {
+export async function loadVerbIndex(lang: string, fetcher: typeof fetch): Promise<string[]> {
     // 1. Browser: Try to get all verb names from IndexedDB
     if (browser) {
         const localVerbs = await db.verbs
             .where('lang').equals(lang)
             .primaryKeys(); // Just get the [lang+name] keys to be fast
-        
+
         if (localVerbs.length > 0) {
             // Extract just the 'name' part from the compound key
             return localVerbs.map(key => (key as string[])[1]);
@@ -89,8 +86,8 @@ export async function loadVerbIndex(lang: string): Promise<string[]> {
 
     // 2. SSR or Cache Miss: Fetch an 'index.json' for that language
     // You should generate this file in your build script (e.g., static/data/v1/fr/index.json)
-    const url = `/data/${DATA_VERSION}/${lang}/index.json`;
-    const response = await fetch(url);
+    const url = `/data/v${DATA_VERSION}/${lang}/index.json`;
+    const response = await fetcher(url);
 
     if (!response.ok) throw new Error(`Index for ${lang} not found`);
 
