@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import gzip
+import hashlib
 import io
 import json
 import logging
@@ -322,6 +323,8 @@ def main():
     data = cache.get_lang_filtered_raw_data(wiki_lang, lang)
     i = 0
 
+    out = {}
+
     for line in data:
         # pprint(orjson.loads(line))
         try:
@@ -348,10 +351,10 @@ def main():
             # pprint(obj)
 
         WORDS = (
-            # "χωράω",
-            # "χωρώ",
-            # "δανείζω",
-            # "ταξιδεύω",
+            "χωράω",
+            "χωρώ",
+            "δανείζω",
+            "ταξιδεύω",
             "πλένω",
             # "βρίσκω",
             # "είμαι",
@@ -368,13 +371,16 @@ def main():
                 is_root = False
 
         if is_root and obj.word in WORDS:
-            pprint(orjson.loads(line), indent_guides=False)
+            # pprint(orjson.loads(line), indent_guides=False)
             # pprint(obj)
 
             filtered_forms = [f for f in obj.forms if form_is_clean_conjugation(f)]
-            pprint(filtered_forms)
-            pprint(extract_conjugations_from_forms(GREEK_CONFIG, filtered_forms))
-            print("---")
+            # pprint(filtered_forms)
+            # pprint(extract_conjugations_from_forms(GREEK_CONFIG, filtered_forms))
+            conj = extract_conjugations_from_forms(GREEK_CONFIG, filtered_forms)
+            print(obj.word)
+            out[obj.word] = conj
+            # print("---")
             # rows = []
 
             # for form in obj.forms:
@@ -419,7 +425,54 @@ def main():
         #     # pprint(obj)
         #     print('---')
 
-    print(i)
+    # print(i)
+    
+    static_dir = os.path.join(os.path.dirname(__file__), "src", "static")
+    schema_version = "1"
+    data_dir = os.path.join(static_dir, "data", f"v{schema_version}")
+    lang_dir = os.path.join(data_dir, lang)
+    os.makedirs(lang_dir, exist_ok=True)
+
+    # full data file
+    out_path = os.path.join(lang_dir, "data.json")
+    with open(out_path, 'w') as f:
+        json.dump(out, f, indent=2, ensure_ascii=False)
+        
+    # single verbs file 
+    single_verbs_dir = os.path.join(lang_dir, "verbs")
+    if os.path.exists(single_verbs_dir):
+        shutil.rmtree(single_verbs_dir)
+    os.makedirs(single_verbs_dir)
+    for verb, verb_data in out.items():
+        with open(os.path.join(single_verbs_dir, f"{verb}.json"), 'w') as f:
+            json.dump(verb_data, f, indent=2, ensure_ascii=False)
+    
+    # index file
+    with open(os.path.join(lang_dir, "index.json"), 'w') as f:
+        json.dump(list(out.keys()), f, indent=2, ensure_ascii=False)
+
+    
+    # write data-manifest.json
+    
+    language_hashes = {}
+    for path in os.listdir(data_dir):
+        if not path.endswith(".json"):
+            continue
+        language = path.removesuffix(".json")
+        fullpath = os.path.join(data_dir, path)
+        with open(fullpath, 'rb') as f:
+            h = hashlib.file_digest(f, "md5").hexdigest()[:8]
+        language_hashes[language] = {"hash": h, "path": os.path.relpath(fullpath, static_dir)}
+    
+    with open(os.path.join(data_dir, "data-manifest.json"), "w") as f:
+        json.dump({
+            "schemaVersion": schema_version,
+            "languages": language_hashes,
+        }, f, indent=2)
+
+
+
+
 
 
 if __name__ == "__main__":

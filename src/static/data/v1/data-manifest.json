@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "1",
+  "languages": {
+    "data-manifest": {
+      "hash": "c362c40d",
+      "path": "data/v1/data-manifest.json"
+    }
+  }
+}
