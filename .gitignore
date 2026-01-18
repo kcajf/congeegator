@@ -30,3 +30,4 @@ vite.config.ts.timestamp-*
 cache/
 
 static/data/
+src/lib/data-manifest.json
