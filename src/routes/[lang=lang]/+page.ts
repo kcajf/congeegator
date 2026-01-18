@@ -2,9 +2,10 @@ import { loadVerbIndex, manifest } from '$lib/dataManager';
 import { error } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 
-export const load: PageLoad = async ({ params , fetch}) => {
+export const load: PageLoad = async ({ params, platform }) => {
+
     try {
-        const verbs = await loadVerbIndex(params.lang, fetch);
+        const verbs = await loadVerbIndex(params.lang, platform);
         return {
             lang: params.lang,
             verbs: verbs,

@@ -12,7 +12,10 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
-		"deploy": "npm run build && npx wrangler deploy"
+		"r2-upload": "rclone sync r2_data r2-congeegator:congeegator --progress",
+		"r2-upload-dev": "rclone sync r2_data r2-congeegator:congeegator-dev --progress",
+		"deploy": "npm run build && npx wrangler deploy",
+		"wrangler-dev": "npm run build && npx wrangler dev --remote"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.4.0",

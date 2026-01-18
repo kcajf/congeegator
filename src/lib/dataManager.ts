@@ -34,7 +34,6 @@ export async function syncLanguage(lang: string) {
             console.log(`Inserted ${records.length} ${lang} verbs. sync finished`)
         } else {
             console.log(`${lang} data is already up-to-date (hash: ${local.hash})`)
-
         }
 
         return 'updated';
@@ -71,7 +70,7 @@ export async function loadSingleVerb(lang: string, verb: string, fetcher: typeof
     } as VerbRecord;
 }
 
-export async function loadVerbIndex(lang: string, fetcher: typeof fetch): Promise<string[]> {
+export async function loadVerbIndex(lang: string, platform: App.Platform): Promise<string[]> {
     // 1. Browser: Try to get all verb names from IndexedDB
     if (browser) {
         const localVerbs = await db.verbs
@@ -84,12 +83,19 @@ export async function loadVerbIndex(lang: string, fetcher: typeof fetch): Promis
         }
     }
 
+    if (!platform) {
+        // Fallback for local dev if not using wrangler dev
+        throw new Error("Platform not found");
+    }
+
     // 2. SSR or Cache Miss: Fetch an 'index.json' for that language
     // You should generate this file in your build script (e.g., static/data/v1/fr/index.json)
-    const url = `/data/v${DATA_VERSION}/${lang}/index.json`;
-    const response = await fetcher(url);
+    const key = `data/v${DATA_VERSION}/${lang}/index.json`;
+    const response = await platform.env.DATA_BUCKET.get(key);
 
-    if (!response.ok) throw new Error(`Index for ${lang} not found`);
+    if (!response) {
+        throw new Error(`File ${key} not found in R2`);
+    }
 
     const verbList: string[] = await response.json();
 

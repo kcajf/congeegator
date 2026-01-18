@@ -435,7 +435,7 @@ def main():
     
     DATA_VERSION = "1"
 
-    static_dir = os.path.join(os.path.dirname(__file__), "static")
+    static_dir = os.path.join(os.path.dirname(__file__), "r2_data")
     data_dir = os.path.join(static_dir, "data", f"v{DATA_VERSION}")
     lang_dir = os.path.join(data_dir, lang)
     os.makedirs(lang_dir, exist_ok=True)
