@@ -2,7 +2,7 @@ export interface DataManifest {
   languages: {
     [key: string]: {
       hash: string;
-      path: string;
+      name: string;
     };
   };
 }

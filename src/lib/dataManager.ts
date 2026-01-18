@@ -1,6 +1,9 @@
 import { browser } from '$app/environment';
+import manifestRaw from '$lib/data-manifest.json';
 import { db } from "./db";
 import type { DataManifest, VerbData, VerbRecord } from "./types";
+
+export const manifest = manifestRaw as DataManifest;
 
 const DATA_VERSION = 1;
 
@@ -13,9 +16,6 @@ export async function syncLanguage(lang: string) {
     };
 
     try {
-        const manifest: DataManifest = await fetch(`/data/v${DATA_VERSION}/data-manifest.json`).then(r => r.json());
-        console.log('data manifest', manifest);
-
         const remote = manifest.languages[lang];
         if (!remote) return 'not-supported';
 
@@ -80,7 +80,7 @@ export async function loadVerbIndex(lang: string, fetcher: typeof fetch): Promis
 
         if (localVerbs.length > 0) {
             // Extract just the 'name' part from the compound key
-            return localVerbs.map(key => (key as string[])[1]);
+            return localVerbs.map(key => (key as string[])[1]).sort();
         }
     }
 

@@ -1,4 +1,4 @@
-import { loadVerbIndex } from '$lib/dataManager';
+import { loadVerbIndex, manifest } from '$lib/dataManager';
 import { error } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 
@@ -7,7 +7,8 @@ export const load: PageLoad = async ({ params , fetch}) => {
         const verbs = await loadVerbIndex(params.lang, fetch);
         return {
             lang: params.lang,
-            verbs: verbs // Array of strings: ['manger', 'finir', ...]
+            verbs: verbs,
+            langName: manifest.languages[params.lang].name
         };
     } catch (e) {
         console.error("DEBUG: loadVerbIndex failed because:", e);

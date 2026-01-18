@@ -215,6 +215,12 @@ class FormMatcher(msgspec.Struct, frozen=True):
     def format(self, form: Form) -> str:
         return self.formatter.format(form.form)
 
+LANG_NAMES = {
+    "el": "Modern Greek",
+    "es": "Spanish",
+    "fr": "French",
+}
+
 
 GREEK_CONFIG = {
     "active present": tuple(
@@ -450,7 +456,7 @@ def main():
     
     # index file
     with open(os.path.join(lang_dir, "index.json"), 'w') as f:
-        json.dump(list(out.keys()), f, indent=2, ensure_ascii=False)
+        json.dump(sorted(out.keys()), f, indent=2, ensure_ascii=False)
     
     # write data-manifest.json
     language_hashes = {}
@@ -462,14 +468,14 @@ def main():
         language = path
         with open(data_path, 'rb') as f:
             h = hashlib.file_digest(f, "md5").hexdigest()[:8]
-        language_hashes[language] = {"hash": h}
+        language_hashes[language] = {"hash": h, "name": LANG_NAMES[lang]}
     
-    with open(os.path.join(data_dir, "data-manifest.json"), "w") as f:
+    with open(os.path.join("src", "lib", "data-manifest.json"), "w") as f:
         json.dump({
             "languages": language_hashes,
         }, f, indent=2)
 
-    shutil.copyfile(os.path.join(data_dir, "data-manifest.json"), os.path.join("src", "lib", "data-manifest.json"))
+    # shutil.copyfile(os.path.join(data_dir, "data-manifest.json"), os.path.join("src", "lib", "data-manifest.json"))
 
 
 

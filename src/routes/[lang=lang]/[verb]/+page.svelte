@@ -7,11 +7,7 @@
 
 	// Whenever the language changes, check if we need the full bundle
 	$: if (browser && data.verb?.lang) {
-		syncLanguage(data.verb.lang).then((status) => {
-			if (status === 'updated') {
-				console.log(`${data.verb.lang} bundle synced to IndexedDB`);
-			}
-		});
+		syncLanguage(data.verb.lang);
 	}
 
 	// $: console.log('Current data:', data);

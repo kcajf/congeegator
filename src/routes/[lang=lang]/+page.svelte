@@ -1,19 +1,18 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
+	import { syncLanguage } from '$lib/dataManager';
 	import type { PageData } from './$types';
 	export let data: PageData;
 
-	let query = '';
-
-	// Reactively filter the list as the user types
-	$: filteredVerbs = data.verbs
-		.filter((v) => v.toLowerCase().includes(query.toLowerCase()))
-		.slice(0, 100); // Limit display for performance, search still hits everything
+	$: if (browser && data.lang) {
+		syncLanguage(data.lang);
+	}
 </script>
 
-<h1>{data.lang.toUpperCase()} Verbs</h1>
+<h1>{data.langName} Verbs</h1>
 
 <div class="verb-grid">
-	{#each filteredVerbs as verb}
+	{#each data.verbs as verb}
 		<p><a href="/{data.lang}/{verb}">{verb}</a></p>
 	{:else}
 		<p>No verbs found matching "{query}"</p>
