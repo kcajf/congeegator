@@ -1,7 +1,6 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 import { defineConfig } from 'vite';
-import { cloudflare } from "@cloudflare/vite-plugin";
 
 export default defineConfig({
 	plugins: [
@@ -14,7 +13,7 @@ export default defineConfig({
 			manifest: { /* PWA metadata */ },
 			workbox: {
 				// 1. Precache the basics
-				globPatterns: ['client/**/*.{js,css,ico,png,svg,webp}'],
+				 globPatterns: ['client/**/*.{js,css,ico,png,svg,webp,webmanifest}', 'prerendered/**/*.{html,json}'],
 
 				// This tells the Service Worker: "If you can't find this specific HTML file 
 				// (like /item/123), just give them the root index.html instead." 
