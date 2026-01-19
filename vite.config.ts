@@ -12,21 +12,26 @@ export default defineConfig({
 			registerType: 'prompt', // Shows a "New Version" button to users
 			manifest: { /* PWA metadata */ },
 			workbox: {
-				// 1. Precache the basics
+				globDirectory: '.svelte-kit/output',
+
+				// Only glob the static assets
 				globPatterns: [
 					'client/**/*.{js,css,ico,png,svg,webp,webmanifest}',
-					'prerendered/**/*.{html,json}'
 				],
-
-				// Maps 'prerendered/index.html' to '/index.html' in the cache
-				modifyURLPrefix: { 'prerendered/': '/' },
-
-				// This tells the Service Worker: "If you can't find this specific HTML file 
-				// (like /item/123), just give them the root index.html instead." 
-				// SvelteKit's client-side router will then take over and render the page.
-				navigateFallback: '/index.html',
-
-				navigateFallbackDenylist: [/\/__data\.json$/]
+				// Tell Workbox to hash the physical file but serve it as /
+				templatedURLs: {
+					'/': '.svelte-kit/output/prerendered/pages/index.html'
+				},
+				modifyURLPrefix: {
+					'client/': '',
+				},
+				// Fallback to the root
+				navigateFallback: '/',
+				navigateFallbackDenylist: [
+					/\/__data\.json$/,
+					/^\/_app\/immutable/,
+					/\.(js|css)$/
+				]
 			}
 		})
 	]
