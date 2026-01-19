@@ -1,6 +1,7 @@
 {
     "$schema": "node_modules/wrangler/config-schema.json",
     "name": "congeegator",
+    "preview_urls": true,
     "main": ".svelte-kit/cloudflare/_worker.js",
     "compatibility_date": "2026-01-01",
     "compatibility_flags": [
@@ -16,14 +17,31 @@
     "r2_buckets": [
         {
             "binding": "DATA_BUCKET",
-            "bucket_name": "congeegator",
-            "preview_bucket_name": "congeegator-dev"
+            "bucket_name": "congeegator-dev", // dev for safety
+            "remote": true
         },
     ],
+    "vars": {
+        "PUBLIC_R2_URL": "https://pub-18d4dcb55a684a8387b421c18281e13f.r2.dev",
+    },
     "routes": [
         {
-            "pattern": "shop.example.com",
+            "pattern": "congeegator.com",
             "custom_domain": true
         }
-    ]
+    ],
+    "env": {
+        "production": {
+            "vars": {
+                "PUBLIC_R2_URL": "https://assets.congeegator.com"
+            },
+            "r2_buckets": [
+                {
+                    "binding": "DATA_BUCKET",
+                    "bucket_name": "congeegator", // Prod bucket
+                    "remote": true
+                }
+            ]
+        }
+    }
 }

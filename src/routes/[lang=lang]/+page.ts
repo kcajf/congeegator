@@ -1,18 +1,12 @@
-import { loadVerbIndex, manifest } from '$lib/dataManager';
-import { error } from '@sveltejs/kit';
-import type { PageLoad } from './$types';
+import { loadVerbIndexBrowser, manifest } from "$lib/dataManager";
+import type { PageLoad } from "./$types";
 
-export const load: PageLoad = async ({ params, platform }) => {
-
-    try {
-        const verbs = await loadVerbIndex(params.lang, platform);
-        return {
-            lang: params.lang,
-            verbs: verbs,
-            langName: manifest.languages[params.lang].name
-        };
-    } catch (e) {
-        console.error("DEBUG: loadVerbIndex failed because:", e);
-        throw error(404, `Language ${params.lang} not supported`);
-    }
-};
+export const load: PageLoad = async ({ data, params}) => {
+    // 'data' here is what was returned from +page.server.ts
+    const verbs = await loadVerbIndexBrowser(params.lang, data.verbs);
+    return {
+        lang: params.lang,
+        verbs: verbs,
+        langName: manifest.languages[params.lang].name
+    };
+}

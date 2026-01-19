@@ -1,9 +1,11 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 import { defineConfig } from 'vite';
+import { cloudflare } from "@cloudflare/vite-plugin";
 
 export default defineConfig({
 	plugins: [sveltekit(),
+		cloudflare(),
 
 	SvelteKitPWA({
 		strategies: 'generateSW',

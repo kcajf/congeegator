@@ -1,5 +1,7 @@
 import { browser } from '$app/environment';
+import { PUBLIC_R2_URL } from '$env/static/public';
 import manifestRaw from '$lib/data-manifest.json';
+import { error } from '@sveltejs/kit';
 import { db } from "./db";
 import type { DataManifest, VerbData, VerbRecord } from "./types";
 
@@ -22,7 +24,9 @@ export async function syncLanguage(lang: string) {
         const local = await db.metadata.get(lang);
 
         if (!local || local.hash !== remote.hash) {
-            const raw: Record<string, VerbData> = await fetch(`/data/v${DATA_VERSION}/${lang}/data.json`).then(r => r.json());
+            const url = `${PUBLIC_R2_URL}/data/v${DATA_VERSION}/${lang}/data.json`;
+            console.log(`Fetching ${url}`)
+            const raw: Record<string, VerbData> = await fetch(url).then(r => r.json());
             const records = Object.entries(raw).map(([name, conjugations]) => ({ name, lang, conjugations }));
 
             await db.transaction('rw', [db.verbs, db.metadata], async () => {
@@ -44,6 +48,10 @@ export async function syncLanguage(lang: string) {
 }
 
 export async function loadSingleVerb(lang: string, verb: string, fetcher: typeof fetch): Promise<VerbRecord> {
+    if (!(lang in manifest.languages)) {
+        error(404, { message: `Language ${lang} not supported` });
+    }
+
     // 1. Check IndexedDB first (Browser only)
     if (browser) {
         const cached = await db.verbs.get({ lang, name: verb.toLowerCase() });
@@ -55,8 +63,14 @@ export async function loadSingleVerb(lang: string, verb: string, fetcher: typeof
 
     // 2. Fetch from Network (SSR or Cache Miss)
     // This works on both Server (Cloudflare Worker) and Browser
-    const url = `/data/v${DATA_VERSION}/${lang}/verbs/${verb.toLowerCase()}.json`;
+    const url = `${PUBLIC_R2_URL}/data/v${DATA_VERSION}/${lang}/verbs/${verb.toLowerCase()}.json`;
+    console.log(`Fetching ${url}`)
     const response = await fetcher(url);
+
+    if (response.status == 404) {
+        // TODO: just redirect?
+        error(404, { message: `Verb ${verb} not found` });
+    }
 
     if (!response.ok) {
         throw new Error(`Verb ${verb} not found`);
@@ -70,7 +84,30 @@ export async function loadSingleVerb(lang: string, verb: string, fetcher: typeof
     } as VerbRecord;
 }
 
-export async function loadVerbIndex(lang: string, platform: App.Platform): Promise<string[]> {
+export async function loadVerbIndexServer(lang: string, platform: App.Platform): Promise<string[]> {
+    if (!(lang in manifest.languages)) {
+        error(404, { message: `Language ${lang} not supported` });
+    }
+
+    // 2. SSR or Cache Miss: Fetch an 'index.json' for that language
+    // You should generate this file in your build script (e.g., static/data/v1/fr/index.json)
+    const key = `data/v${DATA_VERSION}/${lang}/index.json`;
+    console.log(`Fetching r2 ${key}`)
+    const response = await platform.env.DATA_BUCKET.get(key);
+
+    if (!response) {
+        throw new Error(`File ${key} not found in R2`);
+    }
+
+    const verbList: string[] = await response.json();
+    return verbList;
+}
+
+export async function loadVerbIndexBrowser(lang: string, serverVerbs: string[]): Promise<string[]> {
+    if (!(lang in manifest.languages)) {
+        error(404, { message: `Language ${lang} not supported` });
+    }
+
     // 1. Browser: Try to get all verb names from IndexedDB
     if (browser) {
         const localVerbs = await db.verbs
@@ -83,21 +120,6 @@ export async function loadVerbIndex(lang: string, platform: App.Platform): Promi
         }
     }
 
-    if (!platform) {
-        // Fallback for local dev if not using wrangler dev
-        throw new Error("Platform not found");
-    }
-
-    // 2. SSR or Cache Miss: Fetch an 'index.json' for that language
-    // You should generate this file in your build script (e.g., static/data/v1/fr/index.json)
-    const key = `data/v${DATA_VERSION}/${lang}/index.json`;
-    const response = await platform.env.DATA_BUCKET.get(key);
-
-    if (!response) {
-        throw new Error(`File ${key} not found in R2`);
-    }
-
-    const verbList: string[] = await response.json();
-
-    return verbList;
+    // SERVER SIDE (or first load): Return the R2 data
+    return serverVerbs;
 }
