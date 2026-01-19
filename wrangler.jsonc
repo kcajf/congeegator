@@ -14,15 +14,8 @@
     "observability": {
         "enabled": true
     },
-    "r2_buckets": [
-        {
-            "binding": "DATA_BUCKET",
-            "bucket_name": "congeegator-dev", // dev for safety
-            "remote": true
-        },
-    ],
     "vars": {
-        "PUBLIC_R2_URL": "https://pub-18d4dcb55a684a8387b421c18281e13f.r2.dev",
+        "PUBLIC_R2_URL": "https://pub-18d4dcb55a684a8387b421c18281e13f.r2.dev", // congeegator-dev bucket
     },
     "routes": [
         {
@@ -35,13 +28,6 @@
             "vars": {
                 "PUBLIC_R2_URL": "https://assets.congeegator.com"
             },
-            "r2_buckets": [
-                {
-                    "binding": "DATA_BUCKET",
-                    "bucket_name": "congeegator", // Prod bucket
-                    "remote": true
-                }
-            ]
         }
     }
 }

@@ -16,7 +16,7 @@ const config = {
 				environment: undefined,
 				persist: undefined
 			},
-			fallback: 'plaintext',
+			fallback: 'index.html',
 			routes: {
 				include: ['/*'],
 				exclude: ['<all>']

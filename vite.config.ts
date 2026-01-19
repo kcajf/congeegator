@@ -13,16 +13,20 @@ export default defineConfig({
 			manifest: { /* PWA metadata */ },
 			workbox: {
 				// 1. Precache the basics
-				 globPatterns: ['client/**/*.{js,css,ico,png,svg,webp,webmanifest}', 'prerendered/**/*.{html,json}'],
+				globPatterns: [
+					'client/**/*.{js,css,ico,png,svg,webp,webmanifest}',
+					'prerendered/**/*.{html,json}'
+				],
+
+				// Maps 'prerendered/index.html' to '/index.html' in the cache
+				modifyURLPrefix: { 'prerendered/': '/' },
 
 				// This tells the Service Worker: "If you can't find this specific HTML file 
 				// (like /item/123), just give them the root index.html instead." 
 				// SvelteKit's client-side router will then take over and render the page.
-				navigateFallback: '/',
+				navigateFallback: '/index.html',
 
-				// 3. Prevent the Service Worker from trying to cache your data fetches
-				// since Dexie handles it.
-				navigateFallbackDenylist: [/^\/data/],
+				navigateFallbackDenylist: [/\/__data\.json$/]
 			}
 		})
 	]
