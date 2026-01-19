@@ -56,7 +56,7 @@ export async function loadSingleVerb(lang: string, verb: string, fetcher: typeof
     if (browser) {
         const cached = await db.verbs.get({ lang, name: verb.toLowerCase() });
         if (cached) {
-            console.log('Found in IndexedDB');
+            console.log('Serving from IndexedDB');
             return cached;
         }
     }
@@ -82,44 +82,4 @@ export async function loadSingleVerb(lang: string, verb: string, fetcher: typeof
         lang,
         conjugations,
     } as VerbRecord;
-}
-
-export async function loadVerbIndexServer(lang: string, platform: App.Platform): Promise<string[]> {
-    if (!(lang in manifest.languages)) {
-        error(404, { message: `Language ${lang} not supported` });
-    }
-
-    // 2. SSR or Cache Miss: Fetch an 'index.json' for that language
-    // You should generate this file in your build script (e.g., static/data/v1/fr/index.json)
-    const key = `data/v${DATA_VERSION}/${lang}/index.json`;
-    console.log(`Fetching r2 ${key}`)
-    const response = await platform.env.DATA_BUCKET.get(key);
-
-    if (!response) {
-        throw new Error(`File ${key} not found in R2`);
-    }
-
-    const verbList: string[] = await response.json();
-    return verbList;
-}
-
-export async function loadVerbIndexBrowser(lang: string, serverVerbs: string[]): Promise<string[]> {
-    if (!(lang in manifest.languages)) {
-        error(404, { message: `Language ${lang} not supported` });
-    }
-
-    // 1. Browser: Try to get all verb names from IndexedDB
-    if (browser) {
-        const localVerbs = await db.verbs
-            .where('lang').equals(lang)
-            .primaryKeys(); // Just get the [lang+name] keys to be fast
-
-        if (localVerbs.length > 0) {
-            // Extract just the 'name' part from the compound key
-            return localVerbs.map(key => (key as string[])[1]).sort();
-        }
-    }
-
-    // SERVER SIDE (or first load): Return the R2 data
-    return serverVerbs;
 }

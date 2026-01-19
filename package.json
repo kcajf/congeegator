@@ -14,7 +14,7 @@
 		"lint": "prettier --check . && eslint .",
 		"r2-upload": "rclone sync r2_data r2-congeegator:congeegator --progress",
 		"r2-upload-dev": "rclone sync r2_data r2-congeegator:congeegator-dev --progress",
-		"deploy": "npm run build && npx wrangler deploy",
+		"deploy": "npm run build && npx wrangler deploy --env prod",
 		"wrangler-dev": "npm run build && npx wrangler dev --remote"
 	},
 	"devDependencies": {
