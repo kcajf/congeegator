@@ -16,7 +16,7 @@ const config = {
 				environment: undefined,
 				persist: undefined
 			},
-			fallback: 'index.html',
+			// fallback: 'app.html',
 		}),
 		paths: {
 			relative: false

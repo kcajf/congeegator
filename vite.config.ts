@@ -13,7 +13,8 @@ export default defineConfig({
 			manifest: { /* PWA metadata */ },
 			kit: {
 				// This is the "SvelteKit way" to handle SPA fallbacks in this plugin
-				adapterFallback: 'index.html',
+				// adapterFallback: 'app.html',
+				adapterFallback: undefined,
 			},
 			workbox: {
 				// Only glob the static assets
@@ -22,6 +23,7 @@ export default defineConfig({
 					// 'prerendered/**/*.json', // Cache data for offline navigation
 					// We can keep prerendered pages if you want home page SSR
 					// 'prerendered/**/*.html'
+					'prerendered/pages/app-shell.html'
 				],
 				// globIgnores: [
                 //     "**/node_modules/**/*",
@@ -31,13 +33,14 @@ export default defineConfig({
                 // ],
 				modifyURLPrefix: {
 					'client/': '/',
-					// 'prerendered/pages/': '/'
+					// This turns "prerendered/pages/app-shell.html" -> "/app-shell.html"
+                    'prerendered/pages/': '/'
 				},
 				// Prevents '/' being stripped, keeping URLs explicit
 				directoryIndex: null,
 
 				// 1. Point to the fallback we are about to inject
-				navigateFallback: '/index.html',
+				navigateFallback: '/app-shell.html',
 
 				// 2. Exclude internal paths
 				navigateFallbackDenylist: [
@@ -45,14 +48,8 @@ export default defineConfig({
 					/\/[^/]+\.[^/]+$/
 				],
 
-				// 3. FORCE the entry into the manifest
+				// for some reason, the default version of this renames /app-shell.html -> app-shell, and messes things up?
 				manifestTransforms: [async (manifest) => {
-					manifest.push({
-						url: '/index.html',
-						// Generate a unique revision every build so the SW updates index.html
-						revision: `${Date.now()}`,
-						size: 0
-					});
 					return { manifest };
 				}]
 			}
