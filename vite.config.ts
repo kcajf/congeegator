@@ -11,27 +11,50 @@ export default defineConfig({
 			strategies: 'generateSW',
 			registerType: 'prompt', // Shows a "New Version" button to users
 			manifest: { /* PWA metadata */ },
+			kit: {
+				// This is the "SvelteKit way" to handle SPA fallbacks in this plugin
+				adapterFallback: 'index.html',
+			},
 			workbox: {
-				globDirectory: '.svelte-kit/output',
-
 				// Only glob the static assets
 				globPatterns: [
 					'client/**/*.{js,css,ico,png,svg,webp,webmanifest}',
+					// 'prerendered/**/*.json', // Cache data for offline navigation
+					// We can keep prerendered pages if you want home page SSR
+					// 'prerendered/**/*.html'
 				],
-				// Tell Workbox to hash the physical file but serve it as /
-				templatedURLs: {
-					'/': '.svelte-kit/output/prerendered/pages/index.html'
-				},
+				// globIgnores: [
+                //     "**/node_modules/**/*",
+                //     "sw.js",
+                //     "workbox-*.js",
+                //     "prerendered/**/*.html" // <--- Important!
+                // ],
 				modifyURLPrefix: {
-					'client/': '',
+					'client/': '/',
+					// 'prerendered/pages/': '/'
 				},
-				// Fallback to the root
-				navigateFallback: '/',
+				// Prevents '/' being stripped, keeping URLs explicit
+				directoryIndex: null,
+
+				// 1. Point to the fallback we are about to inject
+				navigateFallback: '/index.html',
+
+				// 2. Exclude internal paths
 				navigateFallbackDenylist: [
-					/\/__data\.json$/,
-					/^\/_app\/immutable/,
-					/\.(js|css)$/
-				]
+					/^\/_app\//,
+					/\/[^/]+\.[^/]+$/
+				],
+
+				// 3. FORCE the entry into the manifest
+				manifestTransforms: [async (manifest) => {
+					manifest.push({
+						url: '/index.html',
+						// Generate a unique revision every build so the SW updates index.html
+						revision: `${Date.now()}`,
+						size: 0
+					});
+					return { manifest };
+				}]
 			}
 		})
 	]

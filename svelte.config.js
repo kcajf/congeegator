@@ -17,11 +17,10 @@ const config = {
 				persist: undefined
 			},
 			fallback: 'index.html',
-			routes: {
-				include: ['/*'],
-				exclude: ['<all>']
-			}
-		})
+		}),
+		paths: {
+			relative: false
+		}
 	}
 };
 

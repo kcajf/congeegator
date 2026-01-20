@@ -5,6 +5,8 @@ import { db } from "$lib/db";
 import { error } from "@sveltejs/kit";
 import type { PageLoad } from "./$types";
 
+export const prerender = true;
+
 async function loadVerbIndex(lang: string, fetcher: typeof fetch): Promise<string[]> {
     if (!(lang in manifest.languages)) {
         error(404, { message: `Language ${lang} not supported` });
