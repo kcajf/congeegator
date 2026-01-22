@@ -1,12 +1,12 @@
 {
     "$schema": "node_modules/wrangler/config-schema.json",
     "name": "congeegator",
-    "preview_urls": true,
     "main": ".svelte-kit/cloudflare/_worker.js",
     "compatibility_date": "2026-01-01",
     "compatibility_flags": [
         "nodejs_compat"
     ],
+    // "preview_urls": false,
     "assets": {
         "binding": "ASSETS",
         "directory": ".svelte-kit/cloudflare",
@@ -14,20 +14,26 @@
     "observability": {
         "enabled": true
     },
-    // "vars": {
-    //     "PUBLIC_R2_URL": "https://pub-18d4dcb55a684a8387b421c18281e13f.r2.dev", // congeegator-dev bucket
-    // },
-    "routes": [
-        {
-            "pattern": "congeegator.com",
-            "custom_domain": true
-        }
-    ],
     "env": {
+        "staging": {
+            "vars": {
+            },
+            "routes": [
+                {
+                    "pattern": "staging.congeegator.com",
+                    "custom_domain": true
+                }
+            ],
+        },
         "production": {
-            // "vars": {
-            //     "PUBLIC_R2_URL": "https://assets.congeegator.com"
-            // },
+            "vars": {
+            },
+            "routes": [
+                {
+                    "pattern": "congeegator.com",
+                    "custom_domain": true
+                }
+            ],
         }
     }
 }
