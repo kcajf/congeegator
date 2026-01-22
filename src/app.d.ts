@@ -8,7 +8,8 @@ declare global {
 		// interface PageState {}
 		interface Platform {
 			env: {
-				DATA_BUCKET: R2Bucket;
+				// PUBLIC_R2_URL: string;
+				// ENVIRONMENT: string;
 			};
 		}
 	}

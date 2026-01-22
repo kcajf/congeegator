@@ -376,7 +376,7 @@ def main():
             if "alt-of" in s.tags:
                 is_root = False
 
-        if is_root and obj.word in WORDS:
+        if is_root:# and obj.word in WORDS:
             # pprint(orjson.loads(line), indent_guides=False)
             # pprint(obj)
 
@@ -384,7 +384,7 @@ def main():
             # pprint(filtered_forms)
             # pprint(extract_conjugations_from_forms(GREEK_CONFIG, filtered_forms))
             conj = extract_conjugations_from_forms(GREEK_CONFIG, filtered_forms)
-            print(obj.word)
+            # print(obj.word)
             out[obj.word] = conj
             # print("---")
             # rows = []
@@ -432,6 +432,8 @@ def main():
         #     print('---')
 
     # print(i)
+
+    out = {k: out[k] for k in sorted(out.keys())}
     
     DATA_VERSION = "1"
 
@@ -443,6 +445,7 @@ def main():
     # full data file
     out_path = os.path.join(lang_dir, "data.json")
     with open(out_path, 'w') as f:
+        log.info(f"Wrote {out_path}")
         json.dump(out, f, indent=2, ensure_ascii=False)
         
     # single verbs file 
@@ -476,6 +479,7 @@ def main():
         }, f, indent=2)
 
     # shutil.copyfile(os.path.join(data_dir, "data-manifest.json"), os.path.join("src", "lib", "data-manifest.json"))
+    log.info("all done")
 
 
 

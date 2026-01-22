@@ -5,16 +5,18 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
-		"build": "vite build",
+		"build": "vite build --mode development",
+        "build:prod": "vite build --mode production",		
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
-		"r2-upload": "rclone sync r2_data r2-congeegator:congeegator --progress",
-		"r2-upload-dev": "rclone sync r2_data r2-congeegator:congeegator-dev --progress",
-		"deploy": "npm run build && npx wrangler deploy --env prod",
+		"r2-upload": "rclone sync r2_data r2-congeegator:congeegator-dev --progress --transfers=64",
+		"r2-upload:prod": "rclone sync r2_data r2-congeegator:congeegator --progress --transfers=64",
+		"deploy": "npm run build && npx wrangler deploy",
+		"deploy:prod": "npm run build:prod && npx wrangler deploy",
 		"wrangler-dev": "npm run build && npx wrangler dev --remote"
 	},
 	"devDependencies": {

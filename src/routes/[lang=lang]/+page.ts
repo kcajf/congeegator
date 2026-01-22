@@ -25,6 +25,7 @@ async function loadVerbIndex(lang: string, fetcher: typeof fetch): Promise<strin
     // This runs on the Cloudflare Worker during the initial page load
     // but runs in the browser if IndexedDB was empty.
     const url = `${PUBLIC_R2_URL}/data/v1/${lang}/index.json`;
+    console.log(`Fetching ${url}`)
     const res = await fetch(url);
     
     if (!res.ok) throw new Error(`Error loading index for ${lang}`);

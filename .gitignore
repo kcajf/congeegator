@@ -13,10 +13,10 @@ node_modules
 Thumbs.db
 
 # Env
-.env
-.env.*
-!.env.example
-!.env.test
+# .env
+# .env.*
+# !.env.example
+# !.env.test
 
 # Vite
 vite.config.js.timestamp-*
@@ -29,5 +29,5 @@ vite.config.ts.timestamp-*
 
 cache/
 
-src/lib/data-manifest.json
+# src/lib/data-manifest.json
 r2_data/

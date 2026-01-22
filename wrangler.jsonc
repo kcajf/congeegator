@@ -14,9 +14,9 @@
     "observability": {
         "enabled": true
     },
-    "vars": {
-        "PUBLIC_R2_URL": "https://pub-18d4dcb55a684a8387b421c18281e13f.r2.dev", // congeegator-dev bucket
-    },
+    // "vars": {
+    //     "PUBLIC_R2_URL": "https://pub-18d4dcb55a684a8387b421c18281e13f.r2.dev", // congeegator-dev bucket
+    // },
     "routes": [
         {
             "pattern": "congeegator.com",
@@ -24,10 +24,10 @@
         }
     ],
     "env": {
-        "prod": {
-            "vars": {
-                "PUBLIC_R2_URL": "https://assets.congeegator.com"
-            },
+        "production": {
+            // "vars": {
+            //     "PUBLIC_R2_URL": "https://assets.congeegator.com"
+            // },
         }
     }
 }
