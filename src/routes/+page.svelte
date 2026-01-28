@@ -1,11 +1,13 @@
 <script lang="ts">
-	import { appTitle } from "$lib/defs";
-
+	import { manifest } from '$lib/dataManager';
+	import { appTitle } from '$lib/defs';
 </script>
 
 <svelte:head>
 	<title>{appTitle}</title>
 </svelte:head>
 
-<h1>Conjugation Search</h1>
-<p><a href="/el">Greek</a></p>
+<h1>Conj</h1>
+{#each Object.entries(manifest.languages) as [code, details]}
+	<p><a href="/{code}">{details.name}</a></p>
+{/each}

@@ -26,7 +26,7 @@ async function loadVerbIndex(lang: string, fetcher: typeof fetch): Promise<strin
     // but runs in the browser if IndexedDB was empty.
     const url = `${PUBLIC_R2_URL}/data/v1/${lang}/index.json`;
     console.log(`Fetching ${url}`)
-    const res = await fetch(url);
+    const res = await fetcher(url);
     
     if (!res.ok) throw new Error(`Error loading index for ${lang}`);
 

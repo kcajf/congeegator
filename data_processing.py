@@ -197,6 +197,19 @@ def matches_tags(tags: set[str], want_tags: tuple[str, ...]) -> bool:
     return True
 
 
+# Primary IPA Extensions
+IPA_EXTENSIONS = "".join(chr(c) for c in range(0x0250, 0x02B0))
+
+# Spacing Modifiers (includes tone marks and aspiration)
+IPA_SPACING_MODIFIERS = "".join(chr(c) for c in range(0x02B0, 0x0300))
+
+# Combining Diacritical Marks (accents, nasalization, etc.)
+IPA_DIACRITICS = "".join(chr(c) for c in range(0x0300, 0x0370))
+
+# Full IPA-related character set
+IPA_ALL = IPA_EXTENSIONS + IPA_SPACING_MODIFIERS + IPA_DIACRITICS
+
+
 PERSONS = ("first-person", "second-person", "third-person")
 NUMBERS = ("singular", "plural")
 PERSONS_NUMBERS = tuple((person, number) for number in NUMBERS for person in PERSONS)
@@ -223,7 +236,7 @@ LANG_NAMES = {
 }
 
 
-GREEK_CONFIG = {
+EL_CONFIG = {
     "active present": tuple(
         FormMatcher(tags=(*pn, "present", "indicative", "imperfective", "active"))
         for pn in PERSONS_NUMBERS
@@ -273,6 +286,25 @@ GREEK_CONFIG = {
     "passive infinitive aorist": FormMatcher(tags=("passive", "infinitive-aorist")),
 }
 
+FR_CONFIG = {
+    "present indicative": tuple(FormMatcher(tags=("present", "indicative", *pn)) for pn in PERSONS_NUMBERS),
+    "imperfect indicative": tuple(FormMatcher(tags=("imperfect", "indicative", *pn)) for pn in PERSONS_NUMBERS),
+    "past historic indicative": tuple(FormMatcher(tags=("past", "historic", "indicative", *pn)) for pn in PERSONS_NUMBERS),
+    "future indicative": tuple(FormMatcher(tags=("future", "indicative", *pn)) for pn in PERSONS_NUMBERS),
+    "conditional indicative": tuple(FormMatcher(tags=("conditional", *pn)) for pn in PERSONS_NUMBERS),
+    "present subjunctive": tuple(FormMatcher(tags=("present", "subjunctive", *pn)) for pn in PERSONS_NUMBERS),
+    "imperfect subjunctive": tuple(FormMatcher(tags=("imperfect", "subjunctive", *pn)) for pn in PERSONS_NUMBERS),
+}
+
+CONFIG = {
+    "el": {
+        "config": EL_CONFIG,
+    },
+    "fr": {
+        "config": FR_CONFIG,
+    }
+}
+
 
 def structure_map(f, s):
     if isinstance(s, list):
@@ -304,6 +336,8 @@ def extract_conjugations_from_forms(config, forms: list[Form]):
 def form_is_clean_conjugation(form: Form) -> bool:
     if form.source != "conjugation":
         return False
+    if form.form is None:
+        return False
     if form.form in {
         "Formed using present",
         "dependent (for simple past)",
@@ -315,6 +349,10 @@ def form_is_clean_conjugation(form: Form) -> bool:
         return False
     if "inflection-template" in form.tags:
         return False
+    
+    for c in IPA_ALL:
+        if c in form.form:
+            return False
     return True
 
 
@@ -334,7 +372,6 @@ def count_conjs(thing) -> int:
 
 
 def write_language_data(data: dict[str, Any], lang_dir: str):
-    shutil.rmtree(lang_dir, ignore_errors=True)
     os.makedirs(lang_dir, exist_ok=True)
 
     # full data file
@@ -345,8 +382,6 @@ def write_language_data(data: dict[str, Any], lang_dir: str):
 
     # single verbs file
     single_verbs_dir = os.path.join(lang_dir, "verbs")
-    if os.path.exists(single_verbs_dir):
-        shutil.rmtree(single_verbs_dir)
     os.makedirs(single_verbs_dir)
     for verb, verb_data in data.items():
         with open(os.path.join(single_verbs_dir, f"{verb}.json"), "w") as f:
@@ -356,8 +391,8 @@ def write_language_data(data: dict[str, Any], lang_dir: str):
     with open(os.path.join(lang_dir, "index.json"), "w") as f:
         json.dump(sorted(data.keys()), f, indent=2, ensure_ascii=False)
 
+
 def write_data_manifest(data_dir: str):
-    # write data-manifest.json
     language_hashes = {}
     for path in os.listdir(data_dir):
         data_path = os.path.join(data_dir, path, "data.json")
@@ -369,7 +404,9 @@ def write_data_manifest(data_dir: str):
             h = hashlib.file_digest(f, "md5").hexdigest()[:8]
         language_hashes[language] = {"hash": h, "name": LANG_NAMES[language]}
 
-    with open(os.path.join("src", "lib", "data-manifest.json"), "w") as f:
+    path = os.path.join("src", "lib", "data-manifest.json")
+    log.info(f"Writing {path}")
+    with open(path, "w") as f:
         json.dump(
             {
                 "languages": language_hashes,
@@ -378,23 +415,12 @@ def write_data_manifest(data_dir: str):
             indent=2,
         )
 
-
-
-
-# This is significantly faster than general dict parsing.
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--wiki")
-    parser.add_argument("--lang")
-    args = parser.parse_args()
-
-    wiki_lang = args.wiki
-    lang = args.lang
+def generate_data_for_lang(wiki_lang: str, lang: str, lang_config: dict):
+    log.info(f"generating {lang} data")
     cache = CacheManager()
-
     data = cache.get_lang_filtered_raw_data(wiki_lang, lang)
 
-    out = {}
+    ret = {}
 
     for line in data:
         obj = msgspec.json.decode(line, type=Entry)
@@ -407,9 +433,6 @@ def main():
         if obj.pos != "verb":
             continue
 
-        if obj.word == "μέλλων":
-            pprint(orjson.loads(line))
-
         is_root = True
         for s in obj.senses:
             if "form-of" in s.tags:
@@ -417,33 +440,47 @@ def main():
             if "alt-of" in s.tags:
                 is_root = False
 
+        if obj.word == "manger":
+            pprint(orjson.loads(line)["forms"])
+
         if is_root:
             filtered_forms = [f for f in obj.forms if form_is_clean_conjugation(f)]
-            conj = extract_conjugations_from_forms(GREEK_CONFIG, filtered_forms)
+            conj = extract_conjugations_from_forms(lang_config, filtered_forms)
 
-            out[obj.word] = conj
+            ret[obj.word] = conj
 
-    out = {k: out[k] for k in sorted(out.keys())}
+    return  {k: ret[k] for k in sorted(ret.keys())}
+    
 
-    has_conj_count = 0
-    for k, v in out.items():
-        has_conj_count += count_conjs(v) != 0
-        # print(k, count_conjs(v))
 
-    log.info(
-        f"{has_conj_count / len(out):.1%} ({has_conj_count}/{len(out)}) of verbs have conjugation data"
-    )
+def generate_data():
+    ret = {}
+
+    for lang, config in CONFIG.items():
+        wiki_lang = "en"
+        ret[lang] = generate_data_for_lang(wiki_lang, lang, config["config"])
+
+    return ret
+
+
+# This is significantly faster than general dict parsing.
+def main():
+    # parser = argparse.ArgumentParser()
+    # args = parser.parse_args()
+    data = generate_data()
 
     DATA_VERSION = "1"
 
     static_dir = os.path.join(os.path.dirname(__file__), "r2_data")
     data_dir = os.path.join(static_dir, "data", f"v{DATA_VERSION}")
-    lang_dir = os.path.join(data_dir, lang)
+    shutil.rmtree(data_dir, ignore_errors=True)
 
-    write_language_data(out, lang_dir)
+    for lang in data.keys():
+        lang_dir = os.path.join(data_dir, lang)
+        log.info(f"Writing {lang_dir}")
+        write_language_data(data[lang], lang_dir)
 
     write_data_manifest(data_dir)
-    # shutil.copyfile(os.path.join(data_dir, "data-manifest.json"), os.path.join("src", "lib", "data-manifest.json"))
     log.info("all done")
 
 

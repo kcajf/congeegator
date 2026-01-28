@@ -3,6 +3,7 @@
         "cctx",
         "conjs",
         "Dexie",
+        "mimetypes",
         "prerendered"
     ]
 }

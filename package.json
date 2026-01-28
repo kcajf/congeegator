@@ -4,8 +4,9 @@
 	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
-		"dev": "vite dev",
-		"build": "vite build --mode development",
+		"dev": "vite dev --mode development",
+		"build:staging": "vite build --mode staging",
+		"build:dev": "vite build --mode development",
         "build:prod": "vite build --mode production",		
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
