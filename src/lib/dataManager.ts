@@ -9,6 +9,10 @@ export const manifest = manifestRaw as DataManifest;
 
 const DATA_VERSION = 1;
 
+export function langName(langCode: string) {
+    return manifest.languages[langCode].name;
+}
+
 export async function syncLanguage(lang: string) {
     console.log(`starting to syncLanguage ${lang}`)
     if (!navigator.onLine) {
@@ -27,12 +31,12 @@ export async function syncLanguage(lang: string) {
             const url = `${PUBLIC_R2_URL}/data/v${DATA_VERSION}/${lang}/data.json`;
             console.log(`Fetching ${url}`)
             const raw: Record<string, VerbData> = await fetch(url).then(r => r.json());
-            const records = Object.entries(raw).map(([name, conjugations]) => ({ name, lang, conjugations }));
+            const records = Object.entries(raw).map(([name, conjugations]) => ({ name, lang: lang, conjugations }));
 
             await db.transaction('rw', [db.verbs, db.metadata], async () => {
-                await db.verbs.where({ lang }).delete();
+                await db.verbs.where({ lang: lang }).delete();
                 await db.verbs.bulkPut(records);
-                await db.metadata.put({ lang, hash: remote.hash });
+                await db.metadata.put({ lang: lang, hash: remote.hash });
             });
 
             console.log(`Inserted ${records.length} ${lang} verbs. sync finished`)

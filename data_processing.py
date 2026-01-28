@@ -9,7 +9,7 @@ import os
 import shutil
 import sys
 import tempfile
-from typing import Optional
+from typing import Any, Optional
 
 import msgspec
 import orjson
@@ -215,6 +215,7 @@ class FormMatcher(msgspec.Struct, frozen=True):
     def format(self, form: Form) -> str:
         return self.formatter.format(form.form)
 
+
 LANG_NAMES = {
     "el": "Modern Greek",
     "es": "Spanish",
@@ -256,7 +257,10 @@ GREEK_CONFIG = {
         for n in NUMBERS
     ),
     "active future continuous": tuple(
-        FormMatcher(tags=("active", *pn, "present", "indicative", "imperfective"), formatter="θα {}")
+        FormMatcher(
+            tags=("active", *pn, "present", "indicative", "imperfective"),
+            formatter="θα {}",
+        )
         for pn in PERSONS_NUMBERS
     ),
     "active present participle": FormMatcher(tags=("active", "present", "participle")),
@@ -314,7 +318,69 @@ def form_is_clean_conjugation(form: Form) -> bool:
     return True
 
 
-# msgspec.json.decode(line, type=Target)
+def count_conjs(thing) -> int:
+    n = 0
+    if isinstance(thing, str):
+        n += thing != ""
+    elif isinstance(thing, dict):
+        for _, v in thing.items():
+            n += count_conjs(v)
+    elif isinstance(thing, (tuple, list)):
+        for x in thing:
+            n += count_conjs(x)
+    else:
+        raise ValueError(thing)
+    return n
+
+
+def write_language_data(data: dict[str, Any], lang_dir: str):
+    shutil.rmtree(lang_dir, ignore_errors=True)
+    os.makedirs(lang_dir, exist_ok=True)
+
+    # full data file
+    out_path = os.path.join(lang_dir, "data.json")
+    with open(out_path, "w") as f:
+        log.info(f"Wrote {out_path}")
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+    # single verbs file
+    single_verbs_dir = os.path.join(lang_dir, "verbs")
+    if os.path.exists(single_verbs_dir):
+        shutil.rmtree(single_verbs_dir)
+    os.makedirs(single_verbs_dir)
+    for verb, verb_data in data.items():
+        with open(os.path.join(single_verbs_dir, f"{verb}.json"), "w") as f:
+            json.dump(verb_data, f, indent=2, ensure_ascii=False)
+
+    # index file
+    with open(os.path.join(lang_dir, "index.json"), "w") as f:
+        json.dump(sorted(data.keys()), f, indent=2, ensure_ascii=False)
+
+def write_data_manifest(data_dir: str):
+    # write data-manifest.json
+    language_hashes = {}
+    for path in os.listdir(data_dir):
+        data_path = os.path.join(data_dir, path, "data.json")
+        if not os.path.exists(data_path):
+            continue
+
+        language = path
+        with open(data_path, "rb") as f:
+            h = hashlib.file_digest(f, "md5").hexdigest()[:8]
+        language_hashes[language] = {"hash": h, "name": LANG_NAMES[language]}
+
+    with open(os.path.join("src", "lib", "data-manifest.json"), "w") as f:
+        json.dump(
+            {
+                "languages": language_hashes,
+            },
+            f,
+            indent=2,
+        )
+
+
+
+
 # This is significantly faster than general dict parsing.
 def main():
     parser = argparse.ArgumentParser()
@@ -327,48 +393,23 @@ def main():
     cache = CacheManager()
 
     data = cache.get_lang_filtered_raw_data(wiki_lang, lang)
-    i = 0
 
     out = {}
 
     for line in data:
-        # pprint(orjson.loads(line))
-        try:
-            obj = msgspec.json.decode(line, type=Entry)
-        except Exception:
-            pprint(orjson.loads(line))
-            raise
+        obj = msgspec.json.decode(line, type=Entry)
 
         if obj.pos == "hard-redirect":
             continue
 
         assert obj.lang_code == lang
-        # if obj.lang_code != lang:
-        #     continue
 
         if obj.pos != "verb":
             continue
 
-        i += 1
-        if i % 1000 == 0:
-            # print(f"{i:,}")
-            pass
-            # print(line)
-            # pprint(obj)
+        if obj.word == "μέλλων":
+            pprint(orjson.loads(line))
 
-        WORDS = (
-            "χωράω",
-            "χωρώ",
-            "δανείζω",
-            "ταξιδεύω",
-            "πλένω",
-            # "βρίσκω",
-            # "είμαι",
-            "comer",
-            "manger",
-        )
-        # WORDS = ('comer',)
-        # match = False
         is_root = True
         for s in obj.senses:
             if "form-of" in s.tags:
@@ -376,112 +417,34 @@ def main():
             if "alt-of" in s.tags:
                 is_root = False
 
-        if is_root:# and obj.word in WORDS:
-            # pprint(orjson.loads(line), indent_guides=False)
-            # pprint(obj)
-
+        if is_root:
             filtered_forms = [f for f in obj.forms if form_is_clean_conjugation(f)]
-            # pprint(filtered_forms)
-            # pprint(extract_conjugations_from_forms(GREEK_CONFIG, filtered_forms))
             conj = extract_conjugations_from_forms(GREEK_CONFIG, filtered_forms)
-            # print(obj.word)
+
             out[obj.word] = conj
-            # print("---")
-            # rows = []
-
-            # for form in obj.forms:
-            #     if form.source != 'conjugation':
-            #         continue
-
-            #     form_tag_set = set(form.tags)
-            #     plurality = find_in_tags(form_tag_set, ("singular", "plural"))
-            #     person = find_in_tags(
-            #         form_tag_set, ("first-person", "second-person", "third-person")
-            #     )
-            #     mood = find_in_tags(form_tag_set, ("indicative", 'imperative', 'subjunctive'))
-            #     voice = find_in_tags(form_tag_set, ("active", "passive"))
-            #     aspect = find_in_tags(form_tag_set, ("perfective", "imperfective"))
-            #     tense = find_in_tags(form_tag_set, ("present", 'dependent', 'imperfect', 'past', 'future'))
-
-            #     rows.append(
-            #         {
-            #             'form': form.form,
-            #             "plurality": plurality,
-            #             "person": person,
-            #             "mood": mood,
-            #             "voice": voice,
-            #             "aspect": aspect,
-            #             "tense": tense,
-            #             'tags': form.tags,
-            #             'source': form.source,
-            #         }
-            #     )
-
-            # with pl.Config(tbl_rows=1000, fmt_str_lengths=1000, fmt_table_cell_list_len=1000):
-            #     print(pl.from_records(rows))
-
-        # pprint(orjson.loads(line))
-        # pprint(obj)
-        # raise
-
-        # pprint(obj)
-
-        # if obj['word'] == 'μιλάω' or obj['word'] == 'μιλώ':
-        # # if obj['word'] == 'parler':
-        #     # pprint(obj)
-        #     print('---')
-
-    # print(i)
 
     out = {k: out[k] for k in sorted(out.keys())}
-    
+
+    has_conj_count = 0
+    for k, v in out.items():
+        has_conj_count += count_conjs(v) != 0
+        # print(k, count_conjs(v))
+
+    log.info(
+        f"{has_conj_count / len(out):.1%} ({has_conj_count}/{len(out)}) of verbs have conjugation data"
+    )
+
     DATA_VERSION = "1"
 
     static_dir = os.path.join(os.path.dirname(__file__), "r2_data")
     data_dir = os.path.join(static_dir, "data", f"v{DATA_VERSION}")
     lang_dir = os.path.join(data_dir, lang)
-    os.makedirs(lang_dir, exist_ok=True)
 
-    # full data file
-    out_path = os.path.join(lang_dir, "data.json")
-    with open(out_path, 'w') as f:
-        log.info(f"Wrote {out_path}")
-        json.dump(out, f, indent=2, ensure_ascii=False)
-        
-    # single verbs file 
-    single_verbs_dir = os.path.join(lang_dir, "verbs")
-    if os.path.exists(single_verbs_dir):
-        shutil.rmtree(single_verbs_dir)
-    os.makedirs(single_verbs_dir)
-    for verb, verb_data in out.items():
-        with open(os.path.join(single_verbs_dir, f"{verb}.json"), 'w') as f:
-            json.dump(verb_data, f, indent=2, ensure_ascii=False)
-    
-    # index file
-    with open(os.path.join(lang_dir, "index.json"), 'w') as f:
-        json.dump(sorted(out.keys()), f, indent=2, ensure_ascii=False)
-    
-    # write data-manifest.json
-    language_hashes = {}
-    for path in os.listdir(data_dir):
-        data_path = os.path.join(data_dir, path, "data.json")
-        if not os.path.exists(data_path):
-            continue
+    write_language_data(out, lang_dir)
 
-        language = path
-        with open(data_path, 'rb') as f:
-            h = hashlib.file_digest(f, "md5").hexdigest()[:8]
-        language_hashes[language] = {"hash": h, "name": LANG_NAMES[lang]}
-    
-    with open(os.path.join("src", "lib", "data-manifest.json"), "w") as f:
-        json.dump({
-            "languages": language_hashes,
-        }, f, indent=2)
-
+    write_data_manifest(data_dir)
     # shutil.copyfile(os.path.join(data_dir, "data-manifest.json"), os.path.join("src", "lib", "data-manifest.json"))
     log.info("all done")
-
-
 
 
 if __name__ == "__main__":

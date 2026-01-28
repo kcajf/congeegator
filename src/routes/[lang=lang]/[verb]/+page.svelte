@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { syncLanguage } from '$lib/dataManager';
+	import { appTitle } from '$lib/defs';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
@@ -10,10 +11,12 @@
 		syncLanguage(data.verb.lang);
 	}
 
-	// $: console.log('Current data:', data);
-
 	const formatForm = (form: string) => form.replaceAll('|', ' / ');
 </script>
+
+<svelte:head>
+	<title>{data.verb.name}&nbsp;—&nbsp;{appTitle}</title>
+</svelte:head>
 
 {#if data.verb}
 <h1>{data.verb.name}</h1>

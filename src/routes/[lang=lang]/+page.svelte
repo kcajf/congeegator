@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { syncLanguage } from '$lib/dataManager';
+	import { langName, syncLanguage } from '$lib/dataManager';
+	import { appTitle } from '$lib/defs';
 	import type { PageData } from './$types';
 	export let data: PageData;
 
@@ -8,6 +9,10 @@
 		syncLanguage(data.lang);
 	}
 </script>
+
+<svelte:head>
+	<title>{langName(data.lang)}&nbsp;—&nbsp;{appTitle}</title>
+</svelte:head>
 
 <h1>{data.langName} Verbs</h1>
 
