@@ -9,6 +9,7 @@ import os
 import shutil
 import sys
 import tempfile
+import typing
 from typing import Any, Optional
 
 import msgspec
@@ -235,66 +236,139 @@ LANG_NAMES = {
     "fr": "French",
 }
 
+type ConjEntry = str | list[str]
 
-EL_CONFIG = {
-    "active present": tuple(
-        FormMatcher(tags=(*pn, "present", "indicative", "imperfective", "active"))
-        for pn in PERSONS_NUMBERS
-    ),
-    "passive present": tuple(
-        FormMatcher(tags=(*pn, "present", "indicative", "imperfective", "passive"))
-        for pn in PERSONS_NUMBERS
-    ),
-    "active imperfect": tuple(
-        FormMatcher(tags=(*pn, "imperfect", "indicative", "imperfective", "active"))
-        for pn in PERSONS_NUMBERS
-    ),
-    "passive imperfect": tuple(
-        FormMatcher(tags=(*pn, "imperfect", "indicative", "imperfective", "passive"))
-        for pn in PERSONS_NUMBERS
-    ),
-    "active aorist": tuple(
-        FormMatcher(tags=(*pn, "past", "indicative", "perfective", "active"))
-        for pn in PERSONS_NUMBERS
-    ),
-    "passive aorist": tuple(
-        FormMatcher(tags=(*pn, "past", "indicative", "perfective", "passive"))
-        for pn in PERSONS_NUMBERS
-    ),
-    "active imperative": tuple(
-        FormMatcher(tags=("second-person", n, "imperative", "imperfective", "active"))
-        for n in NUMBERS
-    ),
-    "passive imperative": tuple(
-        FormMatcher(tags=("second-person", n, "imperative", "imperfective", "passive"))
-        for n in NUMBERS
-    ),
-    "active future continuous": tuple(
-        FormMatcher(
-            tags=("active", *pn, "present", "indicative", "imperfective"),
-            formatter="θα {}",
-        )
-        for pn in PERSONS_NUMBERS
-    ),
-    "active present participle": FormMatcher(tags=("active", "present", "participle")),
-    "active perfect participle": FormMatcher(tags=("active", "past", "participle")),
-    "passive perfect participle": FormMatcher(tags=("passive", "past", "participle")),
-    "passive present participle": FormMatcher(
-        tags=("passive", "present", "participle")
-    ),
-    "active infinitive aorist": FormMatcher(tags=("active", "infinitive-aorist")),
-    "passive infinitive aorist": FormMatcher(tags=("passive", "infinitive-aorist")),
-}
 
-FR_CONFIG = {
-    "present indicative": tuple(FormMatcher(tags=("present", "indicative", *pn)) for pn in PERSONS_NUMBERS),
-    "imperfect indicative": tuple(FormMatcher(tags=("imperfect", "indicative", *pn)) for pn in PERSONS_NUMBERS),
-    "past historic indicative": tuple(FormMatcher(tags=("past", "historic", "indicative", *pn)) for pn in PERSONS_NUMBERS),
-    "future indicative": tuple(FormMatcher(tags=("future", "indicative", *pn)) for pn in PERSONS_NUMBERS),
-    "conditional indicative": tuple(FormMatcher(tags=("conditional", *pn)) for pn in PERSONS_NUMBERS),
-    "present subjunctive": tuple(FormMatcher(tags=("present", "subjunctive", *pn)) for pn in PERSONS_NUMBERS),
-    "imperfect subjunctive": tuple(FormMatcher(tags=("imperfect", "subjunctive", *pn)) for pn in PERSONS_NUMBERS),
-}
+class TenseConfig(msgspec.Struct, frozen=True):
+    name: str
+    form_matchers: FormMatcher | tuple[FormMatcher, ...]
+
+
+class LanguageConfig(msgspec.Struct, frozen=True):
+    code: str
+    name: str
+    tenses: tuple[TenseConfig, ...]
+
+
+EL_CONFIG = LanguageConfig(
+    code="el",
+    name="Modern Greek",
+    tenses=(
+        TenseConfig(
+            "active present",
+            tuple(
+                FormMatcher((*pn, "present", "indicative", "imperfective", "active"))
+                for pn in PERSONS_NUMBERS
+            ),
+        ),
+        TenseConfig(
+            "passive present",
+            tuple(
+                FormMatcher((*pn, "present", "indicative", "imperfective", "passive"))
+                for pn in PERSONS_NUMBERS
+            ),
+        ),
+        TenseConfig(
+            "active present participle",
+            FormMatcher(("active", "present", "participle")),
+        ),
+    ),
+)
+
+FR_CONFIG = LanguageConfig(
+    code="fr",
+    name="French",
+    tenses=(
+        TenseConfig(
+            "Present",
+            tuple(
+                FormMatcher((*pn, "present", "indicative")) for pn in PERSONS_NUMBERS
+            ),
+        ),
+        TenseConfig(
+            "Past Historic",
+            tuple(
+                FormMatcher(("past", "historic", "indicative", *pn))
+                for pn in PERSONS_NUMBERS
+            ),
+        ),
+    ),
+)
+
+# EL_CONFIG = {
+#     "active present": tuple(
+#         FormMatcher(tags=(*pn, "present", "indicative", "imperfective", "active"))
+#         for pn in PERSONS_NUMBERS
+#     ),
+#     "passive present": tuple(
+#         FormMatcher(tags=(*pn, "present", "indicative", "imperfective", "passive"))
+#         for pn in PERSONS_NUMBERS
+#     ),
+#     "active imperfect": tuple(
+#         FormMatcher(tags=(*pn, "imperfect", "indicative", "imperfective", "active"))
+#         for pn in PERSONS_NUMBERS
+#     ),
+#     "passive imperfect": tuple(
+#         FormMatcher(tags=(*pn, "imperfect", "indicative", "imperfective", "passive"))
+#         for pn in PERSONS_NUMBERS
+#     ),
+#     "active aorist": tuple(
+#         FormMatcher(tags=(*pn, "past", "indicative", "perfective", "active"))
+#         for pn in PERSONS_NUMBERS
+#     ),
+#     "passive aorist": tuple(
+#         FormMatcher(tags=(*pn, "past", "indicative", "perfective", "passive"))
+#         for pn in PERSONS_NUMBERS
+#     ),
+#     "active imperative": tuple(
+#         FormMatcher(tags=("second-person", n, "imperative", "imperfective", "active"))
+#         for n in NUMBERS
+#     ),
+#     "passive imperative": tuple(
+#         FormMatcher(tags=("second-person", n, "imperative", "imperfective", "passive"))
+#         for n in NUMBERS
+#     ),
+#     "active future continuous": tuple(
+#         FormMatcher(
+#             tags=("active", *pn, "present", "indicative", "imperfective"),
+#             formatter="θα {}",
+#         )
+#         for pn in PERSONS_NUMBERS
+#     ),
+#     "active present participle": FormMatcher(tags=("active", "present", "participle")),
+#     "active perfect participle": FormMatcher(tags=("active", "past", "participle")),
+#     "passive perfect participle": FormMatcher(tags=("passive", "past", "participle")),
+#     "passive present participle": FormMatcher(
+#         tags=("passive", "present", "participle")
+#     ),
+#     "active infinitive aorist": FormMatcher(tags=("active", "infinitive-aorist")),
+#     "passive infinitive aorist": FormMatcher(tags=("passive", "infinitive-aorist")),
+# }
+
+# FR_CONFIG = {
+#     "present indicative": tuple(
+#         FormMatcher(tags=("present", "indicative", *pn)) for pn in PERSONS_NUMBERS
+#     ),
+#     "imperfect indicative": tuple(
+#         FormMatcher(tags=("imperfect", "indicative", *pn)) for pn in PERSONS_NUMBERS
+#     ),
+#     "past historic indicative": tuple(
+#         FormMatcher(tags=("past", "historic", "indicative", *pn))
+#         for pn in PERSONS_NUMBERS
+#     ),
+#     "future indicative": tuple(
+#         FormMatcher(tags=("future", "indicative", *pn)) for pn in PERSONS_NUMBERS
+#     ),
+#     "conditional indicative": tuple(
+#         FormMatcher(tags=("conditional", *pn)) for pn in PERSONS_NUMBERS
+#     ),
+#     "present subjunctive": tuple(
+#         FormMatcher(tags=("present", "subjunctive", *pn)) for pn in PERSONS_NUMBERS
+#     ),
+#     "imperfect subjunctive": tuple(
+#         FormMatcher(tags=("imperfect", "subjunctive", *pn)) for pn in PERSONS_NUMBERS
+#     ),
+# }
 
 CONFIG = {
     "el": {
@@ -302,7 +376,7 @@ CONFIG = {
     },
     "fr": {
         "config": FR_CONFIG,
-    }
+    },
 }
 
 
@@ -317,6 +391,7 @@ def structure_map(f, s):
 
 
 def extract_one(matcher: FormMatcher, forms: list[Form]) -> str:
+    seen = set()
     ret = ""
     for form in forms:
         if form.source != "conjugation":
@@ -325,12 +400,26 @@ def extract_one(matcher: FormMatcher, forms: list[Form]) -> str:
         if matcher.matches(form):
             if ret != "":
                 ret += "|"
-            ret += matcher.format(form)
+            formatted = matcher.format(form)
+            if formatted in seen:
+                continue
+            ret += formatted
+            seen.add(formatted)
     return ret
 
 
-def extract_conjugations_from_forms(config, forms: list[Form]):
-    return structure_map(lambda matcher: extract_one(matcher, forms), config)
+def extract_conjugations_from_forms(config: LanguageConfig, forms: list[Form]):
+    # return structure_map(lambda matcher: extract_one(matcher, forms), config)
+    ret: dict[str, str | tuple[str, ...]] = {}
+    for t in config.tenses:
+        if isinstance(t.form_matchers, FormMatcher):
+            x = extract_one(t.form_matchers, forms)
+        elif isinstance(t.form_matchers, tuple):
+            x = tuple(extract_one(fm, forms) for fm in t.form_matchers)
+        else:
+            typing.assert_never(t.form_matchers)
+        ret[t.name] = x
+    return ret
 
 
 def form_is_clean_conjugation(form: Form) -> bool:
@@ -349,7 +438,7 @@ def form_is_clean_conjugation(form: Form) -> bool:
         return False
     if "inflection-template" in form.tags:
         return False
-    
+
     for c in IPA_ALL:
         if c in form.form:
             return False
@@ -415,7 +504,8 @@ def write_data_manifest(data_dir: str):
             indent=2,
         )
 
-def generate_data_for_lang(wiki_lang: str, lang: str, lang_config: dict):
+
+def generate_data_for_lang(wiki_lang: str, lang: str, lang_config: LanguageConfig):
     log.info(f"generating {lang} data")
     cache = CacheManager()
     data = cache.get_lang_filtered_raw_data(wiki_lang, lang)
@@ -440,7 +530,7 @@ def generate_data_for_lang(wiki_lang: str, lang: str, lang_config: dict):
             if "alt-of" in s.tags:
                 is_root = False
 
-        if obj.word == "manger":
+        if obj.word == "voir":
             pprint(orjson.loads(line)["forms"])
 
         if is_root:
@@ -449,8 +539,7 @@ def generate_data_for_lang(wiki_lang: str, lang: str, lang_config: dict):
 
             ret[obj.word] = conj
 
-    return  {k: ret[k] for k in sorted(ret.keys())}
-    
+    return {k: ret[k] for k in sorted(ret.keys())}
 
 
 def generate_data():
@@ -463,7 +552,6 @@ def generate_data():
     return ret
 
 
-# This is significantly faster than general dict parsing.
 def main():
     # parser = argparse.ArgumentParser()
     # args = parser.parse_args()
