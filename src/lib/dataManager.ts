@@ -3,7 +3,7 @@ import { PUBLIC_R2_URL } from '$env/static/public';
 import manifestRaw from '$lib/data-manifest.json';
 import { error } from '@sveltejs/kit';
 import { db } from "./db";
-import type { DataManifest, VerbData, VerbRecord } from "./types";
+import type { DataManifest, VerbRecord } from "./types";
 
 export const manifest = manifestRaw as DataManifest;
 
@@ -18,8 +18,7 @@ export async function syncLanguage(lang: string) {
     if (!navigator.onLine) {
         console.log(`we are offline, can't sync`);
         return;
-
-    };
+    }
 
     try {
         const remote = manifest.languages[lang];
@@ -30,8 +29,11 @@ export async function syncLanguage(lang: string) {
         if (!local || local.hash !== remote.hash) {
             const url = `${PUBLIC_R2_URL}/data/v${DATA_VERSION}/${lang}/data.json`;
             console.log(`Fetching ${url}`)
-            const raw: Record<string, VerbData> = await fetch(url).then(r => r.json());
-            const records = Object.entries(raw).map(([name, conjugations]) => ({ name, lang: lang, conjugations }));
+            const raw = await fetch(url).then(r => r.json());
+            const records: VerbRecord[] = raw.map((item: any) => ({
+                ...item,
+                lang: lang
+            }));
 
             await db.transaction('rw', [db.verbs, db.metadata], async () => {
                 await db.verbs.where({ lang: lang }).delete();
@@ -39,7 +41,7 @@ export async function syncLanguage(lang: string) {
                 await db.metadata.put({ lang: lang, hash: remote.hash });
             });
 
-            console.log(`Inserted ${records.length} ${lang} verbs. sync finished`)
+            console.log(`Inserted ${raw.length} ${lang} verbs. sync finished`)
         } else {
             console.log(`${lang} data is already up-to-date (hash: ${local.hash})`)
         }
@@ -80,10 +82,6 @@ export async function loadSingleVerb(lang: string, verb: string, fetcher: typeof
         throw new Error(`Verb ${verb} not found`);
     }
 
-    const conjugations = await response.json();
-    return {
-        name: verb,
-        lang,
-        conjugations,
-    } as VerbRecord;
+    const raw = await response.json();
+    return { ...raw, lang } as VerbRecord;
 }

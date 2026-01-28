@@ -1,12 +1,12 @@
 {
   "languages": {
-    "fr": {
-      "hash": "568c2bd2",
-      "name": "French"
-    },
     "el": {
-      "hash": "03cc250d",
-      "name": "Modern Greek"
+      "hash": "e9d9f5e1",
+      "name": "Greek"
+    },
+    "fr": {
+      "hash": "f16b1a5d",
+      "name": "French"
     }
   }
 }

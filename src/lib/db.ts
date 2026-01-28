@@ -12,8 +12,8 @@ export class ConjugationDatabase extends Dexie {
 
   constructor() {
     super('ConjugationDB');
-    this.version(1).stores({
-      verbs: '[lang+name], lang', // Compound index for fast lookup
+    this.version(2).stores({
+      verbs: '[lang+name], lang, [lang+nameNoDiacritics]', // Compound index for fast lookup
       metadata: 'lang'
     });
   }

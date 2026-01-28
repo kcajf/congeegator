@@ -17,7 +17,7 @@
 <h1>{data.langName} Verbs</h1>
 
 <div class="verb-grid">
-	{#each data.verbs as verb}
+	{#each data.verbs as verb (verb)}
 		<p><a href="/{data.lang}/{verb}">{verb}</a></p>
 	{:else}
 		<p>No verbs found matching "{query}"</p>

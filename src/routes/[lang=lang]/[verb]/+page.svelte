@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { syncLanguage } from '$lib/dataManager';
+	import { langName, syncLanguage } from '$lib/dataManager';
 	import { appTitle } from '$lib/defs';
 	import type { PageData } from './$types';
 
@@ -11,7 +11,7 @@
 		syncLanguage(data.verb.lang);
 	}
 
-	const formatForm = (form: string) => form.replaceAll('|', ' / ');
+	const formatForm = (form: string) => form.replaceAll('/', ' / ');
 </script>
 
 <svelte:head>
@@ -20,7 +20,10 @@
 
 {#if data.verb}
 <h1>{data.verb.name}</h1>
-{#each Object.entries(data.verb.conjugations) as [tense, forms]}
+<p>
+	<a target="_blank" rel="noopener noreferrer" href="https://en.wiktionary.com/wiki/{data.verb.name}#{langName(data.verb.lang)}">wiktionary</a>
+</p>
+{#each Object.entries(data.verb.conjugation) as [tense, forms]}
 	<h3>{tense}</h3>
 
 	{#if Array.isArray(forms)}

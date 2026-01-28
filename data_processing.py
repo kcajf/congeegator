@@ -10,6 +10,7 @@ import shutil
 import sys
 import tempfile
 import typing
+import unicodedata
 from typing import Any, Optional
 
 import msgspec
@@ -174,14 +175,32 @@ class Sense(msgspec.Struct, frozen=True):
     form_of: tuple[FormOf, ...] = ()
     alt_of: tuple[FormOf, ...] = ()
     tags: tuple[str, ...] = ()
+    categories: tuple[str, ...] = ()
+
+
+class HeadTemplate(msgspec.Struct, frozen=True):
+    name: str
+    args: dict[str, str] = {}
+
+
+class EtymologyTemplate(msgspec.Struct, frozen=True):
+    name: str
+
+
+class EntryJustPos(msgspec.Struct, frozen=True):
+    pos: str
 
 
 class Entry(msgspec.Struct, frozen=True):
     pos: str
+    lang_code: str
+    lang: str
+    word: str
     forms: tuple[Form, ...] = ()
     senses: tuple[Sense, ...] = ()
-    lang_code: Optional[str] = None
-    word: Optional[str] = None
+    head_templates: tuple[HeadTemplate, ...] = ()
+    etymology_templates: tuple[EtymologyTemplate, ...] = ()
+    categories: tuple[str, ...] = ()
 
 
 def find_in_tags(tags: set[str], values: tuple[str, ...]) -> Optional[str]:
@@ -196,6 +215,17 @@ def matches_tags(tags: set[str], want_tags: tuple[str, ...]) -> bool:
         if t not in tags:
             return False
     return True
+
+
+def strip_diacritics(s):
+    # https://stackoverflow.com/questions/517923/what-is-the-best-way-to-remove-accents-normalize-in-a-python-unicode-string/518232#518232
+    return "".join(
+        c for c in unicodedata.normalize("NFD", s) if unicodedata.category(c) != "Mn"
+    )
+
+
+def sort_without_diacritics(strings: list[str]):
+    return sorted(strings, key=strip_diacritics)
 
 
 # Primary IPA Extensions
@@ -230,15 +260,6 @@ class FormMatcher(msgspec.Struct, frozen=True):
         return self.formatter.format(form.form)
 
 
-LANG_NAMES = {
-    "el": "Modern Greek",
-    "es": "Spanish",
-    "fr": "French",
-}
-
-type ConjEntry = str | list[str]
-
-
 class TenseConfig(msgspec.Struct, frozen=True):
     name: str
     form_matchers: FormMatcher | tuple[FormMatcher, ...]
@@ -246,13 +267,13 @@ class TenseConfig(msgspec.Struct, frozen=True):
 
 class LanguageConfig(msgspec.Struct, frozen=True):
     code: str
-    name: str
+    name: str  # This should be the language name that (English) wiktionary uses
     tenses: tuple[TenseConfig, ...]
 
 
 EL_CONFIG = LanguageConfig(
     code="el",
-    name="Modern Greek",
+    name="Greek",
     tenses=(
         TenseConfig(
             "active present",
@@ -370,14 +391,7 @@ FR_CONFIG = LanguageConfig(
 #     ),
 # }
 
-CONFIG = {
-    "el": {
-        "config": EL_CONFIG,
-    },
-    "fr": {
-        "config": FR_CONFIG,
-    },
-}
+CONFIG: list[LanguageConfig] = [EL_CONFIG, FR_CONFIG]
 
 
 def structure_map(f, s):
@@ -390,36 +404,52 @@ def structure_map(f, s):
     return f(s)
 
 
-def extract_one(matcher: FormMatcher, forms: list[Form]) -> str:
+def clean_up_matched_forms(l: LanguageConfig, forms: list[str]) -> list[str]:
+    if l.code == "el":
+        new_forms = [*forms]
+        for i, f in enumerate(forms):
+            if f == "‑ομε":
+                assert i > 0, forms
+                new_forms[i] = new_forms[i - 1].replace("ουμε", "ομε")
+            elif f == "‑ιόσαστε":
+                assert i > 0, forms
+                new_forms[i] = new_forms[i - 1].replace("ιέστε", "ιόσαστε")
+            elif f == "-ιόνται":
+                assert i > 0, forms
+                new_forms[i] = new_forms[i - 1].replace("ιούνται", "ιόνται")
+        return new_forms
+    return forms
+
+
+def extract_one(l: LanguageConfig, matcher: FormMatcher, forms: list[Form]) -> str:
     seen = set()
-    ret = ""
+    ret: list[str] = []
     for form in forms:
         if form.source != "conjugation":
             continue
         assert form.form is not None
         if matcher.matches(form):
-            if ret != "":
-                ret += "|"
             formatted = matcher.format(form)
             if formatted in seen:
                 continue
-            ret += formatted
+            ret.append(formatted)
             seen.add(formatted)
-    return ret
+    ret = clean_up_matched_forms(l, ret)
+    return "/".join(ret)
+
+
+def extract_tense(l: LanguageConfig, t: TenseConfig, forms: list[Form]):
+    if isinstance(t.form_matchers, FormMatcher):
+        x = extract_one(l, t.form_matchers, forms)
+    elif isinstance(t.form_matchers, tuple):
+        x = tuple(extract_one(l, fm, forms) for fm in t.form_matchers)
+    else:
+        typing.assert_never(t.form_matchers)
+    return x
 
 
 def extract_conjugations_from_forms(config: LanguageConfig, forms: list[Form]):
-    # return structure_map(lambda matcher: extract_one(matcher, forms), config)
-    ret: dict[str, str | tuple[str, ...]] = {}
-    for t in config.tenses:
-        if isinstance(t.form_matchers, FormMatcher):
-            x = extract_one(t.form_matchers, forms)
-        elif isinstance(t.form_matchers, tuple):
-            x = tuple(extract_one(fm, forms) for fm in t.form_matchers)
-        else:
-            typing.assert_never(t.form_matchers)
-        ret[t.name] = x
-    return ret
+    return {t.name: extract_tense(config, t, forms) for t in config.tenses}
 
 
 def form_is_clean_conjugation(form: Form) -> bool:
@@ -437,6 +467,12 @@ def form_is_clean_conjugation(form: Form) -> bool:
     if "table-tags" in form.tags:
         return False
     if "inflection-template" in form.tags:
+        return False
+
+    if "'" in form.form:  # French "t'es"
+        return False
+
+    if " " in form.form:  # French "me suis"
         return False
 
     for c in IPA_ALL:
@@ -460,7 +496,7 @@ def count_conjs(thing) -> int:
     return n
 
 
-def write_language_data(data: dict[str, Any], lang_dir: str):
+def write_language_data(data: list[dict[str, Any]], lang_dir: str):
     os.makedirs(lang_dir, exist_ok=True)
 
     # full data file
@@ -472,26 +508,28 @@ def write_language_data(data: dict[str, Any], lang_dir: str):
     # single verbs file
     single_verbs_dir = os.path.join(lang_dir, "verbs")
     os.makedirs(single_verbs_dir)
-    for verb, verb_data in data.items():
-        with open(os.path.join(single_verbs_dir, f"{verb}.json"), "w") as f:
+    for verb_data in data:
+        with open(
+            os.path.join(single_verbs_dir, f"{verb_data['name']}.json"), "w"
+        ) as f:
             json.dump(verb_data, f, indent=2, ensure_ascii=False)
 
     # index file
     with open(os.path.join(lang_dir, "index.json"), "w") as f:
-        json.dump(sorted(data.keys()), f, indent=2, ensure_ascii=False)
+        names = [x["name"] for x in data]
+        json.dump(names, f, indent=2, ensure_ascii=False)
 
 
 def write_data_manifest(data_dir: str):
     language_hashes = {}
-    for path in os.listdir(data_dir):
-        data_path = os.path.join(data_dir, path, "data.json")
+    for config in CONFIG:
+        data_path = os.path.join(data_dir, config.code, "data.json")
         if not os.path.exists(data_path):
             continue
 
-        language = path
         with open(data_path, "rb") as f:
             h = hashlib.file_digest(f, "md5").hexdigest()[:8]
-        language_hashes[language] = {"hash": h, "name": LANG_NAMES[language]}
+        language_hashes[config.code] = {"hash": h, "name": config.name}
 
     path = os.path.join("src", "lib", "data-manifest.json")
     log.info(f"Writing {path}")
@@ -505,49 +543,146 @@ def write_data_manifest(data_dir: str):
         )
 
 
-def generate_data_for_lang(wiki_lang: str, lang: str, lang_config: LanguageConfig):
-    log.info(f"generating {lang} data")
-    cache = CacheManager()
-    data = cache.get_lang_filtered_raw_data(wiki_lang, lang)
+def entry_is_clean_verb_root(entry: Entry) -> bool:
+    if entry.pos == "hard-redirect":
+        return False
 
-    ret = {}
+    if entry.pos != "verb":
+        return False
+
+    if entry.word is None:
+        return False
+
+    if "'" in entry.word:  # French "'a"
+        return False
+
+    if "-" in entry.word:  # Greek '-βιβάζω'
+        return False
+
+    for s in entry.senses:
+        if "form-of" in s.tags:
+            return False
+        if "alt-of" in s.tags:
+            return False
+
+    for h in entry.head_templates:
+        if entry.lang_code == "el" and h.name == "el-part":
+            return False  # past participle
+
+    for h in entry.etymology_templates:
+        if h.name == "participle of":
+            return False  # past participle
+        if h.name == "abbrev":
+            return False  # abbreviation
+
+    BAD_CATEGORIES = {
+        f"{entry.lang} verb forms",
+        f"{entry.lang} multiword forms",
+        f"{entry.lang} multiword terms",
+        f"{entry.lang} idioms",
+        f"{entry.lang} terms in nonstandard scripts",
+    }
+
+    for c in entry.categories:
+        if c in BAD_CATEGORIES:
+            return False
+
+    for s in entry.senses:
+        for c in s.categories:
+            if c in BAD_CATEGORIES:
+                return False
+
+    return True
+
+
+def generate_data_for_lang(wiki_lang: str, lang: LanguageConfig):
+    log.info(f"generating {lang.code} data")
+    cache = CacheManager()
+    data = cache.get_lang_filtered_raw_data(wiki_lang, lang.code)
+
+    ret: list[dict[str, Any]] = []
+
+    seen_verbs : set[str] = set()
 
     for line in data:
-        obj = msgspec.json.decode(line, type=Entry)
-
-        if obj.pos == "hard-redirect":
+        entry_just_pos = msgspec.json.decode(line, type=EntryJustPos)
+        if entry_just_pos.pos == "hard-redirect":
             continue
 
-        assert obj.lang_code == lang
+        entry = msgspec.json.decode(line, type=Entry)
 
-        if obj.pos != "verb":
+        if not entry_is_clean_verb_root(entry):
             continue
 
-        is_root = True
-        for s in obj.senses:
-            if "form-of" in s.tags:
-                is_root = False
-            if "alt-of" in s.tags:
-                is_root = False
+        if not any(x.source == "conjugation" for x in entry.forms):
+            continue
 
-        if obj.word == "voir":
-            pprint(orjson.loads(line)["forms"])
+        assert entry.lang_code == lang.code
 
-        if is_root:
-            filtered_forms = [f for f in obj.forms if form_is_clean_conjugation(f)]
-            conj = extract_conjugations_from_forms(lang_config, filtered_forms)
+        WORDS = [
+            # "αναμαλλιασμένος",
+            # "στριμμένος",
+            # "στέκει",
+            # "στέκω",
+            # "abréagisses",
+            # "tenir le coup",
+            # "être à l'ouest",
+            # "abandonner à son sort",
+            # "🟣",
+            # "être",
+            # "'a",
+            # "έρχομαι στα χέρια",
+            # "abandonner à son sort",
+            # "aluner",
+            # "voy.",
+            # "χιονίζω",
+            # "χιονίζει",
+            "στενοχωρώ",
+        ]
+        if entry.word in WORDS:
+            # pprint(entry)
+            pprint(orjson.loads(line))
 
-            ret[obj.word] = conj
+        if entry.word in seen_verbs:
+            # There are quite a few double-entries. These tend to be verbs with different senses.
+            # Not always clear why they are different entries rather than different senses.
+            # In Greek, sometimes it seems that it is because some senses are only e.g. used in the active or passive.
+            # In French, sometimes it is because the two senses have different etymology (etymology is not per-sense).
+            # I think in most cases, the conjugation will be same/similar and it is fine to skip arbitrarily for now.
+            log.debug(f"duplicate: {entry.word}")
+            continue
 
-    return {k: ret[k] for k in sorted(ret.keys())}
+        filtered_forms = [f for f in entry.forms if form_is_clean_conjugation(f)]
+        try:
+            conj = extract_conjugations_from_forms(lang, filtered_forms)
+        except Exception as e:
+            log.warning(f"Failed to process {entry.lang_code} {entry.word}: {e}")
+            continue
+            # raise ValueError(f"Failed to process {entry.word}") from e
+
+        ret.append(
+            dict(
+                name=entry.word,
+                nameNoDiacritics=strip_diacritics(entry.word),
+                conjugation=conj,
+            )
+        )
+        seen_verbs.add(entry.word)
+
+    log.info(f"{lang.code} has {len(ret)} entries")
+    ret = sorted(ret, key=lambda x: x["nameNoDiacritics"])
+    verbs = {x["name"] for x in ret}
+    if len(verbs) != len(ret):
+        raise ValueError("duplicates")
+    return ret
 
 
 def generate_data():
-    ret = {}
+    ret: dict[str, list[dict[str, Any]]] = {}
 
-    for lang, config in CONFIG.items():
+    for config in CONFIG:
         wiki_lang = "en"
-        ret[lang] = generate_data_for_lang(wiki_lang, lang, config["config"])
+        ret[config.code] = generate_data_for_lang(wiki_lang, config)
 
     return ret
 

@@ -16,6 +16,7 @@ export interface VerbData {
 
 export interface VerbRecord {
   name: string;      // "manger"
+  nameNoDiacritics: string;      // "manger"
   lang: string;      // "fr" (the "partition" key)
-  conjugations: VerbData;
+  conjugation: VerbData;
 }
