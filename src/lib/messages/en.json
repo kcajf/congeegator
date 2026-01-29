@@ -10,6 +10,10 @@
   "fr_cond_pres": "Present",
   "fr_subj_pres": "Present",
   "fr_subj_imperf": "Imperfect",
+  "fr_indic_pres_perf": "Present Perfect",
+  "fr_indic_pluperf": "Pluperfect",
+  "fr_indic_past_ant": "Past Anterior",
+  "fr_indic_fut_perf": "Future Perfect",
   "el_indic": "Indicative Mood",
   "el_indic_pres_active": "Present Active",
   "el_indic_pres_passive": "Present Passive"

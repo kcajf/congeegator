@@ -30,7 +30,8 @@
 		}
 	};
 
-	const formatForm = (form: string) => form.replaceAll('/', ' / ');
+	// const formatForm = (form: string) => form.replaceAll('/', ' / ');
+	const formatForm = (form: string) => form;
 </script>
 
 <svelte:head>
@@ -52,35 +53,32 @@
 	{#each tenseGroups as tenseGroup}
 		<h2>{getTenseDisplayName(tenseGroup.name)}</h2>
 		<div class="tenseGroup">
-
-		{#each tenseGroup.tenseIndices as tenseI}
-			{@const tenseForms = data.verb.conjugation[tenseI]}
-			<div class="tense">
-				<h3>{getTenseDisplayName(tenseNames[tenseI])}</h3>
-				{#if Array.isArray(tenseForms)}
-					<table class="tenseTable">
-						<tbody>
-							{#each tenseForms as form, formI}
-								<tr>
-									<td class="pronoun"
-										>{formatPronoun(
-											data.verb.lang,
-											tensePronouns[tenseI][formI],
-											form,
-											data.verb.frIsAspirated || false
-										)}</td
-									>
-									<td class="verbForm">{formatForm(form)}</td>
-								</tr>
-							{/each}
-						</tbody>
-					</table>
-				{:else}
-					<p class="participle">{formatForm(tenseForms)}</p>
-				{/if}
-			</div>
-
-		{/each}
+			{#each tenseGroup.tenseIndices as tenseI}
+				{@const tenseForms = data.verb.conjugation[tenseI]}
+				<div class="tense">
+					<h3>{getTenseDisplayName(tenseNames[tenseI])}</h3>
+					{#if Array.isArray(tenseForms)}
+						<table class="tenseTable">
+							<tbody>
+								{#each tenseForms as form, formI}
+									<tr>
+										<td
+											>{formatPronoun(
+												data.verb.lang,
+												tensePronouns[tenseI][formI],
+												form,
+												data.verb.frIsAspirated || false
+											)}</td
+										><td>{formatForm(form)}</td>
+									</tr>
+								{/each}
+							</tbody>
+						</table>
+					{:else}
+						<p class="participle">{formatForm(tenseForms)}</p>
+					{/if}
+				</div>
+			{/each}
 		</div>
 	{/each}
 {:else}
@@ -88,15 +86,31 @@
 {/if}
 
 <style>
+
+.tenseTable {
+	border-collapse: collapse;
+}
 	.tenseTable td:nth-child(1) {
-		text-align: end;
+		text-align: right;
+		white-space: pre;
 		color: #858585;
+	}
+
+	.tenseTable td {
+		padding-left: 0;
+		padding-right: 0;
+		margin-left: 0;
+		margin-right: 0;
+	}
+
+	.tenseTable tr {
+		/* display: flex; */
 	}
 
 	.tenseGroup {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 2.0rem;
+		gap: 2rem;
 	}
 	.tense {
 		/* margin: 0 1em; */

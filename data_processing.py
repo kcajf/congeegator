@@ -246,10 +246,10 @@ PERSONS = ("first-person", "second-person", "third-person")
 NUMBERS = ("singular", "plural")
 PERSONS_NUMBERS = tuple((person, number) for number in NUMBERS for person in PERSONS)
 
-FR_PRONOUNS = ("je", "tu", "il/elle", "nous", "vous", "ils/elles")
-EL_PRONOUNS = ("εγω", "εσυ", "αυτ(ος/ή/ό)", "εμείς", "εσείς", "αυτ(οί/ές/ά)")
-PN_TO_EL_PRONOUN = dict(zip(PERSONS_NUMBERS, EL_PRONOUNS))
-PN_TO_FR_PRONOUN = dict(zip(PERSONS_NUMBERS, FR_PRONOUNS))
+LANG_PRONOUNS = {
+    "fr": ("je", "tu", "il/elle", "nous", "vous", "ils/elles"),
+    "el": ("εγω", "εσυ", "αυτ(ος/ή/ό)", "εμείς", "εσείς", "αυτ(οί/ές/ά)"),
+}
 
 
 class FormMatcher(msgspec.Struct, frozen=True):
@@ -285,25 +285,61 @@ class LanguageConfig(msgspec.Struct, frozen=True):
     tense_groups: list[TenseGroup]
 
 
-def el_full_tense(name, tags: tuple[str, ...]) -> TenseConfig:
-    return TenseConfig(
-        name,
-        tuple(
-            FormMatcher((*pn, *tags), pronoun=PN_TO_EL_PRONOUN[pn])
-            for pn in PERSONS_NUMBERS
-        ),
+
+def full_tense(
+    lang: str,
+    name: str,
+    tags: tuple[str, ...],
+    auxiliaries: tuple[str, ...] | None = None,
+):
+    if auxiliaries is not None:
+        assert len(auxiliaries) == len(PERSONS_NUMBERS)
+        matchers = tuple(
+            FormMatcher(
+                (*PERSONS_NUMBERS[i], *tags),
+                pronoun=LANG_PRONOUNS[lang][i],
+                formatter=auxiliaries[i] + "{}",
+            )
+            for i in range(len(PERSONS_NUMBERS))
+        )
+    else:
+        matchers = tuple(
+            FormMatcher((*PERSONS_NUMBERS[i], *tags), pronoun=LANG_PRONOUNS[lang][i])
+            for i in range(len(PERSONS_NUMBERS))
+        )
+
+    return TenseConfig(name, matchers)
+
+def repeated_tense(
+    lang: str,
+    name: str,
+    tags: tuple[str, ...],
+    auxiliaries: tuple[str, ...]
+):
+    assert len(auxiliaries) == len(PERSONS_NUMBERS)
+    matchers = tuple(
+        FormMatcher(
+            tags,
+            pronoun=LANG_PRONOUNS[lang][i],
+            formatter=auxiliaries[i] + " {}",
+        )
+        for i in range(len(PERSONS_NUMBERS))
     )
+
+    return TenseConfig(name, matchers)
 
 
 EL_CONFIG = LanguageConfig(
     code="el",
     name="Greek",
     tenses=(
-        el_full_tense(
+        full_tense(
+            "el",
             "el_indic_pres_active",
             ("present", "indicative", "imperfective", "active"),
         ),
-        el_full_tense(
+        full_tense(
+            "el",
             "el_indic_pres_passive",
             ("present", "indicative", "imperfective", "passive"),
         ),
@@ -319,29 +355,31 @@ EL_CONFIG = LanguageConfig(
 )
 
 
-def fr_full_tense(name: str, tags: tuple[str, ...]):
-    return TenseConfig(
-        name,
-        tuple(
-            FormMatcher((*pn, *tags), pronoun=PN_TO_FR_PRONOUN[pn])
-            for pn in PERSONS_NUMBERS
-        ),
-    )
-
+FR_PRES_INDIC_AVOIR = ("ai", "as", "a", "avons", "avez", "ont")
+FR_IMPERF_INDIC_AVOIR = ("avais", "avais", "avait", "avions", "aviez", "avaient")
+FR_PAST_HIST_INDIC_AVOIR = ("eus", "eus", "eut", "eûmes", "eûtes", "eurent")
+FR_FUT_INDIC_AVOIR = ("aurai", "auras", "aura", "aurons", "aurez", "auront")
 
 FR_CONFIG = LanguageConfig(
     code="fr",
     name="French",
     tenses=(
-        fr_full_tense("fr_indic_pres", ("present", "indicative")),
-        fr_full_tense("fr_indic_imperf", ("imperfect", "indicative")),
-        fr_full_tense("fr_indic_past_hist", ("past", "historic", "indicative")),
-        fr_full_tense("fr_indic_fut", ("future", "indicative")),
-        fr_full_tense("fr_cond_pres", ("conditional",)),
-        fr_full_tense("fr_subj_pres", ("subjunctive", "present")),
-        fr_full_tense("fr_subj_imperf", ("subjunctive", "imperfect")),
+        TenseConfig("fr_impers_pres_partic", FormMatcher(("participle", "present"))),
+        TenseConfig("fr_impers_past_partic", FormMatcher(("participle", "past"))),
+        full_tense("fr", "fr_indic_pres", ("present", "indicative")),
+        full_tense("fr", "fr_indic_imperf", ("imperfect", "indicative")),
+        full_tense("fr", "fr_indic_past_hist", ("past", "historic", "indicative")),
+        full_tense("fr", "fr_indic_fut", ("future", "indicative")),
+        full_tense("fr", "fr_cond_pres", ("conditional",)),
+        full_tense("fr", "fr_subj_pres", ("subjunctive", "present")),
+        full_tense("fr", "fr_subj_imperf", ("subjunctive", "imperfect")),
+        repeated_tense("fr", "fr_indic_pres_perf", ("participle", "past"), FR_PRES_INDIC_AVOIR),
+        repeated_tense("fr", "fr_indic_pluperf", ("participle", "past"), FR_IMPERF_INDIC_AVOIR),
+        repeated_tense("fr", "fr_indic_past_ant", ("participle", "past"), FR_PAST_HIST_INDIC_AVOIR),
+        repeated_tense("fr", "fr_indic_fut_perf", ("participle", "past"), FR_FUT_INDIC_AVOIR),
     ),
     tense_groups=[
+        TenseGroup("fr_impers", re.compile(r"^fr_impers_")),
         TenseGroup("fr_indic", re.compile(r"^fr_indic_")),
         TenseGroup("fr_subj", re.compile(r"^fr_subj_")),
         TenseGroup("fr_cond", re.compile(r"^fr_cond_")),
@@ -423,7 +461,10 @@ FR_CONFIG = LanguageConfig(
 #     ),
 # }
 
-CONFIG: list[LanguageConfig] = [EL_CONFIG, FR_CONFIG]
+CONFIG: list[LanguageConfig] = [
+    FR_CONFIG,
+    EL_CONFIG,
+]
 
 
 def structure_map(f, s):
@@ -590,10 +631,10 @@ def write_data_manifest(data_dir: str):
 
         with open(data_path, "rb") as f:
             h = hashlib.file_digest(f, "md5").hexdigest()[:8]
-        
+
         hashed_data_dir = os.path.join(data_dir, f"{config.code}-{h}")
         os.rename(os.path.join(data_dir, config.code), hashed_data_dir)
-            
+
         language_hashes[config.code] = {
             "dataHash": h,
             **make_language_static_metadata(config),
@@ -717,7 +758,7 @@ def generate_data_for_lang(wiki_lang: str, lang: LanguageConfig):
             # "χιονίζω",
             # "χιονίζει",
             # "στενοχωρώ",
-            # "habiter",
+            "habiter",
             # "haïr",
         ]
         if entry.word in WORDS:
@@ -752,6 +793,9 @@ def generate_data_for_lang(wiki_lang: str, lang: LanguageConfig):
 
         ret.append(processed_entry)
         seen_verbs.add(entry.word)
+
+        if len(seen_verbs) > 10:
+            break
 
     log.info(f"{lang.code} has {len(ret)} entries")
     ret = sorted(ret, key=lambda x: x["nameNoDiacritics"])
