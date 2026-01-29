@@ -5,12 +5,35 @@ import { defineConfig } from 'vite';
 export default defineConfig({
 	plugins: [
 		sveltekit(),
-		// cloudflare(),
-
 		SvelteKitPWA({
 			strategies: 'generateSW',
 			registerType: 'prompt', // Shows a "New Version" button to users
-			manifest: { /* PWA metadata */ },
+			manifest: { /* PWA metadata */
+				// copy-pasted from output of `npm run generate-pwa-assets`:
+				"icons": [
+					{
+						"src": "pwa-64x64.png",
+						"sizes": "64x64",
+						"type": "image/png"
+					},
+					{
+						"src": "pwa-192x192.png",
+						"sizes": "192x192",
+						"type": "image/png"
+					},
+					{
+						"src": "pwa-512x512.png",
+						"sizes": "512x512",
+						"type": "image/png"
+					},
+					{
+						"src": "maskable-icon-512x512.png",
+						"sizes": "512x512",
+						"type": "image/png",
+						"purpose": "maskable"
+					}
+				]
+			},
 			kit: {
 				// This is the "SvelteKit way" to handle SPA fallbacks in this plugin
 				// adapterFallback: 'app.html',
@@ -26,15 +49,15 @@ export default defineConfig({
 					'prerendered/pages/app-shell.html'
 				],
 				// globIgnores: [
-                //     "**/node_modules/**/*",
-                //     "sw.js",
-                //     "workbox-*.js",
-                //     "prerendered/**/*.html" // <--- Important!
-                // ],
+				//     "**/node_modules/**/*",
+				//     "sw.js",
+				//     "workbox-*.js",
+				//     "prerendered/**/*.html" // <--- Important!
+				// ],
 				modifyURLPrefix: {
 					'client/': '/',
 					// This turns "prerendered/pages/app-shell.html" -> "/app-shell.html"
-                    'prerendered/pages/': '/'
+					'prerendered/pages/': '/'
 				},
 				// Prevents '/' being stripped, keeping URLs explicit
 				directoryIndex: null,
