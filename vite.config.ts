@@ -1,6 +1,7 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 import { defineConfig } from 'vite';
+// import { pwa64} from './src/lib/assets/pwa-64x64.png?url'
 
 export default defineConfig({
 	plugins: [
@@ -9,31 +10,13 @@ export default defineConfig({
 			strategies: 'generateSW',
 			registerType: 'prompt', // Shows a "New Version" button to users
 			manifest: { /* PWA metadata */
-				// copy-pasted from output of `npm run generate-pwa-assets`:
-				"icons": [
-					{
-						"src": "pwa-64x64.png",
-						"sizes": "64x64",
-						"type": "image/png"
-					},
-					{
-						"src": "pwa-192x192.png",
-						"sizes": "192x192",
-						"type": "image/png"
-					},
-					{
-						"src": "pwa-512x512.png",
-						"sizes": "512x512",
-						"type": "image/png"
-					},
-					{
-						"src": "maskable-icon-512x512.png",
-						"sizes": "512x512",
-						"type": "image/png",
-						"purpose": "maskable"
-					}
-				]
+				name: 'Congeegator',
+                short_name: 'CG',
 			},
+			pwaAssets: {
+                config: true,
+				// overrideManifestIcons: true,
+            },
 			kit: {
 				// This is the "SvelteKit way" to handle SPA fallbacks in this plugin
 				// adapterFallback: 'app.html',
