@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import wiktionaryLogo from '$lib/assets/wiktionary_favicon_en.svg';
 	import { langName, syncLanguage } from '$lib/dataManager';
 	import { appTitle } from '$lib/defs';
 	import type { PageData } from './$types';
@@ -20,9 +21,8 @@
 
 {#if data.verb}
 <h1>{data.verb.name}</h1>
-<p>
-	<a target="_blank" rel="noopener noreferrer" href="https://en.wiktionary.com/wiki/{data.verb.name}#{langName(data.verb.lang)}">wiktionary</a>
-</p>
+<a target="_blank" rel="noopener noreferrer" href="https://en.wiktionary.com/wiki/{data.verb.name}#{langName(data.verb.lang)}"><img alt="wiktionary" src={wiktionaryLogo} />
+</a>
 {#each Object.entries(data.verb.conjugation) as [tense, forms]}
 	<h3>{tense}</h3>
 

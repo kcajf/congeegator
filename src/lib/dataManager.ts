@@ -28,7 +28,7 @@ export async function syncLanguage(lang: string) {
 
         if (!local || local.hash !== remote.hash) {
             const url = `${PUBLIC_R2_URL}/data/v${DATA_VERSION}/${lang}/data.json`;
-            console.log(`Fetching ${url}`)
+            // console.log(`Fetching ${url}`)
             const raw = await fetch(url).then(r => r.json());
             const records: VerbRecord[] = raw.map((item: any) => ({
                 ...item,
@@ -70,7 +70,7 @@ export async function loadSingleVerb(lang: string, verb: string, fetcher: typeof
     // 2. Fetch from Network (SSR or Cache Miss)
     // This works on both Server (Cloudflare Worker) and Browser
     const url = `${PUBLIC_R2_URL}/data/v${DATA_VERSION}/${lang}/verbs/${verb.toLowerCase()}.json`;
-    console.log(`Fetching ${url}`)
+    // console.log(`Fetching ${url}`)
     const response = await fetcher(url);
 
     if (response.status == 404) {
