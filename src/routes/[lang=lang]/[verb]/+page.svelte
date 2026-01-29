@@ -20,8 +20,6 @@
 	});
 
 	const formatForm = (form: string) => form.replaceAll('/', ' / ');
-	
-	
 </script>
 
 <svelte:head>
@@ -29,26 +27,83 @@
 </svelte:head>
 
 {#if data.verb}
-	<h1>{data.verb.name}</h1>
-	<a
-		target="_blank"
-		rel="noopener noreferrer"
-		href="https://en.wiktionary.com/wiki/{data.verb.name}#{langName(data.verb.lang)}"
-		><img alt="wiktionary" src={wiktionaryLogo} />
-	</a>
-	{#each data.verb.conjugation as tenseForms, i}
-		<h3>{tenseNames[i]}</h3>
+	<div class="header-container">
+		<h1>{data.verb.name}</h1>
+		<a
+			target="_blank"
+			rel="noopener noreferrer"
+			href="https://en.wiktionary.com/wiki/{data.verb.name}#{langName(data.verb.lang)}"
+			class="wiktionaryLink"
+			><img alt="wiktionary" src={wiktionaryLogo} />
+		</a>
+	</div>
 
-		{#if Array.isArray(tenseForms)}
-			<ul>
-				{#each tenseForms as form, j}
-					<li>{formatPronoun(data.verb.lang, tensePronouns[i][j], form, data.verb.frIsAspirated || false)}{formatForm(form)}</li>
-				{/each}
-			</ul>
-		{:else}
-			<p class="participle">{formatForm(tenseForms)}</p>
-		{/if}
-	{/each}
+	<div class="tenseGroup">
+		{#each data.verb.conjugation as tenseForms, i}
+			<div class="tense">
+				<h3>{tenseNames[i]}</h3>
+
+				{#if Array.isArray(tenseForms)}
+					<table class="tenseTable">
+						<tbody>
+							{#each tenseForms as form, j}
+								<tr>
+									<td class="pronoun"
+										>{formatPronoun(
+											data.verb.lang,
+											tensePronouns[i][j],
+											form,
+											data.verb.frIsAspirated || false
+										)}</td
+									>
+									<td class="verbForm">{formatForm(form)}</td>
+								</tr>
+							{/each}
+						</tbody>
+					</table>
+				{:else}
+					<p class="participle">{formatForm(tenseForms)}</p>
+				{/if}
+			</div>
+		{/each}
+	</div>
 {:else}
 	<h1>Verb not found</h1>
 {/if}
+
+<style>
+	.tenseTable td:nth-child(1) {
+		text-align: end;
+		color: #858585;
+	}
+
+	.tenseGroup {
+		display: flex;
+		gap: 0.5rem;
+	}
+
+	.tense {
+		/* margin: 0 1em; */
+	}
+
+	.wiktionaryLink {
+		display: inline-flex;
+		align-items: center; /* This handles the vertical centering */
+		text-decoration: none;
+		gap: 8px; /* Adds a clean gap between text and square img */
+	}
+
+	.wiktionaryLink img {
+		width: 1.6em; /* Or whatever size you need */
+		height: 1.6em; /* Keeping it square */
+		object-fit: cover;
+		display: block; /* Removes the default bottom whitespace */
+		margin-top: 0.3em;
+	}
+
+	.header-container {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	}
+</style>

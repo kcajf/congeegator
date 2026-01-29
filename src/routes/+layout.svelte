@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { PUBLIC_R2_URL } from '$env/static/public';
 	import appleIcon180 from '$lib/assets/apple-touch-icon-180x180.png';
 	import congeegatorSVG from '$lib/assets/congeegator.svg';
 	import favicon from '$lib/assets/favicon.ico';
@@ -45,14 +46,19 @@
 	{#if webManifestLink}
 		{@html webManifestLink}
 	{/if}
+	
+	<link rel="preconnect" href="{PUBLIC_R2_URL}" />
 </svelte:head>
+
+
+<div class="container">
 
 <nav>
 <a href="/"><img alt="Congeegator" src={congeegatorSVG} class="top-icon" /></a>
-
 </nav>
 
 {@render children()}
+</div>
 
 {#await import('$lib/ReloadPrompt.svelte') then { default: ReloadPrompt }}
 	<ReloadPrompt />
@@ -61,5 +67,10 @@
 <style>
   .top-icon {
     width: 4rem;
+  }
+  
+  .container {
+	max-width: 60rem;
+    margin: 0 auto;
   }
 </style>
