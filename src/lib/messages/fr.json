@@ -1,5 +1,13 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
-  "fr_present_indicative": "Présent",
-  "fr_past_historic": "Passé Simple"
+  "fr_indic": "Indicatif",
+  "fr_cond": "Conditionnel",
+  "fr_subj": "Subjonctif",
+  "fr_indic_pres": "Présent",
+  "fr_indic_imperf": "Imparfait",
+  "fr_indic_past_hist": "Passé simple",
+  "fr_indic_fut": "Futur simple",
+  "fr_cond_pres": "Présent",
+  "fr_subj_pres": "Présent",
+  "fr_subj_imperf": "Imparfait"
 }

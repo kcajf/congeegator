@@ -64,9 +64,8 @@
 			i18n.setLocale('en');
 		} else {
 			i18n.setLocale('fr');
-			
 		}
-			}}>
+		}}>
 			Change Lang
 	</button>
 	</nav>

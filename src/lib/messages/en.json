@@ -1,5 +1,16 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
-  "fr_present_indicative": "Present",
-  "fr_past_historic": "Past Historic"
+  "fr_indic": "Indicative",
+  "fr_cond": "Conditional",
+  "fr_subj": "Subjunctive",
+  "fr_indic_pres": "Present",
+  "fr_indic_imperf": "Imperfect",
+  "fr_indic_past_hist": "Past Historic",
+  "fr_indic_fut": "Future",
+  "fr_cond_pres": "Present",
+  "fr_subj_pres": "Present",
+  "fr_subj_imperf": "Imperfect",
+  "el_indic": "Indicative Mood",
+  "el_indic_pres_active": "Present Active",
+  "el_indic_pres_passive": "Present Passive"
 }

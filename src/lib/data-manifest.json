@@ -5,9 +5,9 @@
       "code": "el",
       "name": "Greek",
       "tenseNames": [
-        "el_active_present_indicative",
-        "el_passive_present_indicative",
-        "el_active_present_participle"
+        "el_indic_pres_active",
+        "el_indic_pres_passive",
+        "el_pres_parti_active"
       ],
       "tensePronouns": [
         [
@@ -27,15 +27,29 @@
           "αυτ(οί/ές/ά)"
         ],
         []
+      ],
+      "tenseGroups": [
+        {
+          "name": "el_indic",
+          "tenseIndices": [
+            0,
+            1
+          ]
+        }
       ]
     },
     "fr": {
-      "dataHash": "8048687b",
+      "dataHash": "a5b49a6f",
       "code": "fr",
       "name": "French",
       "tenseNames": [
-        "fr_present_indicative",
-        "fr_past_historic"
+        "fr_indic_pres",
+        "fr_indic_imperf",
+        "fr_indic_past_hist",
+        "fr_indic_fut",
+        "fr_cond_pres",
+        "fr_subj_pres",
+        "fr_subj_imperf"
       ],
       "tensePronouns": [
         [
@@ -53,7 +67,71 @@
           "nous",
           "vous",
           "ils/elles"
+        ],
+        [
+          "je",
+          "tu",
+          "il/elle",
+          "nous",
+          "vous",
+          "ils/elles"
+        ],
+        [
+          "je",
+          "tu",
+          "il/elle",
+          "nous",
+          "vous",
+          "ils/elles"
+        ],
+        [
+          "je",
+          "tu",
+          "il/elle",
+          "nous",
+          "vous",
+          "ils/elles"
+        ],
+        [
+          "je",
+          "tu",
+          "il/elle",
+          "nous",
+          "vous",
+          "ils/elles"
+        ],
+        [
+          "je",
+          "tu",
+          "il/elle",
+          "nous",
+          "vous",
+          "ils/elles"
         ]
+      ],
+      "tenseGroups": [
+        {
+          "name": "fr_indic",
+          "tenseIndices": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "name": "fr_subj",
+          "tenseIndices": [
+            5,
+            6
+          ]
+        },
+        {
+          "name": "fr_cond",
+          "tenseIndices": [
+            4
+          ]
+        }
       ]
     }
   }

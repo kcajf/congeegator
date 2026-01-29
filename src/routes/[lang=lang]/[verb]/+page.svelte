@@ -12,6 +12,7 @@
 	const langManifest = $derived(manifest.languages[data.verb.lang]);
 	const tenseNames = $derived(langManifest.tenseNames);
 	const tensePronouns = $derived(langManifest.tensePronouns);
+	const tenseGroups = $derived(langManifest.tenseGroups);
 
 	// Whenever the language changes, check if we need the full bundle
 	$effect(() => {
@@ -48,20 +49,23 @@
 		</a>
 	</div>
 
-	<div class="tenseGroup">
-		{#each data.verb.conjugation as tenseForms, i}
-			<div class="tense">
-				<h3>{getTenseDisplayName(tenseNames[i])}</h3>
+	{#each tenseGroups as tenseGroup}
+		<h2>{getTenseDisplayName(tenseGroup.name)}</h2>
+		<div class="tenseGroup">
 
+		{#each tenseGroup.tenseIndices as tenseI}
+			{@const tenseForms = data.verb.conjugation[tenseI]}
+			<div class="tense">
+				<h3>{getTenseDisplayName(tenseNames[tenseI])}</h3>
 				{#if Array.isArray(tenseForms)}
 					<table class="tenseTable">
 						<tbody>
-							{#each tenseForms as form, j}
+							{#each tenseForms as form, formI}
 								<tr>
 									<td class="pronoun"
 										>{formatPronoun(
 											data.verb.lang,
-											tensePronouns[i][j],
+											tensePronouns[tenseI][formI],
 											form,
 											data.verb.frIsAspirated || false
 										)}</td
@@ -75,8 +79,10 @@
 					<p class="participle">{formatForm(tenseForms)}</p>
 				{/if}
 			</div>
+
 		{/each}
-	</div>
+		</div>
+	{/each}
 {:else}
 	<h1>Verb not found</h1>
 {/if}
@@ -89,9 +95,9 @@
 
 	.tenseGroup {
 		display: flex;
-		gap: 0.5rem;
+		flex-wrap: wrap;
+		gap: 2.0rem;
 	}
-
 	.tense {
 		/* margin: 0 1em; */
 	}

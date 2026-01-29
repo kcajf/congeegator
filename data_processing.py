@@ -6,6 +6,7 @@ import io
 import json
 import logging
 import os
+import re
 import shutil
 import sys
 import tempfile
@@ -249,8 +250,6 @@ FR_PRONOUNS = ("je", "tu", "il/elle", "nous", "vous", "ils/elles")
 EL_PRONOUNS = ("εγω", "εσυ", "αυτ(ος/ή/ό)", "εμείς", "εσείς", "αυτ(οί/ές/ά)")
 PN_TO_EL_PRONOUN = dict(zip(PERSONS_NUMBERS, EL_PRONOUNS))
 PN_TO_FR_PRONOUN = dict(zip(PERSONS_NUMBERS, FR_PRONOUNS))
-print(PN_TO_EL_PRONOUN)
-print(PN_TO_FR_PRONOUN)
 
 
 class FormMatcher(msgspec.Struct, frozen=True):
@@ -274,10 +273,16 @@ class TenseConfig(msgspec.Struct, frozen=True):
     # pronouns: tuple[str, ...] | None
 
 
+class TenseGroup(msgspec.Struct, frozen=True):
+    name: str
+    pattern: re.Pattern
+
+
 class LanguageConfig(msgspec.Struct, frozen=True):
     code: str
     name: str  # This should be the language name that (English) wiktionary uses
     tenses: tuple[TenseConfig, ...]
+    tense_groups: list[TenseGroup]
 
 
 def el_full_tense(name, tags: tuple[str, ...]) -> TenseConfig:
@@ -295,18 +300,22 @@ EL_CONFIG = LanguageConfig(
     name="Greek",
     tenses=(
         el_full_tense(
-            "el_active_present_indicative",
+            "el_indic_pres_active",
             ("present", "indicative", "imperfective", "active"),
         ),
         el_full_tense(
-            "el_passive_present_indicative",
+            "el_indic_pres_passive",
             ("present", "indicative", "imperfective", "passive"),
         ),
         TenseConfig(
-            "el_active_present_participle",
+            "el_pres_parti_active",
             FormMatcher(("active", "present", "participle")),
         ),
     ),
+    tense_groups=[
+        TenseGroup("el_indic", re.compile(r"^el_indic_")),
+        # TenseGroup("Indicative", re.compile(r"^el_indic_")),
+    ],
 )
 
 
@@ -324,9 +333,19 @@ FR_CONFIG = LanguageConfig(
     code="fr",
     name="French",
     tenses=(
-        fr_full_tense("fr_present_indicative", ("present", "indicative")),
-        fr_full_tense("fr_past_historic", ("past", "historic", "indicative")),
+        fr_full_tense("fr_indic_pres", ("present", "indicative")),
+        fr_full_tense("fr_indic_imperf", ("imperfect", "indicative")),
+        fr_full_tense("fr_indic_past_hist", ("past", "historic", "indicative")),
+        fr_full_tense("fr_indic_fut", ("future", "indicative")),
+        fr_full_tense("fr_cond_pres", ("conditional",)),
+        fr_full_tense("fr_subj_pres", ("subjunctive", "present")),
+        fr_full_tense("fr_subj_imperf", ("subjunctive", "imperfect")),
     ),
+    tense_groups=[
+        TenseGroup("fr_indic", re.compile(r"^fr_indic_")),
+        TenseGroup("fr_subj", re.compile(r"^fr_subj_")),
+        TenseGroup("fr_cond", re.compile(r"^fr_cond_")),
+    ],
 )
 
 # EL_CONFIG = {
@@ -546,11 +565,19 @@ def make_language_static_metadata(config: LanguageConfig):
         else:
             tense_pronouns.append([f.pronoun or "" for f in t.form_matchers])
 
+    tense_groups: list[dict[str, Any]] = []
+    for g in config.tense_groups:
+        matching_tenses = [
+            tense_names.index(t.name) for t in config.tenses if g.pattern.match(t.name)
+        ]
+        tense_groups.append(dict(name=g.name, tenseIndices=matching_tenses))
+
     return {
         "code": config.code,
         "name": config.name,
         "tenseNames": tense_names,
         "tensePronouns": tense_pronouns,
+        "tenseGroups": tense_groups,
     }
 
 
@@ -710,7 +737,7 @@ def generate_data_for_lang(wiki_lang: str, lang: LanguageConfig):
             continue
             # raise ValueError(f"Failed to process {entry.word}") from e
 
-        processed_entry : dict[str, Any]= dict(
+        processed_entry: dict[str, Any] = dict(
             name=entry.word,
             nameNoDiacritics=strip_diacritics(entry.word),
             conjugation=list(conj.values()),

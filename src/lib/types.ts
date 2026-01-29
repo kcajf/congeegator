@@ -6,16 +6,15 @@ export interface DataManifest {
       name: string;
       tenseNames: string[];
       tensePronouns: string[][];
+      tenseGroups: {
+        name: string,
+        tenseIndices: number[]
+      }[]
     };
   };
 }
 
 export type ConjugationForms = string | string[];
-
-// export interface VerbData {
-//   // Keyed by tense: e.g., "present", "imperfect"
-//   [tense: string]: ConjugationForms;
-// }
 
 export interface VerbRecord {
   name: string;      // "manger"
