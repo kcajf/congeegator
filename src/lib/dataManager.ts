@@ -9,6 +9,10 @@ export const manifest = manifestRaw as DataManifest;
 
 const DATA_VERSION = 1;
 
+function getLangDataRoot(langCode: string) {
+    return `${PUBLIC_R2_URL}/data/v${DATA_VERSION}/${langCode}-${manifest.languages[langCode].dataHash}`
+}
+
 export function langName(langCode: string) {
     return manifest.languages[langCode].name;
 }
@@ -27,7 +31,7 @@ export async function syncLanguage(lang: string) {
         const local = await db.metadata.get(lang);
 
         if (!local || local.hash !== remote.dataHash) {
-            const url = `${PUBLIC_R2_URL}/data/v${DATA_VERSION}/${lang}/data.json`;
+            const url = `${getLangDataRoot(lang)}/data.json`;
             // console.log(`Fetching ${url}`)
             const raw = await fetch(url).then(r => r.json());
             const records: VerbRecord[] = raw.map((item: any) => ({
@@ -69,7 +73,7 @@ export async function loadSingleVerb(lang: string, verb: string, fetcher: typeof
 
     // 2. Fetch from Network (SSR or Cache Miss)
     // This works on both Server (Cloudflare Worker) and Browser
-    const url = `${PUBLIC_R2_URL}/data/v${DATA_VERSION}/${lang}/verbs/${verb.toLowerCase()}.json`;
+    const url = `${getLangDataRoot(lang)}/verbs/${verb.toLowerCase()}.json`;
     // console.log(`Fetching ${url}`)
     const response = await fetcher(url);
 
@@ -84,4 +88,34 @@ export async function loadSingleVerb(lang: string, verb: string, fetcher: typeof
 
     const raw = await response.json();
     return { ...raw, lang } as VerbRecord;
+}
+
+export async function loadVerbIndex(lang: string, fetcher: typeof fetch): Promise<string[]> {
+    if (!(lang in manifest.languages)) {
+        error(404, { message: `Language ${lang} not supported` });
+    }
+
+    if (browser) {
+        const localVerbs = await db.verbs
+            .where('[lang+nameNoDiacritics]')
+            .between([lang, ''], [lang, '\uffff'])
+            .primaryKeys(); // Just get the [lang+name] keys to be fast
+        if (localVerbs.length > 0) {
+            console.log('Serving from IndexedDB');
+            // Extract just the 'name' part from the compound key
+            return localVerbs.map(key => (key as string[])[1]);
+        }
+    }
+
+    // 2. SSR OR CACHE MISS: Fetch from R2 Public URL
+    // This runs on the Cloudflare Worker during the initial page load
+    // but runs in the browser if IndexedDB was empty.
+    const url = `${getLangDataRoot(lang)}/index.json`;
+    // console.log(`Fetching ${url}`)
+    const res = await fetcher(url);
+
+    if (!res.ok) throw new Error(`Error loading index for ${lang}`);
+
+    const verbs: string[] = await res.json();
+    return verbs;
 }

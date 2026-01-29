@@ -590,6 +590,10 @@ def write_data_manifest(data_dir: str):
 
         with open(data_path, "rb") as f:
             h = hashlib.file_digest(f, "md5").hexdigest()[:8]
+        
+        hashed_data_dir = os.path.join(data_dir, f"{config.code}-{h}")
+        os.rename(os.path.join(data_dir, config.code), hashed_data_dir)
+            
         language_hashes[config.code] = {
             "dataHash": h,
             **make_language_static_metadata(config),
