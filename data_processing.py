@@ -794,8 +794,8 @@ def generate_data_for_lang(wiki_lang: str, lang: LanguageConfig):
         ret.append(processed_entry)
         seen_verbs.add(entry.word)
 
-        if len(seen_verbs) > 10:
-            break
+        # if len(seen_verbs) > 10:
+        #     break
 
     log.info(f"{lang.code} has {len(ret)} entries")
     ret = sorted(ret, key=lambda x: x["nameNoDiacritics"])
