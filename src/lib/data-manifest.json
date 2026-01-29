@@ -5,9 +5,9 @@
       "code": "el",
       "name": "Greek",
       "tenseNames": [
-        "el-active-present-indicative",
-        "el-passive-present-indicative",
-        "el-active-present-participle"
+        "el_active_present_indicative",
+        "el_passive_present_indicative",
+        "el_active_present_participle"
       ],
       "tensePronouns": [
         [
@@ -34,8 +34,8 @@
       "code": "fr",
       "name": "French",
       "tenseNames": [
-        "fr-present-indicative",
-        "fr-past-historic"
+        "fr_present_indicative",
+        "fr_past_historic"
       ],
       "tensePronouns": [
         [

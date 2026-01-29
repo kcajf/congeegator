@@ -4,11 +4,17 @@
 	import congeegatorSVG from '$lib/assets/congeegator.svg';
 	import favicon from '$lib/assets/favicon.ico';
 	import { appTitle } from '$lib/defs';
+	import { i18n } from '$lib/i18n.svelte';
 	import { onMount } from 'svelte';
 	import { pwaInfo } from 'virtual:pwa-info';
 	import type { LayoutProps } from './$types';
 
 	let { data, children }: LayoutProps = $props();
+
+	// No onMount needed.
+	// This runs immediately during initialization.
+	// svelte-ignore state_referenced_locally
+	i18n.init(data.interfaceLang);
 
 	const webManifestLink = $derived(pwaInfo?.webManifest?.linkTag ?? '');
 
@@ -46,18 +52,26 @@
 	{#if webManifestLink}
 		{@html webManifestLink}
 	{/if}
-	
-	<link rel="preconnect" href="{PUBLIC_R2_URL}" />
+
+	<link rel="preconnect" href={PUBLIC_R2_URL} />
 </svelte:head>
 
-
 <div class="container">
+	<nav>
+		<a href="/"><img alt="Congeegator" src={congeegatorSVG} class="top-icon" /></a>
+		<button onclick={() => {
+		if (i18n.current == "fr") {
+			i18n.setLocale('en');
+		} else {
+			i18n.setLocale('fr');
+			
+		}
+			}}>
+			Change Lang
+	</button>
+	</nav>
 
-<nav>
-<a href="/"><img alt="Congeegator" src={congeegatorSVG} class="top-icon" /></a>
-</nav>
-
-{@render children()}
+	{@render children()}
 </div>
 
 {#await import('$lib/ReloadPrompt.svelte') then { default: ReloadPrompt }}
@@ -65,12 +79,11 @@
 {/await}
 
 <style>
-  .top-icon {
-    width: 4rem;
-  }
-  
-  .container {
-	max-width: 60rem;
-    margin: 0 auto;
-  }
+	.top-icon {
+		width: 4rem;
+	}
+	.container {
+		max-width: 60rem;
+		margin: 0 auto;
+	}
 </style>

@@ -5,6 +5,7 @@
         "conjs",
         "Dexie",
         "mimetypes",
+        "paraglide",
         "prerendered"
     ]
 }

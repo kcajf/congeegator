@@ -295,15 +295,15 @@ EL_CONFIG = LanguageConfig(
     name="Greek",
     tenses=(
         el_full_tense(
-            "el-active-present-indicative",
+            "el_active_present_indicative",
             ("present", "indicative", "imperfective", "active"),
         ),
         el_full_tense(
-            "el-passive-present-indicative",
+            "el_passive_present_indicative",
             ("present", "indicative", "imperfective", "passive"),
         ),
         TenseConfig(
-            "el-active-present-participle",
+            "el_active_present_participle",
             FormMatcher(("active", "present", "participle")),
         ),
     ),
@@ -324,8 +324,8 @@ FR_CONFIG = LanguageConfig(
     code="fr",
     name="French",
     tenses=(
-        fr_full_tense("fr-present-indicative", ("present", "indicative")),
-        fr_full_tense("fr-past-historic", ("past", "historic", "indicative")),
+        fr_full_tense("fr_present_indicative", ("present", "indicative")),
+        fr_full_tense("fr_past_historic", ("past", "historic", "indicative")),
     ),
 )
 

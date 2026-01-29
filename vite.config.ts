@@ -1,7 +1,6 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 import { defineConfig } from 'vite';
-// import { pwa64} from './src/lib/assets/pwa-64x64.png?url'
 
 export default defineConfig({
 	plugins: [
@@ -11,12 +10,11 @@ export default defineConfig({
 			registerType: 'prompt', // Shows a "New Version" button to users
 			manifest: { /* PWA metadata */
 				name: 'Congeegator',
-                short_name: 'CG',
+				short_name: 'CG',
 			},
 			pwaAssets: {
-                config: true,
-				// overrideManifestIcons: true,
-            },
+				config: true,
+			},
 			kit: {
 				// This is the "SvelteKit way" to handle SPA fallbacks in this plugin
 				// adapterFallback: 'app.html',

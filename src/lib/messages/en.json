@@ -1,0 +1,5 @@
+{
+  "$schema": "https://inlang.com/schema/inlang-message-format",
+  "fr_present_indicative": "Present",
+  "fr_past_historic": "Past Historic"
+}

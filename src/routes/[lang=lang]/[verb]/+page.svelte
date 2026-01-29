@@ -3,6 +3,7 @@
 	import wiktionaryLogo from '$lib/assets/wiktionary_favicon_en.svg';
 	import { langName, manifest, syncLanguage } from '$lib/dataManager';
 	import { appTitle } from '$lib/defs';
+	import { i18n } from '$lib/i18n.svelte';
 	import { formatPronoun } from '$lib/langTools';
 	import type { PageProps } from './$types';
 
@@ -18,6 +19,15 @@
 			syncLanguage(data.verb.lang);
 		}
 	});
+
+	const getTenseDisplayName = (tenseCode: string) => {
+		try {
+			// TODO: support 'native' tense code mode, where it's always language
+			return i18n.translate(tenseCode);
+		} catch (error) {
+			return tenseCode;
+		}
+	};
 
 	const formatForm = (form: string) => form.replaceAll('/', ' / ');
 </script>
@@ -41,7 +51,7 @@
 	<div class="tenseGroup">
 		{#each data.verb.conjugation as tenseForms, i}
 			<div class="tense">
-				<h3>{tenseNames[i]}</h3>
+				<h3>{getTenseDisplayName(tenseNames[i])}</h3>
 
 				{#if Array.isArray(tenseForms)}
 					<table class="tenseTable">
