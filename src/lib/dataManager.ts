@@ -26,7 +26,7 @@ export async function syncLanguage(lang: string) {
 
         const local = await db.metadata.get(lang);
 
-        if (!local || local.hash !== remote.hash) {
+        if (!local || local.hash !== remote.dataHash) {
             const url = `${PUBLIC_R2_URL}/data/v${DATA_VERSION}/${lang}/data.json`;
             // console.log(`Fetching ${url}`)
             const raw = await fetch(url).then(r => r.json());
@@ -38,7 +38,7 @@ export async function syncLanguage(lang: string) {
             await db.transaction('rw', [db.verbs, db.metadata], async () => {
                 await db.verbs.where({ lang: lang }).delete();
                 await db.verbs.bulkPut(records);
-                await db.metadata.put({ lang: lang, hash: remote.hash });
+                await db.metadata.put({ lang: lang, hash: remote.dataHash });
             });
 
             console.log(`Inserted ${raw.length} ${lang} verbs. sync finished`)

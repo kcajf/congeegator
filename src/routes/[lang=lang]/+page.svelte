@@ -2,12 +2,16 @@
 	import { browser } from '$app/environment';
 	import { langName, syncLanguage } from '$lib/dataManager';
 	import { appTitle } from '$lib/defs';
-	import type { PageData } from './$types';
-	export let data: PageData;
+	import type { PageProps } from './$types';
 
-	$: if (browser && data.lang) {
-		syncLanguage(data.lang);
-	}
+	let { data }: PageProps = $props();
+
+	// Whenever the language changes, check if we need the full bundle
+	$effect(() => {
+		if (browser && data.lang) {
+			syncLanguage(data.lang);
+		}
+	});
 </script>
 
 <svelte:head>
@@ -19,7 +23,5 @@
 <div class="verb-grid">
 	{#each data.verbs as verb (verb)}
 		<p><a href="/{data.lang}/{verb}">{verb}</a></p>
-	{:else}
-		<p>No verbs found matching "{query}"</p>
 	{/each}
 </div>

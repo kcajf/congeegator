@@ -1,12 +1,60 @@
 {
   "languages": {
     "el": {
-      "hash": "e9d9f5e1",
-      "name": "Greek"
+      "dataHash": "44db9203",
+      "code": "el",
+      "name": "Greek",
+      "tenseNames": [
+        "el-active-present-indicative",
+        "el-passive-present-indicative",
+        "el-active-present-participle"
+      ],
+      "tensePronouns": [
+        [
+          "εγω",
+          "εσυ",
+          "αυτ(ος/ή/ό)",
+          "εμείς",
+          "εσείς",
+          "αυτ(οί/ές/ά)"
+        ],
+        [
+          "εγω",
+          "εσυ",
+          "αυτ(ος/ή/ό)",
+          "εμείς",
+          "εσείς",
+          "αυτ(οί/ές/ά)"
+        ],
+        []
+      ]
     },
     "fr": {
-      "hash": "f16b1a5d",
-      "name": "French"
+      "dataHash": "8048687b",
+      "code": "fr",
+      "name": "French",
+      "tenseNames": [
+        "fr-present-indicative",
+        "fr-past-historic"
+      ],
+      "tensePronouns": [
+        [
+          "je",
+          "tu",
+          "il/elle",
+          "nous",
+          "vous",
+          "ils/elles"
+        ],
+        [
+          "je",
+          "tu",
+          "il/elle",
+          "nous",
+          "vous",
+          "ils/elles"
+        ]
+      ]
     }
   }
 }

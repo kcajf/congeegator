@@ -5,8 +5,9 @@
 	import { appTitle } from '$lib/defs';
 	import { onMount } from 'svelte';
 	import { pwaInfo } from 'virtual:pwa-info';
+	import type { LayoutProps } from './$types';
 
-	let { children } = $props();
+	let { data, children }: LayoutProps = $props();
 
 	const webManifestLink = $derived(pwaInfo?.webManifest?.linkTag ?? '');
 

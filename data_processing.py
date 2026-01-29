@@ -245,10 +245,18 @@ PERSONS = ("first-person", "second-person", "third-person")
 NUMBERS = ("singular", "plural")
 PERSONS_NUMBERS = tuple((person, number) for number in NUMBERS for person in PERSONS)
 
+FR_PRONOUNS = ("je", "tu", "il/elle", "nous", "vous", "ils/elles")
+EL_PRONOUNS = ("εγω", "εσυ", "αυτ(ος/ή/ό)", "εμείς", "εσείς", "αυτ(οί/ές/ά)")
+PN_TO_EL_PRONOUN = dict(zip(PERSONS_NUMBERS, EL_PRONOUNS))
+PN_TO_FR_PRONOUN = dict(zip(PERSONS_NUMBERS, FR_PRONOUNS))
+print(PN_TO_EL_PRONOUN)
+print(PN_TO_FR_PRONOUN)
+
 
 class FormMatcher(msgspec.Struct, frozen=True):
     tags: tuple[str, ...]
     formatter: str = "{}"
+    pronoun: str | None = None
 
     def matches(self, form: Form) -> bool:
         for t in self.tags:
@@ -263,6 +271,7 @@ class FormMatcher(msgspec.Struct, frozen=True):
 class TenseConfig(msgspec.Struct, frozen=True):
     name: str
     form_matchers: FormMatcher | tuple[FormMatcher, ...]
+    # pronouns: tuple[str, ...] | None
 
 
 class LanguageConfig(msgspec.Struct, frozen=True):
@@ -271,48 +280,52 @@ class LanguageConfig(msgspec.Struct, frozen=True):
     tenses: tuple[TenseConfig, ...]
 
 
+def el_full_tense(name, tags: tuple[str, ...]) -> TenseConfig:
+    return TenseConfig(
+        name,
+        tuple(
+            FormMatcher((*pn, *tags), pronoun=PN_TO_EL_PRONOUN[pn])
+            for pn in PERSONS_NUMBERS
+        ),
+    )
+
+
 EL_CONFIG = LanguageConfig(
     code="el",
     name="Greek",
     tenses=(
-        TenseConfig(
-            "active present",
-            tuple(
-                FormMatcher((*pn, "present", "indicative", "imperfective", "active"))
-                for pn in PERSONS_NUMBERS
-            ),
+        el_full_tense(
+            "el-active-present-indicative",
+            ("present", "indicative", "imperfective", "active"),
+        ),
+        el_full_tense(
+            "el-passive-present-indicative",
+            ("present", "indicative", "imperfective", "passive"),
         ),
         TenseConfig(
-            "passive present",
-            tuple(
-                FormMatcher((*pn, "present", "indicative", "imperfective", "passive"))
-                for pn in PERSONS_NUMBERS
-            ),
-        ),
-        TenseConfig(
-            "active present participle",
+            "el-active-present-participle",
             FormMatcher(("active", "present", "participle")),
         ),
     ),
 )
 
+
+def fr_full_tense(name: str, tags: tuple[str, ...]):
+    return TenseConfig(
+        name,
+        tuple(
+            FormMatcher((*pn, *tags), pronoun=PN_TO_FR_PRONOUN[pn])
+            for pn in PERSONS_NUMBERS
+        ),
+    )
+
+
 FR_CONFIG = LanguageConfig(
     code="fr",
     name="French",
     tenses=(
-        TenseConfig(
-            "Present",
-            tuple(
-                FormMatcher((*pn, "present", "indicative")) for pn in PERSONS_NUMBERS
-            ),
-        ),
-        TenseConfig(
-            "Past Historic",
-            tuple(
-                FormMatcher(("past", "historic", "indicative", *pn))
-                for pn in PERSONS_NUMBERS
-            ),
-        ),
+        fr_full_tense("fr-present-indicative", ("present", "indicative")),
+        fr_full_tense("fr-past-historic", ("past", "historic", "indicative")),
     ),
 )
 
@@ -499,11 +512,14 @@ def count_conjs(thing) -> int:
 def write_language_data(data: list[dict[str, Any]], lang_dir: str):
     os.makedirs(lang_dir, exist_ok=True)
 
+    # INDENT=None
+    INDENT = 2
+
     # full data file
     out_path = os.path.join(lang_dir, "data.json")
     with open(out_path, "w") as f:
         log.info(f"Wrote {out_path}")
-        json.dump(data, f, indent=2, ensure_ascii=False)
+        json.dump(data, f, indent=INDENT, ensure_ascii=False)
 
     # single verbs file
     single_verbs_dir = os.path.join(lang_dir, "verbs")
@@ -512,12 +528,30 @@ def write_language_data(data: list[dict[str, Any]], lang_dir: str):
         with open(
             os.path.join(single_verbs_dir, f"{verb_data['name']}.json"), "w"
         ) as f:
-            json.dump(verb_data, f, indent=2, ensure_ascii=False)
+            json.dump(verb_data, f, indent=INDENT, ensure_ascii=False)
 
     # index file
     with open(os.path.join(lang_dir, "index.json"), "w") as f:
         names = [x["name"] for x in data]
-        json.dump(names, f, indent=2, ensure_ascii=False)
+        json.dump(names, f, indent=INDENT, ensure_ascii=False)
+
+
+def make_language_static_metadata(config: LanguageConfig):
+    tense_names: list[str] = []
+    tense_pronouns: list[list[str] | None] = []
+    for t in config.tenses:
+        tense_names.append(t.name)
+        if isinstance(t.form_matchers, FormMatcher):
+            tense_pronouns.append([])
+        else:
+            tense_pronouns.append([f.pronoun or "" for f in t.form_matchers])
+
+    return {
+        "code": config.code,
+        "name": config.name,
+        "tenseNames": tense_names,
+        "tensePronouns": tense_pronouns,
+    }
 
 
 def write_data_manifest(data_dir: str):
@@ -529,7 +563,10 @@ def write_data_manifest(data_dir: str):
 
         with open(data_path, "rb") as f:
             h = hashlib.file_digest(f, "md5").hexdigest()[:8]
-        language_hashes[config.code] = {"hash": h, "name": config.name}
+        language_hashes[config.code] = {
+            "dataHash": h,
+            **make_language_static_metadata(config),
+        }
 
     path = os.path.join("src", "lib", "data-manifest.json")
     log.info(f"Writing {path}")
@@ -540,6 +577,7 @@ def write_data_manifest(data_dir: str):
             },
             f,
             indent=2,
+            ensure_ascii=False,
         )
 
 
@@ -595,6 +633,16 @@ def entry_is_clean_verb_root(entry: Entry) -> bool:
     return True
 
 
+def fr_is_aspirated(entry: Entry) -> bool:
+    cat = "French terms with aspirated h"
+    if cat in entry.categories:
+        return True
+    for s in entry.senses:
+        if cat in s.categories:
+            return True
+    return False
+
+
 def generate_data_for_lang(wiki_lang: str, lang: LanguageConfig):
     log.info(f"generating {lang.code} data")
     cache = CacheManager()
@@ -602,7 +650,7 @@ def generate_data_for_lang(wiki_lang: str, lang: LanguageConfig):
 
     ret: list[dict[str, Any]] = []
 
-    seen_verbs : set[str] = set()
+    seen_verbs: set[str] = set()
 
     for line in data:
         entry_just_pos = msgspec.json.decode(line, type=EntryJustPos)
@@ -637,7 +685,9 @@ def generate_data_for_lang(wiki_lang: str, lang: LanguageConfig):
             # "voy.",
             # "χιονίζω",
             # "χιονίζει",
-            "στενοχωρώ",
+            # "στενοχωρώ",
+            # "habiter",
+            # "haïr",
         ]
         if entry.word in WORDS:
             # pprint(entry)
@@ -660,13 +710,16 @@ def generate_data_for_lang(wiki_lang: str, lang: LanguageConfig):
             continue
             # raise ValueError(f"Failed to process {entry.word}") from e
 
-        ret.append(
-            dict(
-                name=entry.word,
-                nameNoDiacritics=strip_diacritics(entry.word),
-                conjugation=conj,
-            )
+        processed_entry : dict[str, Any]= dict(
+            name=entry.word,
+            nameNoDiacritics=strip_diacritics(entry.word),
+            conjugation=list(conj.values()),
         )
+
+        if fr_is_aspirated(entry):
+            processed_entry["frIsAspirated"] = True
+
+        ret.append(processed_entry)
         seen_verbs.add(entry.word)
 
     log.info(f"{lang.code} has {len(ret)} entries")
