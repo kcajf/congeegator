@@ -265,7 +265,7 @@
 	.search-container input {
 		/* margin-left: 1rem;
 		margin-right: 1rem; */
-		padding: 0.5rem 0.5rem;
+		padding: 0.5rem 0.2rem;
 		border: 0px solid #ddd;
 		border-bottom: 1px solid #ddd;
 		font-size: 1rem;

@@ -23,7 +23,7 @@ export default defineConfig({
 			workbox: {
 				// Only glob the static assets
 				globPatterns: [
-					'client/**/*.{js,css,ico,png,svg,webp,webmanifest}',
+					'client/**/*.{js,css,ico,png,svg,webp}',
 					// 'prerendered/**/*.json', // Cache data for offline navigation
 					// We can keep prerendered pages if you want home page SSR
 					// 'prerendered/**/*.html'
@@ -58,8 +58,5 @@ export default defineConfig({
 				}]
 			}
 		})
-	],
-	worker: {
-		plugins: () => []
-	}
+	]
 });
