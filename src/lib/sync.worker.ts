@@ -14,10 +14,6 @@ self.onmessage = async (e: MessageEvent<{ lang: string }>) => {
         }
 
         console.log(`starting to syncLanguage ${lang}`)
-        if (!navigator.onLine) {
-            console.log(`we are offline, can't sync`);
-            return;
-        }
 
         try {
             const remote = manifest.languages[lang];
@@ -30,6 +26,13 @@ self.onmessage = async (e: MessageEvent<{ lang: string }>) => {
 
             if (!local || local.hash !== remote.dataHash) {
                 self.postMessage({ type: 'PROGRESS', lang, status: 'loading', percent: 0 });
+
+                if (!navigator.onLine) {
+                    self.postMessage({ type: 'ERROR', lang, error: 'offline' });
+                    console.log(`we are offline, can't sync`);
+                    return;
+                }
+
                 const url = `${getLangDataUrl(lang)}/data.json`;
                 // console.log(`Fetching ${url}`)
                 const raw = await fetch(url).then(r => r.json());
