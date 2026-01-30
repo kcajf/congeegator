@@ -21,7 +21,7 @@
 	// No onMount needed.
 	// This runs immediately during initialization.
 	// svelte-ignore state_referenced_locally
-	i18n.init(data.interfaceLang);
+	i18n.init(data.interfaceLang || 'en');
 
 	const webManifestLink = $derived(pwaInfo?.webManifest?.linkTag ?? '');
 
