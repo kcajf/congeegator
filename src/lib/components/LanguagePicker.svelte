@@ -3,9 +3,9 @@
 	import { page } from '$app/state';
 	import { clickOutside } from '$lib/clickOutside';
 	import { fade, fly, slide } from 'svelte/transition';
-	// Your custom action
+// Your custom action
 	import { conjLangState } from '$lib/conjLang.svelte';
-	import { manifest } from '$lib/dataManager';
+	import { langName, manifest } from '$lib/dataManager';
 
 	// The current language comes from the URL param
 	let currentLang = $derived(page.params.lang || conjLangState.current);
@@ -33,7 +33,8 @@
 
 <div class="picker-container" use:clickOutside={() => (isOpen = false)}>
 	<button class="trigger" onclick={() => (isOpen = !isOpen)}>
-		{currentLang.toUpperCase()}
+        <span class="mobile-only">{currentLang.toUpperCase() }</span>
+        <span class="desktop-only">{langName(currentLang)}</span>
 	</button>
 
 	{#if isOpen}
@@ -70,12 +71,21 @@
 </div>
 
 <style>
+	.mobile-only { display: none; }
+	.desktop-only { display: block; }
+
+	@media (max-width: 768px) {
+		.mobile-only { display: block; }
+		.desktop-only { display: none; }
+	}
+
 	.picker-container {
 		position: relative;
 	}
 
 	.trigger {
-		padding: 8px 12px;
+    padding: 0.6rem 0.6rem;
+		/* padding: 8px 12px; */
 		/* font-weight: bold; */
 		font-family: inherit; /* Inherit from body or container */
 		border: 1px solid #ddd;
@@ -96,7 +106,7 @@
 	}
 
 	.option.active {
-		color: #007bff;
+		/* color: #517092; */
 		font-weight: bold;
 		background: #f8f9fa;
 	}
@@ -109,8 +119,8 @@
 		width: 180px;
 		background: white;
 		border: 1px solid #ddd;
-		border-radius: 8px;
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+		/* border-radius: 8px; */
+		/* box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); */
 		z-index: 100;
 		max-height: 300px;
 		overflow-y: auto;

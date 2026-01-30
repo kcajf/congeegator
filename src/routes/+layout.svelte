@@ -59,7 +59,7 @@
 
 <div class="container">
 	<nav class="navbar">
-		<a href="/"><img alt="Congeegator" src={congeegatorSVG} class="top-icon" /></a>
+		<a href="/"><img alt="{appTitle}" src={congeegatorSVG} class="top-icon" /></a>
 
 		<div class="search-container">
 			<input type="text" id="searchInput" placeholder="search..." />
@@ -76,6 +76,12 @@
 {/await}
 
 <style>
+	:global(html) {
+		scrollbar-gutter: stable;
+		/* Optional: modern thin scrollbar for Firefox/Chrome */
+		/* scrollbar-width: thin; */
+		scrollbar-color: rgba(155, 155, 155, 0.5) transparent;
+	}
 	:global(body) {
 		/* applies to <body> */
 		/* margin: 0; */
@@ -85,10 +91,13 @@
 
 	.top-icon {
 		width: 4rem;
+		aspect-ratio: 1;
+		object-fit: contain;
 	}
+
 	.container {
-		max-width: 60rem;
-		margin: 0 auto;
+		max-width: 50rem;
+		margin: 1rem auto;
 	}
 
 	.navbar {
@@ -102,23 +111,32 @@
   font-family: sans-serif; */
 	}
 
+	.search-container {
+		flex: 1;
+		display: flex;
+		max-width: 30rem;
+	}
+
 	.search-container input {
 		margin-left: 1rem;
 		margin-right: 1rem;
-		padding: 0.5rem 1rem;
+		padding: 0.5rem 0.5rem;
 		border: 0px solid #ddd;
 		border-bottom: 1px solid #ddd;
-		font-size: 16px;
+		font-size: 1rem;
 		font-family: inherit;
 		/* border-radius: 20px; */
 		outline: none;
-		max-width: 250px;
+		min-width: 0;
+		width: 100%;
+		/* max-width: 1000px; */
+		/* field-sizing: content; */
 		transition:
 			width 0.3s ease,
 			border-color 0.3s ease;
 	}
-
-	/* .search-container input:focus {
+	/* 
+	.search-container input:focus {
   width: 300px;
   border-color: #007bff;
 } */
