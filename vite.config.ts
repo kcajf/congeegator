@@ -24,10 +24,10 @@ export default defineConfig({
 				// Only glob the static assets
 				globPatterns: [
 					'client/**/*.{js,css,ico,png,svg,webp}',
-					// 'prerendered/**/*.json', // Cache data for offline navigation
 					// We can keep prerendered pages if you want home page SSR
 					// 'prerendered/**/*.html'
-					'prerendered/pages/app-shell.html'
+					'prerendered/pages/app-shell.html',
+					'prerendered/pages/**/*.json'
 				],
 				// globIgnores: [
 				//     "**/node_modules/**/*",

@@ -52,7 +52,7 @@ class I18n {
 		if (browser) {
 			localStorage.setItem('lang', lang);
 			// Also update cookie in case they go back online
-			document.cookie = `lang=${lang}; path=/; max-age=31536000`;
+			// document.cookie = `lang=${lang}; path=/; max-age=31536000`;
 		}
 	}
 
