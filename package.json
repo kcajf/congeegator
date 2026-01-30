@@ -4,7 +4,7 @@
 	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
-		"dev": "vite dev --mode development --host frigaardj-x1c6-arch.lemming-frog.ts.net",
+		"dev": "vite dev --mode development",
 		"build:staging": "vite build --mode staging",
 		"build:dev": "vite build --mode development",
 		"build:prod": "vite build --mode production",

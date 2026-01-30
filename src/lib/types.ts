@@ -17,6 +17,7 @@ export interface DataManifest {
 export type ConjugationForms = string | string[];
 
 export interface VerbRecord {
+  id: number; // 0-indexed within lang
   name: string;      // "manger"
   nameNoDiacritics: string;      // "manger"
   lang: string;      // "fr" (the "partition" key)

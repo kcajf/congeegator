@@ -4,6 +4,7 @@ import type { VerbRecord } from './types';
 export interface MetaEntry {
   lang: string;
   hash: string;
+  searchIndex: Map<string, number[]>;
 }
 
 export class ConjugationDatabase extends Dexie {
@@ -13,7 +14,7 @@ export class ConjugationDatabase extends Dexie {
   constructor() {
     super('ConjugationDB');
     this.version(2).stores({
-      verbs: '[lang+name], lang, [lang+nameNoDiacritics]', // Compound index for fast lookup
+      verbs: '[lang+id], [lang+name]', // Compound index for fast lookup
       metadata: 'lang'
     });
   }

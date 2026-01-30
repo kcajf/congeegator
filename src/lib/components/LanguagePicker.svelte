@@ -1,25 +1,24 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { page } from '$app/state';
 	import { clickOutside } from '$lib/clickOutside';
 	import { fade, fly, slide } from 'svelte/transition';
 // Your custom action
-	import { conjLangState } from '$lib/conjLang.svelte';
 	import { langName, manifest } from '$lib/dataManager';
+	import { searchLangState } from '$lib/searchLang.svelte';
 
-	// The current language comes from the URL param
-	let currentLang = $derived(page.params.lang || conjLangState.current);
+	let currentLang = $derived(searchLangState.current);
 	let isOpen = $state(false);
 	let isMobile = $state(false);
 
 	function select(newLang: string) {
-		conjLangState.set(newLang);
-		const word = page.params.verb || '';
-		const path = word ? `/${newLang}/${word}` : `/${newLang}`;
-
-		goto(path);
+		searchLangState.set(newLang);
 		isOpen = false;
 	}
+
+// $effect(() => {
+//     // This runs on mount AND when 'language' changes
+//     console.log(`Language changed to: ${language}`);
+//     loadTranslations(language);
+//   });
 
 	// Responsive check
 	$effect(() => {
@@ -33,8 +32,8 @@
 
 <div class="picker-container" use:clickOutside={() => (isOpen = false)}>
 	<button class="trigger" onclick={() => (isOpen = !isOpen)}>
-        <span class="mobile-only">{currentLang.toUpperCase() }</span>
-        <span class="desktop-only">{langName(currentLang)}</span>
+		<span class="mobile-only">{currentLang.toUpperCase()}</span>
+		<span class="desktop-only">{langName(currentLang)}</span>
 	</button>
 
 	{#if isOpen}
@@ -71,12 +70,20 @@
 </div>
 
 <style>
-	.mobile-only { display: none; }
-	.desktop-only { display: block; }
+	.mobile-only {
+		display: none;
+	}
+	.desktop-only {
+		display: block;
+	}
 
 	@media (max-width: 768px) {
-		.mobile-only { display: block; }
-		.desktop-only { display: none; }
+		.mobile-only {
+			display: block;
+		}
+		.desktop-only {
+			display: none;
+		}
 	}
 
 	.picker-container {
@@ -84,7 +91,7 @@
 	}
 
 	.trigger {
-    padding: 0.6rem 0.6rem;
+		padding: 0.6rem 0.6rem;
 		/* padding: 8px 12px; */
 		/* font-weight: bold; */
 		font-family: inherit; /* Inherit from body or container */

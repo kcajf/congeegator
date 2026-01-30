@@ -12,6 +12,7 @@ import sys
 import tempfile
 import typing
 import unicodedata
+from collections import defaultdict
 from typing import Any, Optional
 
 import msgspec
@@ -285,7 +286,6 @@ class LanguageConfig(msgspec.Struct, frozen=True):
     tense_groups: list[TenseGroup]
 
 
-
 def full_tense(
     lang: str,
     name: str,
@@ -310,11 +310,9 @@ def full_tense(
 
     return TenseConfig(name, matchers)
 
+
 def repeated_tense(
-    lang: str,
-    name: str,
-    tags: tuple[str, ...],
-    auxiliaries: tuple[str, ...]
+    lang: str, name: str, tags: tuple[str, ...], auxiliaries: tuple[str, ...]
 ):
     assert len(auxiliaries) == len(PERSONS_NUMBERS)
     matchers = tuple(
@@ -373,10 +371,18 @@ FR_CONFIG = LanguageConfig(
         full_tense("fr", "fr_cond_pres", ("conditional",)),
         full_tense("fr", "fr_subj_pres", ("subjunctive", "present")),
         full_tense("fr", "fr_subj_imperf", ("subjunctive", "imperfect")),
-        repeated_tense("fr", "fr_indic_pres_perf", ("participle", "past"), FR_PRES_INDIC_AVOIR),
-        repeated_tense("fr", "fr_indic_pluperf", ("participle", "past"), FR_IMPERF_INDIC_AVOIR),
-        repeated_tense("fr", "fr_indic_past_ant", ("participle", "past"), FR_PAST_HIST_INDIC_AVOIR),
-        repeated_tense("fr", "fr_indic_fut_perf", ("participle", "past"), FR_FUT_INDIC_AVOIR),
+        repeated_tense(
+            "fr", "fr_indic_pres_perf", ("participle", "past"), FR_PRES_INDIC_AVOIR
+        ),
+        repeated_tense(
+            "fr", "fr_indic_pluperf", ("participle", "past"), FR_IMPERF_INDIC_AVOIR
+        ),
+        repeated_tense(
+            "fr", "fr_indic_past_ant", ("participle", "past"), FR_PAST_HIST_INDIC_AVOIR
+        ),
+        repeated_tense(
+            "fr", "fr_indic_fut_perf", ("participle", "past"), FR_FUT_INDIC_AVOIR
+        ),
     ),
     tense_groups=[
         TenseGroup("fr_impers", re.compile(r"^fr_impers_")),
@@ -477,24 +483,38 @@ def structure_map(f, s):
     return f(s)
 
 
-def clean_up_matched_forms(l: LanguageConfig, forms: list[str]) -> list[str]:
+def clean_up_matched_forms(
+    l: LanguageConfig, forms: list[str], entry: Entry
+) -> list[str]:
+    forms = [f.replace("‑", "-") for f in forms]
+
     if l.code == "el":
         new_forms = [*forms]
         for i, f in enumerate(forms):
-            if f == "‑ομε":
-                assert i > 0, forms
-                new_forms[i] = new_forms[i - 1].replace("ουμε", "ομε")
-            elif f == "‑ιόσαστε":
-                assert i > 0, forms
-                new_forms[i] = new_forms[i - 1].replace("ιέστε", "ιόσαστε")
-            elif f == "-ιόνται":
-                assert i > 0, forms
-                new_forms[i] = new_forms[i - 1].replace("ιούνται", "ιόνται")
+            suffix_replacements = [
+                ("ουμε", "ομε"),
+                ("ιέστε", "ιόσαστε"),
+                ("ιούνται", "ιόνται"),
+                ("όμαστε", "ώμεθα"),
+                ("άστε", "άσθε"),
+            ]
+            
+            if i > 0:
+                for from_, to in suffix_replacements:
+                    if f == f'-{to}':
+                        new_forms[i] = new_forms[i-1].replace(from_, to)
+
+        for f in new_forms:
+            if '-' in f and len(f) > 1:
+                # log.warning(f"dodgy-looking form in {entry.word}: {f}")
+                pass
         return new_forms
     return forms
 
 
-def extract_one(l: LanguageConfig, matcher: FormMatcher, forms: list[Form]) -> str:
+def extract_one(
+    l: LanguageConfig, matcher: FormMatcher, forms: list[Form], entry: Entry
+) -> str:
     seen = set()
     ret: list[str] = []
     for form in forms:
@@ -507,22 +527,24 @@ def extract_one(l: LanguageConfig, matcher: FormMatcher, forms: list[Form]) -> s
                 continue
             ret.append(formatted)
             seen.add(formatted)
-    ret = clean_up_matched_forms(l, ret)
+    ret = clean_up_matched_forms(l, ret, entry)
     return "/".join(ret)
 
 
-def extract_tense(l: LanguageConfig, t: TenseConfig, forms: list[Form]):
+def extract_tense(l: LanguageConfig, t: TenseConfig, forms: list[Form], entry: Entry):
     if isinstance(t.form_matchers, FormMatcher):
-        x = extract_one(l, t.form_matchers, forms)
+        x = extract_one(l, t.form_matchers, forms, entry)
     elif isinstance(t.form_matchers, tuple):
-        x = tuple(extract_one(l, fm, forms) for fm in t.form_matchers)
+        x = tuple(extract_one(l, fm, forms, entry) for fm in t.form_matchers)
     else:
         typing.assert_never(t.form_matchers)
     return x
 
 
-def extract_conjugations_from_forms(config: LanguageConfig, forms: list[Form]):
-    return {t.name: extract_tense(config, t, forms) for t in config.tenses}
+def extract_conjugations_from_forms(
+    config: LanguageConfig, forms: list[Form], entry: Entry
+):
+    return {t.name: extract_tense(config, t, forms, entry) for t in config.tenses}
 
 
 def form_is_clean_conjugation(form: Form) -> bool:
@@ -545,7 +567,7 @@ def form_is_clean_conjugation(form: Form) -> bool:
     if "'" in form.form:  # French "t'es"
         return False
 
-    if " " in form.form:  # French "me suis"
+    if " " in form.form and ' - ' not in form.form:  # French "me suis"
         return False
 
     for c in IPA_ALL:
@@ -569,7 +591,7 @@ def count_conjs(thing) -> int:
     return n
 
 
-def write_language_data(data: list[dict[str, Any]], lang_dir: str):
+def write_language_data(data: dict[str, Any], lang_dir: str):
     os.makedirs(lang_dir, exist_ok=True)
 
     # INDENT=None
@@ -584,7 +606,7 @@ def write_language_data(data: list[dict[str, Any]], lang_dir: str):
     # single verbs file
     single_verbs_dir = os.path.join(lang_dir, "verbs")
     os.makedirs(single_verbs_dir)
-    for verb_data in data:
+    for verb_data in data["verbs"]:
         with open(
             os.path.join(single_verbs_dir, f"{verb_data['name']}.json"), "w"
         ) as f:
@@ -592,7 +614,7 @@ def write_language_data(data: list[dict[str, Any]], lang_dir: str):
 
     # index file
     with open(os.path.join(lang_dir, "index.json"), "w") as f:
-        names = [x["name"] for x in data]
+        names = [x["name"] for x in data["verbs"]]
         json.dump(names, f, indent=INDENT, ensure_ascii=False)
 
 
@@ -715,12 +737,66 @@ def fr_is_aspirated(entry: Entry) -> bool:
     return False
 
 
-def generate_data_for_lang(wiki_lang: str, lang: LanguageConfig):
+def build_search_index(verbs: list[dict[str, Any]]) -> dict[str, list[int]]:
+    log.info("generating search index")
+    searchable_words = defaultdict[str, set[int]](lambda: set())
+
+    def add_to_index(s: str, idx: int):
+        if s == "" or s == "-":
+            return
+        for ss in s.split("/"):
+            if ' ' in ss:
+                ss = ss.split(' ')[-1]
+            searchable_words[ss].add(idx)
+            searchable_words[strip_diacritics(ss)].add(idx)
+
+    # TODO: strip diacritics?
+    # TODO split variants
+    for i, v in enumerate(verbs):
+        searchable_words[v["name"]].add(i)
+        for c in v["conjugation"]:
+            if isinstance(c, str):
+                add_to_index(c, i)
+            else:
+                for cc in c:
+                    # TODO; drop auxiliary? or split on word boundaries
+                    add_to_index(cc, i)
+
+    index = defaultdict[str, set[int]](lambda: set())
+
+    MIN_PREFIX = 2
+    MAX_PREFIX = 4
+
+    for word, indices in searchable_words.items():
+        for prefix_len in range(MIN_PREFIX, MAX_PREFIX + 1):
+            word_prefix = word[:prefix_len]
+            for i in indices:
+                index[word_prefix].add(i)
+
+    ret = {k: sorted(v) for k, v in index.items()}
+
+    max_hits = 0
+    max_key = None
+    for k, v in ret.items():
+        if len(v) > max_hits:
+            max_hits = len(v)
+            max_key = k
+
+    log.info(f"Longest index entry: '{max_key}', {max_hits} hits")
+
+    # pprint(ret.get('de'))
+    # pprint(ret.get('dé'))
+    for k, v in ret.items():
+        print(k, len(v))
+    return ret
+
+
+def generate_data_for_lang(wiki_lang: str, lang: LanguageConfig, dev: bool):
     log.info(f"generating {lang.code} data")
     cache = CacheManager()
     data = cache.get_lang_filtered_raw_data(wiki_lang, lang.code)
 
-    ret: list[dict[str, Any]] = []
+    verbs: list[dict[str, Any]] = []
 
     seen_verbs: set[str] = set()
 
@@ -758,7 +834,7 @@ def generate_data_for_lang(wiki_lang: str, lang: LanguageConfig):
             # "χιονίζω",
             # "χιονίζει",
             # "στενοχωρώ",
-            "habiter",
+            # "habiter",
             # "haïr",
         ]
         if entry.word in WORDS:
@@ -776,11 +852,11 @@ def generate_data_for_lang(wiki_lang: str, lang: LanguageConfig):
 
         filtered_forms = [f for f in entry.forms if form_is_clean_conjugation(f)]
         try:
-            conj = extract_conjugations_from_forms(lang, filtered_forms)
+            conj = extract_conjugations_from_forms(lang, filtered_forms, entry)
         except Exception as e:
-            log.warning(f"Failed to process {entry.lang_code} {entry.word}: {e}")
+            log.error(f"Failed to process {entry.lang_code} {entry.word}", exc_info=e)
+            # pprint(entry)
             continue
-            # raise ValueError(f"Failed to process {entry.word}") from e
 
         processed_entry: dict[str, Any] = dict(
             name=entry.word,
@@ -791,34 +867,43 @@ def generate_data_for_lang(wiki_lang: str, lang: LanguageConfig):
         if fr_is_aspirated(entry):
             processed_entry["frIsAspirated"] = True
 
-        ret.append(processed_entry)
+        verbs.append(processed_entry)
         seen_verbs.add(entry.word)
 
-        # if len(seen_verbs) > 10:
-        #     break
+        if dev and len(seen_verbs) > 20:
+            break
 
-    log.info(f"{lang.code} has {len(ret)} entries")
-    ret = sorted(ret, key=lambda x: x["nameNoDiacritics"])
-    verbs = {x["name"] for x in ret}
-    if len(verbs) != len(ret):
+    log.info(f"{lang.code} has {len(verbs)} entries")
+    verbs = sorted(verbs, key=lambda x: x["nameNoDiacritics"])
+
+    unique_verbs = {x["name"] for x in verbs}
+    if len(unique_verbs) != len(verbs):
         raise ValueError("duplicates")
-    return ret
+
+    search_index = build_search_index(verbs)
+
+    return {
+        "verbs": verbs,
+        "searchIndex": search_index,
+    }
 
 
-def generate_data():
-    ret: dict[str, list[dict[str, Any]]] = {}
+def generate_data(dev: bool):
+    ret: dict[str, dict[str, Any]] = {}
 
     for config in CONFIG:
         wiki_lang = "en"
-        ret[config.code] = generate_data_for_lang(wiki_lang, config)
+        ret[config.code] = generate_data_for_lang(wiki_lang, config, dev=dev)
 
     return ret
 
 
 def main():
-    # parser = argparse.ArgumentParser()
-    # args = parser.parse_args()
-    data = generate_data()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--dev", action="store_true")
+    args = parser.parse_args()
+
+    data = generate_data(dev=args.dev)
 
     DATA_VERSION = "1"
 

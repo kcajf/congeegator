@@ -2,6 +2,7 @@ import { browser } from '$app/environment';
 import { PUBLIC_R2_URL } from '$env/static/public';
 import manifestRaw from '$lib/data-manifest.json';
 import { error } from '@sveltejs/kit';
+import Dexie from 'dexie';
 import { db } from "./db";
 import type { DataManifest, VerbRecord } from "./types";
 
@@ -9,7 +10,7 @@ export const manifest = manifestRaw as DataManifest;
 
 const DATA_VERSION = 1;
 
-function getLangDataRoot(langCode: string) {
+export function getLangDataUrl(langCode: string) {
     return `${PUBLIC_R2_URL}/data/v${DATA_VERSION}/${langCode}-${manifest.languages[langCode].dataHash}`
 }
 
@@ -17,44 +18,51 @@ export function langName(langCode: string) {
     return manifest.languages[langCode].name;
 }
 
-export async function syncLanguage(lang: string) {
-    console.log(`starting to syncLanguage ${lang}`)
-    if (!navigator.onLine) {
-        console.log(`we are offline, can't sync`);
+let worker_: Worker | undefined;
+
+export const getWorker = (): Worker | undefined => {
+    if (!browser) {
         return;
     }
 
-    try {
-        const remote = manifest.languages[lang];
-        if (!remote) return 'not-supported';
+    if (worker_) return worker_;
 
-        const local = await db.metadata.get(lang);
+    // The 'new URL' syntax is recognized by Vite to bundle the worker file separately
+    worker_ = new Worker(new URL('./sync.worker.ts', import.meta.url), {
+        type: 'module'
+    });
 
-        if (!local || local.hash !== remote.dataHash) {
-            const url = `${getLangDataRoot(lang)}/data.json`;
-            // console.log(`Fetching ${url}`)
-            const raw = await fetch(url).then(r => r.json());
-            const records: VerbRecord[] = raw.map((item: any) => ({
-                ...item,
-                lang: lang
-            }));
+    worker_.onmessage = (e) => {
+        // Handle messages...
+        const { type, lang, percent, error } = e.data;
 
-            await db.transaction('rw', [db.verbs, db.metadata], async () => {
-                await db.verbs.where({ lang: lang }).delete();
-                await db.verbs.bulkPut(records);
-                await db.metadata.put({ lang: lang, hash: remote.dataHash });
-            });
-
-            console.log(`Inserted ${raw.length} ${lang} verbs. sync finished`)
-        } else {
-            console.log(`${lang} data is already up-to-date (hash: ${local.hash})`)
+        if (type === 'PROGRESS') {
+            console.log(`${lang} loading: ${percent}%`)
         }
 
-        return 'updated';
-    } catch (e) {
-        console.error('Background sync failed', e);
-        return 'error';
+        if (type === 'COMPLETE') {
+            console.log(`${lang} loading: complete`)
+        }
+
+        if (type === 'ERROR') {
+            console.log(`${lang} loading: error ${error}`)
+        }
+    };
+    
+    return worker_;
+}
+
+// initialise it early
+getWorker();
+
+export function triggerLangSync(lang: string) {
+    const worker = getWorker();
+    if (!worker) {
+        console.warn('Worker not initialized. Are you on the server?');
+        return;
     }
+    console.log("Trigger language sync " + lang);
+    worker.postMessage({ lang });
 }
 
 export async function loadSingleVerb(lang: string, verb: string, fetcher: typeof fetch): Promise<VerbRecord> {
@@ -73,7 +81,7 @@ export async function loadSingleVerb(lang: string, verb: string, fetcher: typeof
 
     // 2. Fetch from Network (SSR or Cache Miss)
     // This works on both Server (Cloudflare Worker) and Browser
-    const url = `${getLangDataRoot(lang)}/verbs/${verb.toLowerCase()}.json`;
+    const url = `${getLangDataUrl(lang)}/verbs/${verb.toLowerCase()}.json`;
     // console.log(`Fetching ${url}`)
     const response = await fetcher(url);
 
@@ -96,21 +104,25 @@ export async function loadVerbIndex(lang: string, fetcher: typeof fetch): Promis
     }
 
     if (browser) {
-        const localVerbs = await db.verbs
-            .where('[lang+nameNoDiacritics]')
-            .between([lang, ''], [lang, '\uffff'])
-            .primaryKeys(); // Just get the [lang+name] keys to be fast
-        if (localVerbs.length > 0) {
+        const names: string[] = [];
+        await db.verbs
+            .where('[lang+id]')
+            .between([lang, Dexie.minKey], [lang, Dexie.maxKey])
+            .limit(25)
+            .each(verb => {
+                names.push(verb.name);
+            });
+
+        if (names.length > 0) {
             console.log('Serving from IndexedDB');
-            // Extract just the 'name' part from the compound key
-            return localVerbs.map(key => (key as string[])[1]);
+            return names;
         }
     }
 
     // 2. SSR OR CACHE MISS: Fetch from R2 Public URL
     // This runs on the Cloudflare Worker during the initial page load
     // but runs in the browser if IndexedDB was empty.
-    const url = `${getLangDataRoot(lang)}/index.json`;
+    const url = `${getLangDataUrl(lang)}/index.json`;
     // console.log(`Fetching ${url}`)
     const res = await fetcher(url);
 

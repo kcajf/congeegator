@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import wiktionaryLogo from '$lib/assets/wiktionary_favicon_en.svg';
-	import { langName, manifest, syncLanguage } from '$lib/dataManager';
+	import { langName, manifest, triggerLangSync } from '$lib/dataManager';
 	import { appTitle } from '$lib/defs';
 	import { i18n } from '$lib/i18n.svelte';
 	import { formatPronoun } from '$lib/langTools';
@@ -17,7 +17,7 @@
 	// Whenever the language changes, check if we need the full bundle
 	$effect(() => {
 		if (browser && data.verb?.lang) {
-			syncLanguage(data.verb.lang);
+			triggerLangSync(data.verb.lang);
 		}
 	});
 
@@ -50,17 +50,17 @@
 		</a>
 	</div>
 
-	{#each tenseGroups as tenseGroup}
+	{#each tenseGroups as tenseGroup (tenseGroup.name)}
 		<h2>{getTenseDisplayName(tenseGroup.name)}</h2>
 		<div class="tenseGroup">
-			{#each tenseGroup.tenseIndices as tenseI}
+			{#each tenseGroup.tenseIndices as tenseI (tenseI)}
 				{@const tenseForms = data.verb.conjugation[tenseI]}
 				<div class="tense">
 					<h3>{getTenseDisplayName(tenseNames[tenseI])}</h3>
 					{#if Array.isArray(tenseForms)}
 						<table class="tenseTable">
 							<tbody>
-								{#each tenseForms as form, formI}
+								{#each tenseForms as form, formI (formI)}
 									<tr>
 										<td
 											>{formatPronoun(

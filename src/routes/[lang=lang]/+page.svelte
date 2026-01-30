@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { langName, syncLanguage } from '$lib/dataManager';
+	import { langName, triggerLangSync } from '$lib/dataManager';
 	import { appTitle } from '$lib/defs';
 	import type { PageProps } from './$types';
 
@@ -9,7 +9,8 @@
 	// Whenever the language changes, check if we need the full bundle
 	$effect(() => {
 		if (browser && data.lang) {
-			syncLanguage(data.lang);
+			// searchLangState.set(data.lang);
+			triggerLangSync(data.lang);
 		}
 	});
 </script>
