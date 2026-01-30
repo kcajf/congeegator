@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { PUBLIC_R2_URL } from '$env/static/public';
+
 	import appleIcon180 from '$lib/assets/apple-touch-icon-180x180.png';
 	import congeegatorSVG from '$lib/assets/congeegator.svg';
 	import favicon from '$lib/assets/favicon.ico';
@@ -13,6 +13,8 @@
 	import { onMount, tick } from 'svelte';
 	import { pwaInfo } from 'virtual:pwa-info';
 	import type { LayoutProps } from './$types';
+
+	const PUBLIC_R2_URL = import.meta.env.VITE_R2_URL;
 
 	let { data, children }: LayoutProps = $props();
 

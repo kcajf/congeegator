@@ -1,6 +1,7 @@
-import { loadVerbIndex, manifest } from "$lib/dataUtils";
+import { manifest } from "$lib/dataUtils";
 import { error } from "@sveltejs/kit";
 import type { PageLoad } from "./$types";
+import { loadVerbIndex } from "$lib/dataLoading";
 
 export const prerender = true;
 

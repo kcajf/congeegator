@@ -60,6 +60,6 @@ export default defineConfig({
 		})
 	],
 	worker: {
-		plugins: () => [sveltekit()]
+		plugins: () => []
 	}
 });
