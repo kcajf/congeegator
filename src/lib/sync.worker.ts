@@ -1,4 +1,4 @@
-import { getLangDataUrl, manifest } from './dataManager';
+import { getLangDataUrl, manifest } from './dataUtils';
 import { db } from './db';
 import type { VerbRecord } from './types';
 
@@ -46,11 +46,10 @@ self.onmessage = async (e: MessageEvent<{ lang: string }>) => {
                 });
 
                 console.log(`Inserted ${records.length} ${lang} verbs. sync finished`)
-
-                self.postMessage({ type: 'COMPLETE', lang });
             } else {
                 console.log(`${lang} data is already up-to-date (hash: ${local.hash})`)
             }
+            self.postMessage({ type: 'COMPLETE', lang });
         } catch (error) {
             self.postMessage({ type: 'ERROR', lang, error: error.message });
         }

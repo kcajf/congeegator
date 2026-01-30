@@ -1,4 +1,4 @@
-import { loadVerbIndex, manifest } from "$lib/dataManager";
+import { loadVerbIndex, manifest } from "$lib/dataUtils";
 import { error } from "@sveltejs/kit";
 import type { PageLoad } from "./$types";
 

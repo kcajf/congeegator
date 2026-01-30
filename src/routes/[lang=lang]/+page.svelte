@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { langName, triggerLangSync } from '$lib/dataManager';
+	import { triggerLangSync } from '$lib/syncManager.svelte';
 	import { appTitle } from '$lib/defs';
 	import type { PageProps } from './$types';
+	import { langName } from '$lib/dataUtils';
 
 	let { data }: PageProps = $props();
 

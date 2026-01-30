@@ -1,4 +1,4 @@
-import { loadSingleVerb } from '$lib/dataManager';
+import { loadSingleVerb } from '$lib/dataUtils';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ params, fetch }) => {

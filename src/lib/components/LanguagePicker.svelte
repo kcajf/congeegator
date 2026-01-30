@@ -2,10 +2,10 @@
 	import { clickOutside } from '$lib/clickOutside';
 	import { fade, fly, slide } from 'svelte/transition';
 // Your custom action
-	import { langName, manifest } from '$lib/dataManager';
+	import { langName, manifest } from '$lib/dataUtils';
 	import { searchLangState } from '$lib/searchLang.svelte';
 
-	let currentLang = $derived(searchLangState.current);
+	let currentLang = $derived(searchLangState.lang);
 	let isOpen = $state(false);
 	let isMobile = $state(false);
 
@@ -13,12 +13,6 @@
 		searchLangState.set(newLang);
 		isOpen = false;
 	}
-
-// $effect(() => {
-//     // This runs on mount AND when 'language' changes
-//     console.log(`Language changed to: ${language}`);
-//     loadTranslations(language);
-//   });
 
 	// Responsive check
 	$effect(() => {

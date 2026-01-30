@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { manifest } from '$lib/dataManager';
+	import { manifest } from '$lib/dataUtils';
 	import { appTitle } from '$lib/defs';
 </script>
 

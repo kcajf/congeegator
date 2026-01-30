@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import wiktionaryLogo from '$lib/assets/wiktionary_favicon_en.svg';
-	import { langName, manifest, triggerLangSync } from '$lib/dataManager';
+	import { langName, manifest} from '$lib/dataUtils';
 	import { appTitle } from '$lib/defs';
 	import { i18n } from '$lib/i18n.svelte';
 	import { formatPronoun } from '$lib/langTools';
+	import { triggerLangSync } from '$lib/syncManager.svelte';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();

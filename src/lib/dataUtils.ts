@@ -18,53 +18,6 @@ export function langName(langCode: string) {
     return manifest.languages[langCode].name;
 }
 
-let worker_: Worker | undefined;
-
-export const getWorker = (): Worker | undefined => {
-    if (!browser) {
-        return;
-    }
-
-    if (worker_) return worker_;
-
-    // The 'new URL' syntax is recognized by Vite to bundle the worker file separately
-    worker_ = new Worker(new URL('./sync.worker.ts', import.meta.url), {
-        type: 'module'
-    });
-
-    worker_.onmessage = (e) => {
-        // Handle messages...
-        const { type, lang, percent, error } = e.data;
-
-        if (type === 'PROGRESS') {
-            console.log(`${lang} loading: ${percent}%`)
-        }
-
-        if (type === 'COMPLETE') {
-            console.log(`${lang} loading: complete`)
-        }
-
-        if (type === 'ERROR') {
-            console.log(`${lang} loading: error ${error}`)
-        }
-    };
-    
-    return worker_;
-}
-
-// initialise it early
-getWorker();
-
-export function triggerLangSync(lang: string) {
-    const worker = getWorker();
-    if (!worker) {
-        console.warn('Worker not initialized. Are you on the server?');
-        return;
-    }
-    console.log("Trigger language sync " + lang);
-    worker.postMessage({ lang });
-}
-
 export async function loadSingleVerb(lang: string, verb: string, fetcher: typeof fetch): Promise<VerbRecord> {
     if (!(lang in manifest.languages)) {
         error(404, { message: `Language ${lang} not supported` });

@@ -1,11 +1,5 @@
 import { Dexie, type Table } from "dexie";
-import type { VerbRecord } from './types';
-
-export interface MetaEntry {
-  lang: string;
-  hash: string;
-  searchIndex: Map<string, number[]>;
-}
+import type { MetaEntry, VerbRecord } from './types';
 
 export class ConjugationDatabase extends Dexie {
   verbs!: Table<VerbRecord>;
