@@ -83,7 +83,7 @@
 		</div>
 	{/each}
 {:else}
-	<h1>Verb not found</h1>
+	<h1>{i18n.t('verb_not_found')}</h1>
 {/if}
 
 <style>

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { useRegisterSW } from 'virtual:pwa-register/svelte';
+	import { i18n } from '$lib/i18n.svelte';
 	const { needRefresh, updateServiceWorker, offlineReady } = useRegisterSW({
 		onRegistered(r) {
 			// uncomment following code if you want check for updates
@@ -24,15 +25,23 @@
 	<div class="pwa-toast" role="alert">
 		<div class="message">
 			{#if $offlineReady}
-				<span> App ready to work offline </span>
+				<span>
+					{i18n.t('pwa_offline_ready')}
+				</span>
 			{:else}
-				<span> New content available, click on reload button to update. </span>
+				<span>
+					{i18n.t('pwa_update_available')}
+				</span>
 			{/if}
 		</div>
 		{#if $needRefresh}
-			<button on:click={() => updateServiceWorker(true)}> Reload </button>
+			<button on:click={() => updateServiceWorker(true)}>
+				{i18n.t('reload')}
+			</button>
 		{/if}
-		<button on:click={close}> Close </button>
+		<button on:click={close}>
+			{i18n.t('close')}
+		</button>
 	</div>
 {/if}
 

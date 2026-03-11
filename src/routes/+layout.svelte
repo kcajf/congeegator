@@ -181,7 +181,7 @@
 				onfocus={() => searchInput?.select()}
 				type="text"
 				id="searchInput"
-				placeholder="search..."
+				placeholder={i18n.t('search_placeholder')}
 			/>
 
 			{#if searchResults.length > 0}
@@ -208,7 +208,7 @@
 					{/each}
 				</ul>
 			{:else if searchTerm}
-				<div class="no-results">No matches found</div>
+				<div class="no-results">{i18n.t('no_matches')}</div>
 			{/if}
 		</div>
 
