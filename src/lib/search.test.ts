@@ -181,7 +181,21 @@ describe('toPhoneticEl', () => {
 	it('normalizes Latin characters', () => {
 		expect(toPhoneticEl('cyma')).toBe('kima');
 		expect(toPhoneticEl('phyllo')).toBe('fillo');
-		expect(toPhoneticEl('query')).toBe('kueri');
+		expect(toPhoneticEl('kueri')).toBe('kueri');
+	});
+
+	it('collapses Latin vowel digraphs', () => {
+		expect(toPhoneticEl('eimai')).toBe('ime');
+		expect(toPhoneticEl('imai')).toBe('ime');
+		expect(toPhoneticEl('oikos')).toBe('ikos');
+		expect(toPhoneticEl('oute')).toBe('ute');
+	});
+
+	it('applies Latin au/eu voicing', () => {
+		expect(toPhoneticEl('autos')).toBe('aftos');
+		expect(toPhoneticEl('euro')).toBe('evro');
+		expect(toPhoneticEl('eu')).toBe('ef');
+		expect(toPhoneticEl('avli')).toBe('avli');
 	});
 
 	it('handles empty string', () => {

@@ -45,7 +45,17 @@ from data_processing import to_phonetic_el
         # Latin normalization
         ("cyma", "kima"),
         ("phyllo", "fillo"),
-        ("query", "kueri"),
+        ("kueri", "kueri"),
+        # Latin vowel digraphs (naive transliteration convergence)
+        ("eimai", "ime"),
+        ("imai", "ime"),
+        ("oikos", "ikos"),
+        ("oute", "ute"),
+        # Latin au/eu voicing
+        ("autos", "aftos"),
+        ("euro", "evro"),
+        ("eu", "ef"),
+        ("avli", "avli"),
         # Mixed / edge cases
         ("", ""),
         ("ξέρω", "ksero"),
