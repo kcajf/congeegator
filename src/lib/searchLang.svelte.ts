@@ -24,6 +24,7 @@ class SearchLangState {
 	onChanged() {
 		if (browser) {
 			localStorage.setItem('searchLang', this.lang);
+			this.reloadIndex();
 			triggerLangSync(this.lang);
 		}
 	}
