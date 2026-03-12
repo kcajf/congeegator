@@ -12,7 +12,10 @@
 		"strict": true,
 		"moduleResolution": "bundler",
 		"types": [
-			"vite-plugin-pwa/pwa-assets"
+			"vite-plugin-pwa/pwa-assets",
+			"vite-plugin-pwa/info",
+			"vite-plugin-pwa/svelte",
+			"vite-plugin-pwa/client"
 		]
 	}
 	// Path aliases are handled by https://svelte.dev/docs/kit/configuration#alias

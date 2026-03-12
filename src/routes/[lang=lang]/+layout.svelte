@@ -1,5 +1,4 @@
 <script lang="ts">
-
 	let { children } = $props();
 
 	let langPickerIsOpen = $state(false);

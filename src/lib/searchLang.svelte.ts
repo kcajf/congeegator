@@ -3,7 +3,7 @@ import { db } from './db';
 import { triggerLangSync } from './syncManager.svelte';
 import type { SearchIndex } from './types';
 
-export const defaultConjLang = "fr";
+export const defaultConjLang = 'fr';
 
 class SearchLangState {
 	lang = $state(browser ? localStorage.getItem('searchLang') || defaultConjLang : defaultConjLang);
@@ -32,7 +32,7 @@ class SearchLangState {
 		this.indexData = undefined;
 
 		const lang = this.lang;
-		db.metadata.get(lang).then(data => {
+		db.metadata.get(lang).then((data) => {
 			if (this.lang === lang) {
 				// this.indexData = data?.searchIndex;
 				if (data?.searchIndex) {

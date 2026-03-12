@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import wiktionaryLogo from '$lib/assets/wiktionary_favicon_en.svg';
-	import { langName, manifest} from '$lib/dataUtils';
+	import { langName, manifest } from '$lib/dataUtils';
 	import { appTitle } from '$lib/defs';
 	import { i18n } from '$lib/i18n.svelte';
 	import { formatPronoun } from '$lib/langTools';
@@ -87,10 +87,9 @@
 {/if}
 
 <style>
-
-.tenseTable {
-	border-collapse: collapse;
-}
+	.tenseTable {
+		border-collapse: collapse;
+	}
 	.tenseTable td:nth-child(1) {
 		text-align: right;
 		white-space: pre;
@@ -104,19 +103,11 @@
 		margin-right: 0;
 	}
 
-	.tenseTable tr {
-		/* display: flex; */
-	}
-
 	.tenseGroup {
 		display: flex;
 		flex-wrap: wrap;
 		gap: 2rem;
 	}
-	.tense {
-		/* margin: 0 1em; */
-	}
-
 	.wiktionaryLink {
 		display: inline-flex;
 		align-items: center; /* This handles the vertical centering */

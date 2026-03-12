@@ -5,7 +5,7 @@ import fr from './messages/fr.json';
 
 // Create a type based on the keys in your English file
 type MessageKey = keyof typeof en;
-type Dictionary = Record<string, typeof en>;
+type Dictionary = Record<string, Record<string, string>>;
 
 export const i18nDictionary: Dictionary = { en, fr, el };
 type LangCode = keyof typeof i18nDictionary;
@@ -31,7 +31,7 @@ class I18n {
 
 	// A derived translation function
 	// It automatically tracks 'this.current'
-	translate(key: MessageKey, vars: Record<string, string | number> = {}) {
+	translate(key: string, vars: Record<string, string | number> = {}) {
 		let text = i18nDictionary[this.current][key] || key;
 
 		for (const [k, v] of Object.entries(vars)) {
@@ -42,11 +42,11 @@ class I18n {
 	}
 
 	get t() {
-		return (key: MessageKey, vars: Record<string, string | number> = {}) => {
+		return (key: string, vars: Record<string, string | number> = {}) => {
 			return this.translate(key, vars);
 		};
 	}
-	
+
 	setLocale(lang: LangCode) {
 		this.current = lang;
 		if (browser) {
@@ -55,7 +55,6 @@ class I18n {
 			// document.cookie = `lang=${lang}; path=/; max-age=31536000`;
 		}
 	}
-
 }
 
 export const i18n = new I18n();

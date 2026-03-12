@@ -21,7 +21,7 @@
 	// No onMount needed.
 	// This runs immediately during initialization.
 	// svelte-ignore state_referenced_locally
-	i18n.init(data.interfaceLang || 'en');
+	i18n.init((data as any).interfaceLang || 'en');
 
 	const webManifestLink = $derived(pwaInfo?.webManifest?.linkTag ?? '');
 
@@ -30,7 +30,7 @@
 			const { registerSW } = await import('virtual:pwa-register');
 			registerSW({
 				immediate: true,
-				onRegistered(r) {
+				onRegistered(r: any) {
 					// uncomment following code if you want check for updates
 					// r && setInterval(() => {
 					//    console.log('Checking for sw update')
@@ -38,7 +38,7 @@
 					// }, 20000 /* 20s for testing purposes */)
 					console.log(`SW Registered: ${r}`);
 				},
-				onRegisterError(error) {
+				onRegisterError(error: any) {
 					console.log('SW registration error', error);
 				}
 			});
