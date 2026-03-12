@@ -44,7 +44,7 @@ jobs:
 
       # Upload data to R2 (needs rclone creds)
       - name: Upload data to R2
-        run: npm run r2-upload:prod
+        run: rclone sync r2_data r2-congeegator:congeegator --transfers=64 --checkers=64 --delete-during --fast-list --stats-one-line -v
 
       # Build and deploy
       - name: Build
