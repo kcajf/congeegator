@@ -1,19 +1,96 @@
 {
-	"name": "aller",
-	"nameNoDiacritics": "aller",
-	"conjugation": [
-		"allant",
-		"allé",
-		["vais", "vas", "va", "allons", "allez", "vont"],
-		["allais", "allais", "allait", "allions", "alliez", "allaient"],
-		["allai", "allas", "alla", "allâmes", "allâtes", "allèrent"],
-		["irai", "iras", "ira", "irons", "irez", "iront"],
-		["irais", "irais", "irait", "irions", "iriez", "iraient"],
-		["aille", "ailles", "aille", "allions", "alliez", "aillent"],
-		["allasse", "allasses", "allât", "allassions", "allassiez", "allassent"],
-		["ai allé", "as allé", "a allé", "avons allé", "avez allé", "ont allé"],
-		["avais allé", "avais allé", "avait allé", "avions allé", "aviez allé", "avaient allé"],
-		["eus allé", "eus allé", "eut allé", "eûmes allé", "eûtes allé", "eurent allé"],
-		["aurai allé", "auras allé", "aura allé", "aurons allé", "aurez allé", "auront allé"]
-	]
+  "name": "aller",
+  "nameNoDiacritics": "aller",
+  "conjugation": [
+    "allant",
+    "allé",
+    [
+      "vais",
+      "vas",
+      "va",
+      "allons",
+      "allez",
+      "vont"
+    ],
+    [
+      "allais",
+      "allais",
+      "allait",
+      "allions",
+      "alliez",
+      "allaient"
+    ],
+    [
+      "allai",
+      "allas",
+      "alla",
+      "allâmes",
+      "allâtes",
+      "allèrent"
+    ],
+    [
+      "irai",
+      "iras",
+      "ira",
+      "irons",
+      "irez",
+      "iront"
+    ],
+    [
+      "irais",
+      "irais",
+      "irait",
+      "irions",
+      "iriez",
+      "iraient"
+    ],
+    [
+      "aille",
+      "ailles",
+      "aille",
+      "allions",
+      "alliez",
+      "aillent"
+    ],
+    [
+      "allasse",
+      "allasses",
+      "allât",
+      "allassions",
+      "allassiez",
+      "allassent"
+    ],
+    [
+      "ai allé",
+      "as allé",
+      "a allé",
+      "avons allé",
+      "avez allé",
+      "ont allé"
+    ],
+    [
+      "avais allé",
+      "avais allé",
+      "avait allé",
+      "avions allé",
+      "aviez allé",
+      "avaient allé"
+    ],
+    [
+      "eus allé",
+      "eus allé",
+      "eut allé",
+      "eûmes allé",
+      "eûtes allé",
+      "eurent allé"
+    ],
+    [
+      "aurai allé",
+      "auras allé",
+      "aura allé",
+      "aurons allé",
+      "aurez allé",
+      "auront allé"
+    ]
+  ]
 }

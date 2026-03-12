@@ -370,10 +370,13 @@ def repeated_tense(
     return TenseConfig(name, matchers)
 
 
+EL_THA = ("θα ", "θα ", "θα ", "θα ", "θα ", "θα ")
+
 EL_CONFIG = LanguageConfig(
     code="el",
     name="Greek",
     tenses=(
+        # Indicative
         full_tense(
             "el",
             "el_indic_pres_active",
@@ -384,14 +387,102 @@ EL_CONFIG = LanguageConfig(
             "el_indic_pres_passive",
             ("present", "indicative", "imperfective", "passive"),
         ),
-        TenseConfig(
-            "el_pres_parti_active",
-            FormMatcher(("active", "present", "participle")),
+        full_tense(
+            "el",
+            "el_indic_imperf_active",
+            ("imperfect", "indicative", "imperfective", "active"),
         ),
+        full_tense(
+            "el",
+            "el_indic_imperf_passive",
+            ("imperfect", "indicative", "imperfective", "passive"),
+        ),
+        full_tense(
+            "el",
+            "el_indic_aorist_active",
+            ("past", "indicative", "perfective", "active"),
+        ),
+        full_tense(
+            "el",
+            "el_indic_aorist_passive",
+            ("past", "indicative", "perfective", "passive"),
+        ),
+        full_tense(
+            "el",
+            "el_indic_fut_cont_active",
+            ("present", "indicative", "imperfective", "active"),
+            auxiliaries=EL_THA,
+        ),
+        full_tense(
+            "el",
+            "el_indic_fut_cont_passive",
+            ("present", "indicative", "imperfective", "passive"),
+            auxiliaries=EL_THA,
+        ),
+        full_tense(
+            "el",
+            "el_indic_fut_simple_active",
+            ("subjunctive", "perfective", "active"),
+            auxiliaries=EL_THA,
+        ),
+        full_tense(
+            "el",
+            "el_indic_fut_simple_passive",
+            ("subjunctive", "perfective", "passive"),
+            auxiliaries=EL_THA,
+        ),
+        # Subjunctive
+        full_tense(
+            "el",
+            "el_subj_perf_active",
+            ("subjunctive", "perfective", "active"),
+        ),
+        full_tense(
+            "el",
+            "el_subj_perf_passive",
+            ("subjunctive", "perfective", "passive"),
+        ),
+        # Imperative (2nd person only — singular + plural)
+        TenseConfig(
+            "el_imper_imperf_active",
+            (
+                FormMatcher(("second-person", "singular", "imperative", "imperfective", "active")),
+                FormMatcher(("second-person", "plural", "imperative", "imperfective", "active")),
+            ),
+        ),
+        TenseConfig(
+            "el_imper_perf_active",
+            (
+                FormMatcher(("second-person", "singular", "imperative", "perfective", "active")),
+                FormMatcher(("second-person", "plural", "imperative", "perfective", "active")),
+            ),
+        ),
+        TenseConfig(
+            "el_imper_imperf_passive",
+            (
+                FormMatcher(("second-person", "singular", "imperative", "imperfective", "passive")),
+                FormMatcher(("second-person", "plural", "imperative", "imperfective", "passive")),
+            ),
+        ),
+        TenseConfig(
+            "el_imper_perf_passive",
+            (
+                FormMatcher(("second-person", "singular", "imperative", "perfective", "passive")),
+                FormMatcher(("second-person", "plural", "imperative", "perfective", "passive")),
+            ),
+        ),
+        # Other forms (participles, infinitives)
+        TenseConfig("el_impers_pres_parti_active", FormMatcher(("active", "present", "participle"))),
+        TenseConfig("el_impers_past_parti_passive", FormMatcher(("passive", "past", "participle"))),
+        TenseConfig("el_impers_pres_parti_passive", FormMatcher(("passive", "present", "participle"))),
+        TenseConfig("el_impers_inf_aorist_active", FormMatcher(("active", "infinitive-aorist"))),
+        TenseConfig("el_impers_inf_aorist_passive", FormMatcher(("passive", "infinitive-aorist"))),
     ),
     tense_groups=[
         TenseGroup("el_indic", re.compile(r"^el_indic_")),
-        # TenseGroup("Indicative", re.compile(r"^el_indic_")),
+        TenseGroup("el_subj", re.compile(r"^el_subj_")),
+        TenseGroup("el_imper", re.compile(r"^el_imper_(?!s_)")),
+        TenseGroup("el_impers", re.compile(r"^el_impers_")),
     ],
 )
 
@@ -434,81 +525,6 @@ FR_CONFIG = LanguageConfig(
         TenseGroup("fr_cond", re.compile(r"^fr_cond_")),
     ],
 )
-
-# EL_CONFIG = {
-#     "active present": tuple(
-#         FormMatcher(tags=(*pn, "present", "indicative", "imperfective", "active"))
-#         for pn in PERSONS_NUMBERS
-#     ),
-#     "passive present": tuple(
-#         FormMatcher(tags=(*pn, "present", "indicative", "imperfective", "passive"))
-#         for pn in PERSONS_NUMBERS
-#     ),
-#     "active imperfect": tuple(
-#         FormMatcher(tags=(*pn, "imperfect", "indicative", "imperfective", "active"))
-#         for pn in PERSONS_NUMBERS
-#     ),
-#     "passive imperfect": tuple(
-#         FormMatcher(tags=(*pn, "imperfect", "indicative", "imperfective", "passive"))
-#         for pn in PERSONS_NUMBERS
-#     ),
-#     "active aorist": tuple(
-#         FormMatcher(tags=(*pn, "past", "indicative", "perfective", "active"))
-#         for pn in PERSONS_NUMBERS
-#     ),
-#     "passive aorist": tuple(
-#         FormMatcher(tags=(*pn, "past", "indicative", "perfective", "passive"))
-#         for pn in PERSONS_NUMBERS
-#     ),
-#     "active imperative": tuple(
-#         FormMatcher(tags=("second-person", n, "imperative", "imperfective", "active"))
-#         for n in NUMBERS
-#     ),
-#     "passive imperative": tuple(
-#         FormMatcher(tags=("second-person", n, "imperative", "imperfective", "passive"))
-#         for n in NUMBERS
-#     ),
-#     "active future continuous": tuple(
-#         FormMatcher(
-#             tags=("active", *pn, "present", "indicative", "imperfective"),
-#             formatter="θα {}",
-#         )
-#         for pn in PERSONS_NUMBERS
-#     ),
-#     "active present participle": FormMatcher(tags=("active", "present", "participle")),
-#     "active perfect participle": FormMatcher(tags=("active", "past", "participle")),
-#     "passive perfect participle": FormMatcher(tags=("passive", "past", "participle")),
-#     "passive present participle": FormMatcher(
-#         tags=("passive", "present", "participle")
-#     ),
-#     "active infinitive aorist": FormMatcher(tags=("active", "infinitive-aorist")),
-#     "passive infinitive aorist": FormMatcher(tags=("passive", "infinitive-aorist")),
-# }
-
-# FR_CONFIG = {
-#     "present indicative": tuple(
-#         FormMatcher(tags=("present", "indicative", *pn)) for pn in PERSONS_NUMBERS
-#     ),
-#     "imperfect indicative": tuple(
-#         FormMatcher(tags=("imperfect", "indicative", *pn)) for pn in PERSONS_NUMBERS
-#     ),
-#     "past historic indicative": tuple(
-#         FormMatcher(tags=("past", "historic", "indicative", *pn))
-#         for pn in PERSONS_NUMBERS
-#     ),
-#     "future indicative": tuple(
-#         FormMatcher(tags=("future", "indicative", *pn)) for pn in PERSONS_NUMBERS
-#     ),
-#     "conditional indicative": tuple(
-#         FormMatcher(tags=("conditional", *pn)) for pn in PERSONS_NUMBERS
-#     ),
-#     "present subjunctive": tuple(
-#         FormMatcher(tags=("present", "subjunctive", *pn)) for pn in PERSONS_NUMBERS
-#     ),
-#     "imperfect subjunctive": tuple(
-#         FormMatcher(tags=("imperfect", "subjunctive", *pn)) for pn in PERSONS_NUMBERS
-#     ),
-# }
 
 CONFIG: list[LanguageConfig] = [
     FR_CONFIG,

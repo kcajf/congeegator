@@ -8,5 +8,8 @@ pixi.lock
 .claude/
 .pytest_cache/
 
+# Test fixtures (machine-generated)
+tests/golden/
+
 # Miscellaneous
 /static/
