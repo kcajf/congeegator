@@ -1,19 +1,96 @@
 {
-	"name": "avoir",
-	"nameNoDiacritics": "avoir",
-	"conjugation": [
-		"ayant",
-		"eu",
-		["ai", "as", "a", "avons", "avez", "ont"],
-		["avais", "avais", "avait", "avions", "aviez", "avaient"],
-		["eus", "eus", "eut", "eûmes", "eûtes", "eurent"],
-		["aurai", "auras", "aura", "aurons", "aurez", "auront"],
-		["aurais", "aurais", "aurait", "aurions", "auriez", "auraient"],
-		["aie", "aies", "ait", "ayons", "ayez", "aient"],
-		["eusse", "eusses", "eût", "eussions", "eussiez", "eussent"],
-		["ai eu", "as eu", "a eu", "avons eu", "avez eu", "ont eu"],
-		["avais eu", "avais eu", "avait eu", "avions eu", "aviez eu", "avaient eu"],
-		["eus eu", "eus eu", "eut eu", "eûmes eu", "eûtes eu", "eurent eu"],
-		["aurai eu", "auras eu", "aura eu", "aurons eu", "aurez eu", "auront eu"]
-	]
+  "name": "avoir",
+  "nameNoDiacritics": "avoir",
+  "conjugation": [
+    "ayant",
+    "eu",
+    [
+      "ai",
+      "as",
+      "a",
+      "avons",
+      "avez",
+      "ont"
+    ],
+    [
+      "avais",
+      "avais",
+      "avait",
+      "avions",
+      "aviez",
+      "avaient"
+    ],
+    [
+      "eus",
+      "eus",
+      "eut",
+      "eûmes",
+      "eûtes",
+      "eurent"
+    ],
+    [
+      "aurai",
+      "auras",
+      "aura",
+      "aurons",
+      "aurez",
+      "auront"
+    ],
+    [
+      "aurais",
+      "aurais",
+      "aurait",
+      "aurions",
+      "auriez",
+      "auraient"
+    ],
+    [
+      "aie",
+      "aies",
+      "ait",
+      "ayons",
+      "ayez",
+      "aient"
+    ],
+    [
+      "eusse",
+      "eusses",
+      "eût",
+      "eussions",
+      "eussiez",
+      "eussent"
+    ],
+    [
+      "ai eu",
+      "as eu",
+      "a eu",
+      "avons eu",
+      "avez eu",
+      "ont eu"
+    ],
+    [
+      "avais eu",
+      "avais eu",
+      "avait eu",
+      "avions eu",
+      "aviez eu",
+      "avaient eu"
+    ],
+    [
+      "eus eu",
+      "eus eu",
+      "eut eu",
+      "eûmes eu",
+      "eûtes eu",
+      "eurent eu"
+    ],
+    [
+      "aurai eu",
+      "auras eu",
+      "aura eu",
+      "aurons eu",
+      "aurez eu",
+      "auront eu"
+    ]
+  ]
 }
