@@ -1,30 +1,30 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { page } from '$app/state';
 	import wiktionaryLogo from '$lib/assets/wiktionary_favicon_en.svg';
 	import { langName, manifest } from '$lib/dataUtils';
 	import { appTitle } from '$lib/defs';
 	import { i18n } from '$lib/i18n.svelte';
 	import { formatPronoun } from '$lib/langTools';
-	import { stripDiacritics } from '$lib/search';
 	import { triggerLangSync } from '$lib/syncManager.svelte';
-	import { onMount } from 'svelte';
+	import { tick } from 'svelte';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
 
-	let highlightNorm = $state('');
+	const highlightForm = $derived.by(() => {
+		const hash = page.url.hash;
+		if (!hash) return '';
+		return decodeURIComponent(hash.slice(1)).toLowerCase();
+	});
 
 	function isHighlighted(form: string): boolean {
-		return highlightNorm !== '' && stripDiacritics(form.toLowerCase()) === highlightNorm;
+		return highlightForm !== '' && form.toLowerCase() === highlightForm;
 	}
 
-	onMount(() => {
-		const hash = window.location.hash;
-		if (!hash) return;
-		const form = decodeURIComponent(hash.slice(1));
-		highlightNorm = stripDiacritics(form.toLowerCase());
-
-		requestAnimationFrame(() => {
+	$effect(() => {
+		if (!browser || !highlightForm) return;
+		tick().then(() => {
 			const el = document.querySelector('.highlight');
 			if (el) {
 				el.scrollIntoView({ behavior: 'smooth', block: 'center' });
