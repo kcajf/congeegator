@@ -19,6 +19,7 @@ A verb conjugation web app (PWA) built with SvelteKit 2 / Svelte 5, deployed to 
 ## Architecture
 
 ### Data Flow
+
 1. **`data_processing.py`** downloads raw Wiktionary JSONL data, extracts verb conjugations per language config (`FR_CONFIG`, `EL_CONFIG`), builds a search index, and writes output to `r2_data/data/v1/<lang>-<hash>/`. It also generates `src/lib/data-manifest.json` containing per-language metadata (tense names, pronouns, tense groups, content hash).
 2. **R2** hosts the processed data (individual verb JSON files, full `data.json` bundles, and `index.json` verb lists).
 3. **SvelteKit SSR** (Cloudflare Worker) fetches individual verb data from R2 for initial page loads (`src/lib/dataLoading.ts`).
@@ -26,6 +27,7 @@ A verb conjugation web app (PWA) built with SvelteKit 2 / Svelte 5, deployed to 
 5. **Search** (`src/lib/searchLang.svelte.ts`) uses a prefix-based search index stored in IndexedDB metadata, resolving matching verb IDs via bulk Dexie lookups.
 
 ### Key Files
+
 - `src/lib/types.ts` — Core types: `VerbRecord`, `DataManifest`, `SearchIndex`
 - `src/lib/db.ts` — Dexie database schema (verbs + metadata tables)
 - `src/lib/dataUtils.ts` — Manifest access, R2 URL construction
@@ -34,6 +36,7 @@ A verb conjugation web app (PWA) built with SvelteKit 2 / Svelte 5, deployed to 
 - `src/params/lang.ts` — SvelteKit param matcher validating language codes against manifest
 
 ### Routing
+
 - `/` — redirects/landing
 - `/[lang]` — verb list for a language (triggers background sync)
 - `/[lang]/[verb]` — conjugation table for a specific verb
@@ -41,9 +44,11 @@ A verb conjugation web app (PWA) built with SvelteKit 2 / Svelte 5, deployed to 
 - `/dev-r2-mock/[...file]` — dev-only proxy serving `r2_data/` files locally
 
 ### Environment
+
 - `VITE_R2_URL` — base URL for conjugation data. Set to `/dev-r2-mock` in dev (`.env`), real R2 URLs in `.env.staging` and `.env.production`.
 
 ## Conventions
+
 - Svelte 5 runes (`$state`, `$derived`, `$effect`, `$props`) throughout — no legacy `$:` reactive statements
 - `.svelte.ts` extension for files using Svelte runes outside components
 - Conjugation data is a flat array indexed by tense position (matching `tenseNames` in the manifest), not keyed by tense name
