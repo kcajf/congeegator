@@ -56,6 +56,7 @@ Source data from kaikki.org is pinned at a date-stamped path in R2 (`source-data
 ### Updating Source Data
 
 Run `pixi run update-source-data` to:
+
 1. Download/filter latest data from kaikki.org
 2. Upload filtered `.zst` files to R2
 3. Update `SOURCE_DATA_VERSION` in `data_processing.py`

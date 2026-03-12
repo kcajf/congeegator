@@ -1,96 +1,19 @@
 {
-  "name": "manger",
-  "nameNoDiacritics": "manger",
-  "conjugation": [
-    "mangeant",
-    "mangé",
-    [
-      "mange",
-      "manges",
-      "mange",
-      "mangeons",
-      "mangez",
-      "mangent"
-    ],
-    [
-      "mangeais",
-      "mangeais",
-      "mangeait",
-      "mangions",
-      "mangiez",
-      "mangeaient"
-    ],
-    [
-      "mangeai",
-      "mangeas",
-      "mangea",
-      "mangeâmes",
-      "mangeâtes",
-      "mangèrent"
-    ],
-    [
-      "mangerai",
-      "mangeras",
-      "mangera",
-      "mangerons",
-      "mangerez",
-      "mangeront"
-    ],
-    [
-      "mangerais",
-      "mangerais",
-      "mangerait",
-      "mangerions",
-      "mangeriez",
-      "mangeraient"
-    ],
-    [
-      "mange",
-      "manges",
-      "mange",
-      "mangions",
-      "mangiez",
-      "mangent"
-    ],
-    [
-      "mangeasse",
-      "mangeasses",
-      "mangeât",
-      "mangeassions",
-      "mangeassiez",
-      "mangeassent"
-    ],
-    [
-      "ai mangé",
-      "as mangé",
-      "a mangé",
-      "avons mangé",
-      "avez mangé",
-      "ont mangé"
-    ],
-    [
-      "avais mangé",
-      "avais mangé",
-      "avait mangé",
-      "avions mangé",
-      "aviez mangé",
-      "avaient mangé"
-    ],
-    [
-      "eus mangé",
-      "eus mangé",
-      "eut mangé",
-      "eûmes mangé",
-      "eûtes mangé",
-      "eurent mangé"
-    ],
-    [
-      "aurai mangé",
-      "auras mangé",
-      "aura mangé",
-      "aurons mangé",
-      "aurez mangé",
-      "auront mangé"
-    ]
-  ]
+	"name": "manger",
+	"nameNoDiacritics": "manger",
+	"conjugation": [
+		"mangeant",
+		"mangé",
+		["mange", "manges", "mange", "mangeons", "mangez", "mangent"],
+		["mangeais", "mangeais", "mangeait", "mangions", "mangiez", "mangeaient"],
+		["mangeai", "mangeas", "mangea", "mangeâmes", "mangeâtes", "mangèrent"],
+		["mangerai", "mangeras", "mangera", "mangerons", "mangerez", "mangeront"],
+		["mangerais", "mangerais", "mangerait", "mangerions", "mangeriez", "mangeraient"],
+		["mange", "manges", "mange", "mangions", "mangiez", "mangent"],
+		["mangeasse", "mangeasses", "mangeât", "mangeassions", "mangeassiez", "mangeassent"],
+		["ai mangé", "as mangé", "a mangé", "avons mangé", "avez mangé", "ont mangé"],
+		["avais mangé", "avais mangé", "avait mangé", "avions mangé", "aviez mangé", "avaient mangé"],
+		["eus mangé", "eus mangé", "eut mangé", "eûmes mangé", "eûtes mangé", "eurent mangé"],
+		["aurai mangé", "auras mangé", "aura mangé", "aurons mangé", "aurez mangé", "auront mangé"]
+	]
 }

@@ -1,96 +1,19 @@
 {
-  "name": "être",
-  "nameNoDiacritics": "etre",
-  "conjugation": [
-    "étant/ayant",
-    "été",
-    [
-      "suis",
-      "es",
-      "est",
-      "sommes",
-      "êtes",
-      "sont"
-    ],
-    [
-      "étais",
-      "étais",
-      "était",
-      "étions",
-      "étiez",
-      "étaient"
-    ],
-    [
-      "fus",
-      "fus",
-      "fut",
-      "fûmes",
-      "fûtes",
-      "furent"
-    ],
-    [
-      "serai",
-      "seras",
-      "sera",
-      "serons",
-      "serez",
-      "seront"
-    ],
-    [
-      "serais",
-      "serais",
-      "serait",
-      "serions",
-      "seriez",
-      "seraient"
-    ],
-    [
-      "sois",
-      "sois",
-      "soit",
-      "soyons",
-      "soyez",
-      "soient"
-    ],
-    [
-      "fusse",
-      "fusses",
-      "fût",
-      "fussions",
-      "fussiez",
-      "fussent"
-    ],
-    [
-      "ai été",
-      "as été",
-      "a été",
-      "avons été",
-      "avez été",
-      "ont été"
-    ],
-    [
-      "avais été",
-      "avais été",
-      "avait été",
-      "avions été",
-      "aviez été",
-      "avaient été"
-    ],
-    [
-      "eus été",
-      "eus été",
-      "eut été",
-      "eûmes été",
-      "eûtes été",
-      "eurent été"
-    ],
-    [
-      "aurai été",
-      "auras été",
-      "aura été",
-      "aurons été",
-      "aurez été",
-      "auront été"
-    ]
-  ]
+	"name": "être",
+	"nameNoDiacritics": "etre",
+	"conjugation": [
+		"étant/ayant",
+		"été",
+		["suis", "es", "est", "sommes", "êtes", "sont"],
+		["étais", "étais", "était", "étions", "étiez", "étaient"],
+		["fus", "fus", "fut", "fûmes", "fûtes", "furent"],
+		["serai", "seras", "sera", "serons", "serez", "seront"],
+		["serais", "serais", "serait", "serions", "seriez", "seraient"],
+		["sois", "sois", "soit", "soyons", "soyez", "soient"],
+		["fusse", "fusses", "fût", "fussions", "fussiez", "fussent"],
+		["ai été", "as été", "a été", "avons été", "avez été", "ont été"],
+		["avais été", "avais été", "avait été", "avions été", "aviez été", "avaient été"],
+		["eus été", "eus été", "eut été", "eûmes été", "eûtes été", "eurent été"],
+		["aurai été", "auras été", "aura été", "aurons été", "aurez été", "auront été"]
+	]
 }
