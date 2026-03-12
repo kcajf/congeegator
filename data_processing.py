@@ -227,10 +227,12 @@ def to_phonetic_el(s: str) -> str:
     s = s.replace("ph", "f")
     s = re.sub(r"c(?!h)", "k", s)
     s = s.replace("q", "k")
+    s = s.replace("x", "ch")
+    s = re.sub(r"(?<![ctk])h", "ch", s)
     s = s.replace("y", "i")
 
     # Latin au/eu voicing (mirrors Greek αυ/ευ rules for naive transliterations)
-    latin_voiceless = set("ptksfcx")
+    latin_voiceless = set("ptksfc")
     result = []
     i = 0
     while i < len(s):

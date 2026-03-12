@@ -184,6 +184,14 @@ describe('toPhoneticEl', () => {
 		expect(toPhoneticEl('kueri')).toBe('kueri');
 	});
 
+	it('treats x and h as chi', () => {
+		expect(toPhoneticEl('exo')).toBe('echo');
+		expect(toPhoneticEl('psaxno')).toBe('psachno');
+		expect(toPhoneticEl('eho')).toBe('echo');
+		expect(toPhoneticEl('eiha')).toBe('icha');
+		expect(toPhoneticEl('thelo')).toBe('thelo'); // th stays as th
+	});
+
 	it('collapses Latin vowel digraphs', () => {
 		expect(toPhoneticEl('eimai')).toBe('ime');
 		expect(toPhoneticEl('imai')).toBe('ime');

@@ -91,10 +91,12 @@ export function toPhoneticEl(s: string): string {
 	s = s.replace(/ph/g, 'f');
 	s = s.replace(/c(?!h)/g, 'k');
 	s = s.replace(/q/g, 'k');
+	s = s.replace(/x/g, 'ch');
+	s = s.replace(/(?<![ctk])h/g, 'ch');
 	s = s.replace(/y/g, 'i');
 
 	// Latin au/eu voicing (mirrors Greek αυ/ευ rules for naive transliterations)
-	const latinVoiceless = new Set('ptksfcx');
+	const latinVoiceless = new Set('ptksfc');
 	result = '';
 	i = 0;
 	while (i < s.length) {

@@ -51,6 +51,12 @@ from data_processing import to_phonetic_el
         ("imai", "ime"),
         ("oikos", "ikos"),
         ("oute", "ute"),
+        # x and h as chi
+        ("exo", "echo"),
+        ("psaxno", "psachno"),
+        ("eho", "echo"),
+        ("eiha", "icha"),
+        ("thelo", "thelo"),  # th stays as th
         # Latin au/eu voicing
         ("autos", "aftos"),
         ("euro", "evro"),
