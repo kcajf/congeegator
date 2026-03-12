@@ -45,7 +45,7 @@ from data_processing import to_phonetic_el
         # Latin normalization
         ("cyma", "kima"),
         ("phyllo", "fillo"),
-        ("kueri", "kueri"),
+        ("kueri", "kieri"),
         # Latin vowel digraphs (naive transliteration convergence)
         ("eimai", "ime"),
         ("imai", "ime"),
@@ -65,6 +65,7 @@ from data_processing import to_phonetic_el
         # Latin full words
         ("mirizei", "mirizi"),
         ("milousa", "milusa"),
+        ("upoferame", "ipoferame"),
         # Latin au/eu voicing
         ("autos", "aftos"),
         ("euro", "evro"),

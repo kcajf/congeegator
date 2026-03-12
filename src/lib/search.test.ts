@@ -181,7 +181,7 @@ describe('toPhoneticEl', () => {
 	it('normalizes Latin characters', () => {
 		expect(toPhoneticEl('cyma')).toBe('kima');
 		expect(toPhoneticEl('phyllo')).toBe('fillo');
-		expect(toPhoneticEl('kueri')).toBe('kueri');
+		expect(toPhoneticEl('kueri')).toBe('kieri');
 	});
 
 	it('converts Latin consonant bigrams', () => {
@@ -202,6 +202,7 @@ describe('toPhoneticEl', () => {
 	it('converts Latin full words', () => {
 		expect(toPhoneticEl('mirizei')).toBe('mirizi');
 		expect(toPhoneticEl('milousa')).toBe('milusa');
+		expect(toPhoneticEl('upoferame')).toBe('ipoferame');
 	});
 
 	it('collapses Latin vowel digraphs', () => {
