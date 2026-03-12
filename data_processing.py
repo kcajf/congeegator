@@ -29,21 +29,14 @@ SOURCE_DATA_VERSION = "2026-03-12"
 
 class CacheManager:
     CACHE_DIR = os.path.join(os.path.dirname(__file__), "cache")
-
-    # Public R2 URL for fetching pinned source data (no credentials needed)
     R2_PUBLIC_URL = "https://assets.congeegator.com"
 
     def __init__(self):
         self._version_cache_dir = os.path.join(CacheManager.CACHE_DIR, SOURCE_DATA_VERSION)
         os.makedirs(self._version_cache_dir, exist_ok=True)
 
-    @staticmethod
-    def _pinned_r2_url(wiki_lang: str, lang: str) -> str:
-        return f"{CacheManager.R2_PUBLIC_URL}/source-data/{SOURCE_DATA_VERSION}/{wiki_lang}-{lang}-filtered.jsonl.zst"
-
-    def _get_zstd_file_stream(self, path: str, chunk_size: int = 128 * 1024):
+    def _stream_zstd_lines(self, path: str, chunk_size: int = 128 * 1024):
         dctx = zstandard.ZstdDecompressor()
-
         with open(path, "rb") as f:
             with dctx.stream_reader(f) as reader:
                 buffer = b""
@@ -53,53 +46,46 @@ class CacheManager:
                         if buffer:
                             yield buffer
                         break
-
                     buffer += chunk
                     lines = buffer.split(b"\n")
-                    # The last element is either an incomplete line or empty
                     buffer = lines.pop()
-
                     for line in lines:
                         if line:
                             yield line
-
-    def _fetch_from_r2(self, wiki_lang: str, lang: str, cache_path: str):
-        """Download pinned source data from R2 public URL."""
-        url = self._pinned_r2_url(wiki_lang, lang)
-        log.info(f"Fetching pinned source data: {url}")
-
-        response = requests.get(url, stream=True)
-        if response.status_code == 404:
-            raise RuntimeError(
-                f"Pinned source data not found at {url}\n"
-                f"Make sure source data has been uploaded for version {SOURCE_DATA_VERSION}"
-            )
-        response.raise_for_status()
-
-        temp_path = None
-        try:
-            with tempfile.NamedTemporaryFile(
-                dir=self._version_cache_dir, delete=False
-            ) as temp_file:
-                temp_path = temp_file.name
-                shutil.copyfileobj(response.raw, temp_file)
-            os.rename(temp_path, cache_path)
-            temp_path = None
-            log.info(f"Downloaded pinned source data to {cache_path}")
-        finally:
-            if temp_path and os.path.exists(temp_path):
-                os.unlink(temp_path)
 
     def get_lang_filtered_raw_data(self, wiki_lang: str, lang: str):
         cache_path = os.path.join(
             self._version_cache_dir, f"{wiki_lang}-{lang}-filtered.jsonl.zst"
         )
-        if os.path.exists(cache_path):
-            log.info(f"Found {cache_path}")
-            return self._get_zstd_file_stream(cache_path)
+        if not os.path.exists(cache_path):
+            url = f"{self.R2_PUBLIC_URL}/source-data/{SOURCE_DATA_VERSION}/{wiki_lang}-{lang}-filtered.jsonl.zst"
+            log.info(f"Fetching pinned source data: {url}")
 
-        self._fetch_from_r2(wiki_lang, lang, cache_path)
-        return self._get_zstd_file_stream(cache_path)
+            response = requests.get(url, stream=True)
+            if response.status_code == 404:
+                raise RuntimeError(
+                    f"Pinned source data not found at {url}\n"
+                    f"Make sure source data has been uploaded for version {SOURCE_DATA_VERSION}"
+                )
+            response.raise_for_status()
+
+            temp_path = None
+            try:
+                with tempfile.NamedTemporaryFile(
+                    dir=self._version_cache_dir, delete=False
+                ) as temp_file:
+                    temp_path = temp_file.name
+                    shutil.copyfileobj(response.raw, temp_file)
+                os.rename(temp_path, cache_path)
+                temp_path = None
+                log.info(f"Downloaded to {cache_path}")
+            finally:
+                if temp_path and os.path.exists(temp_path):
+                    os.unlink(temp_path)
+        else:
+            log.info(f"Found {cache_path}")
+
+        return self._stream_zstd_lines(cache_path)
 
 
 class Form(msgspec.Struct, frozen=True):

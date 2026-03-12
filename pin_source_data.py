@@ -18,18 +18,16 @@ import gzip
 import logging
 import os
 import re
-import shutil
 import subprocess
 import sys
 import tempfile
 
 import msgspec
+import requests
 import zstandard
 from tqdm import tqdm
 
-sys.path.insert(0, os.path.dirname(__file__))
-
-from data_processing import CONFIG, CacheManager
+from data_processing import CONFIG
 
 log = logging.getLogger(__name__)
 
@@ -46,10 +44,12 @@ def _raw_data_url(wiki_lang: str) -> str:
     return f"https://kaikki.org/dictionary/downloads/{wiki_lang}/{wiki_lang}-extract.jsonl.gz"
 
 
+def _filename(wiki_lang: str, lang: str) -> str:
+    return f"{wiki_lang}-{lang}-filtered.jsonl.zst"
+
+
 def _download_and_filter(wiki_lang: str, lang: str, output_path: str):
     """Download raw data from kaikki.org, filter to a single language, and save as .zst."""
-    import requests
-
     url = _raw_data_url(wiki_lang)
     log.info(f"Downloading {url}")
 
@@ -70,11 +70,11 @@ def _download_and_filter(wiki_lang: str, lang: str, output_path: str):
             progress_bar.update(len(chunk))
             return chunk
 
-    temp_dir = os.path.dirname(output_path)
+    output_dir = os.path.dirname(output_path)
     temp_path = None
 
     try:
-        with tempfile.NamedTemporaryFile(dir=temp_dir, delete=False) as temp_file:
+        with tempfile.NamedTemporaryFile(dir=output_dir, delete=False) as temp_file:
             temp_path = temp_file.name
 
             wrapped_stream = ProgressWrapper(response.raw)
@@ -113,42 +113,19 @@ def _download_and_filter(wiki_lang: str, lang: str, output_path: str):
             os.unlink(temp_path)
 
 
-def ensure_filtered_data(cache_dir: str):
-    """Make sure filtered .zst files exist in cache (downloads from kaikki.org if needed)."""
-    os.makedirs(cache_dir, exist_ok=True)
-    for config in CONFIG:
-        wiki_lang = "en"
-        cache_path = os.path.join(
-            cache_dir, f"{wiki_lang}-{config.code}-filtered.jsonl.zst"
-        )
-        if os.path.exists(cache_path):
-            log.info(f"Found existing: {cache_path}")
-        else:
-            log.info(f"Downloading and filtering data for {config.code}...")
-            _download_and_filter(wiki_lang, config.code, cache_path)
+def _upload_to_r2(local_path: str, r2_path: str):
+    log.info(f"Uploading {local_path} -> {r2_path}")
+    result = subprocess.run(
+        ["rclone", "copyto", local_path, r2_path],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        print(f"rclone error: {result.stderr}", file=sys.stderr)
+        sys.exit(1)
 
 
-def upload_to_r2(cache_dir: str, version: str):
-    """Upload filtered .zst files to R2."""
-    for config in CONFIG:
-        wiki_lang = "en"
-        local_path = os.path.join(
-            cache_dir, f"{wiki_lang}-{config.code}-filtered.jsonl.zst"
-        )
-        r2_path = f"{R2_BUCKET}/source-data/{version}/{wiki_lang}-{config.code}-filtered.jsonl.zst"
-        log.info(f"Uploading {local_path} -> {r2_path}")
-        result = subprocess.run(
-            ["rclone", "copyto", local_path, r2_path],
-            capture_output=True,
-            text=True,
-        )
-        if result.returncode != 0:
-            print(f"rclone error: {result.stderr}", file=sys.stderr)
-            sys.exit(1)
-        log.info(f"Uploaded {config.code}")
-
-
-def update_version_in_source(version: str):
+def _update_version_in_source(version: str):
     """Update SOURCE_DATA_VERSION in data_processing.py."""
     dp_path = os.path.join(os.path.dirname(__file__), "data_processing.py")
     with open(dp_path, "r") as f:
@@ -166,7 +143,7 @@ def update_version_in_source(version: str):
     log.info(f"Updated SOURCE_DATA_VERSION to {version}")
 
 
-def run_pipeline():
+def _run_pipeline():
     """Run the full data pipeline."""
     log.info("Running full data pipeline...")
     result = subprocess.run(
@@ -185,23 +162,17 @@ def main():
     version = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H%M%SZ")
     log.info(f"Source data version: {version}")
 
-    # Use a temporary working directory for downloads, separate from the versioned cache
-    work_dir = os.path.join(CacheManager.CACHE_DIR, "_pin_working")
-    ensure_filtered_data(work_dir)
-    upload_to_r2(work_dir, version)
-    update_version_in_source(version)
+    with tempfile.TemporaryDirectory() as tmpdir:
+        for config in CONFIG:
+            wiki_lang = "en"
+            name = _filename(wiki_lang, config.code)
+            local_path = os.path.join(tmpdir, name)
 
-    # Move filtered files into the versioned cache dir so the pipeline finds them
-    version_cache_dir = os.path.join(CacheManager.CACHE_DIR, version)
-    os.makedirs(version_cache_dir, exist_ok=True)
-    for config in CONFIG:
-        wiki_lang = "en"
-        src = os.path.join(work_dir, f"{wiki_lang}-{config.code}-filtered.jsonl.zst")
-        dst = os.path.join(version_cache_dir, f"{wiki_lang}-{config.code}-filtered.jsonl.zst")
-        shutil.move(src, dst)
-    shutil.rmtree(work_dir, ignore_errors=True)
+            _download_and_filter(wiki_lang, config.code, local_path)
+            _upload_to_r2(local_path, f"{R2_BUCKET}/source-data/{version}/{name}")
 
-    run_pipeline()
+    _update_version_in_source(version)
+    _run_pipeline()
 
     print(f"\nDone! SOURCE_DATA_VERSION updated to {version}")
     print("Next steps:")
