@@ -57,16 +57,68 @@
 			"dataHash": "c4f6a46d",
 			"code": "el",
 			"name": "Greek",
-			"tenseNames": ["el_indic_pres_active", "el_indic_pres_passive", "el_pres_parti_active"],
+			"tenseNames": [
+				"el_indic_pres_active",
+				"el_indic_pres_passive",
+				"el_indic_imperf_active",
+				"el_indic_imperf_passive",
+				"el_indic_aorist_active",
+				"el_indic_aorist_passive",
+				"el_indic_fut_cont_active",
+				"el_indic_fut_cont_passive",
+				"el_indic_fut_simple_active",
+				"el_indic_fut_simple_passive",
+				"el_subj_perf_active",
+				"el_subj_perf_passive",
+				"el_imper_imperf_active",
+				"el_imper_perf_active",
+				"el_imper_imperf_passive",
+				"el_imper_perf_passive",
+				"el_impers_pres_parti_active",
+				"el_impers_past_parti_passive",
+				"el_impers_pres_parti_passive",
+				"el_impers_inf_aorist_active",
+				"el_impers_inf_aorist_passive"
+			],
 			"tensePronouns": [
 				["εγω", "εσυ", "αυτ(ος/ή/ό)", "εμείς", "εσείς", "αυτ(οί/ές/ά)"],
 				["εγω", "εσυ", "αυτ(ος/ή/ό)", "εμείς", "εσείς", "αυτ(οί/ές/ά)"],
+				["εγω", "εσυ", "αυτ(ος/ή/ό)", "εμείς", "εσείς", "αυτ(οί/ές/ά)"],
+				["εγω", "εσυ", "αυτ(ος/ή/ό)", "εμείς", "εσείς", "αυτ(οί/ές/ά)"],
+				["εγω", "εσυ", "αυτ(ος/ή/ό)", "εμείς", "εσείς", "αυτ(οί/ές/ά)"],
+				["εγω", "εσυ", "αυτ(ος/ή/ό)", "εμείς", "εσείς", "αυτ(οί/ές/ά)"],
+				["εγω", "εσυ", "αυτ(ος/ή/ό)", "εμείς", "εσείς", "αυτ(οί/ές/ά)"],
+				["εγω", "εσυ", "αυτ(ος/ή/ό)", "εμείς", "εσείς", "αυτ(οί/ές/ά)"],
+				["εγω", "εσυ", "αυτ(ος/ή/ό)", "εμείς", "εσείς", "αυτ(οί/ές/ά)"],
+				["εγω", "εσυ", "αυτ(ος/ή/ό)", "εμείς", "εσείς", "αυτ(οί/ές/ά)"],
+				["εγω", "εσυ", "αυτ(ος/ή/ό)", "εμείς", "εσείς", "αυτ(οί/ές/ά)"],
+				["εγω", "εσυ", "αυτ(ος/ή/ό)", "εμείς", "εσείς", "αυτ(οί/ές/ά)"],
+				["", ""],
+				["", ""],
+				["", ""],
+				["", ""],
+				[],
+				[],
+				[],
+				[],
 				[]
 			],
 			"tenseGroups": [
 				{
 					"name": "el_indic",
-					"tenseIndices": [0, 1]
+					"tenseIndices": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+				},
+				{
+					"name": "el_subj",
+					"tenseIndices": [10, 11]
+				},
+				{
+					"name": "el_imper",
+					"tenseIndices": [12, 13, 14, 15]
+				},
+				{
+					"name": "el_impers",
+					"tenseIndices": [16, 17, 18, 19, 20]
 				}
 			]
 		}
