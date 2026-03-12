@@ -2,6 +2,11 @@ name: Pin source data
 
 on:
   workflow_dispatch:
+    inputs:
+      ref:
+        description: "Branch to run against (default: main)"
+        required: false
+        default: ""
   schedule:
     # First Monday of each month at 06:00 UTC
     - cron: "0 6 1-7 * 1"
@@ -16,6 +21,8 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
 
       - uses: prefix-dev/setup-pixi@v0.8.1
         with:
