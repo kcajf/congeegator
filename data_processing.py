@@ -191,7 +191,7 @@ def to_phonetic_el(s: str) -> str:
     s = s.replace("αι", "e")
     s = s.replace("ει", "i")
     s = s.replace("οι", "i")
-    s = s.replace("ου", "u")
+    s = s.replace("ου", "U")  # placeholder — ου sounds like "u", protected from u→i
     s = s.replace("υι", "i")
 
     # Single vowels
@@ -223,10 +223,16 @@ def to_phonetic_el(s: str) -> str:
     s = s.replace("χ", "ch")
     s = s.replace("ψ", "ps")
 
+    # Latin consonant bigrams (mirrors Greek μπ/ντ/γκ)
+    s = s.replace("mp", "b")
+    s = s.replace("nt", "d")
+    s = s.replace("gk", "g")
+
     # Latin normalization
     s = s.replace("ph", "f")
     s = re.sub(r"c(?!h)", "k", s)
     s = s.replace("q", "k")
+    s = s.replace("w", "o")
     s = s.replace("x", "ch")
     s = re.sub(r"(?<![ctk])h", "ch", s)
     s = s.replace("y", "i")
@@ -252,7 +258,9 @@ def to_phonetic_el(s: str) -> str:
     s = s.replace("ei", "i")
     s = s.replace("ai", "e")
     s = s.replace("oi", "i")
-    s = s.replace("ou", "u")
+    s = s.replace("ou", "U")  # placeholder to protect from u→i
+    s = s.replace("u", "i")  # υ is pronounced "i" in modern Greek
+    s = s.replace("U", "u")  # restore ou→u
 
     return s
 

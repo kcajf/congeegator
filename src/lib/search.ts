@@ -55,7 +55,7 @@ export function toPhoneticEl(s: string): string {
 	s = s.replace(/αι/g, 'e');
 	s = s.replace(/ει/g, 'i');
 	s = s.replace(/οι/g, 'i');
-	s = s.replace(/ου/g, 'u');
+	s = s.replace(/ου/g, 'U'); // placeholder — ου sounds like "u", protected from u→i
 	s = s.replace(/υι/g, 'i');
 
 	// Single vowels
@@ -87,10 +87,16 @@ export function toPhoneticEl(s: string): string {
 	s = s.replace(/χ/g, 'ch');
 	s = s.replace(/ψ/g, 'ps');
 
+	// Latin consonant bigrams (mirrors Greek μπ/ντ/γκ)
+	s = s.replace(/mp/g, 'b');
+	s = s.replace(/nt/g, 'd');
+	s = s.replace(/gk/g, 'g');
+
 	// Latin normalization
 	s = s.replace(/ph/g, 'f');
 	s = s.replace(/c(?!h)/g, 'k');
 	s = s.replace(/q/g, 'k');
+	s = s.replace(/w/g, 'o');
 	s = s.replace(/x/g, 'ch');
 	s = s.replace(/(?<![ctk])h/g, 'ch');
 	s = s.replace(/y/g, 'i');
@@ -119,7 +125,9 @@ export function toPhoneticEl(s: string): string {
 	s = s.replace(/ei/g, 'i');
 	s = s.replace(/ai/g, 'e');
 	s = s.replace(/oi/g, 'i');
-	s = s.replace(/ou/g, 'u');
+	s = s.replace(/ou/g, 'U'); // placeholder to protect from u→i
+	s = s.replace(/u/g, 'i'); // υ is pronounced "i" in modern Greek
+	s = s.replace(/U/g, 'u'); // restore ou→u
 
 	return s;
 }
