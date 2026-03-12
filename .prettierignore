@@ -9,8 +9,9 @@ pixi.lock
 .github/
 .pytest_cache/
 
-# Test fixtures (machine-generated)
+# Machine-generated files
 tests/golden/
+src/lib/data-manifest.json
 
 # Miscellaneous
 /static/

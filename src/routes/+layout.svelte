@@ -9,7 +9,7 @@
 	import { db } from '$lib/db';
 	import { appTitle } from '$lib/defs';
 	import { i18n } from '$lib/i18n.svelte';
-	import { findBestMatch, prefixLookup, type SearchResult } from '$lib/search';
+	import { findBestMatch, prefixLookup, stripDiacritics, type SearchResult } from '$lib/search';
 	import { searchLangState } from '$lib/searchLang.svelte';
 	import type { VerbRecord } from '$lib/types';
 	import { onMount, tick } from 'svelte';
@@ -29,16 +29,9 @@
 			const { registerSW } = await import('virtual:pwa-register');
 			registerSW({
 				immediate: true,
-				onRegistered(r: ServiceWorkerRegistration | undefined) {
-					// uncomment following code if you want check for updates
-					// r && setInterval(() => {
-					//    console.log('Checking for sw update')
-					//    r.update()
-					// }, 20000 /* 20s for testing purposes */)
-					console.log(`SW Registered: ${r}`);
-				},
+				onRegistered() {},
 				onRegisterError(error: Error) {
-					console.log('SW registration error', error);
+					console.error('SW registration error', error);
 				}
 			});
 		}
@@ -46,8 +39,6 @@
 
 	let searchTerm = $state('');
 	let searchInput: HTMLInputElement | undefined = $state();
-
-	// let searchIndex = $derived(searchLangState.indexData);
 
 	let searchResults = $state<SearchResult[]>([]);
 
@@ -62,7 +53,6 @@
 
 		if (searchInput) {
 			searchInput.focus();
-			// searchInput.select();
 		}
 	}
 
@@ -77,13 +67,11 @@
 		const index = searchLangState.indexData;
 
 		const currentLang = searchLangState.lang;
-		const currentQuery = searchTerm.toLowerCase().trim();
-		if (!index || !currentQuery) {
+		const currentQuery = stripDiacritics(searchTerm.toLowerCase().trim());
+		if (!index || currentQuery.length < 2) {
 			searchResults = [];
 			return;
 		}
-
-		console.log('Performing expensive search...');
 
 		const prefixIds = prefixLookup(index, currentQuery);
 
@@ -94,16 +82,22 @@
 
 		const dbKeys = prefixIds.map((id) => [currentLang, id]);
 
-		db.verbs.bulkGet(dbKeys).then((data) => {
-			if (currentQuery !== searchTerm.toLowerCase().trim()) return;
+		db.verbs
+			.bulkGet(dbKeys)
+			.then((data) => {
+				if (currentQuery !== stripDiacritics(searchTerm.toLowerCase().trim())) return;
 
-			searchResults = data
-				.filter((v): v is VerbRecord => !!v)
-				.map((v) => findBestMatch(v, currentQuery))
-				.filter((res): res is SearchResult => !!res)
-				.sort((a, b) => a.matched.length - b.matched.length)
-				.slice(0, 15); // Keep the dropdown manageable
-		});
+				searchResults = data
+					.filter((v): v is VerbRecord => !!v)
+					.map((v) => findBestMatch(v, currentQuery))
+					.filter((res): res is SearchResult => !!res)
+					.sort((a, b) => a.matched.length - b.matched.length)
+					.slice(0, 15);
+			})
+			.catch((err) => {
+				console.error('Search lookup failed:', err);
+				searchResults = [];
+			});
 	});
 </script>
 
@@ -142,7 +136,7 @@
 
 			{#if searchResults.length > 0}
 				<ul class="results-list">
-					{#each searchResults as item (item.matched)}
+					{#each searchResults as item (item.root)}
 						<li>
 							<a
 								href={resolve('/[lang=lang]/[verb]', {
@@ -150,7 +144,6 @@
 									verb: item.root
 								})}
 								onclick={(e) => {
-									// Prevent default <a> behavior to handle it via selectResult
 									e.preventDefault();
 									selectResult(item);
 								}}
@@ -163,8 +156,12 @@
 						</li>
 					{/each}
 				</ul>
-			{:else if searchTerm}
-				<div class="no-results">{i18n.t('no_matches')}</div>
+			{:else if searchTerm.trim().length >= 2}
+				{#if !searchLangState.indexData}
+					<div class="no-results">{i18n.t('loading')}</div>
+				{:else}
+					<div class="no-results">{i18n.t('no_matches')}</div>
+				{/if}
 			{/if}
 		</div>
 

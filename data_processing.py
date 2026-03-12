@@ -714,10 +714,9 @@ def build_search_index(verbs: list[dict[str, Any]]) -> dict[str, list[int]]:
             searchable_words[ss].add(idx)
             searchable_words[strip_diacritics(ss)].add(idx)
 
-    # TODO: strip diacritics?
-    # TODO split variants
     for i, v in enumerate(verbs):
         searchable_words[v["name"]].add(i)
+        searchable_words[strip_diacritics(v["name"])].add(i)
         for c in v["conjugation"]:
             if isinstance(c, str):
                 add_to_index(c, i)
@@ -733,7 +732,7 @@ def build_search_index(verbs: list[dict[str, Any]]) -> dict[str, list[int]]:
 
     for word, indices in searchable_words.items():
         for prefix_len in range(MIN_PREFIX, MAX_PREFIX + 1):
-            word_prefix = word[:prefix_len]
+            word_prefix = word[:prefix_len].lower()
             for i in indices:
                 index[word_prefix].add(i)
 

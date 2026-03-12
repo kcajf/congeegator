@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { findBestMatch, prefixLookup } from './search';
+import { findBestMatch, prefixLookup, stripDiacritics } from './search';
 import type { SearchIndex, VerbRecord } from './types';
 
 function makeVerb(overrides: Partial<VerbRecord> & Pick<VerbRecord, 'name'>): VerbRecord {
@@ -81,6 +81,35 @@ describe('findBestMatch', () => {
 
 	it('is case insensitive', () => {
 		const verb = makeVerb({ name: 'Manger', conjugation: ['Mange'] });
-		expect(findBestMatch(verb, 'mAN')).toEqual({ root: 'Manger', matched: 'Mange' });
+		expect(findBestMatch(verb, 'man')).toEqual({ root: 'Manger', matched: 'Mange' });
+	});
+
+	it('matches accented verb name with stripped query', () => {
+		const verb = makeVerb({ name: 'être', nameNoDiacritics: 'etre', conjugation: ['suis'] });
+		expect(findBestMatch(verb, 'etre')).toEqual({ root: 'être', matched: 'être' });
+	});
+
+	it('matches accented conjugation form with stripped query', () => {
+		const verb = makeVerb({
+			name: 'préférer',
+			nameNoDiacritics: 'preferer',
+			conjugation: ['préfère', 'préférons']
+		});
+		expect(findBestMatch(verb, 'prefere')).toEqual({ root: 'préférer', matched: 'préfère' });
+	});
+});
+
+describe('stripDiacritics', () => {
+	it('removes accents from French characters', () => {
+		expect(stripDiacritics('être')).toBe('etre');
+		expect(stripDiacritics('préféré')).toBe('prefere');
+	});
+
+	it('removes accents from Greek characters', () => {
+		expect(stripDiacritics('τρώω')).toBe('τρωω');
+	});
+
+	it('leaves ASCII strings unchanged', () => {
+		expect(stripDiacritics('manger')).toBe('manger');
 	});
 });
