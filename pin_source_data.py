@@ -57,17 +57,36 @@ def _download_and_filter(wiki_lang: str, lang: str, output_path: str):
     response.raise_for_status()
     total_size = int(response.headers.get("content-length", 0))
 
+    is_tty = sys.stderr.isatty()
     progress_bar = tqdm(
-        total=total_size, unit="B", unit_scale=True, desc=f"Downloading ({lang})"
+        total=total_size,
+        unit="B",
+        unit_scale=True,
+        desc=f"Downloading ({lang})",
+        disable=not is_tty,
     )
 
     class ProgressWrapper:
         def __init__(self, obj):
             self.obj = obj
+            self.bytes_read = 0
+            self._last_logged_mb = 0
 
         def read(self, n):
             chunk = self.obj.read(n)
+            self.bytes_read += len(chunk)
             progress_bar.update(len(chunk))
+            # In CI (non-TTY), log progress every 50 MB
+            if not is_tty:
+                current_mb = self.bytes_read // (50 * 1024 * 1024)
+                if current_mb > self._last_logged_mb:
+                    self._last_logged_mb = current_mb
+                    mb_read = self.bytes_read / (1024 * 1024)
+                    if total_size:
+                        pct = self.bytes_read * 100 / total_size
+                        log.info(f"Downloading ({lang}): {mb_read:.0f} MB ({pct:.0f}%)")
+                    else:
+                        log.info(f"Downloading ({lang}): {mb_read:.0f} MB")
             return chunk
 
     output_dir = os.path.dirname(output_path)
