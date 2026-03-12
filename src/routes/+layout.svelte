@@ -9,8 +9,9 @@
 	import { db } from '$lib/db';
 	import { appTitle } from '$lib/defs';
 	import { i18n } from '$lib/i18n.svelte';
+	import { findBestMatch, prefixLookup, type SearchResult } from '$lib/search';
 	import { searchLangState } from '$lib/searchLang.svelte';
-	import type { Id, VerbRecord } from '$lib/types';
+	import type { VerbRecord } from '$lib/types';
 	import { onMount, tick } from 'svelte';
 	import { pwaInfo } from 'virtual:pwa-info';
 	import type { LayoutProps } from './$types';
@@ -48,11 +49,6 @@
 
 	// let searchIndex = $derived(searchLangState.indexData);
 
-	type SearchResult = {
-		root: string;
-		matched: string;
-	};
-
 	let searchResults = $state<SearchResult[]>([]);
 
 	async function selectResult(item: SearchResult) {
@@ -77,37 +73,6 @@
 		}
 	}
 
-	function findBestMatch(verb: VerbRecord, query: string): SearchResult | null {
-		const q = query.toLowerCase();
-		let best: string | null = null;
-
-		// 1. Check the primary name
-		if (verb.name.toLowerCase().includes(q)) {
-			best = verb.name;
-		}
-
-		// 2. Check all conjugations
-		for (const entry of verb.conjugation) {
-			// Standardize to array to handle string | string[]
-			const forms = Array.isArray(entry) ? entry : [entry];
-
-			for (const form of forms) {
-				if (form.toLowerCase().includes(q)) {
-					// If it's the first match found OR shorter than previous best
-					if (!best || form.length < best.length) {
-						best = form;
-					}
-				}
-			}
-
-			// Optimization: If we found a match that is exactly the same length
-			// as the query, it can't get any shorter. Exit early.
-			if (best?.length === q.length) break;
-		}
-
-		return best ? { root: verb.name, matched: best } : null;
-	}
-
 	$effect(() => {
 		const index = searchLangState.indexData;
 
@@ -120,16 +85,7 @@
 
 		console.log('Performing expensive search...');
 
-		let prefixIds: Id[] = [];
-
-		// Walk backward through the string to find the longest matching prefix
-		for (let i = currentQuery.length; i > 0; i--) {
-			const prefix = currentQuery.slice(0, i);
-			if (index.has(prefix)) {
-				prefixIds = index.get(prefix)!;
-				break; // Found the best starting point
-			}
-		}
+		const prefixIds = prefixLookup(index, currentQuery);
 
 		if (prefixIds.length == 0) {
 			searchResults = [];
