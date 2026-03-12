@@ -700,6 +700,8 @@ def write_data_manifest(data_dir: str):
         hashed_data_dir = os.path.join(data_dir, f"{config.code}-{h}")
         os.rename(os.path.join(data_dir, config.code), hashed_data_dir)
 
+        log.info(f"{config.code}: dataHash={h}")
+
         language_hashes[config.code] = {
             "dataHash": h,
             **make_language_static_metadata(config),
