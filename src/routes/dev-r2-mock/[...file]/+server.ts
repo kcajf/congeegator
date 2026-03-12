@@ -39,7 +39,7 @@ export const GET: RequestHandler = async ({ params }) => {
 				'x-local-proxy': 'true'
 			}
 		});
-	} catch (e) {
+	} catch {
 		throw error(404, 'File not found');
 	}
 };

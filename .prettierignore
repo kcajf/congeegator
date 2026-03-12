@@ -5,6 +5,7 @@ yarn.lock
 bun.lock
 bun.lockb
 pixi.lock
+.claude/
 
 # Miscellaneous
 /static/

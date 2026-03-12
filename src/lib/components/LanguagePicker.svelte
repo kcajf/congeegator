@@ -41,7 +41,7 @@
 			<div class="bottom-sheet" transition:fly={{ y: 300 }}>
 				<!-- <div class="handle"></div> -->
 				<div class="scroll-area">
-					{#each Object.values(manifest.languages) as lang}
+					{#each Object.values(manifest.languages) as lang (lang.code)}
 						<button
 							class="option"
 							class:active={lang.code === currentLang}
@@ -54,7 +54,7 @@
 			</div>
 		{:else}
 			<div class="dropdown" transition:slide>
-				{#each Object.values(manifest.languages) as lang}
+				{#each Object.values(manifest.languages) as lang (lang.code)}
 					<button
 						class="option"
 						class:active={lang.code === currentLang}

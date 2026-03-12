@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { resolve } from '$app/paths';
 	import { triggerLangSync } from '$lib/syncManager.svelte';
 	import { appTitle } from '$lib/defs';
 	import type { PageProps } from './$types';
@@ -24,6 +25,6 @@
 
 <div class="verb-grid">
 	{#each data.verbs as verb (verb)}
-		<p><a href="/{data.lang}/{verb}">{verb}</a></p>
+		<p><a href={resolve('/[lang=lang]/[verb]', { lang: data.lang, verb })}>{verb}</a></p>
 	{/each}
 </div>

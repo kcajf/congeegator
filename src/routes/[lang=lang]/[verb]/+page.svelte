@@ -26,7 +26,7 @@
 		try {
 			// TODO: support 'native' tense code mode, where it's always language
 			return i18n.translate(tenseCode);
-		} catch (error) {
+		} catch {
 			return tenseCode;
 		}
 	};

@@ -4,7 +4,6 @@ import en from './messages/en.json';
 import fr from './messages/fr.json';
 
 // Create a type based on the keys in your English file
-type MessageKey = keyof typeof en;
 type Dictionary = Record<string, Record<string, string>>;
 
 export const i18nDictionary: Dictionary = { en, fr, el };

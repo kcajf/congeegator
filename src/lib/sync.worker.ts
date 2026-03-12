@@ -36,11 +36,14 @@ self.onmessage = async (e: MessageEvent<{ lang: string }>) => {
 				const url = `${getLangDataUrl(lang)}/data.json`;
 				// console.log(`Fetching ${url}`)
 				const raw = await fetch(url).then((r) => r.json());
-				const records: VerbRecord[] = raw['verbs'].map((item: any, index: number) => ({
-					...item,
-					id: index,
-					lang: lang
-				}));
+				const records: VerbRecord[] = raw['verbs'].map(
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					(item: any, index: number) => ({
+						...item,
+						id: index,
+						lang: lang
+					})
+				);
 
 				await db.transaction('rw', [db.verbs, db.metadata], async () => {
 					await db.verbs.where({ lang: lang }).delete();
