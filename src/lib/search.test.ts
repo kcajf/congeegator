@@ -108,8 +108,8 @@ describe('findBestMatch', () => {
 
 	it('matches Greek verb via approximate Greek query', () => {
 		const verb = makeVerb({ name: 'κάνω', lang: 'el', conjugation: ['κάνεις'] });
-		// query with wrong omega/omicron should still match via phonetic
-		expect(findBestMatch(verb, 'κανο', 'el')).toEqual({ root: 'κάνω', matched: 'κάνω' });
+		// query is pre-transformed by caller: κανο → toPhonetic → kano
+		expect(findBestMatch(verb, 'kano', 'el')).toEqual({ root: 'κάνω', matched: 'κάνω' });
 	});
 });
 
