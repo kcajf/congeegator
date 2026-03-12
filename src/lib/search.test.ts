@@ -192,6 +192,11 @@ describe('toPhoneticEl', () => {
 		expect(toPhoneticEl('thelo')).toBe('thelo'); // th stays as th
 	});
 
+	it('converts Latin full words', () => {
+		expect(toPhoneticEl('mirizei')).toBe('mirizi');
+		expect(toPhoneticEl('milousa')).toBe('milusa');
+	});
+
 	it('collapses Latin vowel digraphs', () => {
 		expect(toPhoneticEl('eimai')).toBe('ime');
 		expect(toPhoneticEl('imai')).toBe('ime');

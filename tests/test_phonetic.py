@@ -57,6 +57,9 @@ from data_processing import to_phonetic_el
         ("eho", "echo"),
         ("eiha", "icha"),
         ("thelo", "thelo"),  # th stays as th
+        # Latin full words
+        ("mirizei", "mirizi"),
+        ("milousa", "milusa"),
         # Latin au/eu voicing
         ("autos", "aftos"),
         ("euro", "evro"),
