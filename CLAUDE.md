@@ -47,6 +47,37 @@ A verb conjugation web app (PWA) built with SvelteKit 2 / Svelte 5, deployed to 
 
 - `VITE_R2_URL` — base URL for conjugation data. Set to `/dev-r2-mock` in dev (`.env`), real R2 URLs in `.env.staging` and `.env.production`.
 
+## Data Pipeline & Testing
+
+### Source Data Pinning
+
+Source data from kaikki.org is pinned at a date-stamped path in R2 (`source-data/<date>/`). The version is controlled by `SOURCE_DATA_VERSION` in `data_processing.py`. This ensures reproducible builds — CI fetches the pinned version with `--pinned`.
+
+### Updating Source Data
+
+Run `pixi run update-source-data` to:
+
+1. Download/filter latest data from kaikki.org
+2. Upload filtered `.zst` files to R2
+3. Update `SOURCE_DATA_VERSION` in `data_processing.py`
+4. Regenerate `r2_data/` and `data-manifest.json`
+
+Then review golden test diffs (`pixi run test`), update golden files if needed (`pixi run pytest tests/ --update-golden`), and commit.
+
+### Golden Tests
+
+`tests/test_data_processing.py` runs `process_entry()` against committed fixture verbs and compares output to golden files in `tests/golden/`. To regenerate after intentional changes: `pixi run pytest tests/ --update-golden`.
+
+### CI/Deploy Flow
+
+- **PR CI:** lint, typecheck, build, golden tests (`pixi run test`), manifest metadata check
+- **Merge to main:** fetch pinned source data → generate data → upload to R2 → build → deploy
+- **Manual deploy:** `npm run deploy:prod` runs the full pipeline locally (generate → R2 upload → build → deploy)
+
+### Manifest Metadata Check
+
+`python data_processing.py --check-manifest-metadata` verifies that the committed `data-manifest.json` structural metadata (tenseNames, tensePronouns, tenseGroups) matches current `LanguageConfig` definitions. Runs in CI on every PR.
+
 ## Conventions
 
 - Svelte 5 runes (`$state`, `$derived`, `$effect`, `$props`) throughout — no legacy `$:` reactive statements

@@ -6,6 +6,7 @@ bun.lock
 bun.lockb
 pixi.lock
 .claude/
+.pytest_cache/
 
 # Miscellaneous
 /static/

@@ -1,0 +1,19 @@
+{
+	"name": "finir",
+	"nameNoDiacritics": "finir",
+	"conjugation": [
+		"finissant",
+		"fini",
+		["finis", "finis", "finit", "finissons", "finissez", "finissent"],
+		["finissais", "finissais", "finissait", "finissions", "finissiez", "finissaient"],
+		["finis", "finis", "finit", "finîmes", "finîtes", "finirent"],
+		["finirai", "finiras", "finira", "finirons", "finirez", "finiront"],
+		["finirais", "finirais", "finirait", "finirions", "finiriez", "finiraient"],
+		["finisse", "finisses", "finisse", "finissions", "finissiez", "finissent"],
+		["finisse", "finisses", "finît", "finissions", "finissiez", "finissent"],
+		["ai fini", "as fini", "a fini", "avons fini", "avez fini", "ont fini"],
+		["avais fini", "avais fini", "avait fini", "avions fini", "aviez fini", "avaient fini"],
+		["eus fini", "eus fini", "eut fini", "eûmes fini", "eûtes fini", "eurent fini"],
+		["aurai fini", "auras fini", "aura fini", "aurons fini", "aurez fini", "auront fini"]
+	]
+}

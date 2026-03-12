@@ -1,7 +1,7 @@
 {
 	"languages": {
 		"fr": {
-			"dataHash": "ce674554",
+			"dataHash": "d9ef5709",
 			"code": "fr",
 			"name": "French",
 			"tenseNames": [
@@ -54,7 +54,7 @@
 			]
 		},
 		"el": {
-			"dataHash": "81b102ed",
+			"dataHash": "c4f6a46d",
 			"code": "el",
 			"name": "Greek",
 			"tenseNames": ["el_indic_pres_active", "el_indic_pres_passive", "el_pres_parti_active"],
