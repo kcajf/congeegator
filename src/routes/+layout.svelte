@@ -49,16 +49,13 @@
 	let searchResults = $state<SearchResult[]>([]);
 
 	async function selectResult(item: SearchResult) {
-		await goto(
-			resolve('/[lang=lang]/[verb]', {
-				lang: searchLangState.lang,
-				verb: item.root
-			})
-		);
-
-		if (item.matched !== item.root) {
-			window.location.hash = encodeURIComponent(item.matched);
-		}
+		const base = resolve('/[lang=lang]/[verb]', {
+			lang: searchLangState.lang,
+			verb: item.root
+		});
+		const hash = item.matched !== item.root ? `#${encodeURIComponent(item.matched)}` : '';
+		// eslint-disable-next-line svelte/no-navigation-without-resolve -- base is already resolved above
+		await goto(base + hash);
 
 		searchTerm = '';
 
