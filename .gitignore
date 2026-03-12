@@ -28,6 +28,7 @@ vite.config.ts.timestamp-*
 
 
 .claude/
+__pycache__/
 cache/
 
 # src/lib/data-manifest.json

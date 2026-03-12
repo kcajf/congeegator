@@ -6,6 +6,10 @@ on:
     # First Monday of each month at 06:00 UTC
     - cron: "0 6 1-7 * 1"
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   pin-source-data:
     runs-on: ubuntu-latest
