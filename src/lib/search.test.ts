@@ -184,12 +184,19 @@ describe('toPhoneticEl', () => {
 		expect(toPhoneticEl('kueri')).toBe('kueri');
 	});
 
-	it('treats x and h as chi', () => {
+	it('converts Latin consonant bigrams', () => {
+		expect(toPhoneticEl('mpeno')).toBe('beno');
+		expect(toPhoneticEl('ntino')).toBe('dino');
+		expect(toPhoneticEl('gkremizo')).toBe('gremizo');
+	});
+
+	it('treats x, h, and w as chi/omega', () => {
 		expect(toPhoneticEl('exo')).toBe('echo');
 		expect(toPhoneticEl('psaxno')).toBe('psachno');
 		expect(toPhoneticEl('eho')).toBe('echo');
 		expect(toPhoneticEl('eiha')).toBe('icha');
 		expect(toPhoneticEl('thelo')).toBe('thelo'); // th stays as th
+		expect(toPhoneticEl('kanw')).toBe('kano'); // w as omega
 	});
 
 	it('converts Latin full words', () => {

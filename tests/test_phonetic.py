@@ -51,12 +51,17 @@ from data_processing import to_phonetic_el
         ("imai", "ime"),
         ("oikos", "ikos"),
         ("oute", "ute"),
-        # x and h as chi
+        # Latin consonant bigrams
+        ("mpeno", "beno"),
+        ("ntino", "dino"),
+        ("gkremizo", "gremizo"),
+        # x, h, and w
         ("exo", "echo"),
         ("psaxno", "psachno"),
         ("eho", "echo"),
         ("eiha", "icha"),
         ("thelo", "thelo"),  # th stays as th
+        ("kanw", "kano"),  # w as omega
         # Latin full words
         ("mirizei", "mirizi"),
         ("milousa", "milusa"),

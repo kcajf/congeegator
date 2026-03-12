@@ -87,10 +87,16 @@ export function toPhoneticEl(s: string): string {
 	s = s.replace(/χ/g, 'ch');
 	s = s.replace(/ψ/g, 'ps');
 
+	// Latin consonant bigrams (mirrors Greek μπ/ντ/γκ)
+	s = s.replace(/mp/g, 'b');
+	s = s.replace(/nt/g, 'd');
+	s = s.replace(/gk/g, 'g');
+
 	// Latin normalization
 	s = s.replace(/ph/g, 'f');
 	s = s.replace(/c(?!h)/g, 'k');
 	s = s.replace(/q/g, 'k');
+	s = s.replace(/w/g, 'o');
 	s = s.replace(/x/g, 'ch');
 	s = s.replace(/(?<![ctk])h/g, 'ch');
 	s = s.replace(/y/g, 'i');
