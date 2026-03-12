@@ -119,11 +119,11 @@ class CacheManager:
                 log.info(f"saved to {cache_path}")
 
         except Exception as e:
-            print(f"An error occurred: {e}")
+            log.error(f"An error occurred: {e}")
         finally:
             if temp_path and os.path.exists(temp_path):
                 os.unlink(temp_path)
-                print(f"Cleaned up {temp_path}")
+                log.info(f"Cleaned up {temp_path}")
 
         return self._get_zstd_file_stream(cache_path)
 
@@ -196,11 +196,11 @@ class CacheManager:
                 os.rename(temp_file.name, cache_path)
                 log.info(f"saved to {cache_path}")
         except Exception as e:
-            print(f"An error occurred: {e}")
+            log.error(f"An error occurred: {e}")
         finally:
             if temp_path and os.path.exists(temp_path):
                 os.unlink(temp_path)
-                print(f"Cleaned up {temp_path}")
+                log.info(f"Cleaned up {temp_path}")
 
         return self._get_zstd_file_stream(cache_path)
 
@@ -827,10 +827,6 @@ def build_search_index(verbs: list[dict[str, Any]]) -> dict[str, list[int]]:
 
     log.info(f"Longest index entry: '{max_key}', {max_hits} hits")
 
-    # pprint(ret.get('de'))
-    # pprint(ret.get('dé'))
-    for k, v in ret.items():
-        print(k, len(v))
     return ret
 
 
