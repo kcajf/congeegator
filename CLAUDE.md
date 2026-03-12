@@ -55,14 +55,14 @@ Source data from kaikki.org is pinned at a timestamp-keyed path in R2 (`source-d
 
 ### Updating Source Data
 
-Run `pixi run pin-source-data` to:
+Run `pixi run pin-source-data` (or trigger the **Pin source data** GitHub Action) to:
 
 1. Download and filter latest data from kaikki.org
 2. Upload filtered `.zst` files to R2 at a new timestamp-keyed path
 3. Update `SOURCE_DATA_VERSION` in `data_processing.py`
 4. Regenerate `r2_data/` and `data-manifest.json`
 
-Then review golden test diffs (`pixi run test`), update golden files if needed (`pixi run pytest tests/ --update-golden`), and commit.
+The GitHub Action runs monthly and opens a PR automatically. When running locally, review golden test diffs (`pixi run test`), update golden files if needed (`pixi run pytest tests/ --update-golden`), and commit.
 
 ### Golden Tests
 
