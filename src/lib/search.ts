@@ -138,12 +138,12 @@ export function toPhonetic(lang: string, s: string): string {
 }
 
 export function findBestMatch(verb: VerbRecord, query: string, lang: string): SearchResult | null {
-	const phoneticQuery = toPhonetic(lang, query);
+	// query is already phonetically transformed by the caller
 	let best: string | null = null;
 
 	const matches = (form: string) => {
 		const stripped = stripDiacritics(form).toLowerCase();
-		return stripped.includes(query) || toPhonetic(lang, stripped).includes(phoneticQuery);
+		return stripped.includes(query) || toPhonetic(lang, stripped).includes(query);
 	};
 
 	if (matches(verb.name)) {
