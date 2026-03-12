@@ -11,7 +11,7 @@ import tempfile
 import typing
 import unicodedata
 from collections import defaultdict
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 import msgspec
 import orjson
@@ -156,6 +156,82 @@ def sort_without_diacritics(strings: list[str]):
     return sorted(strings, key=strip_diacritics)
 
 
+def to_phonetic_el(s: str) -> str:
+    """Convert a Greek or Latin string to a canonical Latin phonetic representation."""
+    s = strip_diacritics(s).lower()
+
+    # Fuse Greek consonant bigrams
+    s = s.replace("μπ", "b")
+    s = s.replace("ντ", "d")
+    s = s.replace("γκ", "g")
+    s = s.replace("γγ", "ng")
+    s = s.replace("τσ", "ts")
+    s = s.replace("τζ", "dz")
+
+    # Context-sensitive αυ/ευ voicing
+    voiceless = set("πτκθσφχξψ")
+    result = []
+    i = 0
+    while i < len(s):
+        # αυ/ευ voicing rules
+        if i + 1 < len(s) and s[i] in ("α", "ε") and s[i + 1] == "υ":
+            vowel_part = "a" if s[i] == "α" else "e"
+            next_after = s[i + 2] if i + 2 < len(s) else None
+            if next_after is None or next_after in voiceless:
+                result.append(vowel_part + "f")
+            else:
+                result.append(vowel_part + "v")
+            i += 2
+            continue
+        result.append(s[i])
+        i += 1
+    s = "".join(result)
+
+    # Vowel digraphs
+    s = s.replace("αι", "e")
+    s = s.replace("ει", "i")
+    s = s.replace("οι", "i")
+    s = s.replace("ου", "u")
+    s = s.replace("υι", "i")
+
+    # Single vowels
+    s = s.replace("η", "i")
+    s = s.replace("ω", "o")
+    s = s.replace("υ", "i")
+    s = s.replace("α", "a")
+    s = s.replace("ε", "e")
+    s = s.replace("ι", "i")
+    s = s.replace("ο", "o")
+
+    # Consonants
+    s = s.replace("β", "v")
+    s = s.replace("γ", "g")
+    s = s.replace("δ", "d")
+    s = s.replace("ζ", "z")
+    s = s.replace("θ", "th")
+    s = s.replace("κ", "k")
+    s = s.replace("λ", "l")
+    s = s.replace("μ", "m")
+    s = s.replace("ν", "n")
+    s = s.replace("ξ", "ks")
+    s = s.replace("π", "p")
+    s = s.replace("ρ", "r")
+    s = s.replace("σ", "s")
+    s = s.replace("ς", "s")
+    s = s.replace("τ", "t")
+    s = s.replace("φ", "f")
+    s = s.replace("χ", "ch")
+    s = s.replace("ψ", "ps")
+
+    # Latin normalization
+    s = s.replace("ph", "f")
+    s = re.sub(r"c(?!h)", "k", s)
+    s = s.replace("q", "k")
+    s = s.replace("y", "i")
+
+    return s
+
+
 # Primary IPA Extensions
 IPA_EXTENSIONS = "".join(chr(c) for c in range(0x0250, 0x02B0))
 
@@ -211,6 +287,7 @@ class LanguageConfig(msgspec.Struct, frozen=True):
     name: str  # This should be the language name that (English) wiktionary uses
     tenses: tuple[TenseConfig, ...]
     tense_groups: list[TenseGroup]
+    phonetic_fn: Callable[[str], str] | None = None
 
 
 def full_tense(
@@ -368,6 +445,7 @@ EL_CONFIG = LanguageConfig(
         TenseGroup("el_imper", re.compile(r"^el_imper_(?!s_)")),
         TenseGroup("el_impers", re.compile(r"^el_impers_")),
     ],
+    phonetic_fn=to_phonetic_el,
 )
 
 
@@ -701,7 +779,10 @@ def fr_is_aspirated(entry: Entry) -> bool:
     return False
 
 
-def build_search_index(verbs: list[dict[str, Any]]) -> dict[str, list[int]]:
+def build_search_index(
+    verbs: list[dict[str, Any]],
+    phonetic_fn: Callable[[str], str] | None = None,
+) -> dict[str, list[int]]:
     log.info("generating search index")
     searchable_words = defaultdict[str, set[int]](lambda: set())
 
@@ -713,10 +794,18 @@ def build_search_index(verbs: list[dict[str, Any]]) -> dict[str, list[int]]:
                 ss = ss.split(' ')[-1]
             searchable_words[ss].add(idx)
             searchable_words[strip_diacritics(ss)].add(idx)
+            if phonetic_fn:
+                phonetic = phonetic_fn(ss)
+                if phonetic != ss and phonetic != strip_diacritics(ss):
+                    searchable_words[phonetic].add(idx)
 
     for i, v in enumerate(verbs):
         searchable_words[v["name"]].add(i)
         searchable_words[strip_diacritics(v["name"])].add(i)
+        if phonetic_fn:
+            phonetic = phonetic_fn(v["name"])
+            if phonetic != v["name"] and phonetic != strip_diacritics(v["name"]):
+                searchable_words[phonetic].add(i)
         for c in v["conjugation"]:
             if isinstance(c, str):
                 add_to_index(c, i)
@@ -819,7 +908,7 @@ def generate_data_for_lang(wiki_lang: str, lang: LanguageConfig, dev: bool):
     if len(unique_verbs) != len(verbs):
         raise ValueError("duplicates")
 
-    search_index = build_search_index(verbs)
+    search_index = build_search_index(verbs, phonetic_fn=lang.phonetic_fn)
 
     return {
         "verbs": verbs,
