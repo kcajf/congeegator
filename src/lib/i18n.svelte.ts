@@ -1,4 +1,5 @@
 import { browser } from '$app/environment';
+import de from './messages/de.json';
 import el from './messages/el.json';
 import en from './messages/en.json';
 import fr from './messages/fr.json';
@@ -6,7 +7,7 @@ import fr from './messages/fr.json';
 // Create a type based on the keys in your English file
 type Dictionary = Record<string, Record<string, string>>;
 
-export const i18nDictionary: Dictionary = { en, fr, el };
+export const i18nDictionary: Dictionary = { en, fr, el, de };
 type LangCode = keyof typeof i18nDictionary;
 
 // We create a global state object

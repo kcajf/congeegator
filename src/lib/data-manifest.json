@@ -336,6 +336,81 @@
           ]
         }
       ]
+    },
+    "de": {
+      "dataHash": "00000000",
+      "code": "de",
+      "name": "German",
+      "tenseNames": [
+        "de_impers_infinitive",
+        "de_impers_pres_partic",
+        "de_impers_past_partic",
+        "de_indic_pres",
+        "de_indic_preterite",
+        "de_subj_i",
+        "de_subj_ii"
+      ],
+      "tensePronouns": [
+        [],
+        [],
+        [],
+        [
+          "ich",
+          "du",
+          "er/sie/es",
+          "wir",
+          "ihr",
+          "sie/Sie"
+        ],
+        [
+          "ich",
+          "du",
+          "er/sie/es",
+          "wir",
+          "ihr",
+          "sie/Sie"
+        ],
+        [
+          "ich",
+          "du",
+          "er/sie/es",
+          "wir",
+          "ihr",
+          "sie/Sie"
+        ],
+        [
+          "ich",
+          "du",
+          "er/sie/es",
+          "wir",
+          "ihr",
+          "sie/Sie"
+        ]
+      ],
+      "tenseGroups": [
+        {
+          "name": "de_impers",
+          "tenseIndices": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "name": "de_indic",
+          "tenseIndices": [
+            3,
+            4
+          ]
+        },
+        {
+          "name": "de_subj",
+          "tenseIndices": [
+            5,
+            6
+          ]
+        }
+      ]
     }
   }
 }

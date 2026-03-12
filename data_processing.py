@@ -176,6 +176,7 @@ PERSONS_NUMBERS = tuple((person, number) for number in NUMBERS for person in PER
 LANG_PRONOUNS = {
     "fr": ("je", "tu", "il/elle", "nous", "vous", "ils/elles"),
     "el": ("εγω", "εσυ", "αυτ(ος/ή/ό)", "εμείς", "εσείς", "αυτ(οί/ές/ά)"),
+    "de": ("ich", "du", "er/sie/es", "wir", "ihr", "sie/Sie"),
 }
 
 
@@ -409,9 +410,28 @@ FR_CONFIG = LanguageConfig(
     ],
 )
 
+DE_CONFIG = LanguageConfig(
+    code="de",
+    name="German",
+    tenses=(
+        TenseConfig("de_impers_infinitive", FormMatcher(("infinitive",))),
+        TenseConfig("de_impers_pres_partic", FormMatcher(("participle", "present"))),
+        TenseConfig("de_impers_past_partic", FormMatcher(("participle", "past"))),
+        full_tense("de", "de_indic_pres", ("present", "indicative")),
+        full_tense("de", "de_indic_preterite", ("preterite",)),
+        full_tense("de", "de_subj_i", ("subjunctive", "present")),
+        full_tense("de", "de_subj_ii", ("subjunctive", "past")),
+    ),
+    tense_groups=[
+        TenseGroup("de_impers", re.compile(r"^de_impers_")),
+        TenseGroup("de_indic", re.compile(r"^de_indic_")),
+        TenseGroup("de_subj", re.compile(r"^de_subj_")),
+    ],
+)
 CONFIG: list[LanguageConfig] = [
     FR_CONFIG,
     EL_CONFIG,
+    DE_CONFIG,
 ]
 
 
