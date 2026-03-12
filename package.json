@@ -15,8 +15,8 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
-		"r2-upload:staging": "rclone sync r2_data r2-congeegator:congeegator-dev --progress --transfers=64 --checkers=64 --delete-during --fast-list",
-		"r2-upload:prod": "rclone sync r2_data r2-congeegator:congeegator --progress --transfers=64 --checkers=64 --delete-during --fast-list",
+		"r2-upload:staging": "rclone sync r2_data r2-congeegator:congeegator-dev --transfers=64 --checkers=64 --delete-during --fast-list --stats-one-line -v",
+		"r2-upload:prod": "rclone sync r2_data r2-congeegator:congeegator --transfers=64 --checkers=64 --delete-during --fast-list --stats-one-line -v",
 		"deploy:staging": "pixi run python data_processing.py && npm run r2-upload:staging && npm run build:staging && npx wrangler deploy --env=staging",
 		"deploy:prod": "pixi run python data_processing.py && npm run r2-upload:prod && npm run build:prod && npx wrangler deploy --env=production",
 		"wrangler-dev": "npm run build && npx wrangler dev --remote"
