@@ -19,6 +19,7 @@ from data_processing import CacheManager, Entry
 FIXTURE_VERBS = {
     "fr": {"être", "avoir", "aller", "manger", "finir"},
     "el": {"έχω", "είμαι", "κάνω", "θέλω", "λέω"},
+    "de": {"haben", "sein", "machen", "gehen", "können"},
 }
 
 FIXTURES_DIR = os.path.join(os.path.dirname(__file__), "fixtures")

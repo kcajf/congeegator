@@ -419,8 +419,8 @@ DE_CONFIG = LanguageConfig(
         TenseConfig("de_impers_past_partic", FormMatcher(("participle", "past"))),
         full_tense("de", "de_indic_pres", ("present", "indicative")),
         full_tense("de", "de_indic_preterite", ("preterite",)),
-        full_tense("de", "de_subj_i", ("subjunctive", "present")),
-        full_tense("de", "de_subj_ii", ("subjunctive", "past")),
+        full_tense("de", "de_subj_i", ("subjunctive", "subjunctive-i")),
+        full_tense("de", "de_subj_ii", ("subjunctive", "subjunctive-ii")),
     ),
     tense_groups=[
         TenseGroup("de_impers", re.compile(r"^de_impers_")),

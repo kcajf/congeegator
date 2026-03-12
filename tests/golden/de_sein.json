@@ -1,0 +1,41 @@
+{
+  "name": "sein",
+  "nameNoDiacritics": "sein",
+  "conjugation": [
+    "sein",
+    "seiend",
+    "gewesen",
+    [
+      "bin",
+      "bist",
+      "ist",
+      "sind",
+      "seid",
+      "sind"
+    ],
+    [
+      "war",
+      "warst",
+      "war",
+      "waren",
+      "wart",
+      "waren"
+    ],
+    [
+      "sei",
+      "seist/seiest",
+      "sei",
+      "seien",
+      "seiet",
+      "seien"
+    ],
+    [
+      "wäre",
+      "wärst/wärest",
+      "wäre",
+      "wären",
+      "wärt/wäret",
+      "wären"
+    ]
+  ]
+}
