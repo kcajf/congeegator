@@ -33,15 +33,16 @@ class SearchLangState {
 		this.indexData = undefined;
 
 		const lang = this.lang;
-		db.metadata.get(lang).then((data) => {
-			if (this.lang === lang) {
-				// this.indexData = data?.searchIndex;
-				if (data?.searchIndex) {
+		db.metadata
+			.get(lang)
+			.then((data) => {
+				if (this.lang === lang && data?.searchIndex) {
 					this.indexData = new Map(Object.entries(data.searchIndex));
-					console.log(`Loaded search index for ${lang}`);
 				}
-			}
-		});
+			})
+			.catch((err) => {
+				console.error(`Failed to load search index for ${lang}:`, err);
+			});
 	}
 }
 
