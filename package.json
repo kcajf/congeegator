@@ -17,8 +17,8 @@
 		"lint": "prettier --check . && eslint .",
 		"r2-cleanup:staging": "rclone delete r2-congeegator:congeegator-dev/data/v1/ --min-age 90d --fast-list --stats-one-line",
 		"r2-cleanup:prod": "rclone delete r2-congeegator:congeegator/data/v1/ --min-age 90d --fast-list --stats-one-line",
-		"r2-upload:staging": "rclone copy r2_data r2-congeegator:congeegator-dev --transfers=64 --checkers=64 --fast-list --stats-one-line",
-		"r2-upload:prod": "rclone copy r2_data r2-congeegator:congeegator --transfers=64 --checkers=64 --fast-list --stats-one-line",
+		"r2-upload:staging": "rclone copy r2_data r2-congeegator:congeegator-dev --transfers=64 --checkers=64 --fast-list --stats-one-line --size-only",
+		"r2-upload:prod": "rclone copy r2_data r2-congeegator:congeegator --transfers=64 --checkers=64 --fast-list --stats-one-line --size-only",
 		"deploy:staging": "pixi run python data_processing.py && npm run r2-upload:staging && npm run build:staging && npx wrangler deploy --env=staging",
 		"deploy:prod": "pixi run python data_processing.py && npm run r2-upload:prod && npm run build:prod && npx wrangler deploy --env=production",
 		"wrangler-dev": "npm run build && npx wrangler dev --remote"
