@@ -3,7 +3,6 @@ import { error } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 import { loadVerbIndex } from '$lib/dataLoading';
 
-
 export const load: PageLoad = async ({ params, fetch }) => {
 	const lang = params.lang;
 	if (!(lang in manifest.languages)) {
