@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { page } from '$app/stores';
 	import wiktionaryLogo from '$lib/assets/wiktionary_favicon_en.svg';
 	import { langName, manifest } from '$lib/dataUtils';
 	import { appTitle } from '$lib/defs';
@@ -8,30 +7,29 @@
 	import { formatPronoun } from '$lib/langTools';
 	import { stripDiacritics } from '$lib/search';
 	import { triggerLangSync } from '$lib/syncManager.svelte';
-	import { tick } from 'svelte';
+	import { onMount } from 'svelte';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
 
-	const highlightForm = $derived($page.url.hash ? decodeURIComponent($page.url.hash.slice(1)) : '');
-	const highlightNorm = $derived(stripDiacritics(highlightForm.toLowerCase()));
+	let highlightNorm = $state('');
 
 	function isHighlighted(form: string): boolean {
 		return highlightNorm !== '' && stripDiacritics(form.toLowerCase()) === highlightNorm;
 	}
 
-	let scrolledToHighlight = false;
+	onMount(() => {
+		const hash = window.location.hash;
+		if (!hash) return;
+		const form = decodeURIComponent(hash.slice(1));
+		highlightNorm = stripDiacritics(form.toLowerCase());
 
-	$effect(() => {
-		if (browser && highlightForm && !scrolledToHighlight) {
-			scrolledToHighlight = true;
-			tick().then(() => {
-				const el = document.querySelector('.highlight');
-				if (el) {
-					el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-				}
-			});
-		}
+		requestAnimationFrame(() => {
+			const el = document.querySelector('.highlight');
+			if (el) {
+				el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+			}
+		});
 	});
 
 	const langManifest = $derived(manifest.languages[data.verb.lang]);
