@@ -42,10 +42,16 @@
 
 	let searchResults = $state<SearchResult[]>([]);
 
+	function resultUrl(item: SearchResult): string {
+		const base = resolve('/[lang=lang]/[verb]', {
+			lang: searchLangState.lang,
+			verb: item.root
+		});
+		return item.matched !== item.root ? `${base}#${encodeURIComponent(item.matched)}` : base;
+	}
+
 	async function selectResult(item: SearchResult) {
-		// 2. Navigate to the entry page
-		const lang = searchLangState.lang;
-		await goto(resolve('/[lang=lang]/[verb]', { lang, verb: item.root }));
+		await goto(resultUrl(item));
 
 		searchTerm = '';
 
@@ -139,10 +145,7 @@
 					{#each searchResults as item (item.root)}
 						<li>
 							<a
-								href={resolve('/[lang=lang]/[verb]', {
-									lang: searchLangState.lang,
-									verb: item.root
-								})}
+								href={resultUrl(item)}
 								onclick={(e) => {
 									e.preventDefault();
 									selectResult(item);

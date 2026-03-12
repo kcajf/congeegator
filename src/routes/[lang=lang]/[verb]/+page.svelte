@@ -1,14 +1,38 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { page } from '$app/stores';
 	import wiktionaryLogo from '$lib/assets/wiktionary_favicon_en.svg';
 	import { langName, manifest } from '$lib/dataUtils';
 	import { appTitle } from '$lib/defs';
 	import { i18n } from '$lib/i18n.svelte';
 	import { formatPronoun } from '$lib/langTools';
+	import { stripDiacritics } from '$lib/search';
 	import { triggerLangSync } from '$lib/syncManager.svelte';
+	import { tick } from 'svelte';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
+
+	const highlightForm = $derived($page.url.hash ? decodeURIComponent($page.url.hash.slice(1)) : '');
+	const highlightNorm = $derived(stripDiacritics(highlightForm.toLowerCase()));
+
+	function isHighlighted(form: string): boolean {
+		return highlightNorm !== '' && stripDiacritics(form.toLowerCase()) === highlightNorm;
+	}
+
+	let scrolledToHighlight = false;
+
+	$effect(() => {
+		if (browser && highlightForm && !scrolledToHighlight) {
+			scrolledToHighlight = true;
+			tick().then(() => {
+				const el = document.querySelector('.highlight');
+				if (el) {
+					el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+				}
+			});
+		}
+	});
 
 	const langManifest = $derived(manifest.languages[data.verb.lang]);
 	const tenseNames = $derived(langManifest.tenseNames);
@@ -62,7 +86,7 @@
 						<table class="tenseTable">
 							<tbody>
 								{#each tenseForms as form, formI (formI)}
-									<tr>
+									<tr class:highlight={isHighlighted(form)}>
 										<td
 											>{formatPronoun(
 												data.verb.lang,
@@ -76,7 +100,9 @@
 							</tbody>
 						</table>
 					{:else}
-						<p class="participle">{formatForm(tenseForms)}</p>
+						<p class="participle" class:highlight={isHighlighted(tenseForms)}>
+							{formatForm(tenseForms)}
+						</p>
 					{/if}
 				</div>
 			{/each}
@@ -87,6 +113,10 @@
 {/if}
 
 <style>
+	.highlight {
+		background-color: #fff3cd;
+	}
+
 	.tenseTable {
 		border-collapse: collapse;
 	}
