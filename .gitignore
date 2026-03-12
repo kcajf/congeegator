@@ -27,6 +27,7 @@ vite.config.ts.timestamp-*
 !.pixi/config.toml
 
 
+.claude/
 cache/
 
 # src/lib/data-manifest.json
