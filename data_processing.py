@@ -25,11 +25,16 @@ from tqdm import tqdm
 
 log = logging.getLogger(__name__)
 
+# Date-stamped version of pinned source data in R2.
+# Update by running: pixi run update-source-data
+SOURCE_DATA_VERSION = "2026-03-12"
+
 
 class CacheManager:
     CACHE_DIR = os.path.join(os.path.dirname(__file__), "cache")
 
-    def __init__(self):
+    def __init__(self, pinned: bool = False):
+        self.pinned = pinned
         os.makedirs(CacheManager.CACHE_DIR, exist_ok=True)
 
     @staticmethod
@@ -37,6 +42,13 @@ class CacheManager:
         if wiki_lang == "en":
             return "https://kaikki.org/dictionary/raw-wiktextract-data.jsonl"
         return f"https://kaikki.org/dictionary/downloads/{wiki_lang}/{wiki_lang}-extract.jsonl.gz"
+
+    # Public R2 URL for fetching pinned source data (no credentials needed)
+    R2_PUBLIC_URL = "https://assets.congeegator.com"
+
+    @staticmethod
+    def _pinned_r2_url(wiki_lang: str, lang: str) -> str:
+        return f"{CacheManager.R2_PUBLIC_URL}/source-data/{SOURCE_DATA_VERSION}/{wiki_lang}-{lang}-filtered.jsonl.zst"
 
     def _get_zstd_file_stream(self, path: str, chunk_size: int = 128 * 1024):
         dctx = zstandard.ZstdDecompressor()
@@ -115,12 +127,43 @@ class CacheManager:
 
         return self._get_zstd_file_stream(cache_path)
 
+    def _fetch_pinned_from_r2(self, wiki_lang: str, lang: str, cache_path: str):
+        """Download pinned source data from R2 public URL."""
+        url = self._pinned_r2_url(wiki_lang, lang)
+        log.info(f"Fetching pinned source data: {url}")
+
+        response = requests.get(url, stream=True)
+        if response.status_code == 404:
+            raise RuntimeError(
+                f"Pinned source data not found at {url}\n"
+                f"Make sure source data has been uploaded for version {SOURCE_DATA_VERSION}"
+            )
+        response.raise_for_status()
+
+        temp_path = None
+        try:
+            with tempfile.NamedTemporaryFile(
+                dir=CacheManager.CACHE_DIR, delete=False
+            ) as temp_file:
+                temp_path = temp_file.name
+                shutil.copyfileobj(response.raw, temp_file)
+            os.rename(temp_path, cache_path)
+            temp_path = None
+            log.info(f"Downloaded pinned source data to {cache_path}")
+        finally:
+            if temp_path and os.path.exists(temp_path):
+                os.unlink(temp_path)
+
     def get_lang_filtered_raw_data(self, wiki_lang: str, lang: str):
         cache_path = os.path.join(
             CacheManager.CACHE_DIR, f"{wiki_lang}-{lang}-filtered.jsonl.zst"
         )
         if os.path.exists(cache_path):
             log.info(f"Found {cache_path}")
+            return self._get_zstd_file_stream(cache_path)
+
+        if self.pinned:
+            self._fetch_pinned_from_r2(wiki_lang, lang, cache_path)
             return self._get_zstd_file_stream(cache_path)
 
         temp_path = None
@@ -791,9 +834,40 @@ def build_search_index(verbs: list[dict[str, Any]]) -> dict[str, list[int]]:
     return ret
 
 
-def generate_data_for_lang(wiki_lang: str, lang: LanguageConfig, dev: bool):
+def process_entry(config: LanguageConfig, entry: Entry) -> dict[str, Any] | None:
+    """Process a single Wiktionary entry into a verb conjugation dict.
+
+    Returns None if the entry should be skipped (not a clean verb root,
+    no conjugation forms, or processing fails).
+    """
+    if not entry_is_clean_verb_root(entry):
+        return None
+
+    if not any(x.source == "conjugation" for x in entry.forms):
+        return None
+
+    filtered_forms = [f for f in entry.forms if form_is_clean_conjugation(f)]
+    try:
+        conj = extract_conjugations_from_forms(config, filtered_forms, entry)
+    except Exception as e:
+        log.error(f"Failed to process {entry.lang_code} {entry.word}", exc_info=e)
+        return None
+
+    processed: dict[str, Any] = dict(
+        name=entry.word,
+        nameNoDiacritics=strip_diacritics(entry.word),
+        conjugation=list(conj.values()),
+    )
+
+    if fr_is_aspirated(entry):
+        processed["frIsAspirated"] = True
+
+    return processed
+
+
+def generate_data_for_lang(wiki_lang: str, lang: LanguageConfig, dev: bool, pinned: bool = False):
     log.info(f"generating {lang.code} data")
-    cache = CacheManager()
+    cache = CacheManager(pinned=pinned)
     data = cache.get_lang_filtered_raw_data(wiki_lang, lang.code)
 
     verbs: list[dict[str, Any]] = []
@@ -806,68 +880,17 @@ def generate_data_for_lang(wiki_lang: str, lang: LanguageConfig, dev: bool):
             continue
 
         entry = msgspec.json.decode(line, type=Entry)
-
-        if not entry_is_clean_verb_root(entry):
-            continue
-
-        if not any(x.source == "conjugation" for x in entry.forms):
-            continue
-
         assert entry.lang_code == lang.code
 
-        WORDS = [
-            # "αναμαλλιασμένος",
-            # "στριμμένος",
-            # "στέκει",
-            # "στέκω",
-            # "abréagisses",
-            # "tenir le coup",
-            # "être à l'ouest",
-            # "abandonner à son sort",
-            # "🟣",
-            # "être",
-            # "'a",
-            # "έρχομαι στα χέρια",
-            # "abandonner à son sort",
-            # "aluner",
-            # "voy.",
-            # "χιονίζω",
-            # "χιονίζει",
-            # "στενοχωρώ",
-            # "habiter",
-            # "haïr",
-        ]
-        if entry.word in WORDS:
-            # pprint(entry)
-            pprint(orjson.loads(line))
-
         if entry.word in seen_verbs:
-            # There are quite a few double-entries. These tend to be verbs with different senses.
-            # Not always clear why they are different entries rather than different senses.
-            # In Greek, sometimes it seems that it is because some senses are only e.g. used in the active or passive.
-            # In French, sometimes it is because the two senses have different etymology (etymology is not per-sense).
-            # I think in most cases, the conjugation will be same/similar and it is fine to skip arbitrarily for now.
             log.debug(f"duplicate: {entry.word}")
             continue
 
-        filtered_forms = [f for f in entry.forms if form_is_clean_conjugation(f)]
-        try:
-            conj = extract_conjugations_from_forms(lang, filtered_forms, entry)
-        except Exception as e:
-            log.error(f"Failed to process {entry.lang_code} {entry.word}", exc_info=e)
-            # pprint(entry)
+        processed = process_entry(lang, entry)
+        if processed is None:
             continue
 
-        processed_entry: dict[str, Any] = dict(
-            name=entry.word,
-            nameNoDiacritics=strip_diacritics(entry.word),
-            conjugation=list(conj.values()),
-        )
-
-        if fr_is_aspirated(entry):
-            processed_entry["frIsAspirated"] = True
-
-        verbs.append(processed_entry)
+        verbs.append(processed)
         seen_verbs.add(entry.word)
 
         if dev and len(seen_verbs) > 20:
@@ -888,22 +911,69 @@ def generate_data_for_lang(wiki_lang: str, lang: LanguageConfig, dev: bool):
     }
 
 
-def generate_data(dev: bool):
+def generate_data(dev: bool, pinned: bool = False):
     ret: dict[str, dict[str, Any]] = {}
 
     for config in CONFIG:
         wiki_lang = "en"
-        ret[config.code] = generate_data_for_lang(wiki_lang, config, dev=dev)
+        ret[config.code] = generate_data_for_lang(wiki_lang, config, dev=dev, pinned=pinned)
 
     return ret
+
+
+def check_manifest_metadata():
+    """Verify committed data-manifest.json structural metadata matches current LanguageConfig definitions."""
+    manifest_path = os.path.join("src", "lib", "data-manifest.json")
+    if not os.path.exists(manifest_path):
+        log.error(f"{manifest_path} not found")
+        return False
+
+    with open(manifest_path) as f:
+        manifest = json.load(f)
+
+    ok = True
+    for config in CONFIG:
+        expected = make_language_static_metadata(config)
+        if config.code not in manifest.get("languages", {}):
+            log.error(f"Language '{config.code}' missing from manifest")
+            ok = False
+            continue
+
+        actual = manifest["languages"][config.code]
+        for key in ("tenseNames", "tensePronouns", "tenseGroups"):
+            if expected[key] != actual.get(key):
+                log.error(
+                    f"Mismatch in {config.code}.{key}:\n"
+                    f"  expected: {expected[key]}\n"
+                    f"  actual:   {actual.get(key)}"
+                )
+                ok = False
+
+    if ok:
+        log.info("Manifest metadata matches current configs")
+    return ok
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dev", action="store_true")
+    parser.add_argument(
+        "--check-manifest-metadata",
+        action="store_true",
+        help="Verify data-manifest.json metadata matches current LanguageConfig definitions (no data generation)",
+    )
+    parser.add_argument(
+        "--pinned",
+        action="store_true",
+        help="Fetch source data from pinned R2 path instead of kaikki.org",
+    )
     args = parser.parse_args()
 
-    data = generate_data(dev=args.dev)
+    if args.check_manifest_metadata:
+        ok = check_manifest_metadata()
+        sys.exit(0 if ok else 1)
+
+    data = generate_data(dev=args.dev, pinned=args.pinned)
 
     DATA_VERSION = "1"
 
