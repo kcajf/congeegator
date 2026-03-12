@@ -6,13 +6,8 @@ declare global {
 		// interface Locals {}
 		// interface PageData {}
 		// interface PageState {}
-		interface Platform {
-			env: {
-				// PUBLIC_R2_URL: string;
-				// ENVIRONMENT: string;
-			};
-		}
+		// interface Platform { }
 	}
 }
 
-export { };
+export {};

@@ -1,3 +1,3 @@
-export const appTitle = "Congeegator";
+export const appTitle = 'Congeegator';
 
-export const myPurple = "#c48dcc";
+export const myPurple = '#c48dcc';

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { clickOutside } from '$lib/clickOutside';
 	import { fade, fly, slide } from 'svelte/transition';
-// Your custom action
+	// Your custom action
 	import { langName, manifest } from '$lib/dataUtils';
 	import { searchLangState } from '$lib/searchLang.svelte';
 
@@ -32,11 +32,16 @@
 
 	{#if isOpen}
 		{#if isMobile}
-			<div class="backdrop" transition:fade onclick={() => (isOpen = false)}></div>
+			<div
+				class="backdrop"
+				role="presentation"
+				transition:fade
+				onclick={() => (isOpen = false)}
+			></div>
 			<div class="bottom-sheet" transition:fly={{ y: 300 }}>
 				<!-- <div class="handle"></div> -->
 				<div class="scroll-area">
-					{#each Object.values(manifest.languages) as lang}
+					{#each Object.values(manifest.languages) as lang (lang.code)}
 						<button
 							class="option"
 							class:active={lang.code === currentLang}
@@ -49,7 +54,7 @@
 			</div>
 		{:else}
 			<div class="dropdown" transition:slide>
-				{#each Object.values(manifest.languages) as lang}
+				{#each Object.values(manifest.languages) as lang (lang.code)}
 					<button
 						class="option"
 						class:active={lang.code === currentLang}

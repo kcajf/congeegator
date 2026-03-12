@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 
 	import appleIcon180 from '$lib/assets/apple-touch-icon-180x180.png';
 	import congeegatorSVG from '$lib/assets/congeegator.svg';
@@ -16,12 +17,9 @@
 
 	const PUBLIC_R2_URL = import.meta.env.VITE_R2_URL;
 
-	let { data, children }: LayoutProps = $props();
+	let { children }: LayoutProps = $props();
 
-	// No onMount needed.
-	// This runs immediately during initialization.
-	// svelte-ignore state_referenced_locally
-	i18n.init(data.interfaceLang || 'en');
+	i18n.init('en');
 
 	const webManifestLink = $derived(pwaInfo?.webManifest?.linkTag ?? '');
 
@@ -30,7 +28,7 @@
 			const { registerSW } = await import('virtual:pwa-register');
 			registerSW({
 				immediate: true,
-				onRegistered(r) {
+				onRegistered(r: ServiceWorkerRegistration | undefined) {
 					// uncomment following code if you want check for updates
 					// r && setInterval(() => {
 					//    console.log('Checking for sw update')
@@ -38,7 +36,7 @@
 					// }, 20000 /* 20s for testing purposes */)
 					console.log(`SW Registered: ${r}`);
 				},
-				onRegisterError(error) {
+				onRegisterError(error: Error) {
 					console.log('SW registration error', error);
 				}
 			});
@@ -60,7 +58,7 @@
 	async function selectResult(item: SearchResult) {
 		// 2. Navigate to the entry page
 		const lang = searchLangState.lang;
-		await goto(`/${lang}/${item.root}`);
+		await goto(resolve('/[lang=lang]/[verb]', { lang, verb: item.root }));
 
 		searchTerm = '';
 
@@ -164,6 +162,7 @@
 	<meta name="application-name" content={appTitle} />
 
 	{#if webManifestLink}
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 		{@html webManifestLink}
 	{/if}
 
@@ -172,7 +171,7 @@
 
 <div class="container">
 	<nav class="navbar">
-		<a href="/"><img alt={appTitle} src={congeegatorSVG} class="top-icon" /></a>
+		<a href={resolve('/')}><img alt={appTitle} src={congeegatorSVG} class="top-icon" /></a>
 
 		<div class="search-container">
 			<input
@@ -190,7 +189,10 @@
 					{#each searchResults as item (item.matched)}
 						<li>
 							<a
-								href="/{searchLangState.lang}/{item.root}"
+								href={resolve('/[lang=lang]/[verb]', {
+									lang: searchLangState.lang,
+									verb: item.root
+								})}
 								onclick={(e) => {
 									// Prevent default <a> behavior to handle it via selectResult
 									e.preventDefault();

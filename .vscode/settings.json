@@ -1,11 +1,16 @@
 {
-    "cSpell.words": [
-        "cctx",
-        "Congeegator",
-        "conjs",
-        "Dexie",
-        "mimetypes",
-        "paraglide",
-        "prerendered"
-    ]
+	"cSpell.words": [
+		"cctx",
+		"Congeegator",
+		"conjs",
+		"Dexie",
+		"mimetypes",
+		"paraglide",
+		"prerendered"
+	],
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"editor.formatOnSave": true,
+	"[svelte]": {
+		"editor.defaultFormatter": "svelte.svelte-vscode"
+	}
 }

@@ -15,14 +15,14 @@ const config = {
 				configPath: 'wrangler.jsonc',
 				environment: undefined,
 				persist: undefined
-			},
+			}
 			// fallback: 'app.html',
 		}),
 		paths: {
 			relative: false
 		},
 		output: {
-			bundleStrategy: "single"
+			bundleStrategy: 'single'
 		}
 	}
 };

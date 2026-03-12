@@ -8,17 +8,17 @@ export default defineConfig({
 		SvelteKitPWA({
 			strategies: 'generateSW',
 			registerType: 'prompt', // Shows a "New Version" button to users
-			manifest: { /* PWA metadata */
-				name: 'Congeegator',
-				short_name: 'CG',
+			manifest: {
+				/* PWA metadata */ name: 'Congeegator',
+				short_name: 'CG'
 			},
 			pwaAssets: {
-				config: true,
+				config: true
 			},
 			kit: {
 				// This is the "SvelteKit way" to handle SPA fallbacks in this plugin
 				// adapterFallback: 'app.html',
-				adapterFallback: undefined,
+				adapterFallback: undefined
 			},
 			workbox: {
 				// Only glob the static assets
@@ -47,15 +47,14 @@ export default defineConfig({
 				navigateFallback: '/app-shell.html',
 
 				// 2. Exclude internal paths
-				navigateFallbackDenylist: [
-					/^\/_app\//,
-					/\/[^/]+\.[^/]+$/
-				],
+				navigateFallbackDenylist: [/^\/_app\//, /\/[^/]+\.[^/]+$/],
 
 				// for some reason, the default version of this renames /app-shell.html -> app-shell, and messes things up?
-				manifestTransforms: [async (manifest) => {
-					return { manifest };
-				}]
+				manifestTransforms: [
+					async (manifest) => {
+						return { manifest };
+					}
+				]
 			}
 		})
 	]
