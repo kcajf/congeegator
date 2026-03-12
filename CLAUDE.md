@@ -13,7 +13,7 @@ A verb conjugation web app (PWA) built with SvelteKit 2 / Svelte 5, deployed to 
 - **Type check:** `npm run check`
 - **Lint:** `npm run lint` (prettier + eslint)
 - **Deploy:** `npm run deploy:staging`, `npm run deploy:prod` (builds then runs wrangler)
-- **Data pipeline:** `python data_processing.py` (requires pixi environment: `pixi run python data_processing.py`). Use `--dev` flag for a small subset. Outputs to `r2_data/` and writes `src/lib/data-manifest.json`.
+- **Data pipeline:** `python data_processing.py` (requires pixi environment: `pixi run python data_processing.py`). Use `--dev` flag for a small subset. Outputs to `r2_data/` and writes `src/lib/data-manifest.json`. Source data is always fetched from the pinned R2 version.
 - **Upload data to R2:** `npm run r2-upload:staging`, `npm run r2-upload:prod` (uses rclone)
 
 ## Architecture
@@ -51,18 +51,18 @@ A verb conjugation web app (PWA) built with SvelteKit 2 / Svelte 5, deployed to 
 
 ### Source Data Pinning
 
-Source data from kaikki.org is pinned at a date-stamped path in R2 (`source-data/<date>/`). The version is controlled by `SOURCE_DATA_VERSION` in `data_processing.py`. This ensures reproducible builds — CI fetches the pinned version with `--pinned`.
+Source data from kaikki.org is pinned at a timestamp-keyed path in R2 (`source-data/<timestamp>/`). The version is controlled by `SOURCE_DATA_VERSION` in `data_processing.py` (format: `2026-03-12T143000Z`). This ensures reproducible builds — the data pipeline always fetches from the pinned version. Source data is cached locally in `cache/<version>/`.
 
 ### Updating Source Data
 
-Run `pixi run update-source-data` to:
+Run `pixi run pin-source-data` (or trigger the **Pin source data** GitHub Action) to:
 
-1. Download/filter latest data from kaikki.org
-2. Upload filtered `.zst` files to R2
+1. Download and filter latest data from kaikki.org
+2. Upload filtered `.zst` files to R2 at a new timestamp-keyed path
 3. Update `SOURCE_DATA_VERSION` in `data_processing.py`
 4. Regenerate `r2_data/` and `data-manifest.json`
 
-Then review golden test diffs (`pixi run test`), update golden files if needed (`pixi run pytest tests/ --update-golden`), and commit.
+The GitHub Action runs monthly and opens a PR automatically. When running locally, review golden test diffs (`pixi run test`), update golden files if needed (`pixi run pytest tests/ --update-golden`), and commit.
 
 ### Golden Tests
 
@@ -71,7 +71,7 @@ Then review golden test diffs (`pixi run test`), update golden files if needed (
 ### CI/Deploy Flow
 
 - **PR CI:** lint, typecheck, build, golden tests (`pixi run test`), manifest metadata check
-- **Merge to main:** fetch pinned source data → generate data → upload to R2 → build → deploy
+- **Merge to main:** generate data (fetches pinned source from R2) → upload to R2 → build → deploy
 - **Manual deploy:** `npm run deploy:prod` runs the full pipeline locally (generate → R2 upload → build → deploy)
 
 ### Manifest Metadata Check
