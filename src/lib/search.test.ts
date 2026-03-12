@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { findBestMatch, prefixLookup, stripDiacritics } from './search';
+import { findBestMatch, prefixLookup, stripDiacritics, toPhoneticEl } from './search';
 import type { SearchIndex, VerbRecord } from './types';
 
 function makeVerb(overrides: Partial<VerbRecord> & Pick<VerbRecord, 'name'>): VerbRecord {
@@ -55,7 +55,7 @@ describe('prefixLookup', () => {
 describe('findBestMatch', () => {
 	it('matches the verb name exactly', () => {
 		const verb = makeVerb({ name: 'manger' });
-		expect(findBestMatch(verb, 'manger')).toEqual({ root: 'manger', matched: 'manger' });
+		expect(findBestMatch(verb, 'manger', 'fr')).toEqual({ root: 'manger', matched: 'manger' });
 	});
 
 	it('prefers a shorter conjugation over a longer name', () => {
@@ -63,7 +63,7 @@ describe('findBestMatch', () => {
 			name: 'manger',
 			conjugation: ['mange', 'mangeons']
 		});
-		expect(findBestMatch(verb, 'man')).toEqual({ root: 'manger', matched: 'mange' });
+		expect(findBestMatch(verb, 'man', 'fr')).toEqual({ root: 'manger', matched: 'mange' });
 	});
 
 	it('handles array conjugation forms', () => {
@@ -71,22 +71,22 @@ describe('findBestMatch', () => {
 			name: 'aller',
 			conjugation: [['va', 'vas'], 'allons']
 		});
-		expect(findBestMatch(verb, 'va')).toEqual({ root: 'aller', matched: 'va' });
+		expect(findBestMatch(verb, 'va', 'fr')).toEqual({ root: 'aller', matched: 'va' });
 	});
 
 	it('returns null when nothing matches', () => {
 		const verb = makeVerb({ name: 'manger', conjugation: ['mange'] });
-		expect(findBestMatch(verb, 'xyz')).toBeNull();
+		expect(findBestMatch(verb, 'xyz', 'fr')).toBeNull();
 	});
 
 	it('is case insensitive', () => {
 		const verb = makeVerb({ name: 'Manger', conjugation: ['Mange'] });
-		expect(findBestMatch(verb, 'man')).toEqual({ root: 'Manger', matched: 'Mange' });
+		expect(findBestMatch(verb, 'man', 'fr')).toEqual({ root: 'Manger', matched: 'Mange' });
 	});
 
 	it('matches accented verb name with stripped query', () => {
 		const verb = makeVerb({ name: 'être', nameNoDiacritics: 'etre', conjugation: ['suis'] });
-		expect(findBestMatch(verb, 'etre')).toEqual({ root: 'être', matched: 'être' });
+		expect(findBestMatch(verb, 'etre', 'fr')).toEqual({ root: 'être', matched: 'être' });
 	});
 
 	it('matches accented conjugation form with stripped query', () => {
@@ -95,7 +95,21 @@ describe('findBestMatch', () => {
 			nameNoDiacritics: 'preferer',
 			conjugation: ['préfère', 'préférons']
 		});
-		expect(findBestMatch(verb, 'prefere')).toEqual({ root: 'préférer', matched: 'préfère' });
+		expect(findBestMatch(verb, 'prefere', 'fr')).toEqual({
+			root: 'préférer',
+			matched: 'préfère'
+		});
+	});
+
+	it('matches Greek verb via phonetic Latin query', () => {
+		const verb = makeVerb({ name: 'κάνω', lang: 'el', conjugation: ['κάνεις', 'κάνει'] });
+		expect(findBestMatch(verb, 'kano', 'el')).toEqual({ root: 'κάνω', matched: 'κάνω' });
+	});
+
+	it('matches Greek verb via approximate Greek query', () => {
+		const verb = makeVerb({ name: 'κάνω', lang: 'el', conjugation: ['κάνεις'] });
+		// query with wrong omega/omicron should still match via phonetic
+		expect(findBestMatch(verb, 'κανο', 'el')).toEqual({ root: 'κάνω', matched: 'κάνω' });
 	});
 });
 
@@ -111,5 +125,70 @@ describe('stripDiacritics', () => {
 
 	it('leaves ASCII strings unchanged', () => {
 		expect(stripDiacritics('manger')).toBe('manger');
+	});
+});
+
+describe('toPhoneticEl', () => {
+	it('converts consonant bigrams', () => {
+		expect(toPhoneticEl('μπαίνω')).toBe('beno');
+		expect(toPhoneticEl('ντύνω')).toBe('dino');
+		expect(toPhoneticEl('γκρεμίζω')).toBe('gremizo');
+		expect(toPhoneticEl('τσάι')).toBe('tse');
+		expect(toPhoneticEl('τζάκι')).toBe('dzaki');
+	});
+
+	it('handles αυ/ευ voicing before voiceless consonants', () => {
+		expect(toPhoneticEl('αυτός')).toBe('aftos');
+		expect(toPhoneticEl('ευτυχία')).toBe('eftichia');
+	});
+
+	it('handles αυ/ευ voicing before voiced consonants', () => {
+		expect(toPhoneticEl('αυλή')).toBe('avli');
+		expect(toPhoneticEl('ευλογώ')).toBe('evlogo');
+	});
+
+	it('handles αυ/ευ at end of word', () => {
+		expect(toPhoneticEl('ευ')).toBe('ef');
+	});
+
+	it('converts vowel digraphs', () => {
+		expect(toPhoneticEl('αίμα')).toBe('ema');
+		expect(toPhoneticEl('είμαι')).toBe('ime');
+		expect(toPhoneticEl('οίκος')).toBe('ikos');
+		expect(toPhoneticEl('ούτε')).toBe('ute');
+	});
+
+	it('converts single vowels', () => {
+		expect(toPhoneticEl('ήμουν')).toBe('imun');
+		expect(toPhoneticEl('ώρα')).toBe('ora');
+	});
+
+	it('converts real verbs', () => {
+		expect(toPhoneticEl('κάνω')).toBe('kano');
+		expect(toPhoneticEl('θέλω')).toBe('thelo');
+		expect(toPhoneticEl('αγαπώ')).toBe('agapo');
+		expect(toPhoneticEl('τρώω')).toBe('troo');
+		expect(toPhoneticEl('έχω')).toBe('echo');
+		expect(toPhoneticEl('ξέρω')).toBe('ksero');
+		expect(toPhoneticEl('ψάχνω')).toBe('psachno');
+	});
+
+	it('passes through Latin input', () => {
+		expect(toPhoneticEl('kano')).toBe('kano');
+		expect(toPhoneticEl('thelo')).toBe('thelo');
+	});
+
+	it('normalizes Latin characters', () => {
+		expect(toPhoneticEl('cyma')).toBe('kima');
+		expect(toPhoneticEl('phyllo')).toBe('fillo');
+		expect(toPhoneticEl('query')).toBe('kueri');
+	});
+
+	it('handles empty string', () => {
+		expect(toPhoneticEl('')).toBe('');
+	});
+
+	it('converts γγ', () => {
+		expect(toPhoneticEl('αγγελία')).toBe('angelia');
 	});
 });

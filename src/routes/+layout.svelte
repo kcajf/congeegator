@@ -9,7 +9,13 @@
 	import { db } from '$lib/db';
 	import { appTitle } from '$lib/defs';
 	import { i18n } from '$lib/i18n.svelte';
-	import { findBestMatch, prefixLookup, stripDiacritics, type SearchResult } from '$lib/search';
+	import {
+		findBestMatch,
+		prefixLookup,
+		stripDiacritics,
+		toPhonetic,
+		type SearchResult
+	} from '$lib/search';
 	import { searchLangState } from '$lib/searchLang.svelte';
 	import type { VerbRecord } from '$lib/types';
 	import { onMount, tick } from 'svelte';
@@ -74,7 +80,8 @@
 		const index = searchLangState.indexData;
 
 		const currentLang = searchLangState.lang;
-		const currentQuery = stripDiacritics(searchTerm.toLowerCase().trim());
+		const stripped = stripDiacritics(searchTerm.toLowerCase().trim());
+		const currentQuery = toPhonetic(currentLang, stripped);
 		if (!index || currentQuery.length < 2) {
 			searchResults = [];
 			return;
@@ -92,11 +99,14 @@
 		db.verbs
 			.bulkGet(dbKeys)
 			.then((data) => {
-				if (currentQuery !== stripDiacritics(searchTerm.toLowerCase().trim())) return;
+				if (
+					currentQuery !== toPhonetic(currentLang, stripDiacritics(searchTerm.toLowerCase().trim()))
+				)
+					return;
 
 				searchResults = data
 					.filter((v): v is VerbRecord => !!v)
-					.map((v) => findBestMatch(v, currentQuery))
+					.map((v) => findBestMatch(v, currentQuery, currentLang))
 					.filter((res): res is SearchResult => !!res)
 					.sort((a, b) => a.matched.length - b.matched.length)
 					.slice(0, 15);
