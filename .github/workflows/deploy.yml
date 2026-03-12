@@ -42,7 +42,7 @@ jobs:
 
       # Generate data from pinned source (fetches via public R2 URL, no creds needed)
       - name: Generate data
-        run: pixi run python data_processing.py --pinned
+        run: pixi run python data_processing.py
 
       # Upload data to R2 (needs rclone creds)
       - name: Upload data to R2
