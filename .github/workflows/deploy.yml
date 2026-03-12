@@ -23,7 +23,7 @@ jobs:
       - run: npm ci
 
       - name: Install rclone
-        run: sudo apt-get install -y rclone
+        run: curl -sSf https://rclone.org/install.sh | sudo bash
 
       # Configure rclone for R2 upload
       - name: Configure rclone
