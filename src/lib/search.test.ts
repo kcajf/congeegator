@@ -181,7 +181,29 @@ describe('toPhoneticEl', () => {
 	it('normalizes Latin characters', () => {
 		expect(toPhoneticEl('cyma')).toBe('kima');
 		expect(toPhoneticEl('phyllo')).toBe('fillo');
-		expect(toPhoneticEl('query')).toBe('kueri');
+		expect(toPhoneticEl('kueri')).toBe('kueri');
+	});
+
+	it('treats x and h as chi', () => {
+		expect(toPhoneticEl('exo')).toBe('echo');
+		expect(toPhoneticEl('psaxno')).toBe('psachno');
+		expect(toPhoneticEl('eho')).toBe('echo');
+		expect(toPhoneticEl('eiha')).toBe('icha');
+		expect(toPhoneticEl('thelo')).toBe('thelo'); // th stays as th
+	});
+
+	it('collapses Latin vowel digraphs', () => {
+		expect(toPhoneticEl('eimai')).toBe('ime');
+		expect(toPhoneticEl('imai')).toBe('ime');
+		expect(toPhoneticEl('oikos')).toBe('ikos');
+		expect(toPhoneticEl('oute')).toBe('ute');
+	});
+
+	it('applies Latin au/eu voicing', () => {
+		expect(toPhoneticEl('autos')).toBe('aftos');
+		expect(toPhoneticEl('euro')).toBe('evro');
+		expect(toPhoneticEl('eu')).toBe('ef');
+		expect(toPhoneticEl('avli')).toBe('avli');
 	});
 
 	it('handles empty string', () => {

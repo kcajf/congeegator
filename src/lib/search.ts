@@ -91,7 +91,35 @@ export function toPhoneticEl(s: string): string {
 	s = s.replace(/ph/g, 'f');
 	s = s.replace(/c(?!h)/g, 'k');
 	s = s.replace(/q/g, 'k');
+	s = s.replace(/x/g, 'ch');
+	s = s.replace(/(?<![ctk])h/g, 'ch');
 	s = s.replace(/y/g, 'i');
+
+	// Latin au/eu voicing (mirrors Greek αυ/ευ rules for naive transliterations)
+	const latinVoiceless = new Set('ptksfc');
+	result = '';
+	i = 0;
+	while (i < s.length) {
+		if (i + 1 < s.length && (s[i] === 'a' || s[i] === 'e') && s[i + 1] === 'u') {
+			const nextAfter = i + 2 < s.length ? s[i + 2] : null;
+			if (nextAfter === null || latinVoiceless.has(nextAfter)) {
+				result += s[i] + 'f';
+			} else {
+				result += s[i] + 'v';
+			}
+			i += 2;
+			continue;
+		}
+		result += s[i];
+		i++;
+	}
+	s = result;
+
+	// Latin vowel digraphs (mirrors Greek αι/ει/οι/ου)
+	s = s.replace(/ei/g, 'i');
+	s = s.replace(/ai/g, 'e');
+	s = s.replace(/oi/g, 'i');
+	s = s.replace(/ou/g, 'u');
 
 	return s;
 }

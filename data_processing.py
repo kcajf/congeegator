@@ -227,7 +227,32 @@ def to_phonetic_el(s: str) -> str:
     s = s.replace("ph", "f")
     s = re.sub(r"c(?!h)", "k", s)
     s = s.replace("q", "k")
+    s = s.replace("x", "ch")
+    s = re.sub(r"(?<![ctk])h", "ch", s)
     s = s.replace("y", "i")
+
+    # Latin au/eu voicing (mirrors Greek αυ/ευ rules for naive transliterations)
+    latin_voiceless = set("ptksfc")
+    result = []
+    i = 0
+    while i < len(s):
+        if i + 1 < len(s) and s[i] in ("a", "e") and s[i + 1] == "u":
+            next_after = s[i + 2] if i + 2 < len(s) else None
+            if next_after is None or next_after in latin_voiceless:
+                result.append(s[i] + "f")
+            else:
+                result.append(s[i] + "v")
+            i += 2
+            continue
+        result.append(s[i])
+        i += 1
+    s = "".join(result)
+
+    # Latin vowel digraphs (mirrors Greek αι/ει/οι/ου)
+    s = s.replace("ei", "i")
+    s = s.replace("ai", "e")
+    s = s.replace("oi", "i")
+    s = s.replace("ou", "u")
 
     return s
 
