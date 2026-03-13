@@ -40,50 +40,13 @@ jobs:
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
 
-      # Save old manifest hashes before regeneration
-      - name: Save old manifest hashes
-        run: |
-          python3 -c "
-          import json, sys
-          with open('src/lib/data-manifest.json') as f:
-              m = json.load(f)
-          for lang, info in m.get('languages', {}).items():
-              print(f\"{lang}={info['dataHash']}\")
-          " > /tmp/old_hashes.txt
-          cat /tmp/old_hashes.txt
-
       # Generate data from pinned source (fetches via public R2 URL, no creds needed)
       - name: Generate data
         run: pixi run python data_processing.py
 
-      # Upload only changed language dirs to R2
-      - name: Upload changed data to R2
-        run: |
-          BUCKET="r2-congeegator:congeegator"
-          RCLONE_FLAGS="--transfers=64 --checkers=64 --fast-list --stats-one-line --checksum"
-
-          # Build map of old hashes
-          declare -A OLD_HASHES
-          while IFS='=' read -r lang hash; do
-            OLD_HASHES[$lang]=$hash
-          done < /tmp/old_hashes.txt
-
-          # Read new manifest and upload changed languages
-          python3 -c "
-          import json
-          with open('src/lib/data-manifest.json') as f:
-              m = json.load(f)
-          for lang, info in m.get('languages', {}).items():
-              print(f\"{lang}={info['dataHash']}\")
-          " | while IFS='=' read -r lang hash; do
-            dir="r2_data/data/v1/${lang}-${hash}"
-            if [ "${OLD_HASHES[$lang]}" = "$hash" ]; then
-              echo "Skipping $lang (hash unchanged: $hash)"
-            else
-              echo "Uploading $lang (hash changed: ${OLD_HASHES[$lang]:-new} -> $hash)"
-              rclone copy "$dir" "$BUCKET/data/v1/${lang}-${hash}" $RCLONE_FLAGS
-            fi
-          done
+      # Upload data to R2 (needs rclone creds)
+      - name: Upload data to R2
+        run: npm run r2-upload:prod
 
       # Build and deploy
       - name: Build
