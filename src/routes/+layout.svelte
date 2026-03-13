@@ -10,7 +10,7 @@
 	import { appTitle } from '$lib/defs';
 	import { i18n } from '$lib/i18n.svelte';
 	import {
-		findBestMatch,
+		findMatches,
 		prefixLookup,
 		stripDiacritics,
 		toPhonetic,
@@ -103,9 +103,8 @@
 
 				searchResults = data
 					.filter((v): v is VerbRecord => !!v)
-					.map((v) => findBestMatch(v, currentQuery, currentLang))
-					.filter((res): res is SearchResult => !!res)
-					.sort((a, b) => a.matched.length - b.matched.length)
+					.flatMap((v) => findMatches(v, currentQuery, currentLang))
+					.sort((a, b) => a.quality - b.quality || a.matched.length - b.matched.length)
 					.slice(0, 15);
 			})
 			.catch((err) => {
@@ -150,7 +149,7 @@
 
 			{#if searchResults.length > 0}
 				<ul class="results-list">
-					{#each searchResults as item (item.root)}
+					{#each searchResults as item (`${item.root}:${item.matched}`)}
 						<li>
 							<a
 								href={resolve('/[lang=lang]/[verb]', {
