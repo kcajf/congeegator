@@ -514,6 +514,14 @@ FR_CONFIG = LanguageConfig(
         full_tense("fr", "fr_indic_past_hist", ("past", "historic", "indicative")),
         full_tense("fr", "fr_indic_fut", ("future", "indicative")),
         full_tense("fr", "fr_cond_pres", ("conditional",)),
+        TenseConfig(
+            "fr_imper_pres",
+            (
+                FormMatcher(("second-person", "singular", "imperative"), pronoun="(tu)"),
+                FormMatcher(("first-person", "plural", "imperative"), pronoun="(nous)"),
+                FormMatcher(("second-person", "plural", "imperative"), pronoun="(vous)"),
+            ),
+        ),
         full_tense("fr", "fr_subj_pres", ("subjunctive", "present"), pronouns=FR_SUBJ_PRONOUNS),
         full_tense("fr", "fr_subj_imperf", ("subjunctive", "imperfect"), pronouns=FR_SUBJ_PRONOUNS),
         repeated_tense(
@@ -533,6 +541,7 @@ FR_CONFIG = LanguageConfig(
         TenseGroup("fr_indic", re.compile(r"^fr_indic_")),
         TenseGroup("fr_subj", re.compile(r"^fr_subj_")),
         TenseGroup("fr_cond", re.compile(r"^fr_cond_")),
+        TenseGroup("fr_imper", re.compile(r"^fr_imper_(?!s_)")),
         TenseGroup("fr_impers", re.compile(r"^fr_impers_")),
     ],
 )
