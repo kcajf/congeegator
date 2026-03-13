@@ -3,11 +3,23 @@ import { db } from './db';
 import { searchLangState } from './searchLang.svelte';
 
 let worker: Worker | undefined;
+let workerReady: Promise<void> | undefined;
 
 if (browser) {
 	// The 'new URL' syntax is recognized by Vite to bundle the worker file separately
 	worker = new Worker(new URL('./sync.worker.ts', import.meta.url), {
 		type: 'module'
+	});
+
+	// Wait for the worker to signal it's ready, with a timeout fallback
+	workerReady = new Promise<void>((resolve) => {
+		const onFirstMessage = () => {
+			resolve();
+			worker!.removeEventListener('message', onFirstMessage);
+		};
+		worker!.addEventListener('message', onFirstMessage);
+		// Fallback: assume ready after a short delay if no READY message
+		setTimeout(resolve, 500);
 	});
 
 	worker.onmessage = (e) => {
@@ -38,12 +50,12 @@ if (browser) {
 //     getWorker();
 // }
 
-export function triggerLangSync(lang: string) {
-	// const worker = getWorker();
-	if (!worker) {
+export async function triggerLangSync(lang: string) {
+	if (!worker || !workerReady) {
 		console.warn('Worker not initialized. Are you on the server?');
 		return;
 	}
+	await workerReady;
 	console.log('Trigger language sync ' + lang);
 	worker.postMessage({ lang });
 }

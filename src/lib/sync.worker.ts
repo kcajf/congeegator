@@ -2,18 +2,12 @@ import { getLangDataUrl, manifest } from './dataUtils';
 import { db } from './db';
 import type { VerbRecord } from './types';
 
+self.postMessage({ type: 'READY' });
+
 self.onmessage = async (e: MessageEvent<{ lang: string }>) => {
 	const { lang } = e.data;
 
-	// Request a lock specific to this language
-	console.log(`Getting lock for ${lang}`);
-	await navigator.locks.request(`sync-${lang}`, { ifAvailable: true }, async (lock) => {
-		if (!lock) {
-			console.log(`Sync for ${lang} already in progress. Skipping.`);
-			self.postMessage({ type: 'SKIPPED', lang });
-			return;
-		}
-
+	async function doSync() {
 		console.log(`starting to syncLanguage ${lang}`);
 
 		try {
@@ -35,7 +29,6 @@ self.onmessage = async (e: MessageEvent<{ lang: string }>) => {
 				}
 
 				const url = `${getLangDataUrl(lang)}/data.json`;
-				// console.log(`Fetching ${url}`)
 				const raw = await fetch(url).then((r) => r.json());
 				const records: VerbRecord[] = raw['verbs'].map(
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -68,5 +61,18 @@ self.onmessage = async (e: MessageEvent<{ lang: string }>) => {
 				error: error instanceof Error ? error.message : String(error)
 			});
 		}
-	});
+	}
+
+	// Use navigator.locks if available (secure contexts), otherwise run directly
+	if (navigator.locks) {
+		await navigator.locks.request(`sync-${lang}`, { ifAvailable: true }, async (lock) => {
+			if (!lock) {
+				self.postMessage({ type: 'SKIPPED', lang });
+				return;
+			}
+			await doSync();
+		});
+	} else {
+		await doSync();
+	}
 };
