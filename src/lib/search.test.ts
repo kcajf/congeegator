@@ -55,7 +55,7 @@ describe('prefixLookup', () => {
 describe('findMatches', () => {
 	it('matches the verb name exactly', () => {
 		const verb = makeVerb({ name: 'manger' });
-		expect(findMatches(verb, 'manger', 'fr')).toEqual([
+		expect(findMatches(verb, 'manger', 'manger', 'fr')).toEqual([
 			{ root: 'manger', matched: 'manger', quality: 0 }
 		]);
 	});
@@ -65,7 +65,7 @@ describe('findMatches', () => {
 			name: 'manger',
 			conjugation: ['mange', 'mangeons']
 		});
-		const results = findMatches(verb, 'man', 'fr');
+		const results = findMatches(verb, 'man', 'man', 'fr');
 		expect(results).toContainEqual({ root: 'manger', matched: 'manger', quality: 0 });
 		expect(results).toContainEqual({ root: 'manger', matched: 'mange', quality: 0 });
 		expect(results).toContainEqual({ root: 'manger', matched: 'mangeons', quality: 0 });
@@ -76,7 +76,7 @@ describe('findMatches', () => {
 			name: 'aller',
 			conjugation: [['va', 'vas'], 'allons']
 		});
-		expect(findMatches(verb, 'va', 'fr')).toContainEqual({
+		expect(findMatches(verb, 'va', 'va', 'fr')).toContainEqual({
 			root: 'aller',
 			matched: 'va',
 			quality: 0
@@ -85,7 +85,7 @@ describe('findMatches', () => {
 
 	it('returns empty array when nothing matches', () => {
 		const verb = makeVerb({ name: 'manger', conjugation: ['mange'] });
-		expect(findMatches(verb, 'xyz', 'fr')).toEqual([]);
+		expect(findMatches(verb, 'xyz', 'xyz', 'fr')).toEqual([]);
 	});
 
 	it('returns both exact and diacritics-stripped matches', () => {
@@ -93,14 +93,14 @@ describe('findMatches', () => {
 			name: 'manger',
 			conjugation: ['mange', 'mangé']
 		});
-		const results = findMatches(verb, 'mange', 'fr');
+		const results = findMatches(verb, 'mange', 'mange', 'fr');
 		expect(results).toContainEqual({ root: 'manger', matched: 'mange', quality: 0 });
 		expect(results).toContainEqual({ root: 'manger', matched: 'mangé', quality: 1 });
 	});
 
 	it('matches accented verb name with stripped query', () => {
 		const verb = makeVerb({ name: 'être', nameNoDiacritics: 'etre', conjugation: ['suis'] });
-		expect(findMatches(verb, 'etre', 'fr')).toContainEqual({
+		expect(findMatches(verb, 'etre', 'etre', 'fr')).toContainEqual({
 			root: 'être',
 			matched: 'être',
 			quality: 1
@@ -109,10 +109,26 @@ describe('findMatches', () => {
 
 	it('matches Greek verb via phonetic Latin query', () => {
 		const verb = makeVerb({ name: 'κάνω', lang: 'el', conjugation: ['κάνεις', 'κάνει'] });
-		expect(findMatches(verb, 'kano', 'el')).toContainEqual({
+		expect(findMatches(verb, 'kano', 'kano', 'el')).toContainEqual({
 			root: 'κάνω',
 			matched: 'κάνω',
 			quality: 2
+		});
+	});
+
+	it('gives exact diacritic match quality 0 and stripped match quality 1', () => {
+		const verbWithDiacritics = makeVerb({ name: 'abändern' });
+		const verbWithout = makeVerb({ name: 'abandonnier' });
+		// Query "abä" (with diacritic) should give quality 0 for abändern, quality 1 for abandonnier
+		expect(findMatches(verbWithDiacritics, 'abä', 'aba', 'fr')).toContainEqual({
+			root: 'abändern',
+			matched: 'abändern',
+			quality: 0
+		});
+		expect(findMatches(verbWithout, 'abä', 'aba', 'fr')).toContainEqual({
+			root: 'abandonnier',
+			matched: 'abandonnier',
+			quality: 1
 		});
 	});
 });

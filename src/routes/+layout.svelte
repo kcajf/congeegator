@@ -85,7 +85,8 @@
 		const index = searchLangState.indexData;
 
 		const currentLang = searchLangState.lang;
-		const stripped = stripDiacritics(searchTerm.toLowerCase().trim());
+		const originalQuery = searchTerm.toLowerCase().trim();
+		const stripped = stripDiacritics(originalQuery);
 		const currentQuery = toPhonetic(currentLang, stripped);
 		if (!index || currentQuery.length < 2) {
 			searchResults = [];
@@ -111,7 +112,7 @@
 
 				searchResults = data
 					.filter((v): v is VerbRecord => !!v)
-					.flatMap((v) => findMatches(v, currentQuery, currentLang))
+					.flatMap((v) => findMatches(v, originalQuery, currentQuery, currentLang))
 					.sort((a, b) => a.quality - b.quality || a.matched.length - b.matched.length)
 					.slice(0, 15);
 			})
