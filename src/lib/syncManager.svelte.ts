@@ -8,6 +8,8 @@ let worker: Worker | undefined;
 let workerReady: Promise<void> | undefined;
 
 const syncToastIds: Record<string, string> = {};
+const syncToastCreatedAt: Record<string, number> = {};
+const MIN_TOAST_MS = 800;
 
 if (browser) {
 	// The 'new URL' syntax is recognized by Vite to bundle the worker file separately
@@ -32,17 +34,29 @@ if (browser) {
 
 		if (type === 'PROGRESS') {
 			if (!syncToastIds[lang]) {
-				syncToastIds[lang] = toasts.add(`Syncing ${name}...`, { dismissAfter: 30000 });
+				const verb = globalSync.map[lang] ? 'Updating' : 'Downloading';
+				syncToastIds[lang] = toasts.add(`${verb} ${name}...`, { dismissAfter: 30000 });
+				syncToastCreatedAt[lang] = Date.now();
 			}
 		}
 
 		if (type === 'COMPLETE') {
 			const id = syncToastIds[lang];
-			if (id) {
-				toasts.update(id, `${name} ready`);
-				delete syncToastIds[lang];
+			const showReady = () => {
+				if (id) {
+					toasts.update(id, `${name} ready for offline`);
+					delete syncToastIds[lang];
+				}
+				delete syncToastCreatedAt[lang];
+				searchLangState.reloadIndex(lang);
+			};
+
+			const elapsed = Date.now() - (syncToastCreatedAt[lang] ?? 0);
+			if (elapsed < MIN_TOAST_MS) {
+				setTimeout(showReady, MIN_TOAST_MS - elapsed);
+			} else {
+				showReady();
 			}
-			searchLangState.reloadIndex(lang);
 		}
 
 		if (type === 'SKIPPED') {

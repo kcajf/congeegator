@@ -20,11 +20,20 @@
 	import type { VerbRecord } from '$lib/types';
 	import ToastStack from '$lib/components/ToastStack.svelte';
 	import { toasts } from '$lib/toasts.svelte';
+	import { dev } from '$app/environment';
 	import { onMount, tick } from 'svelte';
 	import { pwaInfo } from 'virtual:pwa-info';
 	import type { LayoutProps } from './$types';
 
 	const PUBLIC_R2_URL = import.meta.env.VITE_R2_URL;
+
+	async function nukeState() {
+		await db.delete();
+		localStorage.clear();
+		const regs = await navigator.serviceWorker?.getRegistrations();
+		for (const r of regs ?? []) await r.unregister();
+		location.reload();
+	}
 
 	let { children }: LayoutProps = $props();
 
@@ -215,6 +224,10 @@
 
 <ToastStack />
 
+{#if dev}
+	<button class="nuke-btn" onclick={nukeState}>nuke state</button>
+{/if}
+
 <style>
 	:global(html) {
 		scrollbar-gutter: stable;
@@ -304,5 +317,19 @@
 	.result-link:focus {
 		background-color: #f5f5f5;
 		outline: none;
+	}
+
+	.nuke-btn {
+		position: fixed;
+		top: 0.5rem;
+		right: 0.5rem;
+		background: #c00;
+		color: white;
+		border: none;
+		padding: 0.3rem 0.6rem;
+		font-size: 0.7rem;
+		cursor: pointer;
+		z-index: 9999;
+		opacity: 0.6;
 	}
 </style>

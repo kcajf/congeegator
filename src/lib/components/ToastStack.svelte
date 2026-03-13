@@ -21,23 +21,22 @@
 <style>
 	.toast-stack {
 		position: fixed;
-		bottom: 1rem;
-		left: 50%;
-		transform: translateX(-50%);
+		bottom: 0;
+		left: 0;
+		right: 0;
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
 		z-index: 1000;
 		pointer-events: none;
 	}
 
 	.toast {
-		color: white;
-		padding: 0.6rem 1.2rem;
-		border-radius: 4px;
-		font-size: 0.9rem;
+		color: #f5f5f0;
+		padding: 0.5rem 1rem;
+		font-size: 0.85rem;
+		font-weight: 600;
+		letter-spacing: 0.02em;
 		pointer-events: auto;
-		white-space: nowrap;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+		text-align: center;
 	}
 </style>
