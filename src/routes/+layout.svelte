@@ -240,6 +240,7 @@
 
 	.search-container input {
 		appearance: none;
+		background-color: transparent;
 		/* margin-left: 1rem;
 		margin-right: 1rem; */
 		padding: 0.5rem 0.2rem;
