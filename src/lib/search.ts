@@ -3,6 +3,7 @@ import type { Id, SearchIndex, VerbRecord } from './types';
 export type SearchResult = {
 	root: string;
 	matched: string;
+	quality: number; // 0 = exact, 1 = diacritics-stripped, 2 = phonetic
 };
 
 export function stripDiacritics(s: string): string {
@@ -55,7 +56,7 @@ export function toPhoneticEl(s: string): string {
 	s = s.replace(/αι/g, 'e');
 	s = s.replace(/ει/g, 'i');
 	s = s.replace(/οι/g, 'i');
-	s = s.replace(/ου/g, 'u');
+	s = s.replace(/ου/g, 'U'); // placeholder — ου sounds like "u", protected from u→i
 	s = s.replace(/υι/g, 'i');
 
 	// Single vowels
@@ -87,10 +88,16 @@ export function toPhoneticEl(s: string): string {
 	s = s.replace(/χ/g, 'ch');
 	s = s.replace(/ψ/g, 'ps');
 
+	// Latin consonant bigrams (mirrors Greek μπ/ντ/γκ)
+	s = s.replace(/mp/g, 'b');
+	s = s.replace(/nt/g, 'd');
+	s = s.replace(/gk/g, 'g');
+
 	// Latin normalization
 	s = s.replace(/ph/g, 'f');
 	s = s.replace(/c(?!h)/g, 'k');
 	s = s.replace(/q/g, 'k');
+	s = s.replace(/w/g, 'o');
 	s = s.replace(/x/g, 'ch');
 	s = s.replace(/(?<![ctk])h/g, 'ch');
 	s = s.replace(/y/g, 'i');
@@ -119,7 +126,9 @@ export function toPhoneticEl(s: string): string {
 	s = s.replace(/ei/g, 'i');
 	s = s.replace(/ai/g, 'e');
 	s = s.replace(/oi/g, 'i');
-	s = s.replace(/ou/g, 'u');
+	s = s.replace(/ou/g, 'U'); // placeholder to protect from u→i
+	s = s.replace(/u/g, 'i'); // υ is pronounced "i" in modern Greek
+	s = s.replace(/U/g, 'u'); // restore ou→u
 
 	return s;
 }
@@ -129,30 +138,34 @@ export function toPhonetic(lang: string, s: string): string {
 	return s;
 }
 
-export function findBestMatch(verb: VerbRecord, query: string, lang: string): SearchResult | null {
-	const phoneticQuery = toPhonetic(lang, query);
-	let best: string | null = null;
+function matchQuality(form: string, query: string, lang: string): number | null {
+	if (form.toLowerCase().includes(query)) return 0;
+	const stripped = stripDiacritics(form).toLowerCase();
+	if (stripped.includes(query)) return 1;
+	if (toPhonetic(lang, stripped).includes(query)) return 2;
+	return null;
+}
 
-	const matches = (form: string) => {
-		const stripped = stripDiacritics(form).toLowerCase();
-		return stripped.includes(query) || toPhonetic(lang, stripped).includes(phoneticQuery);
+export function findMatches(verb: VerbRecord, query: string, lang: string): SearchResult[] {
+	// query is already phonetically transformed by the caller
+	const seen = new Map<string, SearchResult>();
+
+	const consider = (form: string) => {
+		const quality = matchQuality(form, query, lang);
+		if (quality === null) return;
+		const existing = seen.get(form);
+		if (!existing || quality < existing.quality) {
+			seen.set(form, { root: verb.name, matched: form, quality });
+		}
 	};
 
-	if (matches(verb.name)) {
-		best = verb.name;
-	}
-
+	consider(verb.name);
 	for (const entry of verb.conjugation) {
 		const forms = Array.isArray(entry) ? entry : [entry];
 		for (const form of forms) {
-			if (matches(form)) {
-				if (!best || form.length < best.length) {
-					best = form;
-				}
-			}
+			consider(form);
 		}
-		if (best?.length === query.length) break;
 	}
 
-	return best ? { root: verb.name, matched: best } : null;
+	return [...seen.values()];
 }
