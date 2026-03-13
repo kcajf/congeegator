@@ -115,6 +115,37 @@ describe('findMatches', () => {
 			quality: 2
 		});
 	});
+
+	it('collapses compound forms to last word — single result for German past participle', () => {
+		const verb = makeVerb({
+			name: 'biegen',
+			lang: 'de',
+			conjugation: ['hat gebogen', 'habe gebogen', 'hast gebogen']
+		});
+		const results = findMatches(verb, 'gebogen', 'de');
+		expect(results).toHaveLength(1);
+		expect(results[0]).toEqual({ root: 'biegen', matched: 'gebogen', quality: 0 });
+	});
+
+	it('collapses French compound past tense forms to last word', () => {
+		const verb = makeVerb({
+			name: 'manger',
+			conjugation: ['a mangé', 'avons mangé', 'ont mangé']
+		});
+		const results = findMatches(verb, 'mang', 'fr');
+		expect(results).toHaveLength(1);
+		expect(results[0]).toEqual({ root: 'manger', matched: 'mangé', quality: 1 });
+	});
+
+	it('still matches verb name directly when it matches the query', () => {
+		const verb = makeVerb({
+			name: 'biegen',
+			lang: 'de',
+			conjugation: ['hat gebogen', 'habe gebogen']
+		});
+		const results = findMatches(verb, 'biegen', 'de');
+		expect(results).toContainEqual({ root: 'biegen', matched: 'biegen', quality: 0 });
+	});
 });
 
 describe('stripDiacritics', () => {

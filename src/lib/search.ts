@@ -159,11 +159,19 @@ export function findMatches(verb: VerbRecord, query: string, lang: string): Sear
 		}
 	};
 
+	// For conjugation forms, normalise compound forms (e.g. "hat gebogen" → "gebogen")
+	// so that all compound variants collapse into one result, consistent with how
+	// build_search_index tokenises compound forms.
+	const considerConjugation = (form: string) => {
+		const matchForm = form.includes(' ') ? form.split(' ').at(-1)! : form;
+		consider(matchForm);
+	};
+
 	consider(verb.name);
 	for (const entry of verb.conjugation) {
 		const forms = Array.isArray(entry) ? entry : [entry];
 		for (const form of forms) {
-			consider(form);
+			considerConjugation(form);
 		}
 	}
 
