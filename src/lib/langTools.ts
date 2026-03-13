@@ -12,8 +12,9 @@ export function formatForm(form: string): string {
 	const result = [parts[0]];
 	for (let i = 1; i < parts.length; i++) {
 		const lcp = longestCommonPrefix(parts[0], parts[i]);
-		if (lcp.length >= 4) {
-			result.push('-' + parts[i].slice(lcp.length));
+		const suffix = parts[i].slice(lcp.length);
+		if (lcp.length >= 4 && !parts[0].endsWith(suffix)) {
+			result.push('-' + suffix);
 		} else {
 			result.push(parts[i]);
 		}
