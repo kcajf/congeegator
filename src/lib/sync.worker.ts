@@ -10,6 +10,7 @@ self.onmessage = async (e: MessageEvent<{ lang: string }>) => {
 	await navigator.locks.request(`sync-${lang}`, { ifAvailable: true }, async (lock) => {
 		if (!lock) {
 			console.log(`Sync for ${lang} already in progress. Skipping.`);
+			self.postMessage({ type: 'SKIPPED', lang });
 			return;
 		}
 

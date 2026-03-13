@@ -20,7 +20,11 @@ if (browser) {
 
 		if (type === 'COMPLETE') {
 			console.log(`${lang} loading: complete`);
-			searchLangState.reloadIndex();
+			searchLangState.reloadIndex(lang);
+		}
+
+		if (type === 'SKIPPED') {
+			console.log(`${lang} loading: skipped (already in progress)`);
 		}
 
 		if (type === 'ERROR') {
