@@ -287,6 +287,7 @@ LANG_PRONOUNS = {
     "fr": ("je", "tu", "il/elle", "nous", "vous", "ils/elles"),
     "el": ("εγώ", "εσύ", "αυτ(ος/ή/ό)", "εμείς", "εσείς", "αυτ(οί/ές/ά)"),
     "de": ("ich", "du", "er/sie/es", "wir", "ihr", "sie/Sie"),
+    "es": ("yo", "tú", "él/ella/usted", "nosotros/-as", "vosotros/-as", "ellos/-as/ustedes"),
 }
 
 
@@ -540,10 +541,59 @@ DE_CONFIG = LanguageConfig(
         TenseGroup("de_subj", re.compile(r"^de_subj_")),
     ],
 )
+ES_PRES_INDIC_HABER = ("he", "has", "ha", "hemos", "habéis", "han")
+ES_IMPERF_INDIC_HABER = ("había", "habías", "había", "habíamos", "habíais", "habían")
+
+ES_CONFIG = LanguageConfig(
+    code="es",
+    name="Spanish",
+    tenses=(
+        # Impersonal
+        TenseConfig("es_impers_inf", FormMatcher(("infinitive",))),
+        TenseConfig("es_impers_gerund", FormMatcher(("gerund",))),
+        TenseConfig("es_impers_past_partic", FormMatcher(("participle", "past"))),
+        # Indicative
+        full_tense("es", "es_indic_pres", ("present", "indicative")),
+        full_tense("es", "es_indic_pret", ("preterite",)),
+        full_tense("es", "es_indic_imperf", ("imperfect",)),
+        full_tense("es", "es_indic_fut", ("future",)),
+        repeated_tense(
+            "es", "es_indic_pres_perf", ("participle", "past"), ES_PRES_INDIC_HABER
+        ),
+        repeated_tense(
+            "es", "es_indic_pluperf", ("participle", "past"), ES_IMPERF_INDIC_HABER
+        ),
+        # Conditional
+        full_tense("es", "es_cond_pres", ("conditional",)),
+        # Subjunctive
+        full_tense("es", "es_subj_pres", ("present", "subjunctive")),
+        full_tense("es", "es_subj_imperf", ("imperfect", "subjunctive")),
+        # Imperative (5 forms — no 1st person singular)
+        TenseConfig(
+            "es_imper",
+            (
+                FormMatcher(("second-person", "singular", "imperative"), pronoun="tú"),
+                FormMatcher(("third-person", "singular", "imperative"), pronoun="usted"),
+                FormMatcher(("first-person", "plural", "imperative"), pronoun="nosotros/-as"),
+                FormMatcher(("second-person", "plural", "imperative"), pronoun="vosotros/-as"),
+                FormMatcher(("third-person", "plural", "imperative"), pronoun="ustedes"),
+            ),
+        ),
+    ),
+    tense_groups=[
+        TenseGroup("es_indic", re.compile(r"^es_indic_")),
+        TenseGroup("es_subj", re.compile(r"^es_subj_")),
+        TenseGroup("es_cond", re.compile(r"^es_cond_")),
+        TenseGroup("es_imper", re.compile(r"^es_imper$")),
+        TenseGroup("es_impers", re.compile(r"^es_impers_")),
+    ],
+)
+
 CONFIG: list[LanguageConfig] = [
     FR_CONFIG,
     EL_CONFIG,
     DE_CONFIG,
+    ES_CONFIG,
 ]
 
 
