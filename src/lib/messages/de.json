@@ -69,5 +69,6 @@
 	"pwa_offline_ready": "App ist bereit für die Offline-Nutzung",
 	"pwa_update_available": "Neuer Inhalt verfügbar, klicken Sie auf Neu laden, um zu aktualisieren.",
 	"reload": "Neu laden",
-	"close": "Schließen"
+	"close": "Schließen",
+	"native_tense_names": "Zeitnamen in der Konjugationssprache anzeigen"
 }

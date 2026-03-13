@@ -90,5 +90,6 @@
 	"pwa_offline_ready": "Application prête pour une utilisation hors ligne",
 	"pwa_update_available": "Nouveau contenu disponible, cliquez sur recharger pour mettre à jour.",
 	"reload": "Recharger",
-	"close": "Fermer"
+	"close": "Fermer",
+	"native_tense_names": "Afficher les noms des temps dans la langue d'origine"
 }

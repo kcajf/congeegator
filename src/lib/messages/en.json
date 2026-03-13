@@ -90,5 +90,6 @@
 	"pwa_offline_ready": "App ready to work offline",
 	"pwa_update_available": "New content available, click on reload button to update.",
 	"reload": "Reload",
-	"close": "Close"
+	"close": "Close",
+	"native_tense_names": "Show tense names in native language"
 }
