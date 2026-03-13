@@ -40,3 +40,51 @@ export function formatPronoun(
 
 	return pronoun + ' ';
 }
+
+export type VerbExternalLink = {
+	type: 'icon' | 'text';
+	label: string;
+	href: string;
+	icon?: string;
+};
+
+const WR_LANG_CODES: Record<string, string> = {
+	fr: 'fren',
+	el: 'gren',
+	de: 'deen'
+};
+
+export function getExternalLinks(
+	lang: string,
+	verbName: string,
+	wordreferenceLogo: string
+): VerbExternalLink[] {
+	const links: VerbExternalLink[] = [];
+
+	const wrCode = WR_LANG_CODES[lang];
+	if (wrCode) {
+		links.push({
+			type: 'icon',
+			label: 'WordReference',
+			href: `https://www.wordreference.com/${wrCode}/${encodeURIComponent(verbName)}`,
+			icon: wordreferenceLogo
+		});
+	}
+
+	if (lang === 'fr') {
+		links.push({
+			type: 'text',
+			label: 'Bescherelle',
+			href: `https://conjugaison.bescherelle.com/verbes/${encodeURIComponent(verbName)}`
+		});
+	} else if (lang === 'el') {
+		links.push({
+			type: 'text',
+			label:
+				'\u03A4\u03C1\u03B9\u03B1\u03BD\u03C4\u03B1\u03C6\u03C5\u03BB\u03BB\u03AF\u03B4\u03B7\u03C2',
+			href: `https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=${encodeURIComponent(verbName)}&dq=`
+		});
+	}
+
+	return links;
+}
