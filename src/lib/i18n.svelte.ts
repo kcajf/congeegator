@@ -9,11 +9,12 @@ import fr from './messages/fr.json';
 type Dictionary = Record<string, Record<string, string>>;
 
 export const i18nDictionary: Dictionary = { en, fr, el, de, es };
-type LangCode = keyof typeof i18nDictionary;
+export type LangCode = keyof typeof i18nDictionary;
 
 // We create a global state object
 class I18n {
 	current = $state<LangCode>('en');
+	nativeTenseNames = $state(false);
 
 	init(serverLang: LangCode) {
 		if (!browser) {
@@ -28,6 +29,22 @@ class I18n {
 		} else {
 			this.current = serverLang;
 		}
+
+		this.nativeTenseNames = localStorage.getItem('nativeTenseNames') === 'true';
+	}
+
+	setNativeTenseNames(val: boolean) {
+		this.nativeTenseNames = val;
+		if (browser) {
+			localStorage.setItem('nativeTenseNames', String(val));
+		}
+	}
+
+	translateTense(key: string, lang: string) {
+		if (this.nativeTenseNames && i18nDictionary[lang]?.[key]) {
+			return i18nDictionary[lang][key];
+		}
+		return this.translate(key);
 	}
 
 	// A derived translation function

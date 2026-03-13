@@ -60,8 +60,7 @@
 
 	const getTenseDisplayName = (tenseCode: string) => {
 		try {
-			// TODO: support 'native' tense code mode, where it's always language
-			return i18n.translate(tenseCode);
+			return i18n.translateTense(tenseCode, data.verb.lang);
 		} catch {
 			return tenseCode;
 		}
