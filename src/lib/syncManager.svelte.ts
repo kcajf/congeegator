@@ -30,6 +30,7 @@ if (browser) {
 
 	worker.onmessage = (e) => {
 		const { type, lang, error } = e.data;
+		if (type === 'READY') return;
 		const name = langName(lang);
 
 		if (type === 'PROGRESS') {
