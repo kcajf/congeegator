@@ -24,7 +24,7 @@ log = logging.getLogger(__name__)
 
 # Timestamp version of pinned source data in R2.
 # Update by running: pixi run pin-source-data
-SOURCE_DATA_VERSION = "2026-03-12T192308Z"
+SOURCE_DATA_VERSION = "2026-03-13T100708Z"
 
 
 class CacheManager:
@@ -287,6 +287,7 @@ LANG_PRONOUNS = {
     "fr": ("je", "tu", "il/elle", "nous", "vous", "ils/elles"),
     "el": ("εγώ", "εσύ", "αυτ(ος/ή/ό)", "εμείς", "εσείς", "αυτ(οί/ές/ά)"),
     "de": ("ich", "du", "er/sie/es", "wir", "ihr", "sie/Sie"),
+    "es": ("yo", "tú", "él/ella/usted", "nosotros/-as", "vosotros/-as", "ellos/-as/ustedes"),
 }
 
 FR_SUBJ_PRONOUNS = ("que je", "que tu", "qu'il/elle", "que nous", "que vous", "qu'ils/elles")
@@ -565,10 +566,59 @@ DE_CONFIG = LanguageConfig(
         TenseGroup("de_subj_ii_grp", re.compile(r"^de_subj_ii($|_)")),
     ],
 )
+ES_PRES_INDIC_HABER = ("he", "has", "ha", "hemos", "habéis", "han")
+ES_IMPERF_INDIC_HABER = ("había", "habías", "había", "habíamos", "habíais", "habían")
+
+ES_CONFIG = LanguageConfig(
+    code="es",
+    name="Spanish",
+    tenses=(
+        # Impersonal
+        TenseConfig("es_impers_inf", FormMatcher(("infinitive",))),
+        TenseConfig("es_impers_gerund", FormMatcher(("gerund",))),
+        TenseConfig("es_impers_past_partic", FormMatcher(("participle", "past"))),
+        # Indicative
+        full_tense("es", "es_indic_pres", ("present", "indicative")),
+        full_tense("es", "es_indic_pret", ("preterite", "indicative")),
+        full_tense("es", "es_indic_imperf", ("imperfect", "indicative")),
+        full_tense("es", "es_indic_fut", ("future", "indicative")),
+        repeated_tense(
+            "es", "es_indic_pres_perf", ("participle", "past", "masculine", "singular"), ES_PRES_INDIC_HABER
+        ),
+        repeated_tense(
+            "es", "es_indic_pluperf", ("participle", "past", "masculine", "singular"), ES_IMPERF_INDIC_HABER
+        ),
+        # Conditional
+        full_tense("es", "es_cond_pres", ("conditional",)),
+        # Subjunctive
+        full_tense("es", "es_subj_pres", ("present", "subjunctive")),
+        full_tense("es", "es_subj_imperf", ("imperfect", "subjunctive")),
+        # Imperative (5 forms — no 1st person singular)
+        TenseConfig(
+            "es_imper",
+            (
+                FormMatcher(("second-person", "singular", "imperative"), pronoun="tú"),
+                FormMatcher(("third-person", "singular", "imperative"), pronoun="usted"),
+                FormMatcher(("first-person", "plural", "imperative"), pronoun="nosotros/-as"),
+                FormMatcher(("second-person", "plural", "imperative"), pronoun="vosotros/-as"),
+                FormMatcher(("third-person", "plural", "imperative"), pronoun="ustedes"),
+            ),
+        ),
+    ),
+    tense_groups=[
+        TenseGroup("es_indic", re.compile(r"^es_indic_")),
+        TenseGroup("es_subj", re.compile(r"^es_subj_")),
+        TenseGroup("es_cond", re.compile(r"^es_cond_")),
+        TenseGroup("es_imper", re.compile(r"^es_imper$")),
+        TenseGroup("es_impers", re.compile(r"^es_impers_")),
+    ],
+)
+
 CONFIG: list[LanguageConfig] = [
     FR_CONFIG,
     EL_CONFIG,
     DE_CONFIG,
+    ES_CONFIG,
 ]
 
 
@@ -708,6 +758,10 @@ def form_is_clean_conjugation(form: Form) -> bool:
         return False
     if "inflection-template" in form.tags:
         return False
+    if "combined-form" in form.tags:
+        return False
+    if "negative" in form.tags:
+        return False
 
     if "'" in form.form:  # French "t'es"
         return False
@@ -841,11 +895,10 @@ def entry_is_clean_verb_root(entry: Entry) -> bool:
     if "-" in entry.word:  # Greek '-βιβάζω'
         return False
 
-    for s in entry.senses:
-        if "form-of" in s.tags:
-            return False
-        if "alt-of" in s.tags:
-            return False
+    if entry.senses and all(
+        "form-of" in s.tags or "alt-of" in s.tags for s in entry.senses
+    ):
+        return False
 
     for h in entry.head_templates:
         if entry.lang_code == "el" and h.name == "el-part":
@@ -869,10 +922,10 @@ def entry_is_clean_verb_root(entry: Entry) -> bool:
         if c in BAD_CATEGORIES:
             return False
 
-    for s in entry.senses:
-        for c in s.categories:
-            if c in BAD_CATEGORIES:
-                return False
+    if entry.senses and all(
+        any(c in BAD_CATEGORIES for c in s.categories) for s in entry.senses
+    ):
+        return False
 
     return True
 

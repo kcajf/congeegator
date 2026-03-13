@@ -1,0 +1,89 @@
+{
+  "name": "tener",
+  "nameNoDiacritics": "tener",
+  "conjugation": [
+    "tener",
+    "teniendo",
+    "tenido/tenida/tenidos/tenidas",
+    [
+      "tengo",
+      "tienes/tenés",
+      "tiene",
+      "tenemos",
+      "tenéis",
+      "tienen"
+    ],
+    [
+      "tuve",
+      "tuviste",
+      "tuvo",
+      "tuvimos",
+      "tuvisteis",
+      "tuvieron"
+    ],
+    [
+      "tenía",
+      "tenías",
+      "tenía",
+      "teníamos",
+      "teníais",
+      "tenían"
+    ],
+    [
+      "tendré",
+      "tendrás",
+      "tendrá",
+      "tendremos",
+      "tendréis",
+      "tendrán"
+    ],
+    [
+      "he tenido",
+      "has tenido",
+      "ha tenido",
+      "hemos tenido",
+      "habéis tenido",
+      "han tenido"
+    ],
+    [
+      "había tenido",
+      "habías tenido",
+      "había tenido",
+      "habíamos tenido",
+      "habíais tenido",
+      "habían tenido"
+    ],
+    [
+      "tendría",
+      "tendrías",
+      "tendría",
+      "tendríamos",
+      "tendríais",
+      "tendrían"
+    ],
+    [
+      "tenga",
+      "tengas/tengás",
+      "tenga",
+      "tengamos",
+      "tengáis",
+      "tengan"
+    ],
+    [
+      "tuviera/tuviese",
+      "tuvieras/tuvieses",
+      "tuviera/tuviese",
+      "tuviéramos/tuviésemos",
+      "tuvierais/tuvieseis",
+      "tuvieran/tuviesen"
+    ],
+    [
+      "ten/tené",
+      "tenga",
+      "tengamos",
+      "tened",
+      "tengan"
+    ]
+  ],
+  "gloss": "to have; to possess"
+}

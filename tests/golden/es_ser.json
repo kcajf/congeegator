@@ -1,0 +1,89 @@
+{
+  "name": "ser",
+  "nameNoDiacritics": "ser",
+  "conjugation": [
+    "ser",
+    "siendo",
+    "sido/sida/sidos/sidas",
+    [
+      "soy",
+      "eres/sos",
+      "es",
+      "somos",
+      "sois",
+      "son"
+    ],
+    [
+      "fui",
+      "fuiste",
+      "fue",
+      "fuimos",
+      "fuisteis",
+      "fueron"
+    ],
+    [
+      "era",
+      "eras",
+      "era",
+      "éramos",
+      "erais",
+      "eran"
+    ],
+    [
+      "seré",
+      "serás",
+      "será",
+      "seremos",
+      "seréis",
+      "serán"
+    ],
+    [
+      "he sido",
+      "has sido",
+      "ha sido",
+      "hemos sido",
+      "habéis sido",
+      "han sido"
+    ],
+    [
+      "había sido",
+      "habías sido",
+      "había sido",
+      "habíamos sido",
+      "habíais sido",
+      "habían sido"
+    ],
+    [
+      "sería",
+      "serías",
+      "sería",
+      "seríamos",
+      "seríais",
+      "serían"
+    ],
+    [
+      "sea",
+      "seas/seás",
+      "sea",
+      "seamos",
+      "seáis",
+      "sean"
+    ],
+    [
+      "fuera/fuese",
+      "fueras/fueses",
+      "fuera/fuese",
+      "fuéramos/fuésemos",
+      "fuerais/fueseis",
+      "fueran/fuesen"
+    ],
+    [
+      "sé",
+      "sea",
+      "seamos",
+      "sed",
+      "sean"
+    ]
+  ],
+  "gloss": "to be (essentially or identified as)"
+}

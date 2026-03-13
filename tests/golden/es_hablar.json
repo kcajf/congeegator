@@ -1,0 +1,89 @@
+{
+  "name": "hablar",
+  "nameNoDiacritics": "hablar",
+  "conjugation": [
+    "hablar",
+    "hablando",
+    "hablado/hablada/hablados/habladas",
+    [
+      "hablo",
+      "hablas/hablás",
+      "habla",
+      "hablamos",
+      "habláis",
+      "hablan"
+    ],
+    [
+      "hablé",
+      "hablaste",
+      "habló",
+      "hablamos",
+      "hablasteis",
+      "hablaron"
+    ],
+    [
+      "hablaba",
+      "hablabas",
+      "hablaba",
+      "hablábamos",
+      "hablabais",
+      "hablaban"
+    ],
+    [
+      "hablaré",
+      "hablarás",
+      "hablará",
+      "hablaremos",
+      "hablaréis",
+      "hablarán"
+    ],
+    [
+      "he hablado",
+      "has hablado",
+      "ha hablado",
+      "hemos hablado",
+      "habéis hablado",
+      "han hablado"
+    ],
+    [
+      "había hablado",
+      "habías hablado",
+      "había hablado",
+      "habíamos hablado",
+      "habíais hablado",
+      "habían hablado"
+    ],
+    [
+      "hablaría",
+      "hablarías",
+      "hablaría",
+      "hablaríamos",
+      "hablaríais",
+      "hablarían"
+    ],
+    [
+      "hable",
+      "hables/hablés",
+      "hable",
+      "hablemos",
+      "habléis",
+      "hablen"
+    ],
+    [
+      "hablara/hablase",
+      "hablaras/hablases",
+      "hablara/hablase",
+      "habláramos/hablásemos",
+      "hablarais/hablaseis",
+      "hablaran/hablasen"
+    ],
+    [
+      "habla/hablá",
+      "hable",
+      "hablemos",
+      "hablad",
+      "hablen"
+    ]
+  ],
+  "gloss": "to talk; to speak; to communicate using words"
+}

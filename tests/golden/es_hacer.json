@@ -1,0 +1,89 @@
+{
+  "name": "hacer",
+  "nameNoDiacritics": "hacer",
+  "conjugation": [
+    "hacer/hacerse/hacerme/hacerte/hacernos/haceros",
+    "haciendo/haciéndose/haciéndome/haciéndote/haciéndonos/haciéndoos",
+    "hecho/hecha/hechos/hechas",
+    [
+      "hago",
+      "haces/hacés",
+      "hace",
+      "hacemos",
+      "hacéis",
+      "hacen"
+    ],
+    [
+      "hice",
+      "hiciste",
+      "hizo",
+      "hicimos",
+      "hicisteis",
+      "hicieron"
+    ],
+    [
+      "hacía",
+      "hacías",
+      "hacía",
+      "hacíamos",
+      "hacíais",
+      "hacían"
+    ],
+    [
+      "haré",
+      "harás",
+      "hará",
+      "haremos",
+      "haréis",
+      "harán"
+    ],
+    [
+      "he hecho",
+      "has hecho",
+      "ha hecho",
+      "hemos hecho",
+      "habéis hecho",
+      "han hecho"
+    ],
+    [
+      "había hecho",
+      "habías hecho",
+      "había hecho",
+      "habíamos hecho",
+      "habíais hecho",
+      "habían hecho"
+    ],
+    [
+      "haría",
+      "harías",
+      "haría",
+      "haríamos",
+      "haríais",
+      "harían"
+    ],
+    [
+      "haga",
+      "hagas/hagás",
+      "haga",
+      "hagamos",
+      "hagáis",
+      "hagan"
+    ],
+    [
+      "hiciera/hiciese",
+      "hicieras/hicieses",
+      "hiciera/hiciese",
+      "hiciéramos/hiciésemos",
+      "hicierais/hicieseis",
+      "hicieran/hiciesen"
+    ],
+    [
+      "haz/hacé/hazte/hacete",
+      "haga/hágase",
+      "hagamos/hagámonos",
+      "haced/haceos",
+      "hagan/háganse"
+    ]
+  ],
+  "gloss": "to do"
+}
