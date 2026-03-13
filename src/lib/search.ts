@@ -138,20 +138,31 @@ export function toPhonetic(lang: string, s: string): string {
 	return s;
 }
 
-function matchQuality(form: string, query: string, lang: string): number | null {
-	if (form.toLowerCase().includes(query)) return 0;
-	const stripped = stripDiacritics(form).toLowerCase();
-	if (stripped.includes(query)) return 1;
-	if (toPhonetic(lang, stripped).includes(query)) return 2;
+function matchQuality(
+	form: string,
+	originalQuery: string,
+	phoneticQuery: string,
+	lang: string
+): number | null {
+	if (form.toLowerCase().includes(originalQuery)) return 0;
+	const strippedForm = stripDiacritics(form).toLowerCase();
+	const strippedQuery = stripDiacritics(originalQuery);
+	if (strippedForm.includes(strippedQuery)) return 1;
+	if (toPhonetic(lang, strippedForm).includes(phoneticQuery)) return 2;
 	return null;
 }
 
-export function findMatches(verb: VerbRecord, query: string, lang: string): SearchResult[] {
-	// query is already phonetically transformed by the caller
+export function findMatches(
+	verb: VerbRecord,
+	originalQuery: string,
+	phoneticQuery: string,
+	lang: string
+): SearchResult[] {
+	// originalQuery is lowercased with diacritics preserved; phoneticQuery is the phonetically transformed form
 	const seen = new Map<string, SearchResult>();
 
 	const consider = (form: string) => {
-		const quality = matchQuality(form, query, lang);
+		const quality = matchQuality(form, originalQuery, phoneticQuery, lang);
 		if (quality === null) return;
 		const existing = seen.get(form);
 		if (!existing || quality < existing.quality) {

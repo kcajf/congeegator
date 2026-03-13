@@ -66,8 +66,7 @@
 
 		await tick();
 
-		// Only re-focus on desktop (non-touch) devices — on mobile, refocusing would re-open the keyboard
-		if (searchInput && !window.matchMedia('(pointer: coarse)').matches) {
+		if (searchInput) {
 			searchInput.focus();
 		}
 	}
@@ -75,7 +74,6 @@
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === 'Enter' && searchResults.length > 0) {
 			e.preventDefault();
-			searchInput?.blur(); // Dismiss mobile keyboard immediately
 			selectResult(searchResults[0]);
 		} else if (e.key === 'Escape') {
 			searchTerm = '';
@@ -242,7 +240,6 @@
 
 	.search-container input {
 		appearance: none;
-		background-color: transparent;
 		/* margin-left: 1rem;
 		margin-right: 1rem; */
 		padding: 0.5rem 0.2rem;
