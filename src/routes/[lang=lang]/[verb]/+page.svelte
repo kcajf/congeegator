@@ -8,9 +8,15 @@
 	import { formatPronoun } from '$lib/langTools';
 	import { triggerLangSync } from '$lib/syncManager.svelte';
 	import { tick } from 'svelte';
+	import type { ConjugationForms } from '$lib/types';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
+
+	function isTenseEmpty(forms: ConjugationForms): boolean {
+		if (typeof forms === 'string') return forms === '';
+		return forms.every((f) => f === '');
+	}
 
 	const highlightForm = $derived.by(() => {
 		const hash = page.url.hash;
@@ -77,38 +83,42 @@
 	</div>
 
 	{#each tenseGroups as tenseGroup (tenseGroup.name)}
-		<h2>{getTenseDisplayName(tenseGroup.name)}</h2>
-		<div class="tenseGroup">
-			{#each tenseGroup.tenseIndices as tenseI (tenseI)}
-				{@const tenseForms = data.verb.conjugation[tenseI]}
-				{#if Array.isArray(tenseForms)}
-					<div class="tense">
-						<h3>{getTenseDisplayName(tenseNames[tenseI])}</h3>
-						<table class="tenseTable">
-							<tbody>
-								{#each tenseForms as form, formI (formI)}
-									<tr class:highlight={isHighlighted(form)}>
-										<td
-											>{formatPronoun(
-												data.verb.lang,
-												tensePronouns[tenseI][formI],
-												form,
-												data.verb.frIsAspirated || false
-											)}</td
-										><td>{formatForm(form)}</td>
-									</tr>
-								{/each}
-							</tbody>
-						</table>
-					</div>
-				{:else}
-					<div class="tense tense-inline" class:highlight={isHighlighted(tenseForms)}>
-						<h3 class="tense-inline-name">{getTenseDisplayName(tenseNames[tenseI])}</h3>
-						<span class="tense-inline-value">{formatForm(tenseForms)}</span>
-					</div>
-				{/if}
-			{/each}
-		</div>
+		{#if tenseGroup.tenseIndices.some((i) => !isTenseEmpty(data.verb.conjugation[i]))}
+			<h2>{getTenseDisplayName(tenseGroup.name)}</h2>
+			<div class="tenseGroup">
+				{#each tenseGroup.tenseIndices as tenseI (tenseI)}
+					{@const tenseForms = data.verb.conjugation[tenseI]}
+					{#if !isTenseEmpty(tenseForms)}
+						{#if Array.isArray(tenseForms)}
+							<div class="tense">
+								<h3>{getTenseDisplayName(tenseNames[tenseI])}</h3>
+								<table class="tenseTable">
+									<tbody>
+										{#each tenseForms as form, formI (formI)}
+											<tr class:highlight={isHighlighted(form)}>
+												<td
+													>{formatPronoun(
+														data.verb.lang,
+														tensePronouns[tenseI][formI],
+														form,
+														data.verb.frIsAspirated || false
+													)}</td
+												><td>{formatForm(form)}</td>
+											</tr>
+										{/each}
+									</tbody>
+								</table>
+							</div>
+						{:else}
+							<div class="tense tense-inline" class:highlight={isHighlighted(tenseForms)}>
+								<h3 class="tense-inline-name">{getTenseDisplayName(tenseNames[tenseI])}</h3>
+								<span class="tense-inline-value">{formatForm(tenseForms)}</span>
+							</div>
+						{/if}
+					{/if}
+				{/each}
+			</div>
+		{/if}
 	{/each}
 {:else}
 	<h1>{i18n.t('verb_not_found')}</h1>
