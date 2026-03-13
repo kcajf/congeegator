@@ -8,9 +8,7 @@ describe('formatForm', () => {
 	});
 
 	it('abbreviates Greek forms without word prefix', () => {
-		expect(formatForm('γεννάνε/γεννάν/γεννούν/γεννούνε')).toBe(
-			'γεννάνε/γεννάν/-ούν/-ούνε'
-		);
+		expect(formatForm('γεννάνε/γεννάν/γεννούν/γεννούνε')).toBe('γεννάνε/γεννάν/-ούν/-ούνε');
 	});
 
 	it('factors out "θα" prefix from Greek future forms', () => {

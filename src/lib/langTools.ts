@@ -15,10 +15,7 @@ export function formatForm(form: string): string {
 	outer: while (commonWordCount < wordArrays[0].length) {
 		const word = wordArrays[0][commonWordCount];
 		for (let i = 1; i < wordArrays.length; i++) {
-			if (
-				commonWordCount >= wordArrays[i].length ||
-				wordArrays[i][commonWordCount] !== word
-			) {
+			if (commonWordCount >= wordArrays[i].length || wordArrays[i][commonWordCount] !== word) {
 				break outer;
 			}
 		}
