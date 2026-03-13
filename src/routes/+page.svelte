@@ -3,20 +3,14 @@
 	import { appTitle } from '$lib/defs';
 	import { i18n, i18nDictionary, type LangCode } from '$lib/i18n.svelte';
 
-	let isIOS = $state(false);
-	let isAndroid = $state(false);
-	let isStandalone = $state(false);
-
-	$effect(() => {
-		if (!browser) return;
-		const ua = navigator.userAgent;
-		isIOS = /iPhone|iPad|iPod/.test(ua);
-		isAndroid = /Android/.test(ua);
-		const displayModeStandalone = window.matchMedia('(display-mode: standalone)').matches;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Safari non-standard API
-		const safariStandalone = (navigator as any).standalone === true;
-		isStandalone = displayModeStandalone || safariStandalone;
-	});
+	const ua = browser ? navigator.userAgent : '';
+	const isIOS = /iPhone|iPad|iPod/.test(ua);
+	const isAndroid = /Android/.test(ua);
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Safari non-standard API
+	const safariStandalone = browser && (navigator as any).standalone === true;
+	const isStandalone = browser
+		? window.matchMedia('(display-mode: standalone)').matches || safariStandalone
+		: false;
 </script>
 
 <svelte:head>
