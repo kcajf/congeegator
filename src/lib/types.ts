@@ -24,6 +24,7 @@ export interface VerbRecord {
 	nameNoDiacritics: string; // "manger"
 	lang: string; // "fr" (the "partition" key)
 	conjugation: ConjugationForms[];
+	freq: number;
 	frIsAspirated: boolean | null;
 	gloss?: string;
 }

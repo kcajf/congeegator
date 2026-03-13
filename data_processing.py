@@ -19,6 +19,7 @@ import polars as pl
 import requests
 import zstandard
 from rich.pretty import pprint
+from wordfreq import zipf_frequency
 
 log = logging.getLogger(__name__)
 
@@ -1087,6 +1088,9 @@ def generate_data_for_lang(wiki_lang: str, lang: LanguageConfig, dev: bool):
 
     log.info(f"{lang.code} has {len(verbs)} entries")
     verbs = sorted(verbs, key=lambda x: x["nameNoDiacritics"])
+
+    for verb in verbs:
+        verb["freq"] = round(zipf_frequency(verb["name"], lang.code), 2)
 
     unique_verbs = {x["name"] for x in verbs}
     if len(unique_verbs) != len(verbs):

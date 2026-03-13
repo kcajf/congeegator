@@ -8,6 +8,7 @@ function makeVerb(overrides: Partial<VerbRecord> & Pick<VerbRecord, 'name'>): Ve
 		lang: 'fr',
 		nameNoDiacritics: overrides.name,
 		conjugation: [],
+		freq: 0,
 		frIsAspirated: null,
 		...overrides
 	};
@@ -56,7 +57,7 @@ describe('findMatches', () => {
 	it('matches the verb name exactly', () => {
 		const verb = makeVerb({ name: 'manger' });
 		expect(findMatches(verb, 'manger', 'manger', 'fr')).toEqual([
-			{ root: 'manger', matched: 'manger', quality: 0 }
+			{ root: 'manger', matched: 'manger', quality: 0, freq: 0 }
 		]);
 	});
 
@@ -66,9 +67,9 @@ describe('findMatches', () => {
 			conjugation: ['mange', 'mangeons']
 		});
 		const results = findMatches(verb, 'man', 'man', 'fr');
-		expect(results).toContainEqual({ root: 'manger', matched: 'manger', quality: 0 });
-		expect(results).toContainEqual({ root: 'manger', matched: 'mange', quality: 0 });
-		expect(results).toContainEqual({ root: 'manger', matched: 'mangeons', quality: 0 });
+		expect(results).toContainEqual({ root: 'manger', matched: 'manger', quality: 0, freq: 0 });
+		expect(results).toContainEqual({ root: 'manger', matched: 'mange', quality: 0, freq: 0 });
+		expect(results).toContainEqual({ root: 'manger', matched: 'mangeons', quality: 0, freq: 0 });
 	});
 
 	it('handles array conjugation forms', () => {
@@ -79,7 +80,8 @@ describe('findMatches', () => {
 		expect(findMatches(verb, 'va', 'va', 'fr')).toContainEqual({
 			root: 'aller',
 			matched: 'va',
-			quality: 0
+			quality: 0,
+			freq: 0
 		});
 	});
 
@@ -94,8 +96,8 @@ describe('findMatches', () => {
 			conjugation: ['mange', 'mangé']
 		});
 		const results = findMatches(verb, 'mange', 'mange', 'fr');
-		expect(results).toContainEqual({ root: 'manger', matched: 'mange', quality: 0 });
-		expect(results).toContainEqual({ root: 'manger', matched: 'mangé', quality: 1 });
+		expect(results).toContainEqual({ root: 'manger', matched: 'mange', quality: 0, freq: 0 });
+		expect(results).toContainEqual({ root: 'manger', matched: 'mangé', quality: 1, freq: 0 });
 	});
 
 	it('matches accented verb name with stripped query', () => {
@@ -103,7 +105,8 @@ describe('findMatches', () => {
 		expect(findMatches(verb, 'etre', 'etre', 'fr')).toContainEqual({
 			root: 'être',
 			matched: 'être',
-			quality: 1
+			quality: 1,
+			freq: 0
 		});
 	});
 
@@ -112,7 +115,8 @@ describe('findMatches', () => {
 		expect(findMatches(verb, 'kano', 'kano', 'el')).toContainEqual({
 			root: 'κάνω',
 			matched: 'κάνω',
-			quality: 2
+			quality: 2,
+			freq: 0
 		});
 	});
 
@@ -123,12 +127,14 @@ describe('findMatches', () => {
 		expect(findMatches(verbWithDiacritics, 'abä', 'aba', 'fr')).toContainEqual({
 			root: 'abändern',
 			matched: 'abändern',
-			quality: 0
+			quality: 0,
+			freq: 0
 		});
 		expect(findMatches(verbWithout, 'abä', 'aba', 'fr')).toContainEqual({
 			root: 'abandonnier',
 			matched: 'abandonnier',
-			quality: 1
+			quality: 1,
+			freq: 0
 		});
 	});
 
@@ -140,7 +146,7 @@ describe('findMatches', () => {
 		});
 		const results = findMatches(verb, 'gebogen', 'gebogen', 'de');
 		expect(results).toHaveLength(1);
-		expect(results[0]).toEqual({ root: 'biegen', matched: 'gebogen', quality: 0 });
+		expect(results[0]).toEqual({ root: 'biegen', matched: 'gebogen', quality: 0, freq: 0 });
 	});
 
 	it('collapses French compound past tense forms to last word', () => {
@@ -150,7 +156,7 @@ describe('findMatches', () => {
 		});
 		const results = findMatches(verb, 'mangé', 'mangé', 'fr');
 		expect(results).toHaveLength(1);
-		expect(results[0]).toEqual({ root: 'avoir', matched: 'mangé', quality: 0 });
+		expect(results[0]).toEqual({ root: 'avoir', matched: 'mangé', quality: 0, freq: 0 });
 	});
 
 	it('still matches verb name directly when it matches the query', () => {
@@ -160,7 +166,7 @@ describe('findMatches', () => {
 			conjugation: ['hat gebogen', 'habe gebogen']
 		});
 		const results = findMatches(verb, 'biegen', 'biegen', 'de');
-		expect(results).toContainEqual({ root: 'biegen', matched: 'biegen', quality: 0 });
+		expect(results).toContainEqual({ root: 'biegen', matched: 'biegen', quality: 0, freq: 0 });
 	});
 });
 
