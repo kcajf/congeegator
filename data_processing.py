@@ -579,14 +579,14 @@ ES_CONFIG = LanguageConfig(
         TenseConfig("es_impers_past_partic", FormMatcher(("participle", "past"))),
         # Indicative
         full_tense("es", "es_indic_pres", ("present", "indicative")),
-        full_tense("es", "es_indic_pret", ("preterite",)),
-        full_tense("es", "es_indic_imperf", ("imperfect",)),
-        full_tense("es", "es_indic_fut", ("future",)),
+        full_tense("es", "es_indic_pret", ("preterite", "indicative")),
+        full_tense("es", "es_indic_imperf", ("imperfect", "indicative")),
+        full_tense("es", "es_indic_fut", ("future", "indicative")),
         repeated_tense(
-            "es", "es_indic_pres_perf", ("participle", "past"), ES_PRES_INDIC_HABER
+            "es", "es_indic_pres_perf", ("participle", "past", "masculine", "singular"), ES_PRES_INDIC_HABER
         ),
         repeated_tense(
-            "es", "es_indic_pluperf", ("participle", "past"), ES_IMPERF_INDIC_HABER
+            "es", "es_indic_pluperf", ("participle", "past", "masculine", "singular"), ES_IMPERF_INDIC_HABER
         ),
         # Conditional
         full_tense("es", "es_cond_pres", ("conditional",)),
@@ -758,6 +758,10 @@ def form_is_clean_conjugation(form: Form) -> bool:
         return False
     if "inflection-template" in form.tags:
         return False
+    if "combined-form" in form.tags:
+        return False
+    if "negative" in form.tags:
+        return False
 
     if "'" in form.form:  # French "t'es"
         return False
@@ -891,11 +895,10 @@ def entry_is_clean_verb_root(entry: Entry) -> bool:
     if "-" in entry.word:  # Greek '-βιβάζω'
         return False
 
-    for s in entry.senses:
-        if "form-of" in s.tags:
-            return False
-        if "alt-of" in s.tags:
-            return False
+    if entry.senses and all(
+        "form-of" in s.tags or "alt-of" in s.tags for s in entry.senses
+    ):
+        return False
 
     for h in entry.head_templates:
         if entry.lang_code == "el" and h.name == "el-part":
@@ -919,10 +922,10 @@ def entry_is_clean_verb_root(entry: Entry) -> bool:
         if c in BAD_CATEGORIES:
             return False
 
-    for s in entry.senses:
-        for c in s.categories:
-            if c in BAD_CATEGORIES:
-                return False
+    if entry.senses and all(
+        any(c in BAD_CATEGORIES for c in s.categories) for s in entry.senses
+    ):
+        return False
 
     return True
 

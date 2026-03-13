@@ -1,7 +1,7 @@
 {
   "languages": {
     "fr": {
-      "dataHash": "bb89f747",
+      "dataHash": "de6ab27c",
       "code": "fr",
       "name": "French",
       "tenseNames": [
@@ -63,20 +63,20 @@
           "ils/elles"
         ],
         [
-          "je",
-          "tu",
-          "il/elle",
-          "nous",
-          "vous",
-          "ils/elles"
+          "que je",
+          "que tu",
+          "qu'il/elle",
+          "que nous",
+          "que vous",
+          "qu'ils/elles"
         ],
         [
-          "je",
-          "tu",
-          "il/elle",
-          "nous",
-          "vous",
-          "ils/elles"
+          "que je",
+          "que tu",
+          "qu'il/elle",
+          "que nous",
+          "que vous",
+          "qu'ils/elles"
         ],
         [
           "je",
@@ -148,7 +148,7 @@
       ]
     },
     "el": {
-      "dataHash": "11803317",
+      "dataHash": "96fa5df7",
       "code": "el",
       "name": "Greek",
       "tenseNames": [
@@ -338,17 +338,27 @@
       ]
     },
     "de": {
-      "dataHash": "1c6c5975",
+      "dataHash": "5662bb12",
       "code": "de",
       "name": "German",
       "tenseNames": [
         "de_indic_pres",
         "de_indic_preterite",
+        "de_indic_perfect",
+        "de_indic_pluperfect",
+        "de_indic_fut_i",
+        "de_indic_fut_ii",
         "de_impers_infinitive",
         "de_impers_pres_partic",
         "de_impers_past_partic",
         "de_subj_i",
-        "de_subj_ii"
+        "de_subj_i_perfect",
+        "de_subj_i_fut_i",
+        "de_subj_i_fut_ii",
+        "de_subj_ii",
+        "de_subj_ii_pluperfect",
+        "de_subj_ii_fut_i",
+        "de_subj_ii_fut_ii"
       ],
       "tensePronouns": [
         [
@@ -367,9 +377,89 @@
           "ihr",
           "sie/Sie"
         ],
+        [
+          "ich",
+          "du",
+          "er/sie/es",
+          "wir",
+          "ihr",
+          "sie/Sie"
+        ],
+        [
+          "ich",
+          "du",
+          "er/sie/es",
+          "wir",
+          "ihr",
+          "sie/Sie"
+        ],
+        [
+          "ich",
+          "du",
+          "er/sie/es",
+          "wir",
+          "ihr",
+          "sie/Sie"
+        ],
+        [
+          "ich",
+          "du",
+          "er/sie/es",
+          "wir",
+          "ihr",
+          "sie/Sie"
+        ],
         [],
         [],
         [],
+        [
+          "ich",
+          "du",
+          "er/sie/es",
+          "wir",
+          "ihr",
+          "sie/Sie"
+        ],
+        [
+          "ich",
+          "du",
+          "er/sie/es",
+          "wir",
+          "ihr",
+          "sie/Sie"
+        ],
+        [
+          "ich",
+          "du",
+          "er/sie/es",
+          "wir",
+          "ihr",
+          "sie/Sie"
+        ],
+        [
+          "ich",
+          "du",
+          "er/sie/es",
+          "wir",
+          "ihr",
+          "sie/Sie"
+        ],
+        [
+          "ich",
+          "du",
+          "er/sie/es",
+          "wir",
+          "ihr",
+          "sie/Sie"
+        ],
+        [
+          "ich",
+          "du",
+          "er/sie/es",
+          "wir",
+          "ihr",
+          "sie/Sie"
+        ],
         [
           "ich",
           "du",
@@ -392,28 +482,43 @@
           "name": "de_indic",
           "tenseIndices": [
             0,
-            1
+            1,
+            2,
+            3,
+            4,
+            5
           ]
         },
         {
           "name": "de_impers",
           "tenseIndices": [
-            2,
-            3,
-            4
+            6,
+            7,
+            8
           ]
         },
         {
-          "name": "de_subj",
+          "name": "de_subj_i_grp",
           "tenseIndices": [
-            5,
-            6
+            9,
+            10,
+            11,
+            12
+          ]
+        },
+        {
+          "name": "de_subj_ii_grp",
+          "tenseIndices": [
+            13,
+            14,
+            15,
+            16
           ]
         }
       ]
     },
     "es": {
-      "dataHash": "82aa3ce5",
+      "dataHash": "134677ab",
       "code": "es",
       "name": "Spanish",
       "tenseNames": [
