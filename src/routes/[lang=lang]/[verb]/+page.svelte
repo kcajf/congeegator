@@ -2,10 +2,11 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
 	import wiktionaryLogo from '$lib/assets/wiktionary_favicon_en.svg';
+	import wordreferenceLogo from '$lib/assets/wordreference_favicon.svg';
 	import { langName, manifest } from '$lib/dataUtils';
 	import { appTitle } from '$lib/defs';
 	import { i18n } from '$lib/i18n.svelte';
-	import { formatForm, formatPronoun } from '$lib/langTools';
+	import { formatForm, formatPronoun, getExternalLinks } from '$lib/langTools';
 	import { triggerLangSync } from '$lib/syncManager.svelte';
 	import { tick } from 'svelte';
 	import type { ConjugationForms } from '$lib/types';
@@ -53,6 +54,10 @@
 		}
 	});
 
+	const externalLinks = $derived(
+		getExternalLinks(data.verb.lang, data.verb.name, wordreferenceLogo)
+	);
+
 	const getTenseDisplayName = (tenseCode: string) => {
 		try {
 			// TODO: support 'native' tense code mode, where it's always language
@@ -74,9 +79,22 @@
 			target="_blank"
 			rel="noopener noreferrer"
 			href="https://en.wiktionary.com/wiki/{data.verb.name}#{langName(data.verb.lang)}"
-			class="wiktionaryLink"
+			class="ref-link ref-link-icon"
 			><img alt="wiktionary" src={wiktionaryLogo} />
 		</a>
+		{#each externalLinks as link (link.label)}
+			{#if link.type === 'icon'}
+				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external URL -->
+				<a target="_blank" rel="noopener noreferrer" href={link.href} class="ref-link ref-link-icon"
+					><img alt={link.label} src={link.icon} />
+				</a>
+			{:else}
+				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external URL -->
+				<a target="_blank" rel="noopener noreferrer" href={link.href} class="ref-link ref-link-text"
+					>{link.label}
+				</a>
+			{/if}
+		{/each}
 	</div>
 	{#if data.verb.gloss}<p class="gloss">{data.verb.gloss}</p>{/if}
 
@@ -179,24 +197,35 @@
 		min-width: 10rem;
 	}
 
-	.wiktionaryLink {
+	.ref-link {
 		display: inline-flex;
-		align-items: center; /* This handles the vertical centering */
+		align-items: center;
 		text-decoration: none;
-		gap: 8px; /* Adds a clean gap between text and square img */
 	}
 
-	.wiktionaryLink img {
-		width: 1.6em; /* Or whatever size you need */
-		height: 1.6em; /* Keeping it square */
+	.ref-link-icon img {
+		width: 1.8em;
+		height: 1.8em;
 		object-fit: cover;
-		display: block; /* Removes the default bottom whitespace */
+		display: block;
 		margin-top: 0.3em;
+	}
+
+	.ref-link-text {
+		color: #333;
+		font-size: 0.9rem;
+		margin-top: 0.3em;
+		text-decoration: none;
+	}
+
+	.ref-link-text:hover {
+		text-decoration: underline;
 	}
 
 	.header-container {
 		display: flex;
 		align-items: center;
+		flex-wrap: wrap;
 		gap: 10px;
 		margin-bottom: -1rem;
 	}
