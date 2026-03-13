@@ -65,12 +65,13 @@ if (browser) {
 		}
 
 		if (type === 'ERROR') {
+			console.error(`${lang} sync error:`, error);
 			const id = syncToastIds[lang];
 			if (id) {
-				toasts.update(id, `${name} sync failed`, { dismissAfter: 6000 });
+				toasts.update(id, `Failed to sync ${name}`, { dismissAfter: 6000 });
 				delete syncToastIds[lang];
 			} else {
-				console.error(`${lang} sync error:`, error);
+				toasts.add(`Failed to sync ${name}`, { dismissAfter: 6000 });
 			}
 		}
 	};
