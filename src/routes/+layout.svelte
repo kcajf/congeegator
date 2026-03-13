@@ -273,9 +273,23 @@
 		z-index: 10;
 		background-color: white;
 		padding-top: 0.5rem;
+		padding-bottom: 0.25rem;
+		border-bottom: 1px solid #eee;
 		display: flex;
 		align-items: center;
 		justify-content: flex-start;
+	}
+
+	/* Extend white background above navbar to prevent content showing
+	   above the sticky bar on iOS (momentum / elastic scrolling). */
+	.navbar::before {
+		content: '';
+		position: absolute;
+		top: -100vh;
+		left: -9999px;
+		right: -9999px;
+		height: 100vh;
+		background-color: white;
 	}
 
 	.search-container {
