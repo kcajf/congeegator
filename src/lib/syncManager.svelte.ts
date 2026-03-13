@@ -29,14 +29,27 @@ if (browser) {
 	});
 
 	worker.onmessage = (e) => {
-		const { type, lang, error } = e.data;
+		const { type, lang, error, phase, percent } = e.data;
 		const name = langName(lang);
 
 		if (type === 'PROGRESS') {
+			const isUpdate = !!globalSync.map[lang];
+			const verb = phase === 'installing' ? 'Installing' : isUpdate ? 'Updating' : 'Downloading';
+			const pctStr = percent != null ? ` ${percent}%` : '';
+			const message = `${verb} ${name}${pctStr}`;
+			const showEllipsis = percent == null;
+
 			if (!syncToastIds[lang]) {
-				const verb = globalSync.map[lang] ? 'Updating' : 'Downloading';
-				syncToastIds[lang] = toasts.add(`${verb} ${name}...`, { dismissAfter: 30000 });
+				syncToastIds[lang] = toasts.add(message, {
+					dismissAfter: 0,
+					showEllipsis
+				});
 				syncToastCreatedAt[lang] = Date.now();
+			} else {
+				toasts.update(syncToastIds[lang], message, {
+					dismissAfter: 0,
+					showEllipsis
+				});
 			}
 		}
 
