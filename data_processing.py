@@ -997,8 +997,9 @@ def build_search_index(
 
     index = defaultdict[str, set[int]](lambda: set())
 
-    MIN_PREFIX = 2
+    MIN_PREFIX = 1
     MAX_PREFIX = 4
+    MAX_PREFIX_IDS = 200
 
     for word, indices in searchable_words.items():
         for prefix_len in range(MIN_PREFIX, MAX_PREFIX + 1):
@@ -1006,7 +1007,7 @@ def build_search_index(
             for i in indices:
                 index[word_prefix].add(i)
 
-    ret = {k: sorted(v) for k, v in index.items()}
+    ret = {k: sorted(v)[:MAX_PREFIX_IDS] for k, v in index.items()}
 
     max_hits = 0
     max_key = None

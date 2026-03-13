@@ -13,6 +13,8 @@
 	import { i18n } from '$lib/i18n.svelte';
 	import {
 		findMatches,
+		MAX_PREFIX_IDS,
+		MAX_SEARCH_RESULTS,
 		prefixLookup,
 		stripDiacritics,
 		toPhonetic,
@@ -124,18 +126,19 @@
 		const originalQuery = searchTerm.toLowerCase().trim();
 		const stripped = stripDiacritics(originalQuery);
 		const currentQuery = toPhonetic(currentLang, stripped);
-		if (!index || currentQuery.length < 2) {
+		if (!index || currentQuery.length < 1) {
 			searchResults = [];
 			return;
 		}
 
-		const prefixIds = prefixLookup(index, currentQuery);
+		const allPrefixIds = prefixLookup(index, currentQuery);
 
-		if (prefixIds.length == 0) {
+		if (allPrefixIds.length == 0) {
 			searchResults = [];
 			return;
 		}
 
+		const prefixIds = allPrefixIds.slice(0, MAX_PREFIX_IDS);
 		const dbKeys = prefixIds.map((id) => [currentLang, id]);
 
 		db.verbs
@@ -152,7 +155,8 @@
 					.sort(
 						(a, b) =>
 							a.quality - b.quality || b.freq - a.freq || a.matched.length - b.matched.length
-					);
+					)
+					.slice(0, MAX_SEARCH_RESULTS);
 			})
 			.catch((err) => {
 				console.error('Search lookup failed:', err);
@@ -220,7 +224,7 @@
 				</li>
 			{/each}
 		</ul>
-	{:else if searchTerm.trim().length >= 2}
+	{:else if searchTerm.trim().length >= 1}
 		{#if !searchLangState.indexData}
 			<div class="no-results">{i18n.t('loading')}</div>
 		{:else}
