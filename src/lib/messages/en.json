@@ -91,5 +91,9 @@
 	"pwa_update_available": "New content available, click on reload button to update.",
 	"reload": "Reload",
 	"close": "Close",
-	"native_tense_names": "Show tense names in native language"
+	"settings": "Settings",
+	"interface_language": "Interface language",
+	"about": "About",
+	"native_tense_names": "Show tense names in native language",
+	"about_text": "Congeegator is a verb conjugation app. Conjugation data is sourced from Wiktionary."
 }

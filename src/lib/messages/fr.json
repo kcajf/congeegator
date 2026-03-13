@@ -91,5 +91,9 @@
 	"pwa_update_available": "Nouveau contenu disponible, cliquez sur recharger pour mettre à jour.",
 	"reload": "Recharger",
 	"close": "Fermer",
-	"native_tense_names": "Afficher les noms des temps dans la langue d'origine"
+	"settings": "Paramètres",
+	"interface_language": "Langue de l'interface",
+	"about": "À propos",
+	"native_tense_names": "Afficher les noms des temps dans la langue d'origine",
+	"about_text": "Congeegator est une application de conjugaison de verbes. Les données de conjugaison proviennent de Wiktionary."
 }
