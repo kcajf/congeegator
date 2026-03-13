@@ -2,9 +2,6 @@
   "name": "machen",
   "nameNoDiacritics": "machen",
   "conjugation": [
-    "machen",
-    "machend",
-    "gemacht",
     [
       "mache",
       "machst",
@@ -21,6 +18,9 @@
       "machtet",
       "machten"
     ],
+    "machen",
+    "machend",
+    "gemacht",
     [
       "mache",
       "machest",

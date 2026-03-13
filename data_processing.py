@@ -525,17 +525,17 @@ DE_CONFIG = LanguageConfig(
     code="de",
     name="German",
     tenses=(
+        full_tense("de", "de_indic_pres", ("present", "indicative")),
+        full_tense("de", "de_indic_preterite", ("preterite",)),
         TenseConfig("de_impers_infinitive", FormMatcher(("infinitive",))),
         TenseConfig("de_impers_pres_partic", FormMatcher(("participle", "present"))),
         TenseConfig("de_impers_past_partic", FormMatcher(("participle", "past"))),
-        full_tense("de", "de_indic_pres", ("present", "indicative")),
-        full_tense("de", "de_indic_preterite", ("preterite",)),
         full_tense("de", "de_subj_i", ("subjunctive", "subjunctive-i")),
         full_tense("de", "de_subj_ii", ("subjunctive", "subjunctive-ii")),
     ),
     tense_groups=[
-        TenseGroup("de_impers", re.compile(r"^de_impers_")),
         TenseGroup("de_indic", re.compile(r"^de_indic_")),
+        TenseGroup("de_impers", re.compile(r"^de_impers_")),
         TenseGroup("de_subj", re.compile(r"^de_subj_")),
     ],
 )
