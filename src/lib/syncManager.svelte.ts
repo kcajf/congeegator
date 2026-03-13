@@ -1,9 +1,15 @@
 import { browser } from '$app/environment';
+import { langName } from './dataUtils';
 import { db } from './db';
 import { searchLangState } from './searchLang.svelte';
+import { toasts } from './toasts.svelte';
 
 let worker: Worker | undefined;
 let workerReady: Promise<void> | undefined;
+
+const syncToastIds: Record<string, string> = {};
+const syncToastCreatedAt: Record<string, number> = {};
+const MIN_TOAST_MS = 800;
 
 if (browser) {
 	// The 'new URL' syntax is recognized by Vite to bundle the worker file separately
@@ -23,16 +29,34 @@ if (browser) {
 	});
 
 	worker.onmessage = (e) => {
-		// Handle messages...
-		const { type, lang, percent, error } = e.data;
+		const { type, lang, error } = e.data;
+		const name = langName(lang);
 
 		if (type === 'PROGRESS') {
-			console.log(`${lang} loading: ${percent}%`);
+			if (!syncToastIds[lang]) {
+				const verb = globalSync.map[lang] ? 'Updating' : 'Downloading';
+				syncToastIds[lang] = toasts.add(`${verb} ${name}...`, { dismissAfter: 30000 });
+				syncToastCreatedAt[lang] = Date.now();
+			}
 		}
 
 		if (type === 'COMPLETE') {
-			console.log(`${lang} loading: complete`);
-			searchLangState.reloadIndex(lang);
+			const id = syncToastIds[lang];
+			const showReady = () => {
+				if (id) {
+					toasts.update(id, `${name} ready for offline`);
+					delete syncToastIds[lang];
+				}
+				delete syncToastCreatedAt[lang];
+				searchLangState.reloadIndex(lang);
+			};
+
+			const elapsed = Date.now() - (syncToastCreatedAt[lang] ?? 0);
+			if (elapsed < MIN_TOAST_MS) {
+				setTimeout(showReady, MIN_TOAST_MS - elapsed);
+			} else {
+				showReady();
+			}
 		}
 
 		if (type === 'SKIPPED') {
@@ -40,7 +64,13 @@ if (browser) {
 		}
 
 		if (type === 'ERROR') {
-			console.log(`${lang} loading: error ${error}`);
+			const id = syncToastIds[lang];
+			if (id) {
+				toasts.update(id, `${name} sync failed`, { dismissAfter: 6000 });
+				delete syncToastIds[lang];
+			} else {
+				console.error(`${lang} sync error:`, error);
+			}
 		}
 	};
 }

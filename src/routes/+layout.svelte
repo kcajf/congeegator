@@ -18,11 +18,22 @@
 	} from '$lib/search';
 	import { searchLangState } from '$lib/searchLang.svelte';
 	import type { VerbRecord } from '$lib/types';
+	import ToastStack from '$lib/components/ToastStack.svelte';
+	import { toasts } from '$lib/toasts.svelte';
+	import { dev } from '$app/environment';
 	import { onMount, tick } from 'svelte';
 	import { pwaInfo } from 'virtual:pwa-info';
 	import type { LayoutProps } from './$types';
 
 	const PUBLIC_R2_URL = import.meta.env.VITE_R2_URL;
+
+	async function nukeState() {
+		await db.delete();
+		localStorage.clear();
+		const regs = await navigator.serviceWorker?.getRegistrations();
+		for (const r of regs ?? []) await r.unregister();
+		location.reload();
+	}
 
 	let { children }: LayoutProps = $props();
 
@@ -35,7 +46,23 @@
 			const { registerSW } = await import('virtual:pwa-register');
 			registerSW({
 				immediate: true,
-				onRegistered() {},
+				onRegisteredSW(_url: string, registration: ServiceWorkerRegistration | undefined) {
+					if (registration?.waiting) {
+						toasts.add('Reload to update', { dismissAfter: 15000 });
+					}
+
+					registration?.addEventListener('updatefound', () => {
+						const newWorker = registration.installing;
+						newWorker?.addEventListener('statechange', () => {
+							if (newWorker.state === 'activated') {
+								toasts.add('App ready to work offline');
+							}
+							if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+								toasts.add('Reload to update', { dismissAfter: 15000 });
+							}
+						});
+					});
+				},
 				onRegisterError(error: Error) {
 					console.error('SW registration error', error);
 				}
@@ -194,9 +221,11 @@
 	{/if}
 </div>
 
-{#await import('$lib/ReloadPrompt.svelte') then { default: ReloadPrompt }}
-	<ReloadPrompt />
-{/await}
+<ToastStack />
+
+{#if dev}
+	<button class="nuke-btn" onclick={nukeState}>nuke state</button>
+{/if}
 
 <style>
 	:global(html) {
@@ -287,5 +316,19 @@
 	.result-link:focus {
 		background-color: #f5f5f5;
 		outline: none;
+	}
+
+	.nuke-btn {
+		position: fixed;
+		top: 0.5rem;
+		right: 0.5rem;
+		background: #c00;
+		color: white;
+		border: none;
+		padding: 0.3rem 0.6rem;
+		font-size: 0.7rem;
+		cursor: pointer;
+		z-index: 9999;
+		opacity: 0.6;
 	}
 </style>
