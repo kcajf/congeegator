@@ -1,7 +1,8 @@
 {
   "languages": {
     "fr": {
-      "dataHash": "c3e00e99",
+      "dataHash": "d48f61d4",
+      "dataSize": 24284,
       "code": "fr",
       "name": "French",
       "tenseNames": [
@@ -160,7 +161,8 @@
       ]
     },
     "el": {
-      "dataHash": "e3a06a7c",
+      "dataHash": "bb865530",
+      "dataSize": 45772,
       "code": "el",
       "name": "Greek",
       "tenseNames": [
@@ -350,7 +352,8 @@
       ]
     },
     "de": {
-      "dataHash": "799f83a9",
+      "dataHash": "7d15ddc0",
+      "dataSize": 37854,
       "code": "de",
       "name": "German",
       "tenseNames": [
@@ -530,7 +533,8 @@
       ]
     },
     "es": {
-      "dataHash": "6ffcce9e",
+      "dataHash": "34cb2ea4",
+      "dataSize": 27211,
       "code": "es",
       "name": "Spanish",
       "tenseNames": [
