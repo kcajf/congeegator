@@ -19,3 +19,6 @@ msgspec = ">=0.20.0,<0.21"
 polars = ">=1.37.1,<2"
 rich = ">=14.2.0,<15"
 pytest = ">=8,<9"
+
+[pypi-dependencies]
+wordfreq = ">=3,<4"

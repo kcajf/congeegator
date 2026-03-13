@@ -4,6 +4,7 @@ export type SearchResult = {
 	root: string;
 	matched: string;
 	quality: number; // 0 = exact, 1 = diacritics-stripped, 2 = phonetic
+	freq: number;
 };
 
 export function stripDiacritics(s: string): string {
@@ -166,7 +167,7 @@ export function findMatches(
 		if (quality === null) return;
 		const existing = seen.get(form);
 		if (!existing || quality < existing.quality) {
-			seen.set(form, { root: verb.name, matched: form, quality });
+			seen.set(form, { root: verb.name, matched: form, quality, freq: verb.freq });
 		}
 	};
 
