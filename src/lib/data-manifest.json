@@ -1,7 +1,7 @@
 {
   "languages": {
     "fr": {
-      "dataHash": "ad67f934",
+      "dataHash": "bb89f747",
       "code": "fr",
       "name": "French",
       "tenseNames": [
@@ -148,7 +148,7 @@
       ]
     },
     "el": {
-      "dataHash": "1fe9d261",
+      "dataHash": "11803317",
       "code": "el",
       "name": "Greek",
       "tenseNames": [
@@ -338,7 +338,7 @@
       ]
     },
     "de": {
-      "dataHash": "4bcae287",
+      "dataHash": "1c6c5975",
       "code": "de",
       "name": "German",
       "tenseNames": [
@@ -408,6 +408,150 @@
           "tenseIndices": [
             5,
             6
+          ]
+        }
+      ]
+    },
+    "es": {
+      "dataHash": "82aa3ce5",
+      "code": "es",
+      "name": "Spanish",
+      "tenseNames": [
+        "es_impers_inf",
+        "es_impers_gerund",
+        "es_impers_past_partic",
+        "es_indic_pres",
+        "es_indic_pret",
+        "es_indic_imperf",
+        "es_indic_fut",
+        "es_indic_pres_perf",
+        "es_indic_pluperf",
+        "es_cond_pres",
+        "es_subj_pres",
+        "es_subj_imperf",
+        "es_imper"
+      ],
+      "tensePronouns": [
+        [],
+        [],
+        [],
+        [
+          "yo",
+          "tú",
+          "él/ella/usted",
+          "nosotros/-as",
+          "vosotros/-as",
+          "ellos/-as/ustedes"
+        ],
+        [
+          "yo",
+          "tú",
+          "él/ella/usted",
+          "nosotros/-as",
+          "vosotros/-as",
+          "ellos/-as/ustedes"
+        ],
+        [
+          "yo",
+          "tú",
+          "él/ella/usted",
+          "nosotros/-as",
+          "vosotros/-as",
+          "ellos/-as/ustedes"
+        ],
+        [
+          "yo",
+          "tú",
+          "él/ella/usted",
+          "nosotros/-as",
+          "vosotros/-as",
+          "ellos/-as/ustedes"
+        ],
+        [
+          "yo",
+          "tú",
+          "él/ella/usted",
+          "nosotros/-as",
+          "vosotros/-as",
+          "ellos/-as/ustedes"
+        ],
+        [
+          "yo",
+          "tú",
+          "él/ella/usted",
+          "nosotros/-as",
+          "vosotros/-as",
+          "ellos/-as/ustedes"
+        ],
+        [
+          "yo",
+          "tú",
+          "él/ella/usted",
+          "nosotros/-as",
+          "vosotros/-as",
+          "ellos/-as/ustedes"
+        ],
+        [
+          "yo",
+          "tú",
+          "él/ella/usted",
+          "nosotros/-as",
+          "vosotros/-as",
+          "ellos/-as/ustedes"
+        ],
+        [
+          "yo",
+          "tú",
+          "él/ella/usted",
+          "nosotros/-as",
+          "vosotros/-as",
+          "ellos/-as/ustedes"
+        ],
+        [
+          "tú",
+          "usted",
+          "nosotros/-as",
+          "vosotros/-as",
+          "ustedes"
+        ]
+      ],
+      "tenseGroups": [
+        {
+          "name": "es_indic",
+          "tenseIndices": [
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ]
+        },
+        {
+          "name": "es_subj",
+          "tenseIndices": [
+            10,
+            11
+          ]
+        },
+        {
+          "name": "es_cond",
+          "tenseIndices": [
+            9
+          ]
+        },
+        {
+          "name": "es_imper",
+          "tenseIndices": [
+            12
+          ]
+        },
+        {
+          "name": "es_impers",
+          "tenseIndices": [
+            0,
+            1,
+            2
           ]
         }
       ]

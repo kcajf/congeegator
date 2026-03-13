@@ -24,7 +24,7 @@ log = logging.getLogger(__name__)
 
 # Timestamp version of pinned source data in R2.
 # Update by running: pixi run pin-source-data
-SOURCE_DATA_VERSION = "2026-03-12T192308Z"
+SOURCE_DATA_VERSION = "2026-03-13T100708Z"
 
 
 class CacheManager:
