@@ -1,7 +1,7 @@
 {
   "languages": {
     "fr": {
-      "dataHash": "3be5ca7d",
+      "dataHash": "0d901ec8",
       "code": "fr",
       "name": "French",
       "tenseNames": [
@@ -148,7 +148,7 @@
       ]
     },
     "el": {
-      "dataHash": "28f08c81",
+      "dataHash": "e3a06a7c",
       "code": "el",
       "name": "Greek",
       "tenseNames": [
@@ -338,7 +338,7 @@
       ]
     },
     "de": {
-      "dataHash": "44cb4270",
+      "dataHash": "a80d4ae0",
       "code": "de",
       "name": "German",
       "tenseNames": [
