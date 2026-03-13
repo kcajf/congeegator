@@ -48,13 +48,6 @@
 
 	let searchResults = $state<SearchResult[]>([]);
 
-	// Clear search when language changes
-	$effect(() => {
-		// eslint-disable-next-line @typescript-eslint/no-unused-expressions -- subscribe to lang changes
-		searchLangState.lang;
-		searchTerm = '';
-	});
-
 	// Clear search on any navigation (logo click, back button, etc.)
 	beforeNavigate(() => {
 		searchTerm = '';
@@ -82,6 +75,9 @@
 		if (e.key === 'Enter' && searchResults.length > 0) {
 			e.preventDefault();
 			selectResult(searchResults[0]);
+		} else if (e.key === 'Escape') {
+			searchTerm = '';
+			searchInput?.blur();
 		}
 	}
 
@@ -154,7 +150,7 @@
 				bind:this={searchInput}
 				onkeydown={handleKeydown}
 				onfocus={() => searchInput?.select()}
-				type="text"
+				type="search"
 				id="searchInput"
 				placeholder={i18n.t('search_placeholder')}
 			/>
@@ -243,6 +239,7 @@
 	}
 
 	.search-container input {
+		appearance: none;
 		/* margin-left: 1rem;
 		margin-right: 1rem; */
 		padding: 0.5rem 0.2rem;
