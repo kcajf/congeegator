@@ -1,6 +1,22 @@
 <script lang="ts">
-	import { i18n, i18nDictionary, type LangCode } from '$lib/i18n.svelte';
+	import { browser } from '$app/environment';
 	import { appTitle } from '$lib/defs';
+	import { i18n, i18nDictionary, type LangCode } from '$lib/i18n.svelte';
+
+	let isIOS = $state(false);
+	let isAndroid = $state(false);
+	let isStandalone = $state(false);
+
+	$effect(() => {
+		if (!browser) return;
+		const ua = navigator.userAgent;
+		isIOS = /iPhone|iPad|iPod/.test(ua);
+		isAndroid = /Android/.test(ua);
+		const displayModeStandalone = window.matchMedia('(display-mode: standalone)').matches;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Safari non-standard API
+		const safariStandalone = (navigator as any).standalone === true;
+		isStandalone = displayModeStandalone || safariStandalone;
+	});
 </script>
 
 <svelte:head>
@@ -8,8 +24,27 @@
 </svelte:head>
 
 <section>
-	<h2>{i18n.t('about')}</h2>
-	<p>{i18n.t('about_text')}</p>
+	<h2>About</h2>
+	<p>Congeegator is a fast, offline, multilingual conjugation app.</p>
+	<p>
+		Type above to search. In non-latin alphabets, you can fuzzily search 'phonetically' (e.g.
+		'eimai' in Greek).
+	</p>
+
+	{#if browser && !isStandalone}
+		<p>
+			{#if isIOS}
+				To install: tap the Share icon, then "Add to Home Screen".
+			{:else if isAndroid}
+				To install: tap ⋮, then "Add to Home Screen" or "Install app".
+			{:else}
+				Install as an app from your browser menu for the best experience.
+			{/if}
+		</p>
+	{/if}
+
+	<p>Inspired by <a href="https://ilelleon.com">ilelleon.com</a>.</p>
+	<p>Built by <a href="https://jackfrigaard.com">Jack Frigaard</a>.</p>
 </section>
 
 <section>
@@ -86,5 +121,16 @@
 	p {
 		color: #555;
 		line-height: 1.5;
+		margin: 0.3rem 0;
+	}
+
+	a {
+		color: #4a7c59;
+		text-decoration: underline;
+		text-underline-offset: 2px;
+	}
+
+	a:hover {
+		color: #3a6347;
 	}
 </style>
