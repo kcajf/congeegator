@@ -66,7 +66,8 @@
 
 		await tick();
 
-		if (searchInput) {
+		// Only re-focus on desktop (non-touch) devices — on mobile, refocusing would re-open the keyboard
+		if (searchInput && !window.matchMedia('(pointer: coarse)').matches) {
 			searchInput.focus();
 		}
 	}
@@ -74,6 +75,7 @@
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === 'Enter' && searchResults.length > 0) {
 			e.preventDefault();
+			searchInput?.blur(); // Dismiss mobile keyboard immediately
 			selectResult(searchResults[0]);
 		} else if (e.key === 'Escape') {
 			searchTerm = '';
@@ -85,7 +87,8 @@
 		const index = searchLangState.indexData;
 
 		const currentLang = searchLangState.lang;
-		const stripped = stripDiacritics(searchTerm.toLowerCase().trim());
+		const originalQuery = searchTerm.toLowerCase().trim();
+		const stripped = stripDiacritics(originalQuery);
 		const currentQuery = toPhonetic(currentLang, stripped);
 		if (!index || currentQuery.length < 2) {
 			searchResults = [];
@@ -111,7 +114,7 @@
 
 				searchResults = data
 					.filter((v): v is VerbRecord => !!v)
-					.flatMap((v) => findMatches(v, currentQuery, currentLang))
+					.flatMap((v) => findMatches(v, originalQuery, currentQuery, currentLang))
 					.sort((a, b) => a.quality - b.quality || a.matched.length - b.matched.length)
 					.slice(0, 15);
 			})
@@ -240,6 +243,7 @@
 
 	.search-container input {
 		appearance: none;
+		background-color: transparent;
 		/* margin-left: 1rem;
 		margin-right: 1rem; */
 		padding: 0.5rem 0.2rem;
