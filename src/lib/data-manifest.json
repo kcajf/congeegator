@@ -1,7 +1,7 @@
 {
   "languages": {
     "fr": {
-      "dataHash": "0d901ec8",
+      "dataHash": "bb89f747",
       "code": "fr",
       "name": "French",
       "tenseNames": [
@@ -63,20 +63,20 @@
           "ils/elles"
         ],
         [
-          "que je",
-          "que tu",
-          "qu'il/elle",
-          "que nous",
-          "que vous",
-          "qu'ils/elles"
+          "je",
+          "tu",
+          "il/elle",
+          "nous",
+          "vous",
+          "ils/elles"
         ],
         [
-          "que je",
-          "que tu",
-          "qu'il/elle",
-          "que nous",
-          "que vous",
-          "qu'ils/elles"
+          "je",
+          "tu",
+          "il/elle",
+          "nous",
+          "vous",
+          "ils/elles"
         ],
         [
           "je",
@@ -148,7 +148,7 @@
       ]
     },
     "el": {
-      "dataHash": "e3a06a7c",
+      "dataHash": "11803317",
       "code": "el",
       "name": "Greek",
       "tenseNames": [
@@ -338,27 +338,17 @@
       ]
     },
     "de": {
-      "dataHash": "a80d4ae0",
+      "dataHash": "1c6c5975",
       "code": "de",
       "name": "German",
       "tenseNames": [
         "de_indic_pres",
         "de_indic_preterite",
-        "de_indic_perfect",
-        "de_indic_pluperfect",
-        "de_indic_fut_i",
-        "de_indic_fut_ii",
         "de_impers_infinitive",
         "de_impers_pres_partic",
         "de_impers_past_partic",
         "de_subj_i",
-        "de_subj_i_perfect",
-        "de_subj_i_fut_i",
-        "de_subj_i_fut_ii",
-        "de_subj_ii",
-        "de_subj_ii_pluperfect",
-        "de_subj_ii_fut_i",
-        "de_subj_ii_fut_ii"
+        "de_subj_ii"
       ],
       "tensePronouns": [
         [
@@ -377,89 +367,9 @@
           "ihr",
           "sie/Sie"
         ],
-        [
-          "ich",
-          "du",
-          "er/sie/es",
-          "wir",
-          "ihr",
-          "sie/Sie"
-        ],
-        [
-          "ich",
-          "du",
-          "er/sie/es",
-          "wir",
-          "ihr",
-          "sie/Sie"
-        ],
-        [
-          "ich",
-          "du",
-          "er/sie/es",
-          "wir",
-          "ihr",
-          "sie/Sie"
-        ],
-        [
-          "ich",
-          "du",
-          "er/sie/es",
-          "wir",
-          "ihr",
-          "sie/Sie"
-        ],
         [],
         [],
         [],
-        [
-          "ich",
-          "du",
-          "er/sie/es",
-          "wir",
-          "ihr",
-          "sie/Sie"
-        ],
-        [
-          "ich",
-          "du",
-          "er/sie/es",
-          "wir",
-          "ihr",
-          "sie/Sie"
-        ],
-        [
-          "ich",
-          "du",
-          "er/sie/es",
-          "wir",
-          "ihr",
-          "sie/Sie"
-        ],
-        [
-          "ich",
-          "du",
-          "er/sie/es",
-          "wir",
-          "ihr",
-          "sie/Sie"
-        ],
-        [
-          "ich",
-          "du",
-          "er/sie/es",
-          "wir",
-          "ihr",
-          "sie/Sie"
-        ],
-        [
-          "ich",
-          "du",
-          "er/sie/es",
-          "wir",
-          "ihr",
-          "sie/Sie"
-        ],
         [
           "ich",
           "du",
@@ -482,37 +392,166 @@
           "name": "de_indic",
           "tenseIndices": [
             0,
-            1,
-            2,
-            3,
-            4,
-            5
+            1
           ]
         },
         {
           "name": "de_impers",
           "tenseIndices": [
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "name": "de_subj",
+          "tenseIndices": [
+            5,
+            6
+          ]
+        }
+      ]
+    },
+    "es": {
+      "dataHash": "82aa3ce5",
+      "code": "es",
+      "name": "Spanish",
+      "tenseNames": [
+        "es_impers_inf",
+        "es_impers_gerund",
+        "es_impers_past_partic",
+        "es_indic_pres",
+        "es_indic_pret",
+        "es_indic_imperf",
+        "es_indic_fut",
+        "es_indic_pres_perf",
+        "es_indic_pluperf",
+        "es_cond_pres",
+        "es_subj_pres",
+        "es_subj_imperf",
+        "es_imper"
+      ],
+      "tensePronouns": [
+        [],
+        [],
+        [],
+        [
+          "yo",
+          "tú",
+          "él/ella/usted",
+          "nosotros/-as",
+          "vosotros/-as",
+          "ellos/-as/ustedes"
+        ],
+        [
+          "yo",
+          "tú",
+          "él/ella/usted",
+          "nosotros/-as",
+          "vosotros/-as",
+          "ellos/-as/ustedes"
+        ],
+        [
+          "yo",
+          "tú",
+          "él/ella/usted",
+          "nosotros/-as",
+          "vosotros/-as",
+          "ellos/-as/ustedes"
+        ],
+        [
+          "yo",
+          "tú",
+          "él/ella/usted",
+          "nosotros/-as",
+          "vosotros/-as",
+          "ellos/-as/ustedes"
+        ],
+        [
+          "yo",
+          "tú",
+          "él/ella/usted",
+          "nosotros/-as",
+          "vosotros/-as",
+          "ellos/-as/ustedes"
+        ],
+        [
+          "yo",
+          "tú",
+          "él/ella/usted",
+          "nosotros/-as",
+          "vosotros/-as",
+          "ellos/-as/ustedes"
+        ],
+        [
+          "yo",
+          "tú",
+          "él/ella/usted",
+          "nosotros/-as",
+          "vosotros/-as",
+          "ellos/-as/ustedes"
+        ],
+        [
+          "yo",
+          "tú",
+          "él/ella/usted",
+          "nosotros/-as",
+          "vosotros/-as",
+          "ellos/-as/ustedes"
+        ],
+        [
+          "yo",
+          "tú",
+          "él/ella/usted",
+          "nosotros/-as",
+          "vosotros/-as",
+          "ellos/-as/ustedes"
+        ],
+        [
+          "tú",
+          "usted",
+          "nosotros/-as",
+          "vosotros/-as",
+          "ustedes"
+        ]
+      ],
+      "tenseGroups": [
+        {
+          "name": "es_indic",
+          "tenseIndices": [
+            3,
+            4,
+            5,
             6,
             7,
             8
           ]
         },
         {
-          "name": "de_subj_i_grp",
+          "name": "es_subj",
           "tenseIndices": [
-            9,
             10,
-            11,
+            11
+          ]
+        },
+        {
+          "name": "es_cond",
+          "tenseIndices": [
+            9
+          ]
+        },
+        {
+          "name": "es_imper",
+          "tenseIndices": [
             12
           ]
         },
         {
-          "name": "de_subj_ii_grp",
+          "name": "es_impers",
           "tenseIndices": [
-            13,
-            14,
-            15,
-            16
+            0,
+            1,
+            2
           ]
         }
       ]
