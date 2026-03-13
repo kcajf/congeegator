@@ -23,12 +23,15 @@
 	}
 
 	$effect(() => {
-		if (!browser || !highlightForm) return;
+		// depend on both highlightForm and the verb data so we scroll after the table renders
+		if (!browser || !highlightForm || !data.verb) return;
 		tick().then(() => {
-			const el = document.querySelector('.highlight');
-			if (el) {
-				el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-			}
+			requestAnimationFrame(() => {
+				const el = document.querySelector('.highlight');
+				if (el) {
+					el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+				}
+			});
 		});
 	});
 
