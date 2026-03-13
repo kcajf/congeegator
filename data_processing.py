@@ -104,6 +104,7 @@ class Sense(msgspec.Struct, frozen=True):
     alt_of: tuple[FormOf, ...] = ()
     tags: tuple[str, ...] = ()
     categories: tuple[str, ...] = ()
+    glosses: tuple[str, ...] = ()
 
 
 class HeadTemplate(msgspec.Struct, frozen=True):
@@ -802,6 +803,16 @@ def entry_is_clean_verb_root(entry: Entry) -> bool:
     return True
 
 
+def extract_gloss(entry: Entry) -> Optional[str]:
+    """Extract the first English gloss from an entry's senses, skipping form_of/alt_of senses."""
+    for sense in entry.senses:
+        if sense.form_of or sense.alt_of:
+            continue
+        if sense.glosses:
+            return sense.glosses[0]
+    return None
+
+
 def fr_is_aspirated(entry: Entry) -> bool:
     cat = "French terms with aspirated h"
     if cat in entry.categories:
@@ -899,6 +910,10 @@ def process_entry(config: LanguageConfig, entry: Entry) -> dict[str, Any] | None
 
     if fr_is_aspirated(entry):
         processed["frIsAspirated"] = True
+
+    gloss = extract_gloss(entry)
+    if gloss:
+        processed["gloss"] = gloss
 
     return processed
 

@@ -25,6 +25,7 @@ export interface VerbRecord {
 	lang: string; // "fr" (the "partition" key)
 	conjugation: ConjugationForms[];
 	frIsAspirated: boolean | null;
+	gloss?: string;
 }
 
 export type SearchIndex = Map<string, Id[]>;

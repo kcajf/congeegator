@@ -81,6 +81,7 @@
 			><img alt="wiktionary" src={wiktionaryLogo} />
 		</a>
 	</div>
+	{#if data.verb.gloss}<p class="gloss">{data.verb.gloss}</p>{/if}
 
 	{#each tenseGroups as tenseGroup (tenseGroup.name)}
 		{#if tenseGroup.tenseIndices.some((i) => !isTenseEmpty(data.verb.conjugation[i]))}
@@ -201,5 +202,11 @@
 		align-items: center;
 		gap: 10px;
 		margin-bottom: -1rem;
+	}
+
+	.gloss {
+		font-style: italic;
+		color: #858585;
+		margin-top: -0.8em;
 	}
 </style>
