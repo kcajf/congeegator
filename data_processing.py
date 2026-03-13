@@ -514,10 +514,10 @@ FR_CONFIG = LanguageConfig(
         ),
     ),
     tense_groups=[
-        TenseGroup("fr_impers", re.compile(r"^fr_impers_")),
         TenseGroup("fr_indic", re.compile(r"^fr_indic_")),
         TenseGroup("fr_subj", re.compile(r"^fr_subj_")),
         TenseGroup("fr_cond", re.compile(r"^fr_cond_")),
+        TenseGroup("fr_impers", re.compile(r"^fr_impers_")),
     ],
 )
 
