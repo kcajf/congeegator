@@ -284,7 +284,7 @@ PERSONS_NUMBERS = tuple((person, number) for number in NUMBERS for person in PER
 
 LANG_PRONOUNS = {
     "fr": ("je", "tu", "il/elle", "nous", "vous", "ils/elles"),
-    "el": ("εγω", "εσυ", "αυτ(ος/ή/ό)", "εμείς", "εσείς", "αυτ(οί/ές/ά)"),
+    "el": ("εγώ", "εσύ", "αυτ(ος/ή/ό)", "εμείς", "εσείς", "αυτ(οί/ές/ά)"),
     "de": ("ich", "du", "er/sie/es", "wir", "ihr", "sie/Sie"),
 }
 
@@ -440,29 +440,29 @@ EL_CONFIG = LanguageConfig(
         TenseConfig(
             "el_imper_imperf_active",
             (
-                FormMatcher(("second-person", "singular", "imperative", "imperfective", "active")),
-                FormMatcher(("second-person", "plural", "imperative", "imperfective", "active")),
+                FormMatcher(("second-person", "singular", "imperative", "imperfective", "active"), pronoun="εσύ"),
+                FormMatcher(("second-person", "plural", "imperative", "imperfective", "active"), pronoun="εσείς"),
             ),
         ),
         TenseConfig(
             "el_imper_perf_active",
             (
-                FormMatcher(("second-person", "singular", "imperative", "perfective", "active")),
-                FormMatcher(("second-person", "plural", "imperative", "perfective", "active")),
+                FormMatcher(("second-person", "singular", "imperative", "perfective", "active"), pronoun="εσύ"),
+                FormMatcher(("second-person", "plural", "imperative", "perfective", "active"), pronoun="εσείς"),
             ),
         ),
         TenseConfig(
             "el_imper_imperf_passive",
             (
-                FormMatcher(("second-person", "singular", "imperative", "imperfective", "passive")),
-                FormMatcher(("second-person", "plural", "imperative", "imperfective", "passive")),
+                FormMatcher(("second-person", "singular", "imperative", "imperfective", "passive"), pronoun="εσύ"),
+                FormMatcher(("second-person", "plural", "imperative", "imperfective", "passive"), pronoun="εσείς"),
             ),
         ),
         TenseConfig(
             "el_imper_perf_passive",
             (
-                FormMatcher(("second-person", "singular", "imperative", "perfective", "passive")),
-                FormMatcher(("second-person", "plural", "imperative", "perfective", "passive")),
+                FormMatcher(("second-person", "singular", "imperative", "perfective", "passive"), pronoun="εσύ"),
+                FormMatcher(("second-person", "plural", "imperative", "perfective", "passive"), pronoun="εσείς"),
             ),
         ),
         # Other forms (participles, infinitives)
