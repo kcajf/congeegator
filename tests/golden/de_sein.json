@@ -2,9 +2,6 @@
   "name": "sein",
   "nameNoDiacritics": "sein",
   "conjugation": [
-    "sein",
-    "seiend",
-    "gewesen",
     [
       "bin",
       "bist",
@@ -21,6 +18,9 @@
       "wart",
       "waren"
     ],
+    "sein",
+    "seiend",
+    "gewesen",
     [
       "sei",
       "seist/seiest",
