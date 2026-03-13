@@ -29,10 +29,18 @@ class SearchLangState {
 		}
 	}
 
-	reloadIndex() {
-		this.indexData = undefined;
-
+	reloadIndex(completedLang?: string) {
 		const lang = this.lang;
+
+		// If a specific language completed sync but doesn't match current, skip.
+		if (completedLang && completedLang !== lang) return;
+
+		// Only clear indexData on language switch (called from onChanged with no arg).
+		// On sync reload, keep old index visible until new one is ready.
+		if (!completedLang) {
+			this.indexData = undefined;
+		}
+
 		db.metadata
 			.get(lang)
 			.then((data) => {
