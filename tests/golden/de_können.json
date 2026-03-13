@@ -18,6 +18,38 @@
       "konntet",
       "konnten"
     ],
+    [
+      "habe gekonnt/habe können",
+      "hast gekonnt/hast können",
+      "hat gekonnt/hat können",
+      "haben gekonnt/haben können",
+      "habt gekonnt/habt können",
+      "haben gekonnt/haben können"
+    ],
+    [
+      "hatte gekonnt/hatte können",
+      "hattest gekonnt/hattest können",
+      "hatte gekonnt/hatte können",
+      "hatten gekonnt/hatten können",
+      "hattet gekonnt/hattet können",
+      "hatten gekonnt/hatten können"
+    ],
+    [
+      "werde können",
+      "wirst können",
+      "wird können",
+      "werden können",
+      "werdet können",
+      "werden können"
+    ],
+    [
+      "werde gekonnt haben/werde können haben",
+      "wirst gekonnt haben/wirst können haben",
+      "wird gekonnt haben/wird können haben",
+      "werden gekonnt haben/werden können haben",
+      "werdet gekonnt haben/werdet können haben",
+      "werden gekonnt haben/werden können haben"
+    ],
     "können",
     "könnend",
     "gekonnt/können",
@@ -30,12 +62,60 @@
       "können"
     ],
     [
+      "habe gekonnt/habe können",
+      "habest gekonnt/habest können",
+      "habe gekonnt/habe können",
+      "haben gekonnt/haben können",
+      "habet gekonnt/habet können",
+      "haben gekonnt/haben können"
+    ],
+    [
+      "werde können",
+      "werdest können",
+      "werde können",
+      "werden können",
+      "werdet können",
+      "werden können"
+    ],
+    [
+      "werde gekonnt haben/werde können haben",
+      "werdest gekonnt haben/werdest können haben",
+      "werde gekonnt haben/werde können haben",
+      "werden gekonnt haben/werden können haben",
+      "werdet gekonnt haben/werdet können haben",
+      "werden gekonnt haben/werden können haben"
+    ],
+    [
       "könnte",
       "könntest",
       "könnte",
       "könnten",
       "könntet",
       "könnten"
+    ],
+    [
+      "hätte gekonnt/hätte können",
+      "hättest gekonnt/hättest können",
+      "hätte gekonnt/hätte können",
+      "hätten gekonnt/hätten können",
+      "hättet gekonnt/hättet können",
+      "hätten gekonnt/hätten können"
+    ],
+    [
+      "würde können",
+      "würdest können",
+      "würde können",
+      "würden können",
+      "würdet können",
+      "würden können"
+    ],
+    [
+      "würde gekonnt haben/würde können haben",
+      "würdest gekonnt haben/würdest können haben",
+      "würde gekonnt haben/würde können haben",
+      "würden gekonnt haben/würden können haben",
+      "würdet gekonnt haben/würdet können haben",
+      "würden gekonnt haben/würden können haben"
     ]
   ],
   "gloss": "to be able (to do or be something), to have the possibility of, can."

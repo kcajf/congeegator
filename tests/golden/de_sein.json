@@ -18,6 +18,38 @@
       "wart",
       "waren"
     ],
+    [
+      "bin gewesen",
+      "bist gewesen",
+      "ist gewesen",
+      "sind gewesen",
+      "seid gewesen",
+      "sind gewesen"
+    ],
+    [
+      "war gewesen",
+      "warst gewesen",
+      "war gewesen",
+      "waren gewesen",
+      "wart gewesen",
+      "waren gewesen"
+    ],
+    [
+      "werde sein",
+      "wirst sein",
+      "wird sein",
+      "werden sein",
+      "werdet sein",
+      "werden sein"
+    ],
+    [
+      "werde gewesen sein",
+      "wirst gewesen sein",
+      "wird gewesen sein",
+      "werden gewesen sein",
+      "werdet gewesen sein",
+      "werden gewesen sein"
+    ],
     "sein",
     "seiend",
     "gewesen",
@@ -30,12 +62,60 @@
       "seien"
     ],
     [
+      "sei gewesen",
+      "seist gewesen/seiest gewesen",
+      "sei gewesen",
+      "seien gewesen",
+      "seiet gewesen",
+      "seien gewesen"
+    ],
+    [
+      "werde sein",
+      "werdest sein",
+      "werde sein",
+      "werden sein",
+      "werdet sein",
+      "werden sein"
+    ],
+    [
+      "werde gewesen sein",
+      "werdest gewesen sein",
+      "werde gewesen sein",
+      "werden gewesen sein",
+      "werdet gewesen sein",
+      "werden gewesen sein"
+    ],
+    [
       "wäre",
       "wärst/wärest",
       "wäre",
       "wären",
       "wärt/wäret",
       "wären"
+    ],
+    [
+      "wäre gewesen",
+      "wärst gewesen/wärest gewesen",
+      "wäre gewesen",
+      "wären gewesen",
+      "wärt gewesen/wäret gewesen",
+      "wären gewesen"
+    ],
+    [
+      "würde sein",
+      "würdest sein",
+      "würde sein",
+      "würden sein",
+      "würdet sein",
+      "würden sein"
+    ],
+    [
+      "würde gewesen sein",
+      "würdest gewesen sein",
+      "würde gewesen sein",
+      "würden gewesen sein",
+      "würdet gewesen sein",
+      "würden gewesen sein"
     ]
   ],
   "gloss": "to be"

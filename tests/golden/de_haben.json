@@ -18,6 +18,38 @@
       "hattet",
       "hatten"
     ],
+    [
+      "habe gehabt",
+      "hast gehabt",
+      "hat gehabt",
+      "haben gehabt",
+      "habt gehabt",
+      "haben gehabt"
+    ],
+    [
+      "hatte gehabt",
+      "hattest gehabt",
+      "hatte gehabt",
+      "hatten gehabt",
+      "hattet gehabt",
+      "hatten gehabt"
+    ],
+    [
+      "werde haben",
+      "wirst haben",
+      "wird haben",
+      "werden haben",
+      "werdet haben",
+      "werden haben"
+    ],
+    [
+      "werde gehabt haben",
+      "wirst gehabt haben",
+      "wird gehabt haben",
+      "werden gehabt haben",
+      "werdet gehabt haben",
+      "werden gehabt haben"
+    ],
     "haben",
     "habend",
     "gehabt",
@@ -30,12 +62,60 @@
       "haben"
     ],
     [
+      "habe gehabt",
+      "habest gehabt",
+      "habe gehabt",
+      "haben gehabt",
+      "habet gehabt",
+      "haben gehabt"
+    ],
+    [
+      "werde haben",
+      "werdest haben",
+      "werde haben",
+      "werden haben",
+      "werdet haben",
+      "werden haben"
+    ],
+    [
+      "werde gehabt haben",
+      "werdest gehabt haben",
+      "werde gehabt haben",
+      "werden gehabt haben",
+      "werdet gehabt haben",
+      "werden gehabt haben"
+    ],
+    [
       "hätte",
       "hättest",
       "hätte",
       "hätten",
       "hättet",
       "hätten"
+    ],
+    [
+      "hätte gehabt",
+      "hättest gehabt",
+      "hätte gehabt",
+      "hätten gehabt",
+      "hättet gehabt",
+      "hätten gehabt"
+    ],
+    [
+      "würde haben",
+      "würdest haben",
+      "würde haben",
+      "würden haben",
+      "würdet haben",
+      "würden haben"
+    ],
+    [
+      "würde gehabt haben",
+      "würdest gehabt haben",
+      "würde gehabt haben",
+      "würden gehabt haben",
+      "würdet gehabt haben",
+      "würden gehabt haben"
     ]
   ],
   "gloss": "forms the perfect aspect (have)"
