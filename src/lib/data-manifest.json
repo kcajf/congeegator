@@ -113,13 +113,6 @@
       ],
       "tenseGroups": [
         {
-          "name": "fr_impers",
-          "tenseIndices": [
-            0,
-            1
-          ]
-        },
-        {
           "name": "fr_indic",
           "tenseIndices": [
             2,
@@ -143,6 +136,13 @@
           "name": "fr_cond",
           "tenseIndices": [
             6
+          ]
+        },
+        {
+          "name": "fr_impers",
+          "tenseIndices": [
+            0,
+            1
           ]
         }
       ]
