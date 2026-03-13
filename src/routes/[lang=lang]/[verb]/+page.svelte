@@ -5,7 +5,7 @@
 	import { langName, manifest } from '$lib/dataUtils';
 	import { appTitle } from '$lib/defs';
 	import { i18n } from '$lib/i18n.svelte';
-	import { formatPronoun } from '$lib/langTools';
+	import { formatForm, formatPronoun } from '$lib/langTools';
 	import { triggerLangSync } from '$lib/syncManager.svelte';
 	import { tick } from 'svelte';
 	import type { ConjugationForms } from '$lib/types';
@@ -61,9 +61,6 @@
 			return tenseCode;
 		}
 	};
-
-	// const formatForm = (form: string) => form.replaceAll('/', ' / ');
-	const formatForm = (form: string) => form;
 </script>
 
 <svelte:head>

@@ -578,6 +578,25 @@ def structure_map(f, s):
     return f(s)
 
 
+def _strip_markers(s: str) -> tuple[str, str, str]:
+    """Strip Wiktionary frequency/register markers from a form.
+
+    Returns (prefix_markers, bare_form, suffix_markers).
+    E.g. '[{foo}]' -> ('[{', 'foo', '}]')
+    """
+    prefix = ""
+    suffix = ""
+    openers = "([{"
+    closers = "}])"
+    while s and s[0] in openers:
+        prefix += s[0]
+        s = s[1:]
+    while s and s[-1] in closers:
+        suffix = s[-1] + suffix
+        s = s[:-1]
+    return prefix, s, suffix
+
+
 def clean_up_matched_forms(
     l: LanguageConfig, forms: list[str], entry: Entry
 ) -> list[str]:
@@ -585,24 +604,51 @@ def clean_up_matched_forms(
 
     if l.code == "el":
         new_forms = [*forms]
+        suffix_replacements = [
+            # existing (these expand archaic/formal variants)
+            ("ουμε", "ομε"),
+            ("ιέστε", "ιόσαστε"),
+            ("ιούνται", "ιόνται"),
+            ("όμαστε", "ώμεθα"),
+            ("άστε", "άσθε"),
+            # new: imperfect passive alternates
+            ("όμασταν", "όμαστε"),
+            ("όσασταν", "όσαστε"),
+            ("ιόμασταν", "ιόμαστε"),
+            ("ούμασταν", "ούμαστε"),
+            # new: participle gender endings
+            ("ος", "η"),
+            ("ος", "ο"),
+        ]
         for i, f in enumerate(forms):
-            suffix_replacements = [
-                ("ουμε", "ομε"),
-                ("ιέστε", "ιόσαστε"),
-                ("ιούνται", "ιόνται"),
-                ("όμαστε", "ώμεθα"),
-                ("άστε", "άσθε"),
-            ]
-            
             if i > 0:
+                pre, bare_f, suf = _strip_markers(f)
+                # Extract word prefix before dash (e.g. "θα " from "θα -ομε")
+                word_prefix = ""
+                dash_part = bare_f
+                space_dash = bare_f.rfind(" -")
+                if space_dash >= 0:
+                    word_prefix = bare_f[: space_dash + 1]
+                    dash_part = bare_f[space_dash + 1 :]
+
                 for from_, to in suffix_replacements:
-                    if f == f'-{to}':
-                        new_forms[i] = new_forms[i-1].replace(from_, to)
+                    if dash_part == f"-{to}":
+                        for j in range(i - 1, -1, -1):
+                            _, bare_base, _ = _strip_markers(new_forms[j])
+                            # Strip same word prefix from base
+                            if word_prefix:
+                                if not bare_base.startswith(word_prefix):
+                                    continue
+                                bare_base = bare_base[len(word_prefix) :]
+                            if bare_base.endswith(from_):
+                                expanded = bare_base[: -len(from_)] + to
+                                new_forms[i] = f"{pre}{word_prefix}{expanded}{suf}"
+                                break
+                        break
 
         for f in new_forms:
-            if '-' in f and len(f) > 1:
-                # log.warning(f"dodgy-looking form in {entry.word}: {f}")
-                pass
+            if "-" in f and len(f) > 1:
+                log.warning(f"dodgy-looking form in {entry.word}: {f}")
         return new_forms
     return forms
 
