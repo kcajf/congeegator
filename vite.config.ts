@@ -10,7 +10,7 @@ export default defineConfig({
 			registerType: 'prompt', // Shows a "New Version" button to users
 			manifest: {
 				/* PWA metadata */ name: 'Congeegator',
-				short_name: 'CG'
+				short_name: 'Congeegator'
 			},
 			pwaAssets: {
 				config: true
