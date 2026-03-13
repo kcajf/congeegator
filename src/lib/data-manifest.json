@@ -1,7 +1,7 @@
 {
   "languages": {
     "fr": {
-      "dataHash": "ad67f934",
+      "dataHash": "3be5ca7d",
       "code": "fr",
       "name": "French",
       "tenseNames": [
@@ -148,7 +148,7 @@
       ]
     },
     "el": {
-      "dataHash": "1fe9d261",
+      "dataHash": "d15b7ca6",
       "code": "el",
       "name": "Greek",
       "tenseNames": [
@@ -338,17 +338,27 @@
       ]
     },
     "de": {
-      "dataHash": "4bcae287",
+      "dataHash": "44cb4270",
       "code": "de",
       "name": "German",
       "tenseNames": [
         "de_indic_pres",
         "de_indic_preterite",
+        "de_indic_perfect",
+        "de_indic_pluperfect",
+        "de_indic_fut_i",
+        "de_indic_fut_ii",
         "de_impers_infinitive",
         "de_impers_pres_partic",
         "de_impers_past_partic",
         "de_subj_i",
-        "de_subj_ii"
+        "de_subj_i_perfect",
+        "de_subj_i_fut_i",
+        "de_subj_i_fut_ii",
+        "de_subj_ii",
+        "de_subj_ii_pluperfect",
+        "de_subj_ii_fut_i",
+        "de_subj_ii_fut_ii"
       ],
       "tensePronouns": [
         [
@@ -367,9 +377,89 @@
           "ihr",
           "sie/Sie"
         ],
+        [
+          "ich",
+          "du",
+          "er/sie/es",
+          "wir",
+          "ihr",
+          "sie/Sie"
+        ],
+        [
+          "ich",
+          "du",
+          "er/sie/es",
+          "wir",
+          "ihr",
+          "sie/Sie"
+        ],
+        [
+          "ich",
+          "du",
+          "er/sie/es",
+          "wir",
+          "ihr",
+          "sie/Sie"
+        ],
+        [
+          "ich",
+          "du",
+          "er/sie/es",
+          "wir",
+          "ihr",
+          "sie/Sie"
+        ],
         [],
         [],
         [],
+        [
+          "ich",
+          "du",
+          "er/sie/es",
+          "wir",
+          "ihr",
+          "sie/Sie"
+        ],
+        [
+          "ich",
+          "du",
+          "er/sie/es",
+          "wir",
+          "ihr",
+          "sie/Sie"
+        ],
+        [
+          "ich",
+          "du",
+          "er/sie/es",
+          "wir",
+          "ihr",
+          "sie/Sie"
+        ],
+        [
+          "ich",
+          "du",
+          "er/sie/es",
+          "wir",
+          "ihr",
+          "sie/Sie"
+        ],
+        [
+          "ich",
+          "du",
+          "er/sie/es",
+          "wir",
+          "ihr",
+          "sie/Sie"
+        ],
+        [
+          "ich",
+          "du",
+          "er/sie/es",
+          "wir",
+          "ihr",
+          "sie/Sie"
+        ],
         [
           "ich",
           "du",
@@ -392,22 +482,37 @@
           "name": "de_indic",
           "tenseIndices": [
             0,
-            1
+            1,
+            2,
+            3,
+            4,
+            5
           ]
         },
         {
           "name": "de_impers",
           "tenseIndices": [
-            2,
-            3,
-            4
+            6,
+            7,
+            8
           ]
         },
         {
-          "name": "de_subj",
+          "name": "de_subj_i_grp",
           "tenseIndices": [
-            5,
-            6
+            9,
+            10,
+            11,
+            12
+          ]
+        },
+        {
+          "name": "de_subj_ii_grp",
+          "tenseIndices": [
+            13,
+            14,
+            15,
+            16
           ]
         }
       ]

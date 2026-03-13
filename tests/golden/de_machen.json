@@ -18,6 +18,38 @@
       "machtet",
       "machten"
     ],
+    [
+      "habe gemacht",
+      "hast gemacht",
+      "hat gemacht",
+      "haben gemacht",
+      "habt gemacht",
+      "haben gemacht"
+    ],
+    [
+      "hatte gemacht",
+      "hattest gemacht",
+      "hatte gemacht",
+      "hatten gemacht",
+      "hattet gemacht",
+      "hatten gemacht"
+    ],
+    [
+      "werde machen",
+      "wirst machen",
+      "wird machen",
+      "werden machen",
+      "werdet machen",
+      "werden machen"
+    ],
+    [
+      "werde gemacht haben",
+      "wirst gemacht haben",
+      "wird gemacht haben",
+      "werden gemacht haben",
+      "werdet gemacht haben",
+      "werden gemacht haben"
+    ],
     "machen",
     "machend",
     "gemacht",
@@ -30,12 +62,60 @@
       "machen"
     ],
     [
+      "habe gemacht",
+      "habest gemacht",
+      "habe gemacht",
+      "haben gemacht",
+      "habet gemacht",
+      "haben gemacht"
+    ],
+    [
+      "werde machen",
+      "werdest machen",
+      "werde machen",
+      "werden machen",
+      "werdet machen",
+      "werden machen"
+    ],
+    [
+      "werde gemacht haben",
+      "werdest gemacht haben",
+      "werde gemacht haben",
+      "werden gemacht haben",
+      "werdet gemacht haben",
+      "werden gemacht haben"
+    ],
+    [
       "machte",
       "machtest",
       "machte",
       "machten",
       "machtet",
       "machten"
+    ],
+    [
+      "hätte gemacht",
+      "hättest gemacht",
+      "hätte gemacht",
+      "hätten gemacht",
+      "hättet gemacht",
+      "hätten gemacht"
+    ],
+    [
+      "würde machen",
+      "würdest machen",
+      "würde machen",
+      "würden machen",
+      "würdet machen",
+      "würden machen"
+    ],
+    [
+      "würde gemacht haben",
+      "würdest gemacht haben",
+      "würde gemacht haben",
+      "würden gemacht haben",
+      "würdet gemacht haben",
+      "würden gemacht haben"
     ]
   ],
   "gloss": "to make, to produce, to create (an object, arrangement, situation, etc.)"

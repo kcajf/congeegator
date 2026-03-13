@@ -294,10 +294,14 @@ class FormMatcher(msgspec.Struct, frozen=True):
     tags: tuple[str, ...]
     formatter: str = "{}"
     pronoun: str | None = None
+    exclude_tags: tuple[str, ...] = ()
 
     def matches(self, form: Form) -> bool:
         for t in self.tags:
             if t not in form.tags:
+                return False
+        for t in self.exclude_tags:
+            if t in form.tags:
                 return False
         return True
 
@@ -329,6 +333,7 @@ def full_tense(
     name: str,
     tags: tuple[str, ...],
     auxiliaries: tuple[str, ...] | None = None,
+    exclude_tags: tuple[str, ...] = (),
 ):
     if auxiliaries is not None:
         assert len(auxiliaries) == len(PERSONS_NUMBERS)
@@ -337,12 +342,17 @@ def full_tense(
                 (*PERSONS_NUMBERS[i], *tags),
                 pronoun=LANG_PRONOUNS[lang][i],
                 formatter=auxiliaries[i] + "{}",
+                exclude_tags=exclude_tags,
             )
             for i in range(len(PERSONS_NUMBERS))
         )
     else:
         matchers = tuple(
-            FormMatcher((*PERSONS_NUMBERS[i], *tags), pronoun=LANG_PRONOUNS[lang][i])
+            FormMatcher(
+                (*PERSONS_NUMBERS[i], *tags),
+                pronoun=LANG_PRONOUNS[lang][i],
+                exclude_tags=exclude_tags,
+            )
             for i in range(len(PERSONS_NUMBERS))
         )
 
@@ -528,16 +538,27 @@ DE_CONFIG = LanguageConfig(
     tenses=(
         full_tense("de", "de_indic_pres", ("present", "indicative")),
         full_tense("de", "de_indic_preterite", ("preterite",)),
-        TenseConfig("de_impers_infinitive", FormMatcher(("infinitive",))),
+        full_tense("de", "de_indic_perfect", ("perfect", "indicative")),
+        full_tense("de", "de_indic_pluperfect", ("pluperfect", "indicative")),
+        full_tense("de", "de_indic_fut_i", ("future-i", "indicative")),
+        full_tense("de", "de_indic_fut_ii", ("future-ii", "indicative")),
+        TenseConfig("de_impers_infinitive", FormMatcher(("infinitive",), exclude_tags=("multiword-construction",))),
         TenseConfig("de_impers_pres_partic", FormMatcher(("participle", "present"))),
         TenseConfig("de_impers_past_partic", FormMatcher(("participle", "past"))),
-        full_tense("de", "de_subj_i", ("subjunctive", "subjunctive-i")),
-        full_tense("de", "de_subj_ii", ("subjunctive", "subjunctive-ii")),
+        full_tense("de", "de_subj_i", ("subjunctive", "subjunctive-i"), exclude_tags=("multiword-construction",)),
+        full_tense("de", "de_subj_i_perfect", ("perfect", "subjunctive")),
+        full_tense("de", "de_subj_i_fut_i", ("future-i", "subjunctive-i")),
+        full_tense("de", "de_subj_i_fut_ii", ("future-ii", "subjunctive-i")),
+        full_tense("de", "de_subj_ii", ("subjunctive", "subjunctive-ii"), exclude_tags=("multiword-construction",)),
+        full_tense("de", "de_subj_ii_pluperfect", ("pluperfect", "subjunctive")),
+        full_tense("de", "de_subj_ii_fut_i", ("future-i", "subjunctive-ii")),
+        full_tense("de", "de_subj_ii_fut_ii", ("future-ii", "subjunctive-ii")),
     ),
     tense_groups=[
         TenseGroup("de_indic", re.compile(r"^de_indic_")),
         TenseGroup("de_impers", re.compile(r"^de_impers_")),
-        TenseGroup("de_subj", re.compile(r"^de_subj_")),
+        TenseGroup("de_subj_i_grp", re.compile(r"^de_subj_i($|_)")),
+        TenseGroup("de_subj_ii_grp", re.compile(r"^de_subj_ii($|_)")),
     ],
 )
 CONFIG: list[LanguageConfig] = [
@@ -641,8 +662,12 @@ def form_is_clean_conjugation(form: Form) -> bool:
     if "'" in form.form:  # French "t'es"
         return False
 
-    if " " in form.form and ' - ' not in form.form:  # French "me suis"
-        return False
+    if " " in form.form and " - " not in form.form:
+        # Allow German compound tenses (e.g. "habe gemacht") but reject
+        # French reflexive forms ("me suis") and template descriptions
+        # ("avoir + past participle").
+        if "multiword-construction" not in form.tags or "+" in form.form:
+            return False
 
     for c in IPA_ALL:
         if c in form.form:

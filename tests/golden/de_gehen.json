@@ -18,6 +18,38 @@
       "gingt",
       "gingen"
     ],
+    [
+      "bin gegangen",
+      "bist gegangen",
+      "ist gegangen",
+      "sind gegangen",
+      "seid gegangen",
+      "sind gegangen"
+    ],
+    [
+      "war gegangen",
+      "warst gegangen",
+      "war gegangen",
+      "waren gegangen",
+      "wart gegangen",
+      "waren gegangen"
+    ],
+    [
+      "werde gehen",
+      "wirst gehen",
+      "wird gehen",
+      "werden gehen",
+      "werdet gehen",
+      "werden gehen"
+    ],
+    [
+      "werde gegangen sein",
+      "wirst gegangen sein",
+      "wird gegangen sein",
+      "werden gegangen sein",
+      "werdet gegangen sein",
+      "werden gegangen sein"
+    ],
     "gehen",
     "gehend",
     "gegangen",
@@ -30,12 +62,60 @@
       "gehen"
     ],
     [
+      "sei gegangen",
+      "seist gegangen/seiest gegangen",
+      "sei gegangen",
+      "seien gegangen",
+      "seiet gegangen",
+      "seien gegangen"
+    ],
+    [
+      "werde gehen",
+      "werdest gehen",
+      "werde gehen",
+      "werden gehen",
+      "werdet gehen",
+      "werden gehen"
+    ],
+    [
+      "werde gegangen sein",
+      "werdest gegangen sein",
+      "werde gegangen sein",
+      "werden gegangen sein",
+      "werdet gegangen sein",
+      "werden gegangen sein"
+    ],
+    [
       "ginge",
       "gingest/gingst",
       "ginge",
       "gingen",
       "ginget/gingt",
       "gingen"
+    ],
+    [
+      "wäre gegangen",
+      "wärst gegangen/wärest gegangen",
+      "wäre gegangen",
+      "wären gegangen",
+      "wärt gegangen/wäret gegangen",
+      "wären gegangen"
+    ],
+    [
+      "würde gehen",
+      "würdest gehen",
+      "würde gehen",
+      "würden gehen",
+      "würdet gehen",
+      "würden gehen"
+    ],
+    [
+      "würde gegangen sein",
+      "würdest gegangen sein",
+      "würde gegangen sein",
+      "würden gegangen sein",
+      "würdet gegangen sein",
+      "würden gegangen sein"
     ]
   ],
   "gloss": "to go, to walk"
