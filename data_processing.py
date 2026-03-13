@@ -289,6 +289,8 @@ LANG_PRONOUNS = {
     "de": ("ich", "du", "er/sie/es", "wir", "ihr", "sie/Sie"),
 }
 
+FR_SUBJ_PRONOUNS = ("que je", "que tu", "qu'il/elle", "que nous", "que vous", "qu'ils/elles")
+
 
 class FormMatcher(msgspec.Struct, frozen=True):
     tags: tuple[str, ...]
@@ -334,13 +336,15 @@ def full_tense(
     tags: tuple[str, ...],
     auxiliaries: tuple[str, ...] | None = None,
     exclude_tags: tuple[str, ...] = (),
+    pronouns: tuple[str, ...] | None = None,
 ):
+    lang_pronouns = pronouns if pronouns is not None else LANG_PRONOUNS[lang]
     if auxiliaries is not None:
         assert len(auxiliaries) == len(PERSONS_NUMBERS)
         matchers = tuple(
             FormMatcher(
                 (*PERSONS_NUMBERS[i], *tags),
-                pronoun=LANG_PRONOUNS[lang][i],
+                pronoun=lang_pronouns[i],
                 formatter=auxiliaries[i] + "{}",
                 exclude_tags=exclude_tags,
             )
@@ -350,7 +354,7 @@ def full_tense(
         matchers = tuple(
             FormMatcher(
                 (*PERSONS_NUMBERS[i], *tags),
-                pronoun=LANG_PRONOUNS[lang][i],
+                pronoun=lang_pronouns[i],
                 exclude_tags=exclude_tags,
             )
             for i in range(len(PERSONS_NUMBERS))
@@ -509,8 +513,8 @@ FR_CONFIG = LanguageConfig(
         full_tense("fr", "fr_indic_past_hist", ("past", "historic", "indicative")),
         full_tense("fr", "fr_indic_fut", ("future", "indicative")),
         full_tense("fr", "fr_cond_pres", ("conditional",)),
-        full_tense("fr", "fr_subj_pres", ("subjunctive", "present")),
-        full_tense("fr", "fr_subj_imperf", ("subjunctive", "imperfect")),
+        full_tense("fr", "fr_subj_pres", ("subjunctive", "present"), pronouns=FR_SUBJ_PRONOUNS),
+        full_tense("fr", "fr_subj_imperf", ("subjunctive", "imperfect"), pronouns=FR_SUBJ_PRONOUNS),
         repeated_tense(
             "fr", "fr_indic_pres_perf", ("participle", "past"), FR_PRES_INDIC_AVOIR
         ),
