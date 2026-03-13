@@ -1,9 +1,13 @@
 import { browser } from '$app/environment';
+import { langName } from './dataUtils';
 import { db } from './db';
 import { searchLangState } from './searchLang.svelte';
+import { toasts } from './toasts.svelte';
 
 let worker: Worker | undefined;
 let workerReady: Promise<void> | undefined;
+
+const syncToastIds: Record<string, string> = {};
 
 if (browser) {
 	// The 'new URL' syntax is recognized by Vite to bundle the worker file separately
@@ -23,15 +27,21 @@ if (browser) {
 	});
 
 	worker.onmessage = (e) => {
-		// Handle messages...
-		const { type, lang, percent, error } = e.data;
+		const { type, lang, error } = e.data;
+		const name = langName(lang);
 
 		if (type === 'PROGRESS') {
-			console.log(`${lang} loading: ${percent}%`);
+			if (!syncToastIds[lang]) {
+				syncToastIds[lang] = toasts.add(`Syncing ${name}...`, { dismissAfter: 30000 });
+			}
 		}
 
 		if (type === 'COMPLETE') {
-			console.log(`${lang} loading: complete`);
+			const id = syncToastIds[lang];
+			if (id) {
+				toasts.update(id, `${name} ready`);
+				delete syncToastIds[lang];
+			}
 			searchLangState.reloadIndex(lang);
 		}
 
@@ -40,7 +50,13 @@ if (browser) {
 		}
 
 		if (type === 'ERROR') {
-			console.log(`${lang} loading: error ${error}`);
+			const id = syncToastIds[lang];
+			if (id) {
+				toasts.update(id, `${name} sync failed`, { dismissAfter: 6000 });
+				delete syncToastIds[lang];
+			} else {
+				console.error(`${lang} sync error:`, error);
+			}
 		}
 	};
 }

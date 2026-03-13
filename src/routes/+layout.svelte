@@ -18,6 +18,8 @@
 	} from '$lib/search';
 	import { searchLangState } from '$lib/searchLang.svelte';
 	import type { VerbRecord } from '$lib/types';
+	import ToastStack from '$lib/components/ToastStack.svelte';
+	import { toasts } from '$lib/toasts.svelte';
 	import { onMount, tick } from 'svelte';
 	import { pwaInfo } from 'virtual:pwa-info';
 	import type { LayoutProps } from './$types';
@@ -35,7 +37,23 @@
 			const { registerSW } = await import('virtual:pwa-register');
 			registerSW({
 				immediate: true,
-				onRegistered() {},
+				onRegisteredSW(_url: string, registration: ServiceWorkerRegistration | undefined) {
+					if (registration?.waiting) {
+						toasts.add('Reload to update', { dismissAfter: 15000 });
+					}
+
+					registration?.addEventListener('updatefound', () => {
+						const newWorker = registration.installing;
+						newWorker?.addEventListener('statechange', () => {
+							if (newWorker.state === 'activated') {
+								toasts.add('App ready to work offline');
+							}
+							if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+								toasts.add('Reload to update', { dismissAfter: 15000 });
+							}
+						});
+					});
+				},
 				onRegisterError(error: Error) {
 					console.error('SW registration error', error);
 				}
@@ -195,9 +213,7 @@
 	{/if}
 </div>
 
-{#await import('$lib/ReloadPrompt.svelte') then { default: ReloadPrompt }}
-	<ReloadPrompt />
-{/await}
+<ToastStack />
 
 <style>
 	:global(html) {
