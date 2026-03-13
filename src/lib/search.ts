@@ -3,6 +3,7 @@ import type { Id, SearchIndex, VerbRecord } from './types';
 export type SearchResult = {
 	root: string;
 	matched: string;
+	quality: number; // 0 = exact, 1 = diacritics-stripped, 2 = phonetic
 };
 
 export function stripDiacritics(s: string): string {
@@ -137,30 +138,34 @@ export function toPhonetic(lang: string, s: string): string {
 	return s;
 }
 
-export function findBestMatch(verb: VerbRecord, query: string, lang: string): SearchResult | null {
-	// query is already phonetically transformed by the caller
-	let best: string | null = null;
+function matchQuality(form: string, query: string, lang: string): number | null {
+	if (form.toLowerCase().includes(query)) return 0;
+	const stripped = stripDiacritics(form).toLowerCase();
+	if (stripped.includes(query)) return 1;
+	if (toPhonetic(lang, stripped).includes(query)) return 2;
+	return null;
+}
 
-	const matches = (form: string) => {
-		const stripped = stripDiacritics(form).toLowerCase();
-		return stripped.includes(query) || toPhonetic(lang, stripped).includes(query);
+export function findMatches(verb: VerbRecord, query: string, lang: string): SearchResult[] {
+	// query is already phonetically transformed by the caller
+	const seen = new Map<string, SearchResult>();
+
+	const consider = (form: string) => {
+		const quality = matchQuality(form, query, lang);
+		if (quality === null) return;
+		const existing = seen.get(form);
+		if (!existing || quality < existing.quality) {
+			seen.set(form, { root: verb.name, matched: form, quality });
+		}
 	};
 
-	if (matches(verb.name)) {
-		best = verb.name;
-	}
-
+	consider(verb.name);
 	for (const entry of verb.conjugation) {
 		const forms = Array.isArray(entry) ? entry : [entry];
 		for (const form of forms) {
-			if (matches(form)) {
-				if (!best || form.length < best.length) {
-					best = form;
-				}
-			}
+			consider(form);
 		}
-		if (best?.length === query.length) break;
 	}
 
-	return best ? { root: verb.name, matched: best } : null;
+	return [...seen.values()];
 }
