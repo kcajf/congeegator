@@ -44,11 +44,14 @@
 	onMount(async () => {
 		if (pwaInfo) {
 			const { registerSW } = await import('virtual:pwa-register');
-			registerSW({
+			const updateSW = registerSW({
 				immediate: true,
 				onRegisteredSW(_url: string, registration: ServiceWorkerRegistration | undefined) {
 					if (registration?.waiting) {
-						toasts.add('Reload to update', { dismissAfter: 15000 });
+						toasts.add('Tap to update', {
+							dismissAfter: 0,
+							onclick: () => updateSW(true)
+						});
 					}
 
 					registration?.addEventListener('updatefound', () => {
@@ -58,7 +61,10 @@
 								toasts.add('App ready to work offline');
 							}
 							if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-								toasts.add('Reload to update', { dismissAfter: 15000 });
+								toasts.add('Tap to update', {
+									dismissAfter: 0,
+									onclick: () => updateSW(true)
+								});
 							}
 						});
 					});

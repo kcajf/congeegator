@@ -12,11 +12,13 @@ interface Toast {
 	message: string;
 	color: string;
 	timer: ReturnType<typeof setTimeout> | null;
+	onclick?: () => void;
 }
 
 interface ToastOptions {
 	dismissAfter?: number;
 	color?: string;
+	onclick?: () => void;
 }
 
 let counter = 0;
@@ -30,8 +32,8 @@ class ToastStore {
 		const color = options.color ?? COLORS[counter++ % COLORS.length];
 		const dismissAfter = options.dismissAfter ?? 4000;
 
-		const timer = setTimeout(() => this.dismiss(id), dismissAfter);
-		this.list.push({ id, message, color, timer });
+		const timer = dismissAfter > 0 ? setTimeout(() => this.dismiss(id), dismissAfter) : null;
+		this.list.push({ id, message, color, timer, onclick: options.onclick });
 		return id;
 	}
 

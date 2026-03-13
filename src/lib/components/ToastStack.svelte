@@ -8,8 +8,10 @@
 		{#each toasts.list as toast (toast.id)}
 			<div
 				class="toast"
-				role="status"
+				class:clickable={!!toast.onclick}
+				role={toast.onclick ? 'alert' : 'status'}
 				style:background-color={toast.color}
+				onclick={toast.onclick}
 				transition:fly={{ y: 50, duration: 300 }}
 			>
 				{toast.message}
@@ -38,5 +40,9 @@
 		letter-spacing: 0.02em;
 		pointer-events: auto;
 		text-align: center;
+	}
+
+	.toast.clickable {
+		cursor: pointer;
 	}
 </style>
