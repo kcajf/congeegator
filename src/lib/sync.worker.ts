@@ -30,7 +30,7 @@ self.onmessage = async (e: MessageEvent<{ lang: string }>) => {
 
 				const url = `${getLangDataUrl(lang)}/data.json`;
 				const response = await fetch(url);
-				const totalBytes = parseInt(response.headers.get('Content-Length') ?? '0', 10) || null;
+				const totalBytes = remote.dataSize ?? null;
 				let receivedBytes = 0;
 				const chunks: Uint8Array[] = [];
 				const reader = response.body!.getReader();
