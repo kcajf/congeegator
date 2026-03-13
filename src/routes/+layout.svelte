@@ -126,7 +126,7 @@
 		const originalQuery = searchTerm.toLowerCase().trim();
 		const stripped = stripDiacritics(originalQuery);
 		const currentQuery = toPhonetic(currentLang, stripped);
-		if (!index || currentQuery.length < 2) {
+		if (!index || currentQuery.length < 1) {
 			searchResults = [];
 			return;
 		}
@@ -224,7 +224,7 @@
 				</li>
 			{/each}
 		</ul>
-	{:else if searchTerm.trim().length >= 2}
+	{:else if searchTerm.trim().length >= 1}
 		{#if !searchLangState.indexData}
 			<div class="no-results">{i18n.t('loading')}</div>
 		{:else}
