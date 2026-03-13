@@ -18,7 +18,7 @@
 	<div class="lang-buttons">
 		{#each Object.keys(i18nDictionary) as lang (lang)}
 			<button class:active={i18n.current === lang} onclick={() => i18n.setLocale(lang as LangCode)}>
-				{lang.toUpperCase()}
+				{lang}
 			</button>
 		{/each}
 	</div>
