@@ -115,8 +115,7 @@
 				searchResults = data
 					.filter((v): v is VerbRecord => !!v)
 					.flatMap((v) => findMatches(v, originalQuery, currentQuery, currentLang))
-					.sort((a, b) => a.quality - b.quality || a.matched.length - b.matched.length)
-					.slice(0, 15);
+					.sort((a, b) => a.quality - b.quality || a.matched.length - b.matched.length);
 			})
 			.catch((err) => {
 				console.error('Search lookup failed:', err);
