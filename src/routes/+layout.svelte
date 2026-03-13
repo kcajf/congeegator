@@ -196,6 +196,9 @@
 				type="search"
 				id="searchInput"
 				placeholder={i18n.t('search_placeholder')}
+				autocapitalize="off"
+				autocorrect="off"
+				autocomplete="off"
 			/>
 		</div>
 
