@@ -81,9 +81,9 @@
 		<div class="tenseGroup">
 			{#each tenseGroup.tenseIndices as tenseI (tenseI)}
 				{@const tenseForms = data.verb.conjugation[tenseI]}
-				<div class="tense">
-					<h3>{getTenseDisplayName(tenseNames[tenseI])}</h3>
-					{#if Array.isArray(tenseForms)}
+				{#if Array.isArray(tenseForms)}
+					<div class="tense">
+						<h3>{getTenseDisplayName(tenseNames[tenseI])}</h3>
 						<table class="tenseTable">
 							<tbody>
 								{#each tenseForms as form, formI (formI)}
@@ -100,12 +100,13 @@
 								{/each}
 							</tbody>
 						</table>
-					{:else}
-						<p class="participle" class:highlight={isHighlighted(tenseForms)}>
-							{formatForm(tenseForms)}
-						</p>
-					{/if}
-				</div>
+					</div>
+				{:else}
+					<div class="tense tense-inline" class:highlight={isHighlighted(tenseForms)}>
+						<h3 class="tense-inline-name">{getTenseDisplayName(tenseNames[tenseI])}</h3>
+						<span class="tense-inline-value">{formatForm(tenseForms)}</span>
+					</div>
+				{/if}
 			{/each}
 		</div>
 	{/each}
@@ -134,11 +135,42 @@
 		margin-right: 0;
 	}
 
-	.tenseGroup {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 2rem;
+	h2 {
+		margin-bottom: 0.8rem;
+		font-weight: 500;
 	}
+
+	h3 {
+		margin-top: 0;
+		margin-bottom: 0.2rem;
+		text-transform: uppercase;
+		font-size: 0.8rem;
+		letter-spacing: 0.03em;
+		font-weight: 500;
+	}
+
+	.tenseGroup {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+		max-width: calc(3 * 16rem + 2 * 1rem);
+		gap: 1rem;
+	}
+
+	.tense-inline {
+		display: flex;
+		align-items: baseline;
+		gap: 0.5rem;
+		grid-column: 1 / -1;
+	}
+
+	.tense-inline + .tense-inline {
+		margin-top: -0.5rem;
+	}
+
+	.tense-inline-name {
+		min-width: 10rem;
+	}
+
 	.wiktionaryLink {
 		display: inline-flex;
 		align-items: center; /* This handles the vertical centering */
@@ -158,5 +190,6 @@
 		display: flex;
 		align-items: center;
 		gap: 10px;
+		margin-bottom: -1rem;
 	}
 </style>
