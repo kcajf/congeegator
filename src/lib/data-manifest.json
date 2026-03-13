@@ -148,7 +148,7 @@
       ]
     },
     "el": {
-      "dataHash": "ae15d084",
+      "dataHash": "1fe9d261",
       "code": "el",
       "name": "Greek",
       "tenseNames": [
@@ -338,22 +338,19 @@
       ]
     },
     "de": {
-      "dataHash": "8f005f08",
+      "dataHash": "4bcae287",
       "code": "de",
       "name": "German",
       "tenseNames": [
+        "de_indic_pres",
+        "de_indic_preterite",
         "de_impers_infinitive",
         "de_impers_pres_partic",
         "de_impers_past_partic",
-        "de_indic_pres",
-        "de_indic_preterite",
         "de_subj_i",
         "de_subj_ii"
       ],
       "tensePronouns": [
-        [],
-        [],
-        [],
         [
           "ich",
           "du",
@@ -370,6 +367,9 @@
           "ihr",
           "sie/Sie"
         ],
+        [],
+        [],
+        [],
         [
           "ich",
           "du",
@@ -389,16 +389,16 @@
       ],
       "tenseGroups": [
         {
-          "name": "de_impers",
+          "name": "de_indic",
           "tenseIndices": [
             0,
-            1,
-            2
+            1
           ]
         },
         {
-          "name": "de_indic",
+          "name": "de_impers",
           "tenseIndices": [
+            2,
             3,
             4
           ]

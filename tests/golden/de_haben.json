@@ -2,9 +2,6 @@
   "name": "haben",
   "nameNoDiacritics": "haben",
   "conjugation": [
-    "haben",
-    "habend",
-    "gehabt",
     [
       "habe",
       "hast",
@@ -21,6 +18,9 @@
       "hattet",
       "hatten"
     ],
+    "haben",
+    "habend",
+    "gehabt",
     [
       "habe",
       "habest",

@@ -2,9 +2,6 @@
   "name": "können",
   "nameNoDiacritics": "konnen",
   "conjugation": [
-    "können",
-    "könnend",
-    "gekonnt/können",
     [
       "kann",
       "kannst",
@@ -21,6 +18,9 @@
       "konntet",
       "konnten"
     ],
+    "können",
+    "könnend",
+    "gekonnt/können",
     [
       "könne",
       "könnest",

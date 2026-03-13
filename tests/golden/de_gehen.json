@@ -2,9 +2,6 @@
   "name": "gehen",
   "nameNoDiacritics": "gehen",
   "conjugation": [
-    "gehen",
-    "gehend",
-    "gegangen",
     [
       "gehe",
       "gehst",
@@ -21,6 +18,9 @@
       "gingt",
       "gingen"
     ],
+    "gehen",
+    "gehend",
+    "gegangen",
     [
       "gehe",
       "gehest",
