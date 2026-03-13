@@ -1,12 +1,20 @@
 import { browser } from '$app/environment';
 import { db } from './db';
+import { manifest } from './dataUtils';
 import { triggerLangSync } from './syncManager.svelte';
 import type { SearchIndex } from './types';
 
 export const defaultConjLang = 'fr';
 
+function getInitialLang(): string {
+	if (!browser) return defaultConjLang;
+	const stored = localStorage.getItem('searchLang');
+	if (stored && stored in manifest.languages) return stored;
+	return defaultConjLang;
+}
+
 class SearchLangState {
-	lang = $state(browser ? localStorage.getItem('searchLang') || defaultConjLang : defaultConjLang);
+	lang = $state(getInitialLang());
 
 	indexData = $state.raw<SearchIndex | undefined>(undefined);
 
@@ -15,7 +23,7 @@ class SearchLangState {
 	}
 
 	set(code: string) {
-		if (code != this.lang) {
+		if (code != this.lang && code in manifest.languages) {
 			this.lang = code;
 			this.onChanged();
 		}
