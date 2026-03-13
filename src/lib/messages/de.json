@@ -70,5 +70,9 @@
 	"pwa_update_available": "Neuer Inhalt verfügbar, klicken Sie auf Neu laden, um zu aktualisieren.",
 	"reload": "Neu laden",
 	"close": "Schließen",
-	"native_tense_names": "Zeitnamen in der Konjugationssprache anzeigen"
+	"settings": "Einstellungen",
+	"interface_language": "Sprache der Benutzeroberfläche",
+	"about": "Über",
+	"native_tense_names": "Zeitnamen in der Konjugationssprache anzeigen",
+	"about_text": "Congeegator ist eine App zur Verbkonjugation. Die Konjugationsdaten stammen aus Wiktionary."
 }
