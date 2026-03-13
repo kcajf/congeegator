@@ -145,12 +145,12 @@ describe('findMatches', () => {
 
 	it('collapses French compound past tense forms to last word', () => {
 		const verb = makeVerb({
-			name: 'manger',
+			name: 'avoir',
 			conjugation: ['a mangé', 'avons mangé', 'ont mangé']
 		});
-		const results = findMatches(verb, 'mang', 'mang', 'fr');
+		const results = findMatches(verb, 'mangé', 'mangé', 'fr');
 		expect(results).toHaveLength(1);
-		expect(results[0]).toEqual({ root: 'manger', matched: 'mangé', quality: 0 });
+		expect(results[0]).toEqual({ root: 'avoir', matched: 'mangé', quality: 0 });
 	});
 
 	it('still matches verb name directly when it matches the query', () => {
