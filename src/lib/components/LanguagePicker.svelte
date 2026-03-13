@@ -90,7 +90,9 @@
 
 	.option {
 		width: 100%;
-		padding: 0.4rem 0.75rem;
+		padding: 0.4rem 0.75rem 0.4rem 0.6rem;
+		margin: 0 -0.4rem;
+		width: calc(100% + 0.8rem);
 		text-align: left;
 		background: none;
 		border: none;
@@ -102,7 +104,7 @@
 
 	@media (max-width: 768px) {
 		.option {
-			padding: 0.7rem 1rem;
+			padding: 0.7rem 1rem 0.7rem 0.6rem;
 		}
 	}
 
@@ -118,8 +120,9 @@
 	.dropdown {
 		position: absolute;
 		top: 100%;
-		right: 0;
+		left: -0.4rem;
 		background: #f9f9f9;
+		padding: 0.15rem 0.4rem 0.4rem;
 		z-index: 100;
 		max-height: 300px;
 		overflow-y: auto;
