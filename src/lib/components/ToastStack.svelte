@@ -14,7 +14,8 @@
 				onclick={toast.onclick}
 				transition:fly={{ y: 50, duration: 300 }}
 			>
-				{toast.message}
+				{toast.message}{#if toast.showEllipsis}<span class="ellipsis" aria-hidden="true"
+					></span>{/if}
 			</div>
 		{/each}
 	</div>
@@ -44,5 +45,20 @@
 
 	.toast.clickable {
 		cursor: pointer;
+	}
+
+	.ellipsis::after {
+		content: '...';
+		display: inline-block;
+		width: 0;
+		overflow: hidden;
+		animation: ellipsis 1.2s steps(4, end) infinite;
+		vertical-align: bottom;
+	}
+
+	@keyframes ellipsis {
+		to {
+			width: 1.2em;
+		}
 	}
 </style>
