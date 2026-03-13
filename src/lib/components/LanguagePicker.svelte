@@ -1,70 +1,45 @@
 <script lang="ts">
 	import { clickOutside } from '$lib/clickOutside';
-	import { fade, fly, slide } from 'svelte/transition';
-	// Your custom action
+	import { slide } from 'svelte/transition';
 	import { langName, manifest } from '$lib/dataUtils';
 	import { searchLangState } from '$lib/searchLang.svelte';
 
 	let currentLang = $derived(searchLangState.lang);
 	let isOpen = $state(false);
-	let isMobile = $state(false);
 
 	function select(newLang: string) {
 		searchLangState.set(newLang);
 		isOpen = false;
 	}
-
-	// Responsive check
-	$effect(() => {
-		const mql = window.matchMedia('(max-width: 768px)');
-		isMobile = mql.matches;
-		const handler = (e: MediaQueryListEvent) => (isMobile = e.matches);
-		mql.addEventListener('change', handler);
-		return () => mql.removeEventListener('change', handler);
-	});
 </script>
 
 <div class="picker-container" use:clickOutside={() => (isOpen = false)}>
 	<button class="trigger" onclick={() => (isOpen = !isOpen)}>
-		<span class="mobile-only">{currentLang.toUpperCase()}</span>
+		<span class="mobile-only">{currentLang}</span>
 		<span class="desktop-only">{langName(currentLang)}</span>
+		<svg class="chevron" class:open={isOpen} width="10" height="6" viewBox="0 0 10 6" fill="none">
+			<path
+				d="M1 1L5 5L9 1"
+				stroke="currentColor"
+				stroke-width="1.5"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			/>
+		</svg>
 	</button>
 
 	{#if isOpen}
-		{#if isMobile}
-			<div
-				class="backdrop"
-				role="presentation"
-				transition:fade
-				onclick={() => (isOpen = false)}
-			></div>
-			<div class="bottom-sheet" transition:fly={{ y: 300 }}>
-				<!-- <div class="handle"></div> -->
-				<div class="scroll-area">
-					{#each Object.values(manifest.languages) as lang (lang.code)}
-						<button
-							class="option"
-							class:active={lang.code === currentLang}
-							onclick={() => select(lang.code)}
-						>
-							{lang.name}
-						</button>
-					{/each}
-				</div>
-			</div>
-		{:else}
-			<div class="dropdown" transition:slide>
-				{#each Object.values(manifest.languages) as lang (lang.code)}
-					<button
-						class="option"
-						class:active={lang.code === currentLang}
-						onclick={() => select(lang.code)}
-					>
-						{lang.name}
-					</button>
-				{/each}
-			</div>
-		{/if}
+		<div class="dropdown" transition:slide={{ duration: 100 }}>
+			{#each Object.values(manifest.languages) as lang (lang.code)}
+				<button
+					class="option"
+					class:active={lang.code === currentLang}
+					onclick={() => select(lang.code)}
+				>
+					{lang.name}
+				</button>
+			{/each}
+		</div>
 	{/if}
 </div>
 
@@ -78,7 +53,9 @@
 
 	@media (max-width: 768px) {
 		.mobile-only {
-			display: block;
+			display: inline-block;
+			width: 1.4em;
+			text-align: center;
 		}
 		.desktop-only {
 			display: none;
@@ -90,82 +67,61 @@
 	}
 
 	.trigger {
-		padding: 0.6rem 0.6rem;
-		/* padding: 8px 12px; */
-		/* font-weight: bold; */
-		font-family: inherit; /* Inherit from body or container */
-		border: 1px solid #ddd;
-		/* border-radius: 3px; */
-		background: white;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		padding: 0.4rem 0.2rem;
+		font-family: inherit;
+		font-size: 1rem;
+		border: none;
+		background: transparent;
 		cursor: pointer;
+		color: #333;
+	}
+
+	.chevron {
+		transition: transform 0.15s ease;
+		color: #999;
+	}
+
+	.chevron.open {
+		transform: rotate(180deg);
 	}
 
 	.option {
 		width: 100%;
-		padding: 14px 20px;
+		padding: 0.4rem 0.75rem;
 		text-align: left;
 		background: none;
 		border: none;
 		font-size: 1rem;
-		font-family: inherit; /* Inherit from body or container */
+		font-family: inherit;
 		cursor: pointer;
+		color: #333;
+	}
+
+	@media (max-width: 768px) {
+		.option {
+			padding: 0.7rem 1rem;
+		}
+	}
+
+	.option:hover {
+		background-color: #f0f0f0;
 	}
 
 	.option.active {
-		/* color: #517092; */
-		font-weight: bold;
-		background: #f8f9fa;
+		text-decoration: underline;
+		text-underline-offset: 3px;
 	}
 
-	/* Desktop Styles */
 	.dropdown {
 		position: absolute;
-		top: calc(100% + 5px);
+		top: 100%;
 		right: 0;
-		width: 180px;
-		background: white;
-		border: 1px solid #ddd;
-		/* border-radius: 8px; */
-		/* box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); */
+		background: #f9f9f9;
 		z-index: 100;
 		max-height: 300px;
 		overflow-y: auto;
-	}
-
-	/* Mobile Styles */
-	.backdrop {
-		position: fixed;
-		inset: 0;
-		background: rgba(0, 0, 0, 0.4);
-		z-index: 999;
-	}
-
-	.bottom-sheet {
-		position: fixed;
-		bottom: 0;
-		left: 0;
-		right: 0;
-		height: 60vh;
-		background: white;
-		/* border-top-left-radius: 20px;
-		border-top-right-radius: 20px; */
-		z-index: 1000;
-		padding-bottom: env(safe-area-inset-bottom);
-	}
-
-	/* .handle {
-		width: 40px;
-		height: 4px;
-		background: #ddd;
-		border-radius: 2px;
-		margin: 12px auto;
-	} */
-
-	.scroll-area {
-		/* max-height: 50vh;
-		overflow-y: auto; */
-		flex: 1; /* Takes up all remaining space in the 60vh container */
-		overflow-y: auto;
-		-webkit-overflow-scrolling: touch; /* Smooth scrolling for iOS */
 	}
 </style>

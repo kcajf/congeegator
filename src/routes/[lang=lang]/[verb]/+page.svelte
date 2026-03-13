@@ -227,12 +227,17 @@
 		align-items: center;
 		flex-wrap: wrap;
 		gap: 10px;
-		margin-bottom: -1rem;
+		margin-top: 0.25rem;
+	}
+
+	.header-container h1 {
+		margin-top: 0;
+		margin-bottom: 0;
 	}
 
 	.gloss {
 		font-style: italic;
 		color: #858585;
-		margin-top: -0.8em;
+		margin-top: 0.3rem;
 	}
 </style>
