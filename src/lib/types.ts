@@ -2,6 +2,7 @@ export interface DataManifest {
 	languages: {
 		[key: string]: {
 			dataHash: string;
+			dataSize: number;
 			code: string;
 			name: string;
 			tenseNames: string[];

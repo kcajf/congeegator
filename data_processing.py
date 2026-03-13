@@ -863,16 +863,19 @@ def write_data_manifest(data_dir: str):
         if not os.path.exists(data_path):
             continue
 
+        data_size = os.path.getsize(data_path)
+
         with open(data_path, "rb") as f:
             h = hashlib.file_digest(f, "md5").hexdigest()[:8]
 
         hashed_data_dir = os.path.join(data_dir, f"{config.code}-{h}")
         os.rename(os.path.join(data_dir, config.code), hashed_data_dir)
 
-        log.info(f"{config.code}: dataHash={h}")
+        log.info(f"{config.code}: dataHash={h} dataSize={data_size}")
 
         language_hashes[config.code] = {
             "dataHash": h,
+            "dataSize": data_size,
             **make_language_static_metadata(config),
         }
 
