@@ -45,18 +45,27 @@ from data_processing import to_phonetic_el
         # Latin normalization
         ("cyma", "kima"),
         ("phyllo", "fillo"),
-        ("kueri", "kueri"),
+        ("kueri", "kieri"),
         # Latin vowel digraphs (naive transliteration convergence)
         ("eimai", "ime"),
         ("imai", "ime"),
         ("oikos", "ikos"),
         ("oute", "ute"),
-        # x and h as chi
+        # Latin consonant bigrams
+        ("mpeno", "beno"),
+        ("ntino", "dino"),
+        ("gkremizo", "gremizo"),
+        # x, h, and w
         ("exo", "echo"),
         ("psaxno", "psachno"),
         ("eho", "echo"),
         ("eiha", "icha"),
         ("thelo", "thelo"),  # th stays as th
+        ("kanw", "kano"),  # w as omega
+        # Latin full words
+        ("mirizei", "mirizi"),
+        ("milousa", "milusa"),
+        ("upoferame", "ipoferame"),
         # Latin au/eu voicing
         ("autos", "aftos"),
         ("euro", "evro"),
