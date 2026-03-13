@@ -34,6 +34,7 @@
 	}
 
 	.toast {
+		position: relative;
 		color: #f5f5f0;
 		padding: 0.5rem 1rem;
 		font-size: 0.85rem;
@@ -45,6 +46,10 @@
 
 	.toast.clickable {
 		cursor: pointer;
+	}
+
+	.ellipsis {
+		position: absolute;
 	}
 
 	.ellipsis::after {
