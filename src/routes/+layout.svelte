@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { beforeNavigate, goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 
 	import appleIcon180 from '$lib/assets/apple-touch-icon-180x180.png';
@@ -47,6 +47,18 @@
 	let searchInput: HTMLInputElement | undefined = $state();
 
 	let searchResults = $state<SearchResult[]>([]);
+
+	// Clear search when language changes
+	$effect(() => {
+		// eslint-disable-next-line @typescript-eslint/no-unused-expressions -- subscribe to lang changes
+		searchLangState.lang;
+		searchTerm = '';
+	});
+
+	// Clear search on any navigation (logo click, back button, etc.)
+	beforeNavigate(() => {
+		searchTerm = '';
+	});
 
 	async function selectResult(item: SearchResult) {
 		const base = resolve('/[lang=lang]/[verb]', {
