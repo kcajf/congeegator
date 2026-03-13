@@ -1,7 +1,7 @@
 {
   "languages": {
     "fr": {
-      "dataHash": "de6ab27c",
+      "dataHash": "c3e00e99",
       "code": "fr",
       "name": "French",
       "tenseNames": [
@@ -12,6 +12,7 @@
         "fr_indic_past_hist",
         "fr_indic_fut",
         "fr_cond_pres",
+        "fr_imper_pres",
         "fr_subj_pres",
         "fr_subj_imperf",
         "fr_indic_pres_perf",
@@ -61,6 +62,11 @@
           "nous",
           "vous",
           "ils/elles"
+        ],
+        [
+          "(tu)",
+          "(nous)",
+          "(vous)"
         ],
         [
           "que je",
@@ -119,23 +125,29 @@
             3,
             4,
             5,
-            9,
             10,
             11,
-            12
+            12,
+            13
           ]
         },
         {
           "name": "fr_subj",
           "tenseIndices": [
-            7,
-            8
+            8,
+            9
           ]
         },
         {
           "name": "fr_cond",
           "tenseIndices": [
             6
+          ]
+        },
+        {
+          "name": "fr_imper",
+          "tenseIndices": [
+            7
           ]
         },
         {
@@ -148,7 +160,7 @@
       ]
     },
     "el": {
-      "dataHash": "96fa5df7",
+      "dataHash": "e3a06a7c",
       "code": "el",
       "name": "Greek",
       "tenseNames": [
@@ -338,7 +350,7 @@
       ]
     },
     "de": {
-      "dataHash": "5662bb12",
+      "dataHash": "799f83a9",
       "code": "de",
       "name": "German",
       "tenseNames": [
@@ -518,7 +530,7 @@
       ]
     },
     "es": {
-      "dataHash": "134677ab",
+      "dataHash": "6ffcce9e",
       "code": "es",
       "name": "Spanish",
       "tenseNames": [
