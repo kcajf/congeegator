@@ -1,5 +1,8 @@
 import type { Id, SearchIndex, VerbRecord } from './types';
 
+export const MAX_PREFIX_IDS = 200;
+export const MAX_SEARCH_RESULTS = 50;
+
 export type SearchResult = {
 	root: string;
 	matched: string;

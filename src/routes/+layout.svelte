@@ -13,6 +13,8 @@
 	import { i18n } from '$lib/i18n.svelte';
 	import {
 		findMatches,
+		MAX_PREFIX_IDS,
+		MAX_SEARCH_RESULTS,
 		prefixLookup,
 		stripDiacritics,
 		toPhonetic,
@@ -124,18 +126,19 @@
 		const originalQuery = searchTerm.toLowerCase().trim();
 		const stripped = stripDiacritics(originalQuery);
 		const currentQuery = toPhonetic(currentLang, stripped);
-		if (!index || currentQuery.length < 2) {
+		if (!index || currentQuery.length < 1) {
 			searchResults = [];
 			return;
 		}
 
-		const prefixIds = prefixLookup(index, currentQuery);
+		const allPrefixIds = prefixLookup(index, currentQuery);
 
-		if (prefixIds.length == 0) {
+		if (allPrefixIds.length == 0) {
 			searchResults = [];
 			return;
 		}
 
+		const prefixIds = allPrefixIds.slice(0, MAX_PREFIX_IDS);
 		const dbKeys = prefixIds.map((id) => [currentLang, id]);
 
 		db.verbs
@@ -152,7 +155,8 @@
 					.sort(
 						(a, b) =>
 							a.quality - b.quality || b.freq - a.freq || a.matched.length - b.matched.length
-					);
+					)
+					.slice(0, MAX_SEARCH_RESULTS);
 			})
 			.catch((err) => {
 				console.error('Search lookup failed:', err);
@@ -220,7 +224,7 @@
 				</li>
 			{/each}
 		</ul>
-	{:else if searchTerm.trim().length >= 2}
+	{:else if searchTerm.trim().length >= 1}
 		{#if !searchLangState.indexData}
 			<div class="no-results">{i18n.t('loading')}</div>
 		{:else}
@@ -245,10 +249,8 @@
 		scrollbar-color: rgba(155, 155, 155, 0.5) transparent;
 	}
 	:global(body) {
-		/* applies to <body> */
-		/* margin: 0; */
+		margin: 0;
 		font-family: Georgia, 'Times New Roman', Times, serif;
-		/* background-color: #c48dcc; */
 	}
 
 	.top-icon {
@@ -259,7 +261,8 @@
 
 	.container {
 		max-width: 50rem;
-		margin: 1rem auto;
+		margin: 0 auto;
+		padding: 0 0.75rem 2rem;
 	}
 
 	.navbar {
@@ -267,6 +270,7 @@
 		top: 0;
 		z-index: 10;
 		background-color: white;
+		padding-top: 0.5rem;
 		display: flex;
 		align-items: center;
 		justify-content: flex-start;
