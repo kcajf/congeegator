@@ -9,17 +9,41 @@ export function formatForm(form: string): string {
 	const parts = form.split('/');
 	if (parts.length <= 1) return form;
 
-	const result = [parts[0]];
-	for (let i = 1; i < parts.length; i++) {
-		const lcp = longestCommonPrefix(parts[0], parts[i]);
-		const suffix = parts[i].slice(lcp.length);
-		if (lcp.length >= 4 && !parts[0].endsWith(suffix)) {
+	// Factor out common whole-word prefix across ALL parts
+	const wordArrays = parts.map((p) => p.split(' '));
+	let commonWordCount = 0;
+	outer: while (commonWordCount < wordArrays[0].length) {
+		const word = wordArrays[0][commonWordCount];
+		for (let i = 1; i < wordArrays.length; i++) {
+			if (
+				commonWordCount >= wordArrays[i].length ||
+				wordArrays[i][commonWordCount] !== word
+			) {
+				break outer;
+			}
+		}
+		commonWordCount++;
+	}
+
+	let prefix = '';
+	let effectiveParts = parts;
+	if (commonWordCount > 0) {
+		prefix = wordArrays[0].slice(0, commonWordCount).join(' ') + ' ';
+		effectiveParts = parts.map((p) => p.slice(prefix.length));
+	}
+
+	// Apply per-pair abbreviation to stripped parts
+	const result = [effectiveParts[0]];
+	for (let i = 1; i < effectiveParts.length; i++) {
+		const lcp = longestCommonPrefix(effectiveParts[0], effectiveParts[i]);
+		const suffix = effectiveParts[i].slice(lcp.length);
+		if (lcp.length >= 4 && !effectiveParts[0].endsWith(suffix)) {
 			result.push('-' + suffix);
 		} else {
-			result.push(parts[i]);
+			result.push(effectiveParts[i]);
 		}
 	}
-	return result.join('/');
+	return prefix + result.join('/');
 }
 
 export function formatPronoun(
