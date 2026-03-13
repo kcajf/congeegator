@@ -250,7 +250,7 @@
 	}
 	:global(body) {
 		/* applies to <body> */
-		/* margin: 0; */
+		margin: 0;
 		font-family: Georgia, 'Times New Roman', Times, serif;
 		/* background-color: #c48dcc; */
 	}
@@ -263,7 +263,8 @@
 
 	.container {
 		max-width: 50rem;
-		margin: 1rem auto;
+		margin: 0 auto;
+		padding-bottom: 2rem;
 	}
 
 	.navbar {
@@ -271,6 +272,7 @@
 		top: 0;
 		z-index: 10;
 		background-color: white;
+		padding-top: 0.5rem;
 		display: flex;
 		align-items: center;
 		justify-content: flex-start;
