@@ -736,17 +736,16 @@ def count_conjs(thing) -> int:
     return n
 
 
-def write_language_data(data: dict[str, Any], lang_dir: str):
+def write_language_data(data: dict[str, Any], lang_dir: str, pretty: bool = False):
     os.makedirs(lang_dir, exist_ok=True)
 
-    # INDENT=None
-    INDENT = 2
+    indent = 2 if pretty else None
 
     # full data file
     out_path = os.path.join(lang_dir, "data.json")
     with open(out_path, "w") as f:
         log.info(f"Wrote {out_path}")
-        json.dump(data, f, indent=INDENT, ensure_ascii=False)
+        json.dump(data, f, indent=indent, ensure_ascii=False)
 
     # single verbs file
     single_verbs_dir = os.path.join(lang_dir, "verbs")
@@ -755,12 +754,12 @@ def write_language_data(data: dict[str, Any], lang_dir: str):
         with open(
             os.path.join(single_verbs_dir, f"{verb_data['name']}.json"), "w"
         ) as f:
-            json.dump(verb_data, f, indent=INDENT, ensure_ascii=False)
+            json.dump(verb_data, f, indent=indent, ensure_ascii=False)
 
     # index file
     with open(os.path.join(lang_dir, "index.json"), "w") as f:
         names = [x["name"] for x in data["verbs"]]
-        json.dump(names, f, indent=INDENT, ensure_ascii=False)
+        json.dump(names, f, indent=indent, ensure_ascii=False)
 
 
 def make_language_static_metadata(config: LanguageConfig):
@@ -1082,6 +1081,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dev", action="store_true")
     parser.add_argument(
+        "--pretty", action="store_true", help="Pretty-print JSON output (useful for local dev)"
+    )
+    parser.add_argument(
         "--check-manifest-metadata",
         action="store_true",
         help="Verify data-manifest.json metadata matches current LanguageConfig definitions (no data generation)",
@@ -1103,7 +1105,7 @@ def main():
     for lang in data.keys():
         lang_dir = os.path.join(data_dir, lang)
         log.info(f"Writing {lang_dir}")
-        write_language_data(data[lang], lang_dir)
+        write_language_data(data[lang], lang_dir, pretty=args.pretty)
 
     write_data_manifest(data_dir)
     log.info("all done")
