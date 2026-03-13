@@ -2,10 +2,12 @@
 	import { beforeNavigate, goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 
+	import { dev } from '$app/environment';
 	import appleIcon180 from '$lib/assets/apple-touch-icon-180x180.png';
 	import congeegatorSVG from '$lib/assets/congeegator.svg';
 	import favicon from '$lib/assets/favicon.ico';
 	import LanguagePicker from '$lib/components/LanguagePicker.svelte';
+	import ToastStack from '$lib/components/ToastStack.svelte';
 	import { db } from '$lib/db';
 	import { appTitle } from '$lib/defs';
 	import { i18n } from '$lib/i18n.svelte';
@@ -17,10 +19,8 @@
 		type SearchResult
 	} from '$lib/search';
 	import { searchLangState } from '$lib/searchLang.svelte';
-	import type { VerbRecord } from '$lib/types';
-	import ToastStack from '$lib/components/ToastStack.svelte';
 	import { toasts } from '$lib/toasts.svelte';
-	import { dev } from '$app/environment';
+	import type { VerbRecord } from '$lib/types';
 	import { onMount, tick } from 'svelte';
 	import { pwaInfo } from 'virtual:pwa-info';
 	import type { LayoutProps } from './$types';
@@ -47,8 +47,9 @@
 			const updateSW = registerSW({
 				immediate: true,
 				onRegisteredSW(_url: string, registration: ServiceWorkerRegistration | undefined) {
+					const TAP_TO_UPDATE = 'New app version available. Tap here to reload.';
 					if (registration?.waiting) {
-						toasts.add('Tap to update', {
+						toasts.add(TAP_TO_UPDATE, {
 							dismissAfter: 0,
 							onclick: () => updateSW(true)
 						});
@@ -61,7 +62,7 @@
 								toasts.add('App ready to work offline');
 							}
 							if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-								toasts.add('Tap to update', {
+								toasts.add(TAP_TO_UPDATE, {
 									dismissAfter: 0,
 									onclick: () => updateSW(true)
 								});
