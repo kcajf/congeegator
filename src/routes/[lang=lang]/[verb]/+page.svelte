@@ -9,7 +9,7 @@
 	import { formatPronoun, getExternalLinks, parseAndFormatForm } from '$lib/langTools';
 	import { searchLangState } from '$lib/searchLang.svelte';
 	import { getTenseWikiLink } from '$lib/tenseWikiLinks';
-	import { tick } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import type { ConjugationForms } from '$lib/types';
 	import type { PageProps } from './$types';
 
@@ -54,11 +54,9 @@
 	const tensePronouns = $derived(langManifest.tensePronouns);
 	const tenseGroups = $derived(langManifest.tenseGroups);
 
-	// Whenever the language changes, check if we need the full bundle
-	$effect(() => {
-		if (browser && data.verb?.lang) {
-			searchLangState.set(data.verb.lang);
-		}
+	// Sync language picker on mount (e.g. direct URL navigation to a different language)
+	onMount(() => {
+		searchLangState.set(data.verb.lang);
 	});
 
 	const externalLinks = $derived(
