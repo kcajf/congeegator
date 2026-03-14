@@ -300,6 +300,7 @@ class FormMatcher(msgspec.Struct, frozen=True):
     formatter: str = "{}"
     pronoun: str | None = None
     exclude_tags: tuple[str, ...] = ()
+    max_forms: int | None = None
 
     def matches(self, form: Form) -> bool:
         for t in self.tags:
@@ -590,8 +591,8 @@ ES_CONFIG = LanguageConfig(
     english_wiktionary_name="Spanish",
     tenses=(
         # Impersonal
-        TenseConfig("es_impers_inf", FormMatcher(("infinitive",))),
-        TenseConfig("es_impers_gerund", FormMatcher(("gerund",))),
+        TenseConfig("es_impers_inf", FormMatcher(("infinitive",), max_forms=1)),
+        TenseConfig("es_impers_gerund", FormMatcher(("gerund",), max_forms=1)),
         TenseConfig("es_impers_past_partic", FormMatcher(("participle", "past"))),
         # Indicative
         full_tense("es", "es_indic_pres", ("present", "indicative"), exclude_tags=("vos-form",)),
@@ -738,6 +739,8 @@ def extract_one(
                 continue
             ret.append(formatted)
             seen.add(formatted)
+            if matcher.max_forms is not None and len(ret) >= matcher.max_forms:
+                break
     ret = clean_up_matched_forms(l, ret, entry)
     return "/".join(ret)
 
