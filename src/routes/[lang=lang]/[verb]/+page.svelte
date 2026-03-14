@@ -6,7 +6,7 @@
 	import { langWiktionaryName, manifest } from '$lib/dataUtils';
 	import { appTitle, siteUrl } from '$lib/defs';
 	import { tenseSettings } from '$lib/i18n.svelte';
-	import { formatForm, formatPronoun, getExternalLinks } from '$lib/langTools';
+	import { formatPronoun, getExternalLinks, parseAndFormatForm } from '$lib/langTools';
 	import { triggerLangSync } from '$lib/syncManager.svelte';
 	import { tick } from 'svelte';
 	import type { ConjugationForms } from '$lib/types';
@@ -26,7 +26,9 @@
 	});
 
 	function isHighlighted(form: string): boolean {
-		return highlightForm !== '' && form.toLowerCase() === highlightForm;
+		if (highlightForm === '') return false;
+		const stripped = form.replace(/[([{}\])]/g, '');
+		return stripped.toLowerCase() === highlightForm;
 	}
 
 	$effect(() => {
@@ -62,6 +64,25 @@
 		return tenseSettings.translateTense(tenseCode, data.verb.lang);
 	};
 
+	const presentMarkers = $derived.by(() => {
+		let hasDeprecated = false;
+		let hasRare = false;
+		let hasFormal = false;
+		for (const forms of data.verb.conjugation) {
+			const check = (s: string) => {
+				if (s.includes('(')) hasDeprecated = true;
+				if (s.includes('[')) hasRare = true;
+				if (s.includes('{')) hasFormal = true;
+			};
+			if (typeof forms === 'string') {
+				check(forms);
+			} else {
+				for (const f of forms) check(f);
+			}
+		}
+		return { hasDeprecated, hasRare, hasFormal, any: hasDeprecated || hasRare || hasFormal };
+	});
+
 	const langEn = $derived(langWiktionaryName(data.verb.lang));
 	const verbTitle = $derived(`${data.verb.name} — ${appTitle}`);
 	const verbDescription = $derived(
@@ -84,6 +105,17 @@
 	<meta property="og:type" content="website" />
 	<meta property="og:site_name" content={appTitle} />
 </svelte:head>
+
+{#snippet formDisplay(form: string)}
+	{#each parseAndFormatForm(form) as segment, i (i)}
+		{#if segment.separator}{segment.separator}{/if}
+		{#if segment.markers.length > 0}
+			<span class={segment.markers.map((m) => `marker-${m}`).join(' ')}>{segment.text}</span>
+		{:else}
+			{segment.text}
+		{/if}
+	{/each}
+{/snippet}
 
 {#if data.verb}
 	<div class="header-container">
@@ -144,7 +176,7 @@
 														form,
 														data.verb.frIsAspirated || false
 													)}</td
-												><td>{formatForm(form)}</td>
+												><td>{@render formDisplay(form)}</td>
 											</tr>
 										{/each}
 									</tbody>
@@ -153,7 +185,7 @@
 						{:else}
 							<div class="tense tense-inline" class:highlight={isHighlighted(tenseForms)}>
 								<h3 class="tense-inline-name">{getTenseDisplayName(tenseNames[tenseI])}</h3>
-								<span class="tense-inline-value">{formatForm(tenseForms)}</span>
+								<span class="tense-inline-value">{@render formDisplay(tenseForms)}</span>
 							</div>
 						{/if}
 					{/if}
@@ -161,6 +193,25 @@
 			</div>
 		{/if}
 	{/each}
+	{#if presentMarkers.any}
+		<div class="legend">
+			{#if presentMarkers.hasFormal}
+				<span class="legend-item">
+					<span class="marker-formal">example</span> formal/learned
+				</span>
+			{/if}
+			{#if presentMarkers.hasRare}
+				<span class="legend-item">
+					<span class="marker-rare">example</span> rare
+				</span>
+			{/if}
+			{#if presentMarkers.hasDeprecated}
+				<span class="legend-item">
+					<span class="marker-deprecated">example</span> less common
+				</span>
+			{/if}
+		</div>
+	{/if}
 {:else}
 	<h1>Verb not found</h1>
 {/if}
@@ -269,5 +320,34 @@
 		font-style: italic;
 		color: #858585;
 		margin-top: 0.3rem;
+	}
+
+	:global(.marker-deprecated) {
+		color: #999;
+	}
+
+	:global(.marker-rare) {
+		color: #aaa;
+		font-style: italic;
+	}
+
+	:global(.marker-formal) {
+		color: #7a6f8a;
+	}
+
+	.legend {
+		border-top: 1px solid #e0e0e0;
+		padding-top: 0.5rem;
+		margin-top: 1.5rem;
+		display: flex;
+		gap: 1.5rem;
+		font-size: 0.85rem;
+		color: #666;
+	}
+
+	.legend-item {
+		display: inline-flex;
+		align-items: baseline;
+		gap: 0.3rem;
 	}
 </style>
