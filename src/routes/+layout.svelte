@@ -199,7 +199,7 @@
 				bind:this={searchInput}
 				onkeydown={handleKeydown}
 				onfocus={() => searchInput?.select()}
-				type="search"
+				type="text"
 				id="searchInput"
 				placeholder="search..."
 				autocapitalize="off"
