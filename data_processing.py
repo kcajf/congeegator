@@ -876,6 +876,40 @@ def preprocess_el_forms(forms: list[Form]) -> list[Form]:
     return result
 
 
+def _is_de_volle_endung_pair(a: str, b: str) -> tuple[str, str] | None:
+    """Detect if two German forms are a volle Endung (full ending) pair.
+
+    Returns (common_form, formal_form) or None.
+    E.g. ("gingst", "gingest") or ("seist gegangen", "seiest gegangen").
+    """
+    words_a = a.split()
+    words_b = b.split()
+    if len(words_a) != len(words_b):
+        return None
+
+    # Find the single differing word
+    diffs = [
+        (i, wa, wb)
+        for i, (wa, wb) in enumerate(zip(words_a, words_b))
+        if wa != wb
+    ]
+    if len(diffs) != 1:
+        return None
+
+    _, wa, wb = diffs[0]
+
+    # Check suffix pairs: -st/-est first (more specific), then -t/-et
+    for short_suf, long_suf in [("st", "est"), ("t", "et")]:
+        if wa.endswith(short_suf) and wb.endswith(long_suf):
+            if wa[: -len(short_suf)] == wb[: -len(long_suf)] and wa[: -len(short_suf)]:
+                return (a, b)  # a is common, b is formal
+        if wb.endswith(short_suf) and wa.endswith(long_suf):
+            if wb[: -len(short_suf)] == wa[: -len(long_suf)] and wb[: -len(short_suf)]:
+                return (b, a)  # b is common, a is formal
+
+    return None
+
+
 def clean_up_matched_forms(
     l: LanguageConfig, forms: list[str], entry: Entry
 ) -> list[str]:
@@ -935,6 +969,13 @@ def clean_up_matched_forms(
             if "-" in f and len(f) > 1:
                 log.warning(f"dodgy-looking form in {entry.word}: {f}")
         return new_forms
+
+    if l.code == "de" and len(forms) == 2:
+        result = _is_de_volle_endung_pair(forms[0], forms[1])
+        if result is not None:
+            common, formal = result
+            return [common, "{" + formal + "}"]
+
     return forms
 
 

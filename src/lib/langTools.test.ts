@@ -92,4 +92,20 @@ describe('parseAndFormatForm', () => {
 			{ text: '-ούνε', markers: ['rare'], separator: '/' }
 		]);
 	});
+
+	it('handles German volle Endung with formal marker and abbreviation', () => {
+		const result = parseAndFormatForm('gingst/{gingest}');
+		expect(result).toEqual([
+			{ text: 'gingst', markers: [] },
+			{ text: '-est', markers: ['formal'], separator: '/' }
+		]);
+	});
+
+	it('handles German volle Endung in compound forms', () => {
+		const result = parseAndFormatForm('seist gegangen/{seiest gegangen}');
+		expect(result).toEqual([
+			{ text: 'seist gegangen', markers: [] },
+			{ text: 'seiest gegangen', markers: ['formal'], separator: '/' }
+		]);
+	});
 });

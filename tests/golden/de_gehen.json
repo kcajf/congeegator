@@ -63,7 +63,7 @@
     ],
     [
       "sei gegangen",
-      "seist gegangen/seiest gegangen",
+      "seist gegangen/{seiest gegangen}",
       "sei gegangen",
       "seien gegangen",
       "seiet gegangen",
@@ -87,18 +87,18 @@
     ],
     [
       "ginge",
-      "gingest/gingst",
+      "gingst/{gingest}",
       "ginge",
       "gingen",
-      "ginget/gingt",
+      "gingt/{ginget}",
       "gingen"
     ],
     [
       "wäre gegangen",
-      "wärst gegangen/wärest gegangen",
+      "wärst gegangen/{wärest gegangen}",
       "wäre gegangen",
       "wären gegangen",
-      "wärt gegangen/wäret gegangen",
+      "wärt gegangen/{wäret gegangen}",
       "wären gegangen"
     ],
     [
