@@ -433,25 +433,25 @@ EL_CONFIG = LanguageConfig(
         full_tense(
             "el",
             "el_indic_fut_simple_active",
-            ("subjunctive", "perfective", "active"),
+            ("dependent", "indicative", "perfective", "active"),
             auxiliaries=EL_THA,
         ),
         full_tense(
             "el",
             "el_indic_fut_simple_passive",
-            ("subjunctive", "perfective", "passive"),
+            ("dependent", "indicative", "perfective", "passive"),
             auxiliaries=EL_THA,
         ),
         # Subjunctive
         full_tense(
             "el",
             "el_subj_perf_active",
-            ("subjunctive", "perfective", "active"),
+            ("dependent", "indicative", "perfective", "active"),
         ),
         full_tense(
             "el",
             "el_subj_perf_passive",
-            ("subjunctive", "perfective", "passive"),
+            ("dependent", "indicative", "perfective", "passive"),
         ),
         # Imperative (2nd person only — singular + plural)
         TenseConfig(
