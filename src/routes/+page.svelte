@@ -25,7 +25,7 @@
 		'eimai' in Greek).
 	</p>
 
-	{#if browser && !isStandalone}
+	{#if !isStandalone}
 		<p>
 			{#if isIOS}
 				To install: tap the Share icon, then "Add to Home Screen".
