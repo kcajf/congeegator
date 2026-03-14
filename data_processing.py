@@ -978,6 +978,7 @@ def form_is_clean_conjugation(form: Form) -> bool:
     if form.form is None:
         return False
     if form.form in {
+        "-",
         "Formed using present",
         "dependent (for simple past)",
         "present perfect from above with a particle (να, ας).",

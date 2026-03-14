@@ -1,0 +1,89 @@
+{
+  "name": "llover",
+  "nameNoDiacritics": "llover",
+  "conjugation": [
+    "llover",
+    "lloviendo",
+    "llovido/llovida/llovidos/llovidas",
+    [
+      "lluevo",
+      "llueves",
+      "llueve",
+      "llovemos",
+      "llovéis",
+      "llueven"
+    ],
+    [
+      "lloví",
+      "lloviste",
+      "llovió",
+      "llovimos",
+      "llovisteis",
+      "llovieron"
+    ],
+    [
+      "llovía",
+      "llovías",
+      "llovía",
+      "llovíamos",
+      "llovíais",
+      "llovían"
+    ],
+    [
+      "lloveré",
+      "lloverás",
+      "lloverá",
+      "lloveremos",
+      "lloveréis",
+      "lloverán"
+    ],
+    [
+      "he llovido",
+      "has llovido",
+      "ha llovido",
+      "hemos llovido",
+      "habéis llovido",
+      "han llovido"
+    ],
+    [
+      "había llovido",
+      "habías llovido",
+      "había llovido",
+      "habíamos llovido",
+      "habíais llovido",
+      "habían llovido"
+    ],
+    [
+      "llovería",
+      "lloverías",
+      "llovería",
+      "lloveríamos",
+      "lloveríais",
+      "lloverían"
+    ],
+    [
+      "llueva",
+      "lluevas",
+      "llueva",
+      "llovamos",
+      "llováis",
+      "lluevan"
+    ],
+    [
+      "lloviera/lloviese",
+      "llovieras/llovieses",
+      "lloviera/lloviese",
+      "lloviéramos/lloviésemos",
+      "llovierais/llovieseis",
+      "llovieran/lloviesen"
+    ],
+    [
+      "llueve",
+      "llueva",
+      "llovamos",
+      "lloved",
+      "lluevan"
+    ]
+  ],
+  "gloss": "to rain"
+}
