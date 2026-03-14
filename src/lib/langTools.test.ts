@@ -7,13 +7,13 @@ describe('formatForm', () => {
 		expect(formatForm('mange')).toBe('mange');
 	});
 
-	it('abbreviates Greek forms without word prefix', () => {
-		expect(formatForm('γεννάνε/γεννάν/γεννούν/γεννούνε')).toBe('γεννάνε/γεννάν/-ούν/-ούνε');
+	it('abbreviates Greek forms with global min LCP and additive merge', () => {
+		expect(formatForm('γεννάνε/γεννάν/γεννούν/γεννούνε')).toBe('γεννάνε/-άν/-ούν(ε)');
 	});
 
 	it('factors out "θα" prefix from Greek future forms', () => {
 		expect(formatForm('θα γεννάνε/θα γεννάν/θα γεννούν/θα γεννούνε')).toBe(
-			'θα γεννάνε/γεννάν/-ούν/-ούνε'
+			'θα γεννάνε/-άν/-ούν(ε)'
 		);
 	});
 
@@ -33,8 +33,20 @@ describe('formatForm', () => {
 		expect(formatForm('πίνουμε/πίνομε')).toBe('πίνουμε/πίνομε');
 	});
 
-	it('abbreviates French forms as before', () => {
-		expect(formatForm('mange/manges')).toBe('mange/-s');
+	it('merges adjacent additive French forms with parens', () => {
+		expect(formatForm('mange/manges')).toBe('mange(s)');
+	});
+
+	it('merges adjacent additive Greek 2-form', () => {
+		expect(formatForm('ευχαριστηθούν/ευχαριστηθούνε')).toBe('ευχαριστηθούν(ε)');
+	});
+
+	it('uses consistent global min LCP for Spanish participle', () => {
+		expect(formatForm('llegado/llegada/llegados/llegadas')).toBe('llegado/-a/-os/-as');
+	});
+
+	it('abbreviates non-additive Greek 2-form normally', () => {
+		expect(formatForm('γεννάω/γεννώ')).toBe('γεννάω/-ώ');
 	});
 });
 
@@ -44,7 +56,7 @@ describe('parseAndFormatForm', () => {
 	});
 
 	it('returns abbreviated text for plain forms with slash variants', () => {
-		expect(parseAndFormatForm('mange/manges')).toEqual([{ text: 'mange/-s', markers: [] }]);
+		expect(parseAndFormatForm('mange/manges')).toEqual([{ text: 'mange(s)', markers: [] }]);
 	});
 
 	it('strips [{}] markers and returns rare+formal', () => {
@@ -106,6 +118,24 @@ describe('parseAndFormatForm', () => {
 		expect(result).toEqual([
 			{ text: 'seist gegangen', markers: [] },
 			{ text: 'seiest gegangen', markers: ['formal'], separator: '/' }
+		]);
+	});
+
+	it('produces additive suffix segment with merged form markers', () => {
+		const result = parseAndFormatForm('γεννούν/[γεννούνε]');
+		expect(result).toEqual([
+			{ text: 'γεννούν', markers: [] },
+			{ text: '(ε)', markers: ['rare'] }
+		]);
+	});
+
+	it('splits additive suffix with different markers in 4-form case', () => {
+		const result = parseAndFormatForm('γεννάνε/γεννάν/γεννούν/[γεννούνε]');
+		expect(result).toEqual([
+			{ text: 'γεννάνε', markers: [] },
+			{ text: '-άν', markers: [], separator: '/' },
+			{ text: '-ούν', markers: [], separator: '/' },
+			{ text: '(ε)', markers: ['rare'] }
 		]);
 	});
 });

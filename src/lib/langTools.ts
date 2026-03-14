@@ -58,8 +58,16 @@ function longestCommonPrefix(a: string, b: string): string {
 	return a.slice(0, i);
 }
 
-export function abbreviateVariants(parts: string[]): { prefix: string; parts: string[] } {
-	if (parts.length <= 1) return { prefix: '', parts: [...parts] };
+interface AbbrevItem {
+	text: string;
+	additiveSuffix?: string;
+	sourceIndex: number;
+	mergedSourceIndex?: number;
+}
+
+function abbreviateVariantsDetailed(parts: string[]): { prefix: string; items: AbbrevItem[] } {
+	if (parts.length === 0) return { prefix: '', items: [] };
+	if (parts.length === 1) return { prefix: '', items: [{ text: parts[0], sourceIndex: 0 }] };
 
 	// Factor out common whole-word prefix across ALL parts
 	const wordArrays = parts.map((p) => p.split(' '));
@@ -75,31 +83,70 @@ export function abbreviateVariants(parts: string[]): { prefix: string; parts: st
 	}
 
 	let prefix = '';
-	let effectiveParts = parts;
+	let items: AbbrevItem[] = parts.map((p, i) => ({ text: p, sourceIndex: i }));
 	if (commonWordCount > 0) {
 		prefix = wordArrays[0].slice(0, commonWordCount).join(' ') + ' ';
-		effectiveParts = parts.map((p) => p.slice(prefix.length));
+		items = items.map((item) => ({ ...item, text: item.text.slice(prefix.length) }));
 	}
 
-	// Apply per-pair abbreviation to stripped parts
-	const result = [effectiveParts[0]];
-	for (let i = 1; i < effectiveParts.length; i++) {
-		const lcp = longestCommonPrefix(effectiveParts[0], effectiveParts[i]);
-		const suffix = effectiveParts[i].slice(lcp.length);
-		if (lcp.length >= 4 && !effectiveParts[0].endsWith(suffix)) {
-			result.push('-' + suffix);
+	// Phase 1: Merge adjacent additive pairs
+	for (let i = 0; i < items.length - 1; ) {
+		if (
+			items[i + 1].text.startsWith(items[i].text) &&
+			items[i + 1].text.length > items[i].text.length
+		) {
+			items[i].additiveSuffix = items[i + 1].text.slice(items[i].text.length);
+			items[i].mergedSourceIndex = items[i + 1].sourceIndex;
+			items.splice(i + 1, 1);
 		} else {
-			result.push(effectiveParts[i]);
+			i++;
 		}
 	}
-	return { prefix, parts: result };
+
+	// Phase 2: Abbreviate with global min LCP
+	if (items.length > 1) {
+		const lcpLengths: number[] = [];
+		for (let i = 1; i < items.length; i++) {
+			lcpLengths.push(longestCommonPrefix(items[0].text, items[i].text).length);
+		}
+		const qualifyingLcps = lcpLengths.filter((l) => l >= 4);
+		if (qualifyingLcps.length > 0) {
+			const minLcp = Math.min(...qualifyingLcps);
+			for (let i = 1; i < items.length; i++) {
+				if (lcpLengths[i - 1] >= 4) {
+					const suffix = items[i].text.slice(minLcp);
+					if (!items[0].text.endsWith(suffix)) {
+						items[i].text = '-' + suffix;
+					}
+				}
+			}
+		}
+	}
+
+	return { prefix, items };
+}
+
+export function abbreviateVariants(parts: string[]): { prefix: string; parts: string[] } {
+	const { prefix, items } = abbreviateVariantsDetailed(parts);
+	return {
+		prefix,
+		parts: items.map((item) => item.text + (item.additiveSuffix ? `(${item.additiveSuffix})` : ''))
+	};
 }
 
 export function formatForm(form: string): string {
 	const parts = form.split('/');
 	if (parts.length <= 1) return form;
 	const { prefix, parts: abbrevParts } = abbreviateVariants(parts);
-	return prefix + abbrevParts.join('/');
+	let result = prefix + abbrevParts[0];
+	for (let i = 1; i < abbrevParts.length; i++) {
+		if (abbrevParts[i].startsWith('(')) {
+			result += abbrevParts[i];
+		} else {
+			result += '/' + abbrevParts[i];
+		}
+	}
+	return result;
 }
 
 export function parseAndFormatForm(raw: string): FormSegment[] {
@@ -138,21 +185,24 @@ export function parseAndFormatForm(raw: string): FormSegment[] {
 		}
 	}
 
-	// Build full text per slash-group and abbreviate
+	// Build full text per slash-group and abbreviate (detailed)
 	const groupTexts = slashGroups.map((g) => g.map((i) => tokens[i].text).join(' - '));
-	const { prefix, parts: abbrevParts } = abbreviateVariants(groupTexts);
+	const { prefix, items } = abbreviateVariantsDetailed(groupTexts);
 
-	// Map abbreviated texts back to segments
+	// Map items back to segments
 	const segments: FormSegment[] = [];
-	for (let gi = 0; gi < slashGroups.length; gi++) {
+	for (let ii = 0; ii < items.length; ii++) {
+		const item = items[ii];
+		const gi = item.sourceIndex;
 		const group = slashGroups[gi];
-		const abbrevGroupText = (gi === 0 ? prefix : '') + abbrevParts[gi];
+		const abbrevGroupText = (ii === 0 ? prefix : '') + item.text;
+		const separator: '/' | undefined = ii > 0 ? '/' : undefined;
 
 		if (group.length === 1) {
 			segments.push({
 				text: abbrevGroupText,
 				markers: tokens[group[0]].markers,
-				separator: tokens[group[0]].separator
+				separator
 			});
 		} else {
 			// Multiple dash-separated tokens — split abbreviated text back
@@ -161,9 +211,18 @@ export function parseAndFormatForm(raw: string): FormSegment[] {
 				segments.push({
 					text: subTexts[si] ?? tokens[group[si]].text,
 					markers: tokens[group[si]].markers,
-					separator: tokens[group[si]].separator
+					separator: si === 0 ? separator : ' - '
 				});
 			}
+		}
+
+		// Add additive suffix segment if present
+		if (item.additiveSuffix != null && item.mergedSourceIndex != null) {
+			const mergedGroup = slashGroups[item.mergedSourceIndex];
+			segments.push({
+				text: `(${item.additiveSuffix})`,
+				markers: tokens[mergedGroup[0]].markers
+			});
 		}
 	}
 
