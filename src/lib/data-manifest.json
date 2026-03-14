@@ -877,6 +877,88 @@
           ]
         }
       ]
+    },
+    "en": {
+      "dataHash": "a8bcac91",
+      "dataSize": 348360,
+      "code": "en",
+      "name": "English",
+      "englishWiktionaryName": "English",
+      "tenseNames": [
+        "en_impers_inf",
+        "en_impers_pres_partic",
+        "en_impers_past_partic",
+        "en_indic_pres",
+        "en_indic_past",
+        "en_indic_pres_perf",
+        "en_indic_past_perf",
+        "en_indic_fut"
+      ],
+      "tensePronouns": [
+        [],
+        [],
+        [],
+        [
+          "I",
+          "you",
+          "he/she/it",
+          "we",
+          "you",
+          "they"
+        ],
+        [
+          "I",
+          "you",
+          "he/she/it",
+          "we",
+          "you",
+          "they"
+        ],
+        [
+          "I",
+          "you",
+          "he/she/it",
+          "we",
+          "you",
+          "they"
+        ],
+        [
+          "I",
+          "you",
+          "he/she/it",
+          "we",
+          "you",
+          "they"
+        ],
+        [
+          "I",
+          "you",
+          "he/she/it",
+          "we",
+          "you",
+          "they"
+        ]
+      ],
+      "tenseGroups": [
+        {
+          "name": "en_indic",
+          "tenseIndices": [
+            3,
+            4,
+            5,
+            6,
+            7
+          ]
+        },
+        {
+          "name": "en_impers",
+          "tenseIndices": [
+            0,
+            1,
+            2
+          ]
+        }
+      ]
     }
   }
 }

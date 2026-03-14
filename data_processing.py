@@ -105,7 +105,7 @@ class Sense(msgspec.Struct, frozen=True):
     form_of: tuple[FormOf, ...] = ()
     alt_of: tuple[FormOf, ...] = ()
     tags: tuple[str, ...] = ()
-    categories: tuple[str, ...] = ()
+    categories: tuple[Any, ...] = ()
     glosses: tuple[str, ...] = ()
 
 
@@ -131,7 +131,21 @@ class Entry(msgspec.Struct, frozen=True):
     senses: tuple[Sense, ...] = ()
     head_templates: tuple[HeadTemplate, ...] = ()
     etymology_templates: tuple[EtymologyTemplate, ...] = ()
-    categories: tuple[str, ...] = ()
+    categories: tuple[Any, ...] = ()
+
+
+def _cat_name(c: Any) -> str:
+    """Extract category name from either a plain string or a dict with 'name' key."""
+    if isinstance(c, str):
+        return c
+    if isinstance(c, dict):
+        return c.get("name", "")
+    return ""
+
+
+def _cat_names(categories: tuple[Any, ...]) -> list[str]:
+    """Extract all category names from a tuple of categories."""
+    return [_cat_name(c) for c in categories]
 
 
 def find_in_tags(tags: set[str], values: tuple[str, ...]) -> Optional[str]:
@@ -291,6 +305,7 @@ LANG_PRONOUNS = {
     "de": ("ich", "du", "er/sie/es", "wir", "ihr", "sie/Sie"),
     "es": ("yo", "tú", "él/ella/usted", "nosotros/-as", "vosotros/-as", "ellos/-as/ustedes"),
     "it": ("io", "tu", "lui/lei", "noi", "voi", "loro"),
+    "en": ("I", "you", "he/she/it", "we", "you", "they"),
 }
 
 FR_SUBJ_PRONOUNS = ("que je", "que tu", "qu'il/elle", "que nous", "que vous", "qu'ils/elles")
@@ -370,7 +385,8 @@ def full_tense(
 
 
 def repeated_tense(
-    lang: str, name: str, tags: tuple[str, ...], auxiliaries: tuple[str, ...]
+    lang: str, name: str, tags: tuple[str, ...], auxiliaries: tuple[str, ...],
+    exclude_tags: tuple[str, ...] = (),
 ):
     assert len(auxiliaries) == len(PERSONS_NUMBERS)
     matchers = tuple(
@@ -378,6 +394,7 @@ def repeated_tense(
             tags,
             pronoun=LANG_PRONOUNS[lang][i],
             formatter=auxiliaries[i] + " {}",
+            exclude_tags=exclude_tags,
         )
         for i in range(len(PERSONS_NUMBERS))
     )
@@ -686,12 +703,57 @@ IT_CONFIG = LanguageConfig(
     ],
 )
 
+EN_PRES_HAVE = ("have", "have", "has", "have", "have", "have")
+EN_PAST_HAVE = ("had", "had", "had", "had", "had", "had")
+EN_WILL = ("will", "will", "will", "will", "will", "will")
+
+EN_EXCLUDE = ("archaic", "dialectal")
+
+EN_CONFIG = LanguageConfig(
+    code="en",
+    name="English",
+    english_wiktionary_name="English",
+    tenses=(
+        # Impersonal
+        TenseConfig("en_impers_inf", FormMatcher(("infinitive",), max_forms=1)),
+        TenseConfig("en_impers_pres_partic", FormMatcher(("participle", "present"), max_forms=1, exclude_tags=EN_EXCLUDE)),
+        TenseConfig("en_impers_past_partic", FormMatcher(("participle", "past"), max_forms=1, exclude_tags=EN_EXCLUDE)),
+        # Indicative present — explicit matchers because Wiktionary plural forms lack person tags
+        TenseConfig("en_indic_pres", (
+            FormMatcher(("first-person", "singular", "present"), pronoun="I", exclude_tags=EN_EXCLUDE),
+            FormMatcher(("second-person", "singular", "present"), pronoun="you", exclude_tags=EN_EXCLUDE),
+            FormMatcher(("third-person", "singular", "present"), pronoun="he/she/it", exclude_tags=EN_EXCLUDE),
+            FormMatcher(("plural", "present"), pronoun="we", exclude_tags=EN_EXCLUDE, max_forms=1),
+            FormMatcher(("plural", "present"), pronoun="you", exclude_tags=EN_EXCLUDE, max_forms=1),
+            FormMatcher(("plural", "present"), pronoun="they", exclude_tags=EN_EXCLUDE, max_forms=1),
+        )),
+        # Indicative past
+        TenseConfig("en_indic_past", (
+            FormMatcher(("first-person", "singular", "past"), pronoun="I", exclude_tags=EN_EXCLUDE),
+            FormMatcher(("second-person", "singular", "past"), pronoun="you", exclude_tags=EN_EXCLUDE),
+            FormMatcher(("third-person", "singular", "past"), pronoun="he/she/it", exclude_tags=EN_EXCLUDE),
+            FormMatcher(("plural", "past"), pronoun="we", exclude_tags=EN_EXCLUDE, max_forms=1),
+            FormMatcher(("plural", "past"), pronoun="you", exclude_tags=EN_EXCLUDE, max_forms=1),
+            FormMatcher(("plural", "past"), pronoun="they", exclude_tags=EN_EXCLUDE, max_forms=1),
+        )),
+        # Compound
+        repeated_tense("en", "en_indic_pres_perf", ("participle", "past"), EN_PRES_HAVE, exclude_tags=EN_EXCLUDE),
+        repeated_tense("en", "en_indic_past_perf", ("participle", "past"), EN_PAST_HAVE, exclude_tags=EN_EXCLUDE),
+        repeated_tense("en", "en_indic_fut", ("infinitive",), EN_WILL, exclude_tags=EN_EXCLUDE),
+    ),
+    tense_groups=[
+        TenseGroup("en_indic", re.compile(r"^en_indic_")),
+        TenseGroup("en_impers", re.compile(r"^en_impers_")),
+    ],
+)
+
 CONFIG: list[LanguageConfig] = [
     FR_CONFIG,
     EL_CONFIG,
     DE_CONFIG,
     ES_CONFIG,
     IT_CONFIG,
+    EN_CONFIG,
 ]
 
 
@@ -997,12 +1059,12 @@ def entry_is_clean_verb_root(entry: Entry) -> bool:
         f"{entry.lang} terms in nonstandard scripts",
     }
 
-    for c in entry.categories:
+    for c in _cat_names(entry.categories):
         if c in BAD_CATEGORIES:
             return False
 
     if entry.senses and all(
-        any(c in BAD_CATEGORIES for c in s.categories) for s in entry.senses
+        any(c in BAD_CATEGORIES for c in _cat_names(s.categories)) for s in entry.senses
     ):
         return False
 
@@ -1021,10 +1083,10 @@ def extract_gloss(entry: Entry) -> Optional[str]:
 
 def fr_is_aspirated(entry: Entry) -> bool:
     cat = "French terms with aspirated h"
-    if cat in entry.categories:
+    if cat in _cat_names(entry.categories):
         return True
     for s in entry.senses:
-        if cat in s.categories:
+        if cat in _cat_names(s.categories):
             return True
     return False
 

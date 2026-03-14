@@ -22,6 +22,7 @@ FIXTURE_VERBS = {
     "de": {"haben", "sein", "machen", "gehen", "können"},
     "es": {"hablar", "ser", "tener", "ir", "hacer"},
     "it": {"parlare", "essere", "avere", "fare", "andare"},
+    "en": {"be", "have", "walk", "go", "make"},
 }
 
 FIXTURES_DIR = os.path.join(os.path.dirname(__file__), "fixtures")
