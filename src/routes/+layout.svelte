@@ -247,8 +247,6 @@
 	<button class="nuke-btn" onclick={nukeState}>nuke state</button>
 {/if}
 
-<div style="--myPurple: {myPurple}"></div>
-
 <style>
 	:global(html) {
 		font-size: 120%;
@@ -257,6 +255,10 @@
 		/* scrollbar-width: thin; */
 		scrollbar-color: rgba(155, 155, 155, 0.5) transparent;
 		overscroll-behavior-y: none;
+	}
+
+	:global(:root) {
+		--myPurple: #fbf6fc;
 	}
 
 	@media (max-width: 600px) {
