@@ -33,3 +33,4 @@ cache/
 
 # src/lib/data-manifest.json
 r2_data/
+static/sitemap*.xml

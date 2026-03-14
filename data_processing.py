@@ -10,6 +10,7 @@ import sys
 import tempfile
 import typing
 import unicodedata
+import urllib.parse
 from collections import defaultdict
 from typing import Any, Callable, Optional
 
@@ -1151,6 +1152,50 @@ def check_manifest_metadata():
     return ok
 
 
+BASE_URL = "https://congeegator.com"
+
+
+def generate_sitemaps(data: dict[str, dict[str, Any]], static_dir: str):
+    """Generate sitemap index and per-language sitemaps in static/."""
+    os.makedirs(static_dir, exist_ok=True)
+
+    lang_codes = sorted(data.keys())
+
+    # Sitemap index
+    sitemap_index_lines = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    ]
+    for lang in lang_codes:
+        sitemap_index_lines.append(
+            f"  <sitemap><loc>{BASE_URL}/sitemap-{lang}.xml</loc></sitemap>"
+        )
+    sitemap_index_lines.append("</sitemapindex>")
+    sitemap_index_lines.append("")
+
+    index_path = os.path.join(static_dir, "sitemap.xml")
+    with open(index_path, "w") as f:
+        f.write("\n".join(sitemap_index_lines))
+    log.info(f"Wrote {index_path}")
+
+    # Per-language sitemaps
+    for lang in lang_codes:
+        lines = [
+            '<?xml version="1.0" encoding="UTF-8"?>',
+            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+        ]
+        for verb in data[lang]["verbs"]:
+            encoded_name = urllib.parse.quote(verb["name"], safe="")
+            lines.append(f"  <url><loc>{BASE_URL}/{lang}/{encoded_name}</loc></url>")
+        lines.append("</urlset>")
+        lines.append("")
+
+        lang_path = os.path.join(static_dir, f"sitemap-{lang}.xml")
+        with open(lang_path, "w") as f:
+            f.write("\n".join(lines))
+        log.info(f"Wrote {lang_path} ({len(data[lang]['verbs'])} verbs)")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dev", action="store_true")
@@ -1169,6 +1214,9 @@ def main():
         sys.exit(0 if ok else 1)
 
     data = generate_data(dev=args.dev)
+
+    sitemaps_dir = os.path.join(os.path.dirname(__file__), "static")
+    generate_sitemaps(data, sitemaps_dir)
 
     DATA_VERSION = "1"
 
