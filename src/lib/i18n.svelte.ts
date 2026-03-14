@@ -5,32 +5,17 @@ import en from './messages/en.json';
 import es from './messages/es.json';
 import fr from './messages/fr.json';
 
-// Create a type based on the keys in your English file
-type Dictionary = Record<string, Record<string, string>>;
+type TenseNames = Record<string, Record<string, string>>;
 
-export const i18nDictionary: Dictionary = { en, fr, el, de, es };
-export type LangCode = keyof typeof i18nDictionary;
+const tenseNames: TenseNames = { en, fr, el, de, es };
 
-// We create a global state object
-class I18n {
-	current = $state<LangCode>('en');
+class TenseNameSettings {
 	nativeTenseNames = $state(false);
 
-	init(serverLang: LangCode) {
-		if (!browser) {
-			this.current = serverLang;
-			return;
+	init() {
+		if (browser) {
+			this.nativeTenseNames = localStorage.getItem('nativeTenseNames') === 'true';
 		}
-
-		const saved = localStorage.getItem('lang') as LangCode;
-		// Prioritize local storage for offline PWA persistence
-		if (saved && i18nDictionary[saved]) {
-			this.current = saved;
-		} else {
-			this.current = serverLang;
-		}
-
-		this.nativeTenseNames = localStorage.getItem('nativeTenseNames') === 'true';
 	}
 
 	setNativeTenseNames(val: boolean) {
@@ -40,39 +25,12 @@ class I18n {
 		}
 	}
 
-	translateTense(key: string, lang: string) {
-		if (this.nativeTenseNames && i18nDictionary[lang]?.[key]) {
-			return i18nDictionary[lang][key];
+	translateTense(key: string, lang: string): string {
+		if (this.nativeTenseNames && tenseNames[lang]?.[key]) {
+			return tenseNames[lang][key];
 		}
-		return this.translate(key);
-	}
-
-	// A derived translation function
-	// It automatically tracks 'this.current'
-	translate(key: string, vars: Record<string, string | number> = {}) {
-		let text = i18nDictionary[this.current][key] || key;
-
-		for (const [k, v] of Object.entries(vars)) {
-			text = text.replace(`{${k}}`, String(v));
-		}
-
-		return text;
-	}
-
-	get t() {
-		return (key: string, vars: Record<string, string | number> = {}) => {
-			return this.translate(key, vars);
-		};
-	}
-
-	setLocale(lang: LangCode) {
-		this.current = lang;
-		if (browser) {
-			localStorage.setItem('lang', lang);
-			// Also update cookie in case they go back online
-			// document.cookie = `lang=${lang}; path=/; max-age=31536000`;
-		}
+		return tenseNames['en'][key] || key;
 	}
 }
 
-export const i18n = new I18n();
+export const tenseSettings = new TenseNameSettings();

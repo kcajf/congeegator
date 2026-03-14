@@ -5,7 +5,7 @@
 	import wordreferenceLogo from '$lib/assets/wordreference_favicon.svg';
 	import { langName, manifest } from '$lib/dataUtils';
 	import { appTitle } from '$lib/defs';
-	import { i18n } from '$lib/i18n.svelte';
+	import { tenseSettings } from '$lib/i18n.svelte';
 	import { formatForm, formatPronoun, getExternalLinks } from '$lib/langTools';
 	import { triggerLangSync } from '$lib/syncManager.svelte';
 	import { tick } from 'svelte';
@@ -59,11 +59,7 @@
 	);
 
 	const getTenseDisplayName = (tenseCode: string) => {
-		try {
-			return i18n.translateTense(tenseCode, data.verb.lang);
-		} catch {
-			return tenseCode;
-		}
+		return tenseSettings.translateTense(tenseCode, data.verb.lang);
 	};
 </script>
 
@@ -136,7 +132,7 @@
 		{/if}
 	{/each}
 {:else}
-	<h1>{i18n.t('verb_not_found')}</h1>
+	<h1>Verb not found</h1>
 {/if}
 
 <style>

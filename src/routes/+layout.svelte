@@ -10,7 +10,7 @@
 	import ToastStack from '$lib/components/ToastStack.svelte';
 	import { db } from '$lib/db';
 	import { appTitle } from '$lib/defs';
-	import { i18n } from '$lib/i18n.svelte';
+	import { tenseSettings } from '$lib/i18n.svelte';
 	import {
 		findMatches,
 		MAX_PREFIX_IDS,
@@ -39,7 +39,7 @@
 
 	let { children }: LayoutProps = $props();
 
-	i18n.init('en');
+	tenseSettings.init();
 
 	const webManifestLink = $derived(pwaInfo?.webManifest?.linkTag ?? '');
 
@@ -195,7 +195,7 @@
 				onfocus={() => searchInput?.select()}
 				type="search"
 				id="searchInput"
-				placeholder={i18n.t('search_placeholder')}
+				placeholder="search..."
 				autocapitalize="off"
 				autocorrect="off"
 				autocomplete="off"
@@ -229,9 +229,9 @@
 		</ul>
 	{:else if searchTerm.trim().length >= 1}
 		{#if !searchLangState.indexData}
-			<div class="no-results">{i18n.t('loading')}</div>
+			<div class="no-results">Loading...</div>
 		{:else}
-			<div class="no-results">{i18n.t('no_matches')}</div>
+			<div class="no-results">No matches found</div>
 		{/if}
 	{:else}
 		{@render children()}

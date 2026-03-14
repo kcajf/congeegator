@@ -5,8 +5,6 @@
 	import { appTitle } from '$lib/defs';
 	import type { PageProps } from './$types';
 	import { langName } from '$lib/dataUtils';
-	import { i18n } from '$lib/i18n.svelte';
-
 	let { data }: PageProps = $props();
 
 	// Whenever the language changes, check if we need the full bundle
@@ -22,7 +20,7 @@
 	<title>{langName(data.lang)}&nbsp;—&nbsp;{appTitle}</title>
 </svelte:head>
 
-<h1>{data.langName} {i18n.t('verbs')}</h1>
+<h1>{data.langName} Verbs</h1>
 
 <div class="verb-grid">
 	{#each data.verbs as verb (verb)}
