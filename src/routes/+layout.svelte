@@ -170,7 +170,6 @@
 
 	<!-- copied from output of `npm run generate-pwa-assets` -->
 	<link rel="icon" href={favicon} sizes="any" />
-	<link rel="icon" href={congeegatorSVG} type="image/svg+xml" />
 	<link rel="apple-touch-icon" href={appleIcon180} />
 
 	<meta name="application-name" content={appTitle} />
