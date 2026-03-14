@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
-	import wiktionaryLogo from '$lib/assets/wiktionary_favicon_en.svg';
-	import wordreferenceLogo from '$lib/assets/wordreference_favicon.svg';
+	import wiktionaryLogoRaw from '$lib/assets/wiktionary_favicon_en.svg?raw';
+	import wordreferenceLogoRaw from '$lib/assets/wordreference_favicon.svg?raw';
 	import { langName, manifest } from '$lib/dataUtils';
 	import { appTitle } from '$lib/defs';
 	import { tenseSettings } from '$lib/i18n.svelte';
@@ -55,7 +55,7 @@
 	});
 
 	const externalLinks = $derived(
-		getExternalLinks(data.verb.lang, data.verb.name, wordreferenceLogo)
+		getExternalLinks(data.verb.lang, data.verb.name, wordreferenceLogoRaw)
 	);
 
 	const getTenseDisplayName = (tenseCode: string) => {
@@ -75,14 +75,26 @@
 			rel="noopener noreferrer"
 			href="https://en.wiktionary.com/wiki/{data.verb.name}#{langName(data.verb.lang)}"
 			class="ref-link ref-link-icon"
-			><img alt="wiktionary" src={wiktionaryLogo} />
+		>
+			<span class="inline-icon" role="img" aria-label="wiktionary">
+				<!-- eslint-disable-next-line svelte/no-at-html-tags -- trusted build-time SVG import -->
+				{@html wiktionaryLogoRaw}
+			</span>
 		</a>
 		{#each externalLinks as link (link.label)}
 			{#if link.type === 'icon'}
-				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external URL -->
-				<a target="_blank" rel="noopener noreferrer" href={link.href} class="ref-link ref-link-icon"
-					><img alt={link.label} src={link.icon} />
+				<!-- eslint-disable svelte/no-navigation-without-resolve, svelte/no-at-html-tags -- external URL with trusted build-time SVG -->
+				<a
+					target="_blank"
+					rel="noopener noreferrer"
+					href={link.href}
+					class="ref-link ref-link-icon"
+				>
+					<span class="inline-icon" role="img" aria-label={link.label}>
+						{@html link.iconSvg}
+					</span>
 				</a>
+				<!-- eslint-enable svelte/no-navigation-without-resolve, svelte/no-at-html-tags -->
 			{:else}
 				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external URL -->
 				<a target="_blank" rel="noopener noreferrer" href={link.href} class="ref-link ref-link-text"
@@ -198,12 +210,17 @@
 		text-decoration: none;
 	}
 
-	.ref-link-icon img {
+	.inline-icon {
 		width: 1.8em;
 		height: 1.8em;
-		object-fit: cover;
 		display: block;
 		margin-top: 0.3em;
+	}
+
+	.inline-icon :global(svg) {
+		width: 100%;
+		height: 100%;
+		display: block;
 	}
 
 	.ref-link-text {

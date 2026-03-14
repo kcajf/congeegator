@@ -67,7 +67,7 @@ export type VerbExternalLink = {
 	type: 'icon' | 'text';
 	label: string;
 	href: string;
-	icon?: string;
+	iconSvg?: string;
 };
 
 const WR_LANG_CODES: Record<string, string> = {
@@ -79,7 +79,7 @@ const WR_LANG_CODES: Record<string, string> = {
 export function getExternalLinks(
 	lang: string,
 	verbName: string,
-	wordreferenceLogo: string
+	wordreferenceLogoSvg: string
 ): VerbExternalLink[] {
 	const links: VerbExternalLink[] = [];
 
@@ -89,7 +89,7 @@ export function getExternalLinks(
 			type: 'icon',
 			label: 'WordReference',
 			href: `https://www.wordreference.com/${wrCode}/${encodeURIComponent(verbName)}`,
-			icon: wordreferenceLogo
+			iconSvg: wordreferenceLogoSvg
 		});
 	}
 
