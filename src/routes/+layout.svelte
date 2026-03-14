@@ -166,6 +166,7 @@
 </script>
 
 <svelte:head>
+	<meta name="theme-color" content="#ffffff" />
 	<meta name="svelte-version" content="5" />
 
 	<!-- copied from output of `npm run generate-pwa-assets` -->
