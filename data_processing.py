@@ -290,6 +290,7 @@ LANG_PRONOUNS = {
     "el": ("εγώ", "εσύ", "αυτ(ος/ή/ό)", "εμείς", "εσείς", "αυτ(οί/ές/ά)"),
     "de": ("ich", "du", "er/sie/es", "wir", "ihr", "sie/Sie"),
     "es": ("yo", "tú", "él/ella/usted", "nosotros/-as", "vosotros/-as", "ellos/-as/ustedes"),
+    "it": ("io", "tu", "lui/lei", "noi", "voi", "loro"),
 }
 
 FR_SUBJ_PRONOUNS = ("que je", "que tu", "qu'il/elle", "que nous", "que vous", "qu'ils/elles")
@@ -631,11 +632,66 @@ ES_CONFIG = LanguageConfig(
     ],
 )
 
+IT_PRES_INDIC_AVERE = ("ho", "hai", "ha", "abbiamo", "avete", "hanno")
+IT_IMPERF_INDIC_AVERE = ("avevo", "avevi", "aveva", "avevamo", "avevate", "avevano")
+IT_PAST_HIST_AVERE = ("ebbi", "avesti", "ebbe", "avemmo", "aveste", "ebbero")
+IT_FUT_INDIC_AVERE = ("avrò", "avrai", "avrà", "avremo", "avrete", "avranno")
+IT_COND_AVERE = ("avrei", "avresti", "avrebbe", "avremmo", "avreste", "avrebbero")
+IT_PRES_SUBJ_AVERE = ("abbia", "abbia", "abbia", "abbiamo", "abbiate", "abbiano")
+IT_IMPERF_SUBJ_AVERE = ("avessi", "avessi", "avesse", "avessimo", "aveste", "avessero")
+
+IT_CONFIG = LanguageConfig(
+    code="it",
+    name="italiano",
+    english_wiktionary_name="Italian",
+    tenses=(
+        # Impersonal
+        TenseConfig("it_impers_inf", FormMatcher(("infinitive",), max_forms=1)),
+        TenseConfig("it_impers_gerund", FormMatcher(("gerund",), max_forms=1)),
+        TenseConfig("it_impers_pres_partic", FormMatcher(("participle", "present"))),
+        TenseConfig("it_impers_past_partic", FormMatcher(("participle", "past"))),
+        # Indicative
+        full_tense("it", "it_indic_pres", ("present", "indicative")),
+        full_tense("it", "it_indic_imperf", ("imperfect", "indicative")),
+        full_tense("it", "it_indic_past_hist", ("past", "historic", "indicative")),
+        full_tense("it", "it_indic_fut", ("future", "indicative")),
+        repeated_tense("it", "it_indic_pres_perf", ("participle", "past"), IT_PRES_INDIC_AVERE),
+        repeated_tense("it", "it_indic_pluperf", ("participle", "past"), IT_IMPERF_INDIC_AVERE),
+        repeated_tense("it", "it_indic_past_ant", ("participle", "past"), IT_PAST_HIST_AVERE),
+        repeated_tense("it", "it_indic_fut_perf", ("participle", "past"), IT_FUT_INDIC_AVERE),
+        # Conditional
+        full_tense("it", "it_cond_pres", ("conditional",)),
+        repeated_tense("it", "it_cond_past", ("participle", "past"), IT_COND_AVERE),
+        # Subjunctive
+        full_tense("it", "it_subj_pres", ("present", "subjunctive")),
+        full_tense("it", "it_subj_imperf", ("imperfect", "subjunctive")),
+        repeated_tense("it", "it_subj_past", ("participle", "past"), IT_PRES_SUBJ_AVERE),
+        repeated_tense("it", "it_subj_pluperf", ("participle", "past"), IT_IMPERF_SUBJ_AVERE),
+        # Imperative (3 forms — 2sg, 1pl, 2pl)
+        TenseConfig(
+            "it_imper",
+            (
+                FormMatcher(("second-person", "singular", "imperative"), pronoun="(tu)", exclude_tags=("negative", "formal")),
+                FormMatcher(("first-person", "plural", "imperative"), pronoun="(noi)", exclude_tags=("negative",)),
+                FormMatcher(("second-person", "plural", "imperative"), pronoun="(voi)", exclude_tags=("negative",)),
+            ),
+        ),
+    ),
+    tense_groups=[
+        TenseGroup("it_indic", re.compile(r"^it_indic_")),
+        TenseGroup("it_subj", re.compile(r"^it_subj_")),
+        TenseGroup("it_cond", re.compile(r"^it_cond_")),
+        TenseGroup("it_imper", re.compile(r"^it_imper$")),
+        TenseGroup("it_impers", re.compile(r"^it_impers_")),
+    ],
+)
+
 CONFIG: list[LanguageConfig] = [
     FR_CONFIG,
     EL_CONFIG,
     DE_CONFIG,
     ES_CONFIG,
+    IT_CONFIG,
 ]
 
 

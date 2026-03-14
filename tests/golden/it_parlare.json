@@ -1,0 +1,128 @@
+{
+  "name": "parlare",
+  "nameNoDiacritics": "parlare",
+  "conjugation": [
+    "parlàre",
+    "parlàndo",
+    "parlànte",
+    "parlàto",
+    [
+      "pàrlo",
+      "pàrli",
+      "pàrla",
+      "parliàmo",
+      "parlàte",
+      "pàrlano"
+    ],
+    [
+      "parlàvo",
+      "parlàvi",
+      "parlàva",
+      "parlavàmo",
+      "parlavàte",
+      "parlàvano"
+    ],
+    [
+      "parlài",
+      "parlàsti",
+      "parlò",
+      "parlàmmo",
+      "parlàste",
+      "parlàrono"
+    ],
+    [
+      "parlerò",
+      "parlerài",
+      "parlerà",
+      "parlerémo",
+      "parleréte",
+      "parlerànno"
+    ],
+    [
+      "ho parlàto",
+      "hai parlàto",
+      "ha parlàto",
+      "abbiamo parlàto",
+      "avete parlàto",
+      "hanno parlàto"
+    ],
+    [
+      "avevo parlàto",
+      "avevi parlàto",
+      "aveva parlàto",
+      "avevamo parlàto",
+      "avevate parlàto",
+      "avevano parlàto"
+    ],
+    [
+      "ebbi parlàto",
+      "avesti parlàto",
+      "ebbe parlàto",
+      "avemmo parlàto",
+      "aveste parlàto",
+      "ebbero parlàto"
+    ],
+    [
+      "avrò parlàto",
+      "avrai parlàto",
+      "avrà parlàto",
+      "avremo parlàto",
+      "avrete parlàto",
+      "avranno parlàto"
+    ],
+    [
+      "parlerèi",
+      "parlerésti",
+      "parlerèbbe/parlerébbe",
+      "parlerémmo",
+      "parleréste",
+      "parlerèbbero/parlerébbero"
+    ],
+    [
+      "avrei parlàto",
+      "avresti parlàto",
+      "avrebbe parlàto",
+      "avremmo parlàto",
+      "avreste parlàto",
+      "avrebbero parlàto"
+    ],
+    [
+      "pàrli",
+      "pàrli",
+      "pàrli",
+      "parliàmo",
+      "parliàte",
+      "pàrlino"
+    ],
+    [
+      "parlàssi",
+      "parlàssi",
+      "parlàsse",
+      "parlàssimo",
+      "parlàste",
+      "parlàssero"
+    ],
+    [
+      "abbia parlàto",
+      "abbia parlàto",
+      "abbia parlàto",
+      "abbiamo parlàto",
+      "abbiate parlàto",
+      "abbiano parlàto"
+    ],
+    [
+      "avessi parlàto",
+      "avessi parlàto",
+      "avesse parlàto",
+      "avessimo parlàto",
+      "aveste parlàto",
+      "avessero parlàto"
+    ],
+    [
+      "pàrla",
+      "parliàmo",
+      "parlàte"
+    ]
+  ],
+  "gloss": "to talk, to speak"
+}

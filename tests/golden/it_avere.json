@@ -1,0 +1,128 @@
+{
+  "name": "avere",
+  "nameNoDiacritics": "avere",
+  "conjugation": [
+    "avére",
+    "avèndo",
+    "avènte/abbiènte",
+    "avùto/aùto",
+    [
+      "hò/ò/àggio/àio",
+      "hài/ài",
+      "hà/à/hào",
+      "abbiàmo/avémo/àmo/émo",
+      "avéte/àte/éte",
+      "hànno/ànno/hàco"
+    ],
+    [
+      "avévo/àvo/avéa/avìa",
+      "avévi/àvi",
+      "avéva/àva/avéa/avìa",
+      "avevàmo/avémio/avàmo/avévimo",
+      "avevàte/avévio/avàte/avévivo",
+      "avévano/avéveno/àvano/avéano/avìano"
+    ],
+    [
+      "èbbi/ébbi/èi/ébbe/avéi/avétti/avétte/àbbi",
+      "avésti/avéssi",
+      "èbbe/ébbe/avé/avétte/àbbe",
+      "avémmo/èbbimo/avéssimo/avéttimo/avéstimo",
+      "avéste/avéssivo/avéttivo/avéstivo",
+      "èbbero/ébbero/èbbono/ébbeno/avérno/avétteno/àbbero"
+    ],
+    [
+      "avrò/averò/arò/averràggio/averràio",
+      "avrài/averài/arài",
+      "avrà/averà/arà/averrào",
+      "avrémo/averémo/arémo",
+      "avréte/averéte/aréte",
+      "avrànno/averànno/arànno/averòrno/averàco"
+    ],
+    [
+      "ho avùto/ho aùto",
+      "hai avùto/hai aùto",
+      "ha avùto/ha aùto",
+      "abbiamo avùto/abbiamo aùto",
+      "avete avùto/avete aùto",
+      "hanno avùto/hanno aùto"
+    ],
+    [
+      "avevo avùto/avevo aùto",
+      "avevi avùto/avevi aùto",
+      "aveva avùto/aveva aùto",
+      "avevamo avùto/avevamo aùto",
+      "avevate avùto/avevate aùto",
+      "avevano avùto/avevano aùto"
+    ],
+    [
+      "ebbi avùto/ebbi aùto",
+      "avesti avùto/avesti aùto",
+      "ebbe avùto/ebbe aùto",
+      "avemmo avùto/avemmo aùto",
+      "aveste avùto/aveste aùto",
+      "ebbero avùto/ebbero aùto"
+    ],
+    [
+      "avrò avùto/avrò aùto",
+      "avrai avùto/avrai aùto",
+      "avrà avùto/avrà aùto",
+      "avremo avùto/avremo aùto",
+      "avrete avùto/avrete aùto",
+      "avranno avùto/avranno aùto"
+    ],
+    [
+      "avrèi/averèi/avrìa/arèi/averébbi/avrébbi/averébbe/avrébbe/averìa/àbbera",
+      "avrésti/averésti/arésti/averéssi/avréssi/averìssi/avrìssi/àbbieri",
+      "avrèbbe/avrébbe/averèbbe/avrìa/arèbbe/averébbe/averìa/àbbera",
+      "avrémmo/averémmo/arémmo/averéssimo/avréssimo/averìamo/averràmo",
+      "avréste/averéste/aréste/averéssivo/avréssivo/averìavo/averràte",
+      "avrèbbero/avrébbero/abrébbero/averèbbero/arèbbero/averébbeno/avrébbeno/averìano/avrìano/averìeno/avrìeno/àbberano"
+    ],
+    [
+      "avrei avùto/avrei aùto",
+      "avresti avùto/avresti aùto",
+      "avrebbe avùto/avrebbe aùto",
+      "avremmo avùto/avremmo aùto",
+      "avreste avùto/avreste aùto",
+      "avrebbero avùto/avrebbero aùto"
+    ],
+    [
+      "àbbia/àggia/àbbi/àia",
+      "àbbia/àggia/àbbi/àia",
+      "àbbia/àggia/àbbi/àia",
+      "abbiàmo/aggiàmo/avémo/émo/aiàmo",
+      "abbiàte/aggiàte/avéte/éte/aiàte",
+      "àbbiano/aggiàno/àbbino/àggiano/àiano"
+    ],
+    [
+      "avéssi",
+      "avéssi",
+      "avésse",
+      "avéssimo",
+      "avéste/avéssivo",
+      "avéssero/avéssino"
+    ],
+    [
+      "abbia avùto/abbia aùto",
+      "abbia avùto/abbia aùto",
+      "abbia avùto/abbia aùto",
+      "abbiamo avùto/abbiamo aùto",
+      "abbiate avùto/abbiate aùto",
+      "abbiano avùto/abbiano aùto"
+    ],
+    [
+      "avessi avùto/avessi aùto",
+      "avessi avùto/avessi aùto",
+      "avesse avùto/avesse aùto",
+      "avessimo avùto/avessimo aùto",
+      "aveste avùto/aveste aùto",
+      "avessero avùto/avessero aùto"
+    ],
+    [
+      "àbbi/àggi/hài",
+      "abbiàmo/aggiàmo/avémo/émo/aiàmo",
+      "abbiàte/aggiàte/avéte/àte/éte"
+    ]
+  ],
+  "gloss": "to have"
+}

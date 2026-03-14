@@ -1,0 +1,128 @@
+{
+  "name": "essere",
+  "nameNoDiacritics": "essere",
+  "conjugation": [
+    "èssere",
+    "essèndo",
+    "-/essènte/ènte",
+    "stàto/essùto/sùto",
+    [
+      "sóno/sò",
+      "sèi/sì",
+      "è",
+      "siàmo/sémo/sìmo",
+      "siéte/siète/sète/séte/sìte",
+      "sóno/ènno/èmmo/sò/sònno/sòco"
+    ],
+    [
+      "èro/èra",
+      "èri",
+      "èra",
+      "eravàmo/eràmo/èramo/èrimo",
+      "eravàte/eràte/èrivo",
+      "èrano/èreno"
+    ],
+    [
+      "fùi",
+      "fósti/fùsti/fùssi",
+      "fù",
+      "fùmmo/fùssimo/fùmio",
+      "fóste/fùste/fùssivo",
+      "fùrono/fùro/fóre/fòro/fuòro/fùrno"
+    ],
+    [
+      "sarò/serràio",
+      "sarài/serrài",
+      "sarà/fìa/fìe/serrào",
+      "sarémo/serrémo",
+      "saréte/serrete",
+      "sarànno/fìano/fìeno/fìaro/fìero/saròrno/serràco"
+    ],
+    [
+      "ho stàto/ho essùto/ho sùto",
+      "hai stàto/hai essùto/hai sùto",
+      "ha stàto/ha essùto/ha sùto",
+      "abbiamo stàto/abbiamo essùto/abbiamo sùto",
+      "avete stàto/avete essùto/avete sùto",
+      "hanno stàto/hanno essùto/hanno sùto"
+    ],
+    [
+      "avevo stàto/avevo essùto/avevo sùto",
+      "avevi stàto/avevi essùto/avevi sùto",
+      "aveva stàto/aveva essùto/aveva sùto",
+      "avevamo stàto/avevamo essùto/avevamo sùto",
+      "avevate stàto/avevate essùto/avevate sùto",
+      "avevano stàto/avevano essùto/avevano sùto"
+    ],
+    [
+      "ebbi stàto/ebbi essùto/ebbi sùto",
+      "avesti stàto/avesti essùto/avesti sùto",
+      "ebbe stàto/ebbe essùto/ebbe sùto",
+      "avemmo stàto/avemmo essùto/avemmo sùto",
+      "aveste stàto/aveste essùto/aveste sùto",
+      "ebbero stàto/ebbero essùto/ebbero sùto"
+    ],
+    [
+      "avrò stàto/avrò essùto/avrò sùto",
+      "avrai stàto/avrai essùto/avrai sùto",
+      "avrà stàto/avrà essùto/avrà sùto",
+      "avremo stàto/avremo essùto/avremo sùto",
+      "avrete stàto/avrete essùto/avrete sùto",
+      "avranno stàto/avranno essùto/avranno sùto"
+    ],
+    [
+      "sarèi/sarìa/fòra/sarébbi/sarébbe",
+      "sarésti/saréssi/fòri",
+      "sarèbbe/sarébbe/sarìa/fòra",
+      "sarémmo/saréssimo",
+      "saréste/saréssivo",
+      "sarèbbero/sarébbero/sarìano/fòro/sarébbeno/fórano"
+    ],
+    [
+      "avrei stàto/avrei essùto/avrei sùto",
+      "avresti stàto/avresti essùto/avresti sùto",
+      "avrebbe stàto/avrebbe essùto/avrebbe sùto",
+      "avremmo stàto/avremmo essùto/avremmo sùto",
+      "avreste stàto/avreste essùto/avreste sùto",
+      "avrebbero stàto/avrebbero essùto/avrebbero sùto"
+    ],
+    [
+      "sìa/sìi",
+      "sìa/sìi",
+      "sìa/sìi",
+      "siàmo/sémo",
+      "siàte/séte",
+      "sìano/sìeno/sìino"
+    ],
+    [
+      "fóssi/fùssi",
+      "fóssi/fùssi",
+      "fósse/fùsse",
+      "fóssimo/fùssimo",
+      "fóste/fùste/fùssivo",
+      "fóssero/fùssero/fùssino"
+    ],
+    [
+      "abbia stàto/abbia essùto/abbia sùto",
+      "abbia stàto/abbia essùto/abbia sùto",
+      "abbia stàto/abbia essùto/abbia sùto",
+      "abbiamo stàto/abbiamo essùto/abbiamo sùto",
+      "abbiate stàto/abbiate essùto/abbiate sùto",
+      "abbiano stàto/abbiano essùto/abbiano sùto"
+    ],
+    [
+      "avessi stàto/avessi essùto/avessi sùto",
+      "avessi stàto/avessi essùto/avessi sùto",
+      "avesse stàto/avesse essùto/avesse sùto",
+      "avessimo stàto/avessimo essùto/avessimo sùto",
+      "aveste stàto/aveste essùto/aveste sùto",
+      "avessero stàto/avessero essùto/avessero sùto"
+    ],
+    [
+      "sìi/èssi",
+      "siàmo/sémo",
+      "siàte/séte/sìte"
+    ]
+  ],
+  "gloss": "Used as a copula. to be"
+}

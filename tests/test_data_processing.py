@@ -14,7 +14,7 @@ import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-from data_processing import DE_CONFIG, EL_CONFIG, ES_CONFIG, FR_CONFIG, Entry, LanguageConfig, process_entry
+from data_processing import DE_CONFIG, EL_CONFIG, ES_CONFIG, FR_CONFIG, IT_CONFIG, Entry, LanguageConfig, process_entry
 
 FIXTURES_DIR = os.path.join(os.path.dirname(__file__), "fixtures")
 GOLDEN_DIR = os.path.join(os.path.dirname(__file__), "golden")
@@ -24,6 +24,7 @@ CONFIGS: dict[str, LanguageConfig] = {
     "el": EL_CONFIG,
     "de": DE_CONFIG,
     "es": ES_CONFIG,
+    "it": IT_CONFIG,
 }
 
 FIXTURE_VERBS = {
@@ -31,6 +32,7 @@ FIXTURE_VERBS = {
     "el": ["έχω", "είμαι", "κάνω", "θέλω", "λέω"],
     "de": ["haben", "sein", "machen", "gehen", "können"],
     "es": ["hablar", "ser", "tener", "ir", "hacer"],
+    "it": ["parlare", "essere", "avere", "fare", "andare"],
 }
 
 
@@ -134,6 +136,45 @@ def test_greek_form_spot_checks(verb, tense_idx, person_idx, expected_fragment):
     result = process_entry(EL_CONFIG, entries[verb])
     assert result is not None, f"process_entry returned None for {verb}"
     form = result["conjugation"][tense_idx][person_idx]
+    assert expected_fragment in form, (
+        f"Expected '{expected_fragment}' in form at tense {tense_idx}, person {person_idx} "
+        f"for {verb}, got: '{form}'"
+    )
+
+
+@pytest.mark.parametrize(
+    "verb,tense_idx,person_idx,expected_fragment",
+    [
+        # Present indicative (idx 4)
+        ("parlare", 4, 0, "pàrlo"),
+        ("essere", 4, 0, "sóno"),
+        ("avere", 4, 0, "hò"),
+        ("fare", 4, 0, "fàccio"),
+        ("andare", 4, 0, "vàdo"),
+        # Passato remoto (idx 6)
+        ("parlare", 6, 0, "parlài"),
+        ("essere", 6, 0, "fùi"),
+        # Future (idx 7)
+        ("andare", 7, 0, "andrò"),
+        # Conditional (idx 12)
+        ("parlare", 12, 0, "parlerèi"),
+        # Present subjunctive (idx 14)
+        ("parlare", 14, 0, "pàrli"),
+        # Imperative (idx 18) — 2sg
+        ("parlare", 18, 0, "pàrla"),
+        ("andare", 18, 0, "vài"),
+    ],
+)
+def test_italian_form_spot_checks(verb, tense_idx, person_idx, expected_fragment):
+    """Spot-check that specific Italian forms appear at the expected tense positions."""
+    entries = load_fixture_entries("it")
+    if verb not in entries:
+        pytest.skip(f"Verb '{verb}' not found in it fixtures")
+    result = process_entry(IT_CONFIG, entries[verb])
+    assert result is not None, f"process_entry returned None for {verb}"
+    form = result["conjugation"][tense_idx]
+    if isinstance(form, (list, tuple)):
+        form = form[person_idx]
     assert expected_fragment in form, (
         f"Expected '{expected_fragment}' in form at tense {tense_idx}, person {person_idx} "
         f"for {verb}, got: '{form}'"

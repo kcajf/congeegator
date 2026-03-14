@@ -4,10 +4,11 @@ import el from './messages/el.json';
 import en from './messages/en.json';
 import es from './messages/es.json';
 import fr from './messages/fr.json';
+import it from './messages/it.json';
 
 type TenseNames = Record<string, Record<string, string>>;
 
-const tenseNames: TenseNames = { en, fr, el, de, es };
+const tenseNames: TenseNames = { en, fr, el, de, es, it };
 
 class TenseNameSettings {
 	nativeTenseNames = $state(false);

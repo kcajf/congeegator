@@ -1,0 +1,128 @@
+{
+  "name": "andare",
+  "nameNoDiacritics": "andare",
+  "conjugation": [
+    "andàre",
+    "andàndo",
+    "andànte",
+    "andàto",
+    [
+      "vàdo/vò",
+      "vài",
+      "và",
+      "andiàmo",
+      "andàte",
+      "vànno"
+    ],
+    [
+      "andàvo",
+      "andàvi",
+      "andàva",
+      "andavàmo",
+      "andavàte",
+      "andàvano"
+    ],
+    [
+      "andài",
+      "andàsti",
+      "andò",
+      "andàmmo",
+      "andàste",
+      "andàrono"
+    ],
+    [
+      "andrò/anderò",
+      "andrài/anderài",
+      "andrà/anderà",
+      "andrémo/anderémo",
+      "andréte/anderéte",
+      "andrànno/anderànno"
+    ],
+    [
+      "ho andàto",
+      "hai andàto",
+      "ha andàto",
+      "abbiamo andàto",
+      "avete andàto",
+      "hanno andàto"
+    ],
+    [
+      "avevo andàto",
+      "avevi andàto",
+      "aveva andàto",
+      "avevamo andàto",
+      "avevate andàto",
+      "avevano andàto"
+    ],
+    [
+      "ebbi andàto",
+      "avesti andàto",
+      "ebbe andàto",
+      "avemmo andàto",
+      "aveste andàto",
+      "ebbero andàto"
+    ],
+    [
+      "avrò andàto",
+      "avrai andàto",
+      "avrà andàto",
+      "avremo andàto",
+      "avrete andàto",
+      "avranno andàto"
+    ],
+    [
+      "andrèi/anderèi",
+      "andrésti/anderésti",
+      "andrèbbe/andrébbe/anderèbbe/anderébbe",
+      "andrémmo/anderémmo",
+      "andréste/anderéste",
+      "andrèbbero/andrébbero/anderèbbero/anderébbero"
+    ],
+    [
+      "avrei andàto",
+      "avresti andàto",
+      "avrebbe andàto",
+      "avremmo andàto",
+      "avreste andàto",
+      "avrebbero andàto"
+    ],
+    [
+      "vàda/vàdi",
+      "vàda/vàdi",
+      "vàda/vàdi",
+      "andiàmo",
+      "andiàte",
+      "vàdano/vàdino"
+    ],
+    [
+      "andàssi",
+      "andàssi",
+      "andàsse",
+      "andàssimo",
+      "andàste",
+      "andàssero"
+    ],
+    [
+      "abbia andàto",
+      "abbia andàto",
+      "abbia andàto",
+      "abbiamo andàto",
+      "abbiate andàto",
+      "abbiano andàto"
+    ],
+    [
+      "avessi andàto",
+      "avessi andàto",
+      "avesse andàto",
+      "avessimo andàto",
+      "aveste andàto",
+      "avessero andàto"
+    ],
+    [
+      "vài/và",
+      "andiàmo",
+      "andàte"
+    ]
+  ],
+  "gloss": "to go"
+}
