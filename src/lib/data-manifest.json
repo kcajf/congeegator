@@ -1,8 +1,8 @@
 {
   "languages": {
     "fr": {
-      "dataHash": "d48f61d4",
-      "dataSize": 24284,
+      "dataHash": "5225ed07",
+      "dataSize": 9126467,
       "code": "fr",
       "name": "français",
       "englishWiktionaryName": "French",
@@ -162,8 +162,8 @@
       ]
     },
     "el": {
-      "dataHash": "1616fb75",
-      "dataSize": 54287,
+      "dataHash": "54758718",
+      "dataSize": 4857004,
       "code": "el",
       "name": "ελληνικά",
       "englishWiktionaryName": "Greek",
@@ -354,8 +354,8 @@
       ]
     },
     "de": {
-      "dataHash": "1729c1ea",
-      "dataSize": 37528,
+      "dataHash": "0b07c61d",
+      "dataSize": 17597976,
       "code": "de",
       "name": "Deutsch",
       "englishWiktionaryName": "German",
@@ -536,8 +536,8 @@
       ]
     },
     "es": {
-      "dataHash": "61987d3b",
-      "dataSize": 25797,
+      "dataHash": "542f9ab2",
+      "dataSize": 9513497,
       "code": "es",
       "name": "español",
       "englishWiktionaryName": "Spanish",
@@ -682,8 +682,8 @@
       ]
     },
     "it": {
-      "dataHash": "505f45e6",
-      "dataSize": 44373,
+      "dataHash": "0fddeb31",
+      "dataSize": 22032952,
       "code": "it",
       "name": "italiano",
       "englishWiktionaryName": "Italian",
@@ -879,8 +879,8 @@
       ]
     },
     "en": {
-      "dataHash": "3647ec9c",
-      "dataSize": 342986,
+      "dataHash": "6aa1e94d",
+      "dataSize": 342824,
       "code": "en",
       "name": "English",
       "englishWiktionaryName": "English",
