@@ -5,6 +5,7 @@ export interface DataManifest {
 			dataSize: number;
 			code: string;
 			name: string;
+			englishWiktionaryName: string;
 			tenseNames: string[];
 			tensePronouns: string[][];
 			tenseGroups: {
