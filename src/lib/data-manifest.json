@@ -4,7 +4,7 @@
       "dataHash": "d48f61d4",
       "dataSize": 24284,
       "code": "fr",
-      "name": "French",
+      "name": "français",
       "tenseNames": [
         "fr_impers_pres_partic",
         "fr_impers_past_partic",
@@ -164,7 +164,7 @@
       "dataHash": "bb865530",
       "dataSize": 45772,
       "code": "el",
-      "name": "Greek",
+      "name": "ελληνικά",
       "tenseNames": [
         "el_indic_pres_active",
         "el_indic_pres_passive",
@@ -355,7 +355,7 @@
       "dataHash": "7d15ddc0",
       "dataSize": 37854,
       "code": "de",
-      "name": "German",
+      "name": "Deutsch",
       "tenseNames": [
         "de_indic_pres",
         "de_indic_preterite",
@@ -536,7 +536,7 @@
       "dataHash": "34cb2ea4",
       "dataSize": 27211,
       "code": "es",
-      "name": "Spanish",
+      "name": "español",
       "tenseNames": [
         "es_impers_inf",
         "es_impers_gerund",
