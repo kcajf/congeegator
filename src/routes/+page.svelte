@@ -43,7 +43,7 @@
 
 <section>
 	<h2>About</h2>
-	<p>Congeegator is a fast, offline, multilingual conjugation app.</p>
+	<p>Congeegator is a fast, offline, multilingual conjugation app. Data is sourced from <a href="https://en.wiktionary.org">English Wiktionary</a>.</p>
 	<p>
 		Type above to search. You can search for infinitives or conjugated forms. You can omit
 		accents/diacritics. Non-latin alphabets support fuzzy 'phonetic' search (e.g. 'eimai' in Greek).
