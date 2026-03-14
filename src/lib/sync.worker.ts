@@ -20,13 +20,18 @@ self.onmessage = async (e: MessageEvent<{ lang: string }>) => {
 			const local = await db.metadata.get(lang);
 
 			if (!local || local.hash !== remote.dataHash) {
-				self.postMessage({ type: 'PROGRESS', lang, phase: 'downloading', percent: null });
-
 				if (!navigator.onLine) {
-					self.postMessage({ type: 'ERROR', lang, error: 'offline' });
-					console.log(`we are offline, can't sync`);
+					if (local) {
+						// Offline but have cached data — silently skip, data is still usable
+						console.log(`${lang}: offline, using cached data (hash: ${local.hash})`);
+					} else {
+						// Offline and no cached data — genuine error
+						self.postMessage({ type: 'ERROR', lang, error: 'offline' });
+					}
 					return;
 				}
+
+				self.postMessage({ type: 'PROGRESS', lang, phase: 'downloading', percent: null });
 
 				const url = `${getLangDataUrl(lang)}/data.json`;
 				const response = await fetch(url);
