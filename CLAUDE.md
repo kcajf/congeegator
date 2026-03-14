@@ -31,7 +31,7 @@ A verb conjugation web app (PWA) built with SvelteKit 2 / Svelte 5, deployed to 
 - `src/lib/types.ts` — Core types: `VerbRecord`, `DataManifest`, `SearchIndex`
 - `src/lib/db.ts` — Dexie database schema (verbs + metadata tables)
 - `src/lib/dataUtils.ts` — Manifest access, R2 URL construction
-- `src/lib/i18n.svelte.ts` — Simple i18n using Svelte 5 `$state`, dictionaries in `src/lib/messages/{en,fr,el}.json`
+- `src/lib/i18n.svelte.ts` — Tense name translation (English vs native language toggle), dictionaries in `src/lib/messages/{en,fr,el,de,es}.json`
 - `src/lib/langTools.ts` — Language-specific display logic (e.g., French pronoun elision)
 - `src/params/lang.ts` — SvelteKit param matcher validating language codes against manifest
 
@@ -83,4 +83,4 @@ The GitHub Action runs monthly and opens a PR automatically. When running locall
 - Svelte 5 runes (`$state`, `$derived`, `$effect`, `$props`) throughout — no legacy `$:` reactive statements
 - `.svelte.ts` extension for files using Svelte runes outside components
 - Conjugation data is a flat array indexed by tense position (matching `tenseNames` in the manifest), not keyed by tense name
-- Adding a new language requires: adding a `LanguageConfig` in `data_processing.py`, adding i18n translations, and re-running the data pipeline
+- Adding a new language requires: adding a `LanguageConfig` in `data_processing.py`, adding native tense name translations in `src/lib/messages/`, and re-running the data pipeline

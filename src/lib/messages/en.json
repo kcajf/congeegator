@@ -1,5 +1,4 @@
 {
-	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"fr_indic": "Indicative",
 	"fr_cond": "Conditional",
 	"fr_subj": "Subjunctive",
@@ -81,19 +80,5 @@
 	"es_indic_pluperf": "Pluperfect",
 	"es_cond_pres": "Present",
 	"es_subj_pres": "Present",
-	"es_subj_imperf": "Imperfect",
-	"search_placeholder": "search...",
-	"loading": "Loading...",
-	"no_matches": "No matches found",
-	"verb_not_found": "Verb not found",
-	"verbs": "Verbs",
-	"pwa_offline_ready": "App ready to work offline",
-	"pwa_update_available": "New content available, click on reload button to update.",
-	"reload": "Reload",
-	"close": "Close",
-	"settings": "Settings",
-	"interface_language": "Interface language",
-	"about": "About",
-	"native_tense_names": "Show tense names in native language",
-	"about_text": "Congeegator is a verb conjugation app. Conjugation data is sourced from Wiktionary."
+	"es_subj_imperf": "Imperfect"
 }

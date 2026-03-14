@@ -3,8 +3,8 @@
 	import { replaceState } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { resolve } from '$app/paths';
+	import { tenseSettings } from '$lib/i18n.svelte';
 	import { appTitle } from '$lib/defs';
-	import { i18n, i18nDictionary, type LangCode } from '$lib/i18n.svelte';
 	import { searchLangState } from '$lib/searchLang.svelte';
 	import { manifest } from '$lib/dataUtils';
 
@@ -35,8 +35,8 @@
 	<h2>About</h2>
 	<p>Congeegator is a fast, offline, multilingual conjugation app.</p>
 	<p>
-		Type above to search. In non-latin alphabets, you can fuzzily search 'phonetically' (e.g.
-		'eimai' in Greek).
+		Type above to search. You can search for infinitives or conjugated forms. Non-latin alphabets
+		support fuzzy 'phonetic' search (e.g. 'eimai' in Greek).
 	</p>
 
 	{#if !isStandalone}
@@ -56,22 +56,14 @@
 </section>
 
 <section>
-	<h2>{i18n.t('settings')}</h2>
-	<p class="sublabel">{i18n.t('interface_language')}</p>
-	<div class="lang-buttons">
-		{#each Object.keys(i18nDictionary) as lang (lang)}
-			<button class:active={i18n.current === lang} onclick={() => i18n.setLocale(lang as LangCode)}>
-				{lang}
-			</button>
-		{/each}
-	</div>
+	<h2>Settings</h2>
 	<label class="toggle">
 		<input
 			type="checkbox"
-			checked={i18n.nativeTenseNames}
-			onchange={(e) => i18n.setNativeTenseNames(e.currentTarget.checked)}
+			checked={tenseSettings.nativeTenseNames}
+			onchange={(e) => tenseSettings.setNativeTenseNames(e.currentTarget.checked)}
 		/>
-		{i18n.t('native_tense_names')}
+		Show tense names in native language
 	</label>
 </section>
 
@@ -84,36 +76,6 @@
 		font-size: 1.2rem;
 		margin-bottom: 0.5rem;
 		color: #333;
-	}
-
-	.sublabel {
-		font-size: 0.9rem;
-		color: #666;
-		margin-bottom: 0.5rem;
-	}
-
-	.lang-buttons {
-		display: flex;
-		gap: 0.25rem;
-	}
-
-	.lang-buttons button {
-		padding: 0.4rem 0.7rem;
-		font-family: inherit;
-		font-size: 0.95rem;
-		border: none;
-		background: none;
-		cursor: pointer;
-		color: #333;
-	}
-
-	.lang-buttons button:hover {
-		background-color: #f0f0f0;
-	}
-
-	.lang-buttons button.active {
-		text-decoration: underline;
-		text-underline-offset: 3px;
 	}
 
 	.toggle {
