@@ -124,6 +124,7 @@
 		const index = searchLangState.indexData;
 
 		const currentLang = searchLangState.lang;
+		const requireExactWord = /\S\s+$/.test(searchTerm);
 		const originalQuery = searchTerm.toLowerCase().trim();
 		const stripped = stripDiacritics(originalQuery);
 		const currentQuery = toPhonetic(currentLang, stripped);
@@ -146,13 +147,17 @@
 			.bulkGet(dbKeys)
 			.then((data) => {
 				if (
-					currentQuery !== toPhonetic(currentLang, stripDiacritics(searchTerm.toLowerCase().trim()))
+					currentQuery !==
+						toPhonetic(currentLang, stripDiacritics(searchTerm.toLowerCase().trim())) ||
+					requireExactWord !== /\S\s+$/.test(searchTerm)
 				)
 					return;
 
 				searchResults = data
 					.filter((v): v is VerbRecord => !!v)
-					.flatMap((v) => findMatches(v, originalQuery, currentQuery, currentLang))
+					.flatMap((v) =>
+						findMatches(v, originalQuery, currentQuery, currentLang, requireExactWord)
+					)
 					.sort(
 						(a, b) =>
 							a.quality - b.quality || b.freq - a.freq || a.matched.length - b.matched.length

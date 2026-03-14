@@ -10,6 +10,11 @@ export type SearchResult = {
 	freq: number;
 };
 
+export function includesWholeWord(text: string, word: string): boolean {
+	const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	return new RegExp(`(?<!\\p{L})${escaped}(?!\\p{L})`, 'u').test(text);
+}
+
 export function stripDiacritics(s: string): string {
 	return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
@@ -146,13 +151,15 @@ function matchQuality(
 	form: string,
 	originalQuery: string,
 	phoneticQuery: string,
-	lang: string
+	lang: string,
+	requireExactWord: boolean
 ): number | null {
-	if (form.toLowerCase().includes(originalQuery)) return 0;
+	const match = requireExactWord ? includesWholeWord : (t: string, w: string) => t.includes(w);
+	if (match(form.toLowerCase(), originalQuery)) return 0;
 	const strippedForm = stripDiacritics(form).toLowerCase();
 	const strippedQuery = stripDiacritics(originalQuery);
-	if (strippedForm.includes(strippedQuery)) return 1;
-	if (toPhonetic(lang, strippedForm).includes(phoneticQuery)) return 2;
+	if (match(strippedForm, strippedQuery)) return 1;
+	if (match(toPhonetic(lang, strippedForm), phoneticQuery)) return 2;
 	return null;
 }
 
@@ -160,13 +167,14 @@ export function findMatches(
 	verb: VerbRecord,
 	originalQuery: string,
 	phoneticQuery: string,
-	lang: string
+	lang: string,
+	requireExactWord = false
 ): SearchResult[] {
 	// originalQuery is lowercased with diacritics preserved; phoneticQuery is the phonetically transformed form
 	const seen = new Map<string, SearchResult>();
 
 	const consider = (form: string) => {
-		const quality = matchQuality(form, originalQuery, phoneticQuery, lang);
+		const quality = matchQuality(form, originalQuery, phoneticQuery, lang, requireExactWord);
 		if (quality === null) return;
 		const existing = seen.get(form);
 		if (!existing || quality < existing.quality) {
