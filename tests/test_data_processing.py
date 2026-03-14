@@ -30,7 +30,7 @@ CONFIGS: dict[str, LanguageConfig] = {
 
 FIXTURE_VERBS = {
     "fr": ["être", "avoir", "aller", "manger", "finir"],
-    "el": ["έχω", "είμαι", "κάνω", "θέλω", "λέω"],
+    "el": ["έχω", "είμαι", "κάνω", "θέλω", "λέω", "ευχαριστώ", "απαντάω"],
     "de": ["haben", "sein", "machen", "gehen", "können"],
     "es": ["hablar", "ser", "tener", "ir", "hacer"],
     "it": ["parlare", "essere", "avere", "fare", "andare"],
@@ -181,6 +181,45 @@ def test_italian_form_spot_checks(verb, tense_idx, person_idx, expected_fragment
         f"Expected '{expected_fragment}' in form at tense {tense_idx}, person {person_idx} "
         f"for {verb}, got: '{form}'"
     )
+
+
+@pytest.mark.parametrize(
+    "verb,tense_idx,person_idx,must_contain,must_not_contain",
+    [
+        # ευχαριστώ: present passive 1sg — both variants, no superscript, no ` - `
+        ("ευχαριστώ", 1, 0, ["ευχαριστιέμαι", "ευχαριστούμαι"], ["¹", " - "]),
+        # ευχαριστώ: future continuous passive 1sg — both variants get θα prefix
+        ("ευχαριστώ", 7, 0, ["θα ευχαριστιέμαι", "θα ευχαριστούμαι"], [" - "]),
+        # ευχαριστώ: imperfect passive 3sg — no ` - `, no superscript
+        ("ευχαριστώ", 3, 2, ["ευχαριστιόταν"], ["¹", "—", " - "]),
+        # απαντάω: present passive 1sg — both variants, no ` - `
+        ("απαντάω", 1, 0, ["απαντιέμαι", "απαντώμαι"], [" - "]),
+        # απαντάω: imperfect passive 1sg — em dash variant discarded
+        ("απαντάω", 3, 0, ["απαντιόμουν"], ["—", " - "]),
+        # απαντάω: imperfect passive 3sg — no em dash, no ` - `
+        ("απαντάω", 3, 2, ["απαντιόταν"], ["—", " - "]),
+    ],
+)
+def test_greek_variant_form_spot_checks(
+    verb, tense_idx, person_idx, must_contain, must_not_contain
+):
+    """Spot-check that Greek variant forms are properly split and cleaned."""
+    entries = load_fixture_entries("el")
+    if verb not in entries:
+        pytest.skip(f"Verb '{verb}' not found in el fixtures")
+    result = process_entry(EL_CONFIG, entries[verb])
+    assert result is not None, f"process_entry returned None for {verb}"
+    form = result["conjugation"][tense_idx][person_idx]
+    for fragment in must_contain:
+        assert fragment in form, (
+            f"Expected '{fragment}' in form at tense {tense_idx}, person {person_idx} "
+            f"for {verb}, got: '{form}'"
+        )
+    for fragment in must_not_contain:
+        assert fragment not in form, (
+            f"Did not expect '{fragment}' in form at tense {tense_idx}, person {person_idx} "
+            f"for {verb}, got: '{form}'"
+        )
 
 
 def test_check_manifest_metadata():
