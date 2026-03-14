@@ -3,7 +3,7 @@
 	import { page } from '$app/state';
 	import wiktionaryLogoRaw from '$lib/assets/wiktionary_favicon_en.svg?raw';
 	import wordreferenceLogoRaw from '$lib/assets/wordreference_favicon.svg?raw';
-	import { langName, manifest } from '$lib/dataUtils';
+	import { langWiktionaryName, manifest } from '$lib/dataUtils';
 	import { appTitle } from '$lib/defs';
 	import { tenseSettings } from '$lib/i18n.svelte';
 	import { formatForm, formatPronoun, getExternalLinks } from '$lib/langTools';
@@ -73,7 +73,7 @@
 		<a
 			target="_blank"
 			rel="noopener noreferrer"
-			href="https://en.wiktionary.com/wiki/{data.verb.name}#{langName(data.verb.lang)}"
+			href="https://en.wiktionary.com/wiki/{data.verb.name}#{langWiktionaryName(data.verb.lang)}"
 			class="ref-link ref-link-icon"
 		>
 			<span class="inline-icon" role="img" aria-label="wiktionary">

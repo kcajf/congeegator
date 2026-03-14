@@ -5,6 +5,7 @@
       "dataSize": 24284,
       "code": "fr",
       "name": "français",
+      "englishWiktionaryName": "French",
       "tenseNames": [
         "fr_impers_pres_partic",
         "fr_impers_past_partic",
@@ -165,6 +166,7 @@
       "dataSize": 45772,
       "code": "el",
       "name": "ελληνικά",
+      "englishWiktionaryName": "Greek",
       "tenseNames": [
         "el_indic_pres_active",
         "el_indic_pres_passive",
@@ -356,6 +358,7 @@
       "dataSize": 37854,
       "code": "de",
       "name": "Deutsch",
+      "englishWiktionaryName": "German",
       "tenseNames": [
         "de_indic_pres",
         "de_indic_preterite",
@@ -537,6 +540,7 @@
       "dataSize": 27211,
       "code": "es",
       "name": "español",
+      "englishWiktionaryName": "Spanish",
       "tenseNames": [
         "es_impers_inf",
         "es_impers_gerund",
