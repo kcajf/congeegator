@@ -2,17 +2,24 @@
 """Download latest source data from kaikki.org, filter, upload to R2, and update SOURCE_DATA_VERSION.
 
 Usage:
-    pixi run pin-source-data
+    pixi run pin-source-data                  # Full re-pin (all languages, new version)
+    python pin_source_data.py --add-lang it   # Add one language to existing version
 
-Steps:
+Steps (full re-pin):
 1. Downloads raw Wiktionary data from kaikki.org and filters to relevant languages
 2. Uploads filtered .zst files to R2 at source-data/<timestamp>/
 3. Updates SOURCE_DATA_VERSION in data_processing.py
 4. Runs the full pipeline to regenerate r2_data/ and data-manifest.json
 
 After running, review golden test diffs (pixi run test), then commit.
+
+--add-lang <code>:
+    Uploads source data for a single language to the CURRENT SOURCE_DATA_VERSION in R2.
+    Use this when a new language is added after the last full pin run.
+    Does not change SOURCE_DATA_VERSION or regenerate data.
 """
 
+import argparse
 import datetime
 import gzip
 import logging
@@ -175,8 +182,54 @@ def _run_pipeline():
     log.info("Pipeline completed")
 
 
+def _add_lang(lang_code: str):
+    """Upload source data for a single language to the current SOURCE_DATA_VERSION in R2.
+
+    Use this when a new language is added to CONFIG but its source data was not included
+    in the original pin. Does not change SOURCE_DATA_VERSION or re-run the pipeline.
+
+    After running, re-run the full pipeline and commit updated outputs:
+        pixi run python data_processing.py
+        git add src/lib/data-manifest.json r2_data/
+    """
+    from data_processing import SOURCE_DATA_VERSION
+
+    log.info(f"Adding lang '{lang_code}' to existing version {SOURCE_DATA_VERSION}")
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        wiki_lang = "en"
+        name = _filename(wiki_lang, lang_code)
+        local_path = os.path.join(tmpdir, name)
+
+        _download_and_filter(wiki_lang, lang_code, local_path)
+        _upload_to_r2(local_path, f"{R2_BUCKET}/source-data/{SOURCE_DATA_VERSION}/{name}")
+
+    print(f"\nDone! Uploaded {name} to source-data/{SOURCE_DATA_VERSION}/")
+    print("Next steps:")
+    print("  1. Re-run the pipeline: pixi run python data_processing.py")
+    print("  2. Commit updated outputs: src/lib/data-manifest.json, r2_data/")
+
+
 def main():
     logging.basicConfig(stream=sys.stderr, level=logging.INFO)
+
+    parser = argparse.ArgumentParser(
+        description="Pin source data for all languages or add a single language to an existing version."
+    )
+    parser.add_argument(
+        "--add-lang",
+        metavar="CODE",
+        help=(
+            "Upload source data for a single language code (e.g. 'it') to the current "
+            "SOURCE_DATA_VERSION without creating a new version. Use when a language was "
+            "added after the last full pin run."
+        ),
+    )
+    args = parser.parse_args()
+
+    if args.add_lang:
+        _add_lang(args.add_lang)
+        return
 
     version = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H%M%SZ")
     log.info(f"Source data version: {version}")
