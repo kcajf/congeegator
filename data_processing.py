@@ -385,7 +385,7 @@ EL_THA = ("θα ", "θα ", "θα ", "θα ", "θα ", "θα ")
 
 EL_CONFIG = LanguageConfig(
     code="el",
-    name="Greek",
+    name="ελληνικά",
     tenses=(
         # Indicative
         full_tense(
@@ -506,7 +506,7 @@ FR_FUT_INDIC_AVOIR = ("aurai", "auras", "aura", "aurons", "aurez", "auront")
 
 FR_CONFIG = LanguageConfig(
     code="fr",
-    name="French",
+    name="français",
     tenses=(
         TenseConfig("fr_impers_pres_partic", FormMatcher(("participle", "present"))),
         TenseConfig("fr_impers_past_partic", FormMatcher(("participle", "past"))),
@@ -549,7 +549,7 @@ FR_CONFIG = LanguageConfig(
 
 DE_CONFIG = LanguageConfig(
     code="de",
-    name="German",
+    name="Deutsch",
     tenses=(
         full_tense("de", "de_indic_pres", ("present", "indicative")),
         full_tense("de", "de_indic_preterite", ("preterite",)),
@@ -581,7 +581,7 @@ ES_IMPERF_INDIC_HABER = ("había", "habías", "había", "habíamos", "habíais",
 
 ES_CONFIG = LanguageConfig(
     code="es",
-    name="Spanish",
+    name="español",
     tenses=(
         # Impersonal
         TenseConfig("es_impers_inf", FormMatcher(("infinitive",))),
