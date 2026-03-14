@@ -4,12 +4,15 @@
 	import { langName, manifest } from '$lib/dataUtils';
 	import { searchLangState } from '$lib/searchLang.svelte';
 
+	let { onSelect }: { onSelect?: () => void } = $props();
+
 	let currentLang = $derived(searchLangState.lang);
 	let isOpen = $state(false);
 
 	function select(newLang: string) {
 		searchLangState.set(newLang);
 		isOpen = false;
+		onSelect?.();
 	}
 </script>
 
