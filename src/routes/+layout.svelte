@@ -9,7 +9,7 @@
 	import LanguagePicker from '$lib/components/LanguagePicker.svelte';
 	import ToastStack from '$lib/components/ToastStack.svelte';
 	import { db } from '$lib/db';
-	import { appTitle } from '$lib/defs';
+	import { appTitle, myPurple } from '$lib/defs';
 	import { tenseSettings } from '$lib/i18n.svelte';
 	import {
 		findMatches,
@@ -166,7 +166,7 @@
 </script>
 
 <svelte:head>
-	<meta name="theme-color" content="#ffffff" />
+	<meta name="theme-color" content={myPurple} />
 	<meta name="svelte-version" content="5" />
 
 	<!-- copied from output of `npm run generate-pwa-assets` -->
@@ -246,6 +246,8 @@
 	<button class="nuke-btn" onclick={nukeState}>nuke state</button>
 {/if}
 
+<div style="--myPurple: {myPurple}"></div>
+
 <style>
 	:global(html) {
 		font-size: 120%;
@@ -264,7 +266,7 @@
 
 	:global(body) {
 		margin: 0;
-		background-color: white;
+		background-color: var(--myPurple);
 		font-family: Georgia, 'Times New Roman', Times, serif;
 	}
 
@@ -284,7 +286,7 @@
 		position: sticky;
 		top: 0;
 		z-index: 10;
-		background-color: white;
+		background-color: var(--myPurple);
 		padding: 0.5rem 0.75rem 0;
 		display: flex;
 		align-items: center;

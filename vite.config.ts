@@ -2,6 +2,8 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 import { defineConfig } from 'vite';
 
+export const myPurple = '#fbf6fc';
+
 export default defineConfig({
 	plugins: [
 		sveltekit(),
@@ -11,8 +13,8 @@ export default defineConfig({
 			manifest: {
 				/* PWA metadata */ name: 'Congeegator',
 				short_name: 'Congeegator',
-				theme_color: '#ffffff',
-				background_color: '#ffffff'
+				theme_color: myPurple,
+				background_color: myPurple
 			},
 			pwaAssets: {
 				config: true
