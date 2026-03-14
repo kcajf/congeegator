@@ -1177,6 +1177,9 @@ def generate_sitemaps(data: dict[str, dict[str, Any]], static_dir: str):
         '<?xml version="1.0" encoding="UTF-8"?>',
         '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
     ]
+    sitemap_index_lines.append(
+        f"  <sitemap><loc>{BASE_URL}/sitemap-homepage.xml</loc></sitemap>"
+    )
     for lang in lang_codes:
         sitemap_index_lines.append(
             f"  <sitemap><loc>{BASE_URL}/sitemap-{lang}.xml</loc></sitemap>"
@@ -1188,6 +1191,19 @@ def generate_sitemaps(data: dict[str, dict[str, Any]], static_dir: str):
     with open(index_path, "w") as f:
         f.write("\n".join(sitemap_index_lines))
     log.info(f"Wrote {index_path}")
+
+    # Homepage sitemap
+    homepage_lines = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+        f"  <url><loc>{BASE_URL}/</loc></url>",
+        "</urlset>",
+        "",
+    ]
+    homepage_path = os.path.join(static_dir, "sitemap-homepage.xml")
+    with open(homepage_path, "w") as f:
+        f.write("\n".join(homepage_lines))
+    log.info(f"Wrote {homepage_path}")
 
     # Per-language sitemaps
     for lang in lang_codes:

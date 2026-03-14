@@ -1,5 +1,5 @@
-# allow crawling everything by default
 User-agent: *
-Disallow:
+Disallow: /dev-r2-mock
+Disallow: /app-shell
 
 Sitemap: https://congeegator.com/sitemap.xml

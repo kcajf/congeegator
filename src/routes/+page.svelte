@@ -4,7 +4,10 @@
 	import { resolve } from '$app/paths';
 	import { page } from '$app/stores';
 	import { manifest } from '$lib/dataUtils';
-	import { appTitle } from '$lib/defs';
+	import { appTitle, siteUrl } from '$lib/defs';
+
+	const description =
+		'A fast, offline verb conjugation app. Search and browse conjugation tables for French, Greek, German, and Spanish.';
 	import { tenseSettings } from '$lib/i18n.svelte';
 	import { searchLangState } from '$lib/searchLang.svelte';
 
@@ -29,6 +32,13 @@
 
 <svelte:head>
 	<title>{appTitle}</title>
+	<meta name="description" content={description} />
+	<link rel="canonical" href={siteUrl} />
+	<meta property="og:title" content={appTitle} />
+	<meta property="og:description" content={description} />
+	<meta property="og:url" content={siteUrl} />
+	<meta property="og:type" content="website" />
+	<meta property="og:site_name" content={appTitle} />
 </svelte:head>
 
 <section>

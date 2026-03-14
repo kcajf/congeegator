@@ -4,7 +4,7 @@
 	import wiktionaryLogoRaw from '$lib/assets/wiktionary_favicon_en.svg?raw';
 	import wordreferenceLogoRaw from '$lib/assets/wordreference_favicon.svg?raw';
 	import { langWiktionaryName, manifest } from '$lib/dataUtils';
-	import { appTitle } from '$lib/defs';
+	import { appTitle, siteUrl } from '$lib/defs';
 	import { tenseSettings } from '$lib/i18n.svelte';
 	import { formatForm, formatPronoun, getExternalLinks } from '$lib/langTools';
 	import { triggerLangSync } from '$lib/syncManager.svelte';
@@ -61,10 +61,28 @@
 	const getTenseDisplayName = (tenseCode: string) => {
 		return tenseSettings.translateTense(tenseCode, data.verb.lang);
 	};
+
+	const langEn = $derived(langWiktionaryName(data.verb.lang));
+	const verbTitle = $derived(`${data.verb.name} — ${appTitle}`);
+	const verbDescription = $derived(
+		data.verb.gloss
+			? `Conjugation of the ${langEn} verb ${data.verb.name} (${data.verb.gloss}). All tenses and forms.`
+			: `Conjugation of the ${langEn} verb ${data.verb.name}. All tenses and forms.`
+	);
+	const canonicalUrl = $derived(
+		`${siteUrl}/${data.verb.lang}/${encodeURIComponent(data.verb.name)}`
+	);
 </script>
 
 <svelte:head>
-	<title>{data.verb.name}&nbsp;—&nbsp;{appTitle}</title>
+	<title>{verbTitle}</title>
+	<meta name="description" content={verbDescription} />
+	<link rel="canonical" href={canonicalUrl} />
+	<meta property="og:title" content={verbTitle} />
+	<meta property="og:description" content={verbDescription} />
+	<meta property="og:url" content={canonicalUrl} />
+	<meta property="og:type" content="website" />
+	<meta property="og:site_name" content={appTitle} />
 </svelte:head>
 
 {#if data.verb}
