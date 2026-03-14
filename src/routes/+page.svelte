@@ -1,7 +1,21 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { replaceState } from '$app/navigation';
+	import { page } from '$app/stores';
+	import { resolve } from '$app/paths';
 	import { appTitle } from '$lib/defs';
 	import { i18n, i18nDictionary, type LangCode } from '$lib/i18n.svelte';
+	import { searchLangState } from '$lib/searchLang.svelte';
+	import { manifest } from '$lib/dataUtils';
+
+	$effect(() => {
+		if (!browser) return;
+		const lang = $page.url.searchParams.get('lang');
+		if (lang && lang in manifest.languages) {
+			searchLangState.set(lang);
+			replaceState(resolve('/'), {});
+		}
+	});
 
 	const ua = browser ? navigator.userAgent : '';
 	const isIOS = /iPhone|iPad|iPod/.test(ua);
