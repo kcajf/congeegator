@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { replaceState } from '$app/navigation';
-	import { page } from '$app/stores';
 	import { resolve } from '$app/paths';
-	import { tenseSettings } from '$lib/i18n.svelte';
-	import { appTitle } from '$lib/defs';
-	import { searchLangState } from '$lib/searchLang.svelte';
+	import { page } from '$app/stores';
 	import { manifest } from '$lib/dataUtils';
+	import { appTitle } from '$lib/defs';
+	import { tenseSettings } from '$lib/i18n.svelte';
+	import { searchLangState } from '$lib/searchLang.svelte';
 
 	$effect(() => {
 		if (!browser) return;
@@ -35,8 +35,8 @@
 	<h2>About</h2>
 	<p>Congeegator is a fast, offline, multilingual conjugation app.</p>
 	<p>
-		Type above to search. You can search for infinitives or conjugated forms. Non-latin alphabets
-		support fuzzy 'phonetic' search (e.g. 'eimai' in Greek).
+		Type above to search. You can search for infinitives or conjugated forms. You can omit
+		accents/diacritics. Non-latin alphabets support fuzzy 'phonetic' search (e.g. 'eimai' in Greek).
 	</p>
 
 	{#if !isStandalone}
