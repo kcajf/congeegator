@@ -39,7 +39,11 @@
 			requestAnimationFrame(() => {
 				const el = document.querySelector('.highlight');
 				if (el) {
-					el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+					const rect = el.getBoundingClientRect();
+					const isVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
+					if (!isVisible) {
+						el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+					}
 				}
 			});
 		});
