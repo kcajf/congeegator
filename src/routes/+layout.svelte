@@ -204,37 +204,39 @@
 		<LanguagePicker />
 	</nav>
 
-	{#if searchResults.length > 0}
-		<ul class="results-list">
-			{#each searchResults as item (`${item.root}:${item.matched}`)}
-				<li>
-					<a
-						href={resolve('/[lang=lang]/[verb]', {
-							lang: searchLangState.lang,
-							verb: item.root
-						})}
-						onclick={(e) => {
-							e.preventDefault();
-							selectResult(item);
-						}}
-						onmousedown={(e) => e.preventDefault()}
-						class="result-link"
-					>
-						{item.matched}
-						{item.root != item.matched ? `(${item.root})` : ' '}
-					</a>
-				</li>
-			{/each}
-		</ul>
-	{:else if searchTerm.trim().length >= 1}
-		{#if !searchLangState.indexData}
-			<div class="no-results">Loading...</div>
+	<div class="content">
+		{#if searchResults.length > 0}
+			<ul class="results-list">
+				{#each searchResults as item (`${item.root}:${item.matched}`)}
+					<li>
+						<a
+							href={resolve('/[lang=lang]/[verb]', {
+								lang: searchLangState.lang,
+								verb: item.root
+							})}
+							onclick={(e) => {
+								e.preventDefault();
+								selectResult(item);
+							}}
+							onmousedown={(e) => e.preventDefault()}
+							class="result-link"
+						>
+							{item.matched}
+							{item.root != item.matched ? `(${item.root})` : ' '}
+						</a>
+					</li>
+				{/each}
+			</ul>
+		{:else if searchTerm.trim().length >= 1}
+			{#if !searchLangState.indexData}
+				<div class="no-results">Loading...</div>
+			{:else}
+				<div class="no-results">No matches found</div>
+			{/if}
 		{:else}
-			<div class="no-results">No matches found</div>
+			{@render children()}
 		{/if}
-	{:else}
-		{@render children()}
-	{/if}
+	</div>
 </div>
 
 <ToastStack />
@@ -249,9 +251,11 @@
 		/* Optional: modern thin scrollbar for Firefox/Chrome */
 		/* scrollbar-width: thin; */
 		scrollbar-color: rgba(155, 155, 155, 0.5) transparent;
+		overscroll-behavior-y: none;
 	}
 	:global(body) {
 		margin: 0;
+		background-color: white;
 		font-family: Georgia, 'Times New Roman', Times, serif;
 	}
 
@@ -264,7 +268,7 @@
 	.container {
 		max-width: 50rem;
 		margin: 0 auto;
-		padding: 0 0.75rem 2rem;
+		min-height: 100dvh;
 	}
 
 	.navbar {
@@ -272,10 +276,14 @@
 		top: 0;
 		z-index: 10;
 		background-color: white;
-		padding-top: 0.5rem;
+		padding: 0.5rem 0.75rem 0;
 		display: flex;
 		align-items: center;
 		justify-content: flex-start;
+	}
+
+	.content {
+		padding: 0 0.75rem 2rem;
 	}
 
 	.search-container {
