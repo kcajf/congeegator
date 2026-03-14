@@ -177,8 +177,14 @@ export function findMatches(
 	// For conjugation forms, normalise compound forms (e.g. "hat gebogen" → "gebogen")
 	// so that all compound variants collapse into one result, consistent with how
 	// build_search_index tokenises compound forms.
+	const GERMAN_AUXILIARY_INFINITIVES = new Set(['haben', 'sein']);
 	const considerConjugation = (form: string) => {
-		const matchForm = form.includes(' ') ? form.split(' ').at(-1)! : form;
+		if (!form.includes(' ')) return consider(form);
+		const words = form.split(' ');
+		const matchForm =
+			words.length >= 3 && GERMAN_AUXILIARY_INFINITIVES.has(words.at(-1)!)
+				? words.at(-2)!
+				: words.at(-1)!;
 		consider(matchForm);
 	};
 
