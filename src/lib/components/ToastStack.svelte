@@ -36,7 +36,7 @@
 	.toast {
 		position: relative;
 		color: #f5f5f0;
-		padding: 0.5rem 1rem;
+		padding: 0.75rem 1rem;
 		font-size: 0.85rem;
 		font-weight: 600;
 		letter-spacing: 0.02em;
