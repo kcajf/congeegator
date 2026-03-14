@@ -1,0 +1,122 @@
+{
+  "name": "erheben",
+  "nameNoDiacritics": "erheben",
+  "conjugation": [
+    [
+      "erhebe",
+      "erhebst",
+      "erhebt",
+      "erheben",
+      "erhebt",
+      "erheben"
+    ],
+    [
+      "erhob/[erhub]",
+      "erhobst/[erhubst]",
+      "erhob/[erhub]",
+      "erhoben/[erhuben]",
+      "erhobt/[erhubt]",
+      "erhoben/[erhuben]"
+    ],
+    [
+      "habe erhoben",
+      "hast erhoben",
+      "hat erhoben",
+      "haben erhoben",
+      "habt erhoben",
+      "haben erhoben"
+    ],
+    [
+      "hatte erhoben",
+      "hattest erhoben",
+      "hatte erhoben",
+      "hatten erhoben",
+      "hattet erhoben",
+      "hatten erhoben"
+    ],
+    [
+      "werde erheben",
+      "wirst erheben",
+      "wird erheben",
+      "werden erheben",
+      "werdet erheben",
+      "werden erheben"
+    ],
+    [
+      "werde erhoben haben",
+      "wirst erhoben haben",
+      "wird erhoben haben",
+      "werden erhoben haben",
+      "werdet erhoben haben",
+      "werden erhoben haben"
+    ],
+    "erheben",
+    "erhebend",
+    "erhoben",
+    [
+      "erhebe",
+      "erhebest",
+      "erhebe",
+      "erheben",
+      "erhebet",
+      "erheben"
+    ],
+    [
+      "habe erhoben",
+      "habest erhoben",
+      "habe erhoben",
+      "haben erhoben",
+      "habet erhoben",
+      "haben erhoben"
+    ],
+    [
+      "werde erheben",
+      "werdest erheben",
+      "werde erheben",
+      "werden erheben",
+      "werdet erheben",
+      "werden erheben"
+    ],
+    [
+      "werde erhoben haben",
+      "werdest erhoben haben",
+      "werde erhoben haben",
+      "werden erhoben haben",
+      "werdet erhoben haben",
+      "werden erhoben haben"
+    ],
+    [
+      "erhöbe/[erhübe]",
+      "erhöbest/erhöbst/[erhübest]/[erhübst]",
+      "erhöbe/[erhübe]",
+      "erhöben/[erhüben]",
+      "erhöbet/erhöbt/[erhübet]/[erhübt]",
+      "erhöben/[erhüben]"
+    ],
+    [
+      "hätte erhoben",
+      "hättest erhoben",
+      "hätte erhoben",
+      "hätten erhoben",
+      "hättet erhoben",
+      "hätten erhoben"
+    ],
+    [
+      "würde erheben",
+      "würdest erheben",
+      "würde erheben",
+      "würden erheben",
+      "würdet erheben",
+      "würden erheben"
+    ],
+    [
+      "würde erhoben haben",
+      "würdest erhoben haben",
+      "würde erhoben haben",
+      "würden erhoben haben",
+      "würdet erhoben haben",
+      "würden erhoben haben"
+    ]
+  ],
+  "gloss": "to raise, lift (one's arm, voice, glass, etc.)"
+}

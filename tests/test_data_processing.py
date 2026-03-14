@@ -31,7 +31,7 @@ CONFIGS: dict[str, LanguageConfig] = {
 FIXTURE_VERBS = {
     "fr": ["être", "avoir", "aller", "manger", "finir"],
     "el": ["έχω", "είμαι", "κάνω", "θέλω", "λέω", "ευχαριστώ", "απαντάω"],
-    "de": ["haben", "sein", "machen", "gehen", "können"],
+    "de": ["haben", "sein", "machen", "gehen", "können", "erheben"],
     "es": ["hablar", "ser", "tener", "ir", "hacer", "llover"],
     "it": ["parlare", "essere", "avere", "fare", "andare"],
     "en": ["be", "have", "walk", "go", "make"],
@@ -208,6 +208,37 @@ def test_greek_variant_form_spot_checks(
     if verb not in entries:
         pytest.skip(f"Verb '{verb}' not found in el fixtures")
     result = process_entry(EL_CONFIG, entries[verb])
+    assert result is not None, f"process_entry returned None for {verb}"
+    form = result["conjugation"][tense_idx][person_idx]
+    for fragment in must_contain:
+        assert fragment in form, (
+            f"Expected '{fragment}' in form at tense {tense_idx}, person {person_idx} "
+            f"for {verb}, got: '{form}'"
+        )
+    for fragment in must_not_contain:
+        assert fragment not in form, (
+            f"Did not expect '{fragment}' in form at tense {tense_idx}, person {person_idx} "
+            f"for {verb}, got: '{form}'"
+        )
+
+
+@pytest.mark.parametrize(
+    "verb,tense_idx,person_idx,must_contain,must_not_contain",
+    [
+        # erheben preterite 1sg — standard "erhob" plus archaic "[erhub]"
+        ("erheben", 1, 0, ["erhob", "[erhub]"], []),
+        # erheben subjunctive-ii 1sg — standard "erhöbe" plus archaic "[erhübe]"
+        ("erheben", 13, 0, ["erhöbe", "[erhübe]"], []),
+    ],
+)
+def test_german_archaic_bracket_spot_checks(
+    verb, tense_idx, person_idx, must_contain, must_not_contain
+):
+    """Spot-check that German archaic forms are wrapped in [] brackets."""
+    entries = load_fixture_entries("de")
+    if verb not in entries:
+        pytest.skip(f"Verb '{verb}' not found in de fixtures")
+    result = process_entry(DE_CONFIG, entries[verb])
     assert result is not None, f"process_entry returned None for {verb}"
     form = result["conjugation"][tense_idx][person_idx]
     for fragment in must_contain:
