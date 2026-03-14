@@ -1,0 +1,50 @@
+{
+  "name": "have",
+  "nameNoDiacritics": "have",
+  "conjugation": [
+    "have",
+    "having",
+    "had",
+    [
+      "have",
+      "have",
+      "has",
+      "have",
+      "have",
+      "have"
+    ],
+    [
+      "had",
+      "had",
+      "had",
+      "had",
+      "had",
+      "had"
+    ],
+    [
+      "have had",
+      "have had",
+      "has had",
+      "have had",
+      "have had",
+      "have had"
+    ],
+    [
+      "had had",
+      "had had",
+      "had had",
+      "had had",
+      "had had",
+      "had had"
+    ],
+    [
+      "will have",
+      "will have",
+      "will have",
+      "will have",
+      "will have",
+      "will have"
+    ]
+  ],
+  "gloss": "To possess, own."
+}

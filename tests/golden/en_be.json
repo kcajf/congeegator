@@ -1,0 +1,50 @@
+{
+  "name": "be",
+  "nameNoDiacritics": "be",
+  "conjugation": [
+    "be",
+    "being",
+    "been",
+    [
+      "am",
+      "are/art",
+      "is",
+      "are",
+      "are",
+      "are"
+    ],
+    [
+      "was",
+      "were",
+      "was",
+      "were",
+      "were",
+      "were"
+    ],
+    [
+      "have been",
+      "have been",
+      "has been",
+      "have been",
+      "have been",
+      "have been"
+    ],
+    [
+      "had been",
+      "had been",
+      "had been",
+      "had been",
+      "had been",
+      "had been"
+    ],
+    [
+      "will be",
+      "will be",
+      "will be",
+      "will be",
+      "will be",
+      "will be"
+    ]
+  ],
+  "gloss": "As an auxiliary verb:"
+}

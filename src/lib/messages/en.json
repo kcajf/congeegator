@@ -103,5 +103,15 @@
 	"it_subj_pres": "Present",
 	"it_subj_imperf": "Imperfect",
 	"it_subj_past": "Past",
-	"it_subj_pluperf": "Pluperfect"
+	"it_subj_pluperf": "Pluperfect",
+	"en_indic": "Indicative",
+	"en_impers": "Impersonal",
+	"en_impers_inf": "Infinitive",
+	"en_impers_pres_partic": "Present Participle",
+	"en_impers_past_partic": "Past Participle",
+	"en_indic_pres": "Simple Present",
+	"en_indic_past": "Simple Past",
+	"en_indic_pres_perf": "Present Perfect",
+	"en_indic_past_perf": "Past Perfect",
+	"en_indic_fut": "Future"
 }

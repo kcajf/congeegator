@@ -14,7 +14,7 @@ import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-from data_processing import DE_CONFIG, EL_CONFIG, ES_CONFIG, FR_CONFIG, IT_CONFIG, Entry, LanguageConfig, process_entry
+from data_processing import DE_CONFIG, EL_CONFIG, EN_CONFIG, ES_CONFIG, FR_CONFIG, IT_CONFIG, Entry, LanguageConfig, process_entry
 
 FIXTURES_DIR = os.path.join(os.path.dirname(__file__), "fixtures")
 GOLDEN_DIR = os.path.join(os.path.dirname(__file__), "golden")
@@ -25,6 +25,7 @@ CONFIGS: dict[str, LanguageConfig] = {
     "de": DE_CONFIG,
     "es": ES_CONFIG,
     "it": IT_CONFIG,
+    "en": EN_CONFIG,
 }
 
 FIXTURE_VERBS = {
@@ -33,6 +34,7 @@ FIXTURE_VERBS = {
     "de": ["haben", "sein", "machen", "gehen", "können"],
     "es": ["hablar", "ser", "tener", "ir", "hacer"],
     "it": ["parlare", "essere", "avere", "fare", "andare"],
+    "en": ["be", "have", "walk", "go", "make"],
 }
 
 

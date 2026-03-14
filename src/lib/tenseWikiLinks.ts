@@ -93,7 +93,46 @@ const tenseWikiLinks: Record<string, string> = {
 	es_indic_pluperf: `${WIKI}Pluperfect`,
 	es_impers_inf: `${WIKI}Infinitive`,
 	es_impers_gerund: `${WIKI}Gerund`,
-	es_impers_past_partic: `${WIKI}Past_participle`
+	es_impers_past_partic: `${WIKI}Past_participle`,
+
+	// Italian — groups
+	it_indic: `${WIKI}Indicative_mood`,
+	it_subj: `${WIKI}Subjunctive_mood`,
+	it_cond: `${WIKI}Conditional_mood`,
+	it_imper: `${WIKI}Imperative_mood`,
+	it_impers: `${WIKI}Non-finite_verb`,
+	// Italian — tenses
+	it_indic_pres: `${WIKI}Present_tense`,
+	it_indic_imperf: `${WIKI}Imperfect`,
+	it_indic_past_hist: `${WIKI}Passato_remoto`,
+	it_indic_fut: `${WIKI}Future_tense`,
+	it_cond_pres: `${WIKI}Conditional_mood`,
+	it_cond_past: `${WIKI}Conditional_mood`,
+	it_subj_pres: `${WIKI}Subjunctive_mood`,
+	it_subj_imperf: `${WIKI}Subjunctive_mood`,
+	it_subj_past: `${WIKI}Subjunctive_mood`,
+	it_subj_pluperf: `${WIKI}Subjunctive_mood`,
+	it_indic_pres_perf: `${WIKI}Perfect_(grammar)`,
+	it_indic_pluperf: `${WIKI}Pluperfect`,
+	it_indic_past_ant: `${WIKI}Past_anterior`,
+	it_indic_fut_perf: `${WIKI}Future_perfect`,
+	it_impers_inf: `${WIKI}Infinitive`,
+	it_impers_gerund: `${WIKI}Gerund`,
+	it_impers_pres_partic: `${WIKI}Present_participle`,
+	it_impers_past_partic: `${WIKI}Past_participle`,
+
+	// English — groups
+	en_indic: `${WIKI}Indicative_mood`,
+	en_impers: `${WIKI}Non-finite_verb`,
+	// English — tenses
+	en_indic_pres: `${WIKI}Present_tense`,
+	en_indic_past: `${WIKI}Past_tense`,
+	en_indic_pres_perf: `${WIKI}Present_perfect`,
+	en_indic_past_perf: `${WIKI}Past_perfect`,
+	en_indic_fut: `${WIKI}Future_tense`,
+	en_impers_inf: `${WIKI}Infinitive`,
+	en_impers_pres_partic: `${WIKI}Present_participle`,
+	en_impers_past_partic: `${WIKI}Past_participle`
 };
 
 export function getTenseWikiLink(tenseCode: string): string | undefined {

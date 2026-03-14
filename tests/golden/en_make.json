@@ -1,0 +1,50 @@
+{
+  "name": "make",
+  "nameNoDiacritics": "make",
+  "conjugation": [
+    "make",
+    "making",
+    "made",
+    [
+      "make",
+      "make",
+      "makes",
+      "make",
+      "make",
+      "make"
+    ],
+    [
+      "made",
+      "made",
+      "made",
+      "made",
+      "made",
+      "made"
+    ],
+    [
+      "have made",
+      "have made",
+      "has made",
+      "have made",
+      "have made",
+      "have made"
+    ],
+    [
+      "had made",
+      "had made",
+      "had made",
+      "had made",
+      "had made",
+      "had made"
+    ],
+    [
+      "will make",
+      "will make",
+      "will make",
+      "will make",
+      "will make",
+      "will make"
+    ]
+  ],
+  "gloss": "To create."
+}
