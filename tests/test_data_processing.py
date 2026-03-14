@@ -108,6 +108,38 @@ def test_golden(lang: str, verb: str, update_golden: bool):
     )
 
 
+@pytest.mark.parametrize(
+    "verb,tense_idx,person_idx,expected_fragment",
+    [
+        # Future simple active (idx 8) — θα + dependent stem
+        ("λέω", 8, 0, "θα πω"),
+        ("θέλω", 8, 0, "θα θελήσω"),
+        ("κάνω", 8, 0, "θα κάνω"),
+        # Future simple passive (idx 9)
+        ("λέω", 9, 0, "θα ειπωθώ"),
+        # Subjunctive active (idx 10) — bare dependent stem
+        ("λέω", 10, 0, "πω"),
+        ("θέλω", 10, 0, "θελήσω"),
+        # Subjunctive passive (idx 11)
+        ("λέω", 11, 0, "ειπωθώ"),
+        # Aorist active (idx 4) — already works, sanity check
+        ("λέω", 4, 0, "είπα"),
+    ],
+)
+def test_greek_form_spot_checks(verb, tense_idx, person_idx, expected_fragment):
+    """Spot-check that specific Greek forms appear at the expected tense positions."""
+    entries = load_fixture_entries("el")
+    if verb not in entries:
+        pytest.skip(f"Verb '{verb}' not found in el fixtures")
+    result = process_entry(EL_CONFIG, entries[verb])
+    assert result is not None, f"process_entry returned None for {verb}"
+    form = result["conjugation"][tense_idx][person_idx]
+    assert expected_fragment in form, (
+        f"Expected '{expected_fragment}' in form at tense {tense_idx}, person {person_idx} "
+        f"for {verb}, got: '{form}'"
+    )
+
+
 def test_check_manifest_metadata():
     """Verify that check_manifest_metadata passes with the current committed manifest."""
     from data_processing import check_manifest_metadata
