@@ -46,7 +46,7 @@ self.onmessage = async (e: MessageEvent<{ lang: string }>) => {
 					if (done) break;
 					chunks.push(value);
 					receivedBytes += value.length;
-					const percent = totalBytes ? Math.round((receivedBytes / totalBytes) * 80) : null;
+					const percent = totalBytes ? Math.round((receivedBytes / totalBytes) * 100) : null;
 					if (percent !== lastPercent) {
 						self.postMessage({ type: 'PROGRESS', lang, phase: 'downloading', percent });
 						lastPercent = percent;
@@ -70,7 +70,7 @@ self.onmessage = async (e: MessageEvent<{ lang: string }>) => {
 					})
 				);
 
-				self.postMessage({ type: 'PROGRESS', lang, phase: 'installing', percent: 80 });
+				self.postMessage({ type: 'PROGRESS', lang, phase: 'installing', percent: 0 });
 				const CHUNK_SIZE = 500;
 				const totalChunks = Math.ceil(records.length / CHUNK_SIZE);
 				await db.transaction('rw', [db.verbs, db.metadata], async () => {
@@ -81,7 +81,7 @@ self.onmessage = async (e: MessageEvent<{ lang: string }>) => {
 							type: 'PROGRESS',
 							lang,
 							phase: 'installing',
-							percent: 80 + Math.round(((i + 1) / totalChunks) * 20)
+							percent: Math.round(((i + 1) / totalChunks) * 100)
 						});
 					}
 					await db.metadata.put({
