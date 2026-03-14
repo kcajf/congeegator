@@ -7,7 +7,7 @@
 	import { appTitle, siteUrl } from '$lib/defs';
 	import { tenseSettings } from '$lib/i18n.svelte';
 	import { formatPronoun, getExternalLinks, parseAndFormatForm } from '$lib/langTools';
-	import { triggerLangSync } from '$lib/syncManager.svelte';
+	import { searchLangState } from '$lib/searchLang.svelte';
 	import { getTenseWikiLink } from '$lib/tenseWikiLinks';
 	import { tick } from 'svelte';
 	import type { ConjugationForms } from '$lib/types';
@@ -53,7 +53,7 @@
 	// Whenever the language changes, check if we need the full bundle
 	$effect(() => {
 		if (browser && data.verb?.lang) {
-			triggerLangSync(data.verb.lang);
+			searchLangState.set(data.verb.lang);
 		}
 	});
 
