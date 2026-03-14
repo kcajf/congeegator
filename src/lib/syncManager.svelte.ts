@@ -79,12 +79,14 @@ if (browser) {
 
 		if (type === 'ERROR') {
 			console.error(`${lang} sync error:`, error);
+			const reason = error === 'offline' ? ': offline' : '';
+			const message = `Failed to sync ${name}${reason}`;
 			const id = syncToastIds[lang];
 			if (id) {
-				toasts.update(id, `Failed to sync ${name}`, { dismissAfter: 6000 });
+				toasts.update(id, message, { dismissAfter: 6000 });
 				delete syncToastIds[lang];
 			} else {
-				toasts.add(`Failed to sync ${name}`, { dismissAfter: 6000 });
+				toasts.add(message, { dismissAfter: 6000 });
 			}
 		}
 	};

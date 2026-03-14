@@ -95,7 +95,11 @@ self.onmessage = async (e: MessageEvent<{ lang: string }>) => {
 			self.postMessage({
 				type: 'ERROR',
 				lang,
-				error: error instanceof Error ? error.message : String(error)
+				error: !navigator.onLine
+					? 'offline'
+					: error instanceof Error
+						? error.message
+						: String(error)
 			});
 		}
 	}
