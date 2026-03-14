@@ -615,7 +615,7 @@ ES_CONFIG = LanguageConfig(
         # Impersonal
         TenseConfig("es_impers_inf", FormMatcher(("infinitive",), max_forms=1)),
         TenseConfig("es_impers_gerund", FormMatcher(("gerund",), max_forms=1)),
-        TenseConfig("es_impers_past_partic", FormMatcher(("participle", "past"))),
+        TenseConfig("es_impers_past_partic", FormMatcher(("participle", "past"), exclude_tags=("feminine", "plural"))),
         # Indicative
         full_tense("es", "es_indic_pres", ("present", "indicative"), exclude_tags=("vos-form",)),
         full_tense("es", "es_indic_pret", ("preterite", "indicative"), exclude_tags=("vos-form",)),
@@ -863,6 +863,9 @@ def preprocess_el_forms(forms: list[Form]) -> list[Form]:
         text = text.replace("\u2011", "-")
         text = text.translate(_SUPERSCRIPT_DIGITS)
 
+        # Strip trailing parenthesized annotations (cross-refs, variant notes)
+        text = re.sub(r'\s*\([^)]*\)\s*$', '', text).strip()
+
         # Collect individual parts: split on ` - ` if present
         if " - " in text:
             raw_parts = [p.strip() for p in text.split(" - ")]
@@ -1065,6 +1068,8 @@ def form_is_clean_conjugation(form: Form) -> bool:
         return False
 
     if "'" in form.form:  # French "t'es"
+        return False
+    if '{' in form.form:  # Greek katharevousa/formal forms
         return False
 
     if " " in form.form and " - " not in form.form:
@@ -1336,9 +1341,12 @@ def process_entry(config: LanguageConfig, entry: Entry) -> dict[str, Any] | None
     if config.max_conj_tables is not None:
         filtered_forms = filter_forms_by_table(entry.forms, config.max_conj_tables)
     else:
-        filtered_forms = [f for f in entry.forms if form_is_clean_conjugation(f)]
-    if config.code == "el":
-        filtered_forms = preprocess_el_forms(filtered_forms)
+        forms_to_filter = entry.forms
+        if config.code == "el":
+            # Preprocess Greek forms before filtering so that annotation
+            # stripping runs before the space filter in form_is_clean_conjugation.
+            forms_to_filter = preprocess_el_forms(forms_to_filter)
+        filtered_forms = [f for f in forms_to_filter if form_is_clean_conjugation(f)]
     try:
         conj = extract_conjugations_from_forms(config, filtered_forms, entry)
     except Exception as e:
