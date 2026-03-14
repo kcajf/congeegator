@@ -107,14 +107,9 @@
 </svelte:head>
 
 {#snippet formDisplay(form: string)}
-	{#each parseAndFormatForm(form) as segment, i (i)}
-		{#if segment.separator}{segment.separator}{/if}
-		{#if segment.markers.length > 0}
-			<span class={segment.markers.map((m) => `marker-${m}`).join(' ')}>{segment.text}</span>
-		{:else}
-			{segment.text}
-		{/if}
-	{/each}
+	{#each parseAndFormatForm(form) as segment, i (i)}{#if segment.separator}{segment.separator}{/if}{#if segment.markers.length > 0}<span
+				class={segment.markers.map((m) => `marker-${m}`).join(' ')}>{segment.text}</span
+			>{:else}{segment.text}{/if}{/each}
 {/snippet}
 
 {#if data.verb}

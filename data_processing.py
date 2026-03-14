@@ -724,6 +724,92 @@ def _strip_markers(s: str) -> tuple[str, str, str]:
     return prefix, s, suffix
 
 
+_SUPERSCRIPT_DIGITS = str.maketrans("", "", "¹²³⁴⁵⁶⁷⁸⁹⁰")
+
+
+_MATCHING_CLOSER = {"(": ")", "[": "]", "{": "}"}
+
+
+def _strip_balanced_markers(s: str) -> tuple[str, str, str]:
+    """Strip matched outer bracket pairs from a form.
+
+    Unlike _strip_markers, only strips balanced pairs (e.g. `[...(...)...]`
+    strips the outer `[]` but not the inner `()`).
+    """
+    prefix = ""
+    suffix = ""
+    while s and s[0] in _MATCHING_CLOSER:
+        closer = _MATCHING_CLOSER[s[0]]
+        if s.endswith(closer):
+            prefix += s[0]
+            suffix = closer + suffix
+            s = s[1:-1]
+        else:
+            break
+    return prefix, s, suffix
+
+
+def _expand_el_part(part: str) -> list[str]:
+    """Expand a single Greek form part, handling comma-separated sub-items.
+
+    Drops suffix abbreviations (forms starting with `-` after stripping markers).
+    For comma-separated items inside markers like `[foo, (-bar)]`, splits them
+    and re-wraps each with the outer markers.
+    """
+    pre, bare, suf = _strip_balanced_markers(part)
+    if bare.startswith("-"):
+        return []
+
+    # Handle comma-separated sub-items inside markers
+    if ", " in bare and pre:
+        sub_items = bare.split(", ")
+        expanded = []
+        for sub in sub_items:
+            _, sub_bare, _ = _strip_balanced_markers(sub.strip())
+            if sub_bare.startswith("-"):
+                continue
+            expanded.append(f"{pre}{sub.strip()}{suf}")
+        return expanded
+
+    return [part]
+
+
+def preprocess_el_forms(forms: list[Form]) -> list[Form]:
+    """Split Greek ` - ` variant forms into individual Form objects.
+
+    Wiktionary encodes variant forms like `ευχαριστιέμαι¹ - ευχαριστούμαι`.
+    Splitting them lets downstream processing (θα prefix, deduplication)
+    work correctly on each variant. Suffix abbreviations (parts starting
+    with `-` like `(-ιόσαστε)`) are dropped since they're only meaningful
+    within the compound notation. Em dashes and superscripts are stripped.
+    Comma-separated sub-items inside markers are expanded individually.
+    """
+    result: list[Form] = []
+    for form in forms:
+        text = form.form
+        if text is None:
+            result.append(form)
+            continue
+
+        # Normalize non-breaking hyphens and strip superscript digits
+        text = text.replace("\u2011", "-")
+        text = text.translate(_SUPERSCRIPT_DIGITS)
+
+        # Collect individual parts: split on ` - ` if present
+        if " - " in text:
+            raw_parts = [p.strip() for p in text.split(" - ")]
+        else:
+            raw_parts = [text]
+
+        for part in raw_parts:
+            if part == "—" or part == "":
+                continue
+            for expanded in _expand_el_part(part):
+                result.append(Form(form=expanded, tags=form.tags, source=form.source))
+
+    return result
+
+
 def clean_up_matched_forms(
     l: LanguageConfig, forms: list[str], entry: Entry
 ) -> list[str]:
@@ -743,6 +829,9 @@ def clean_up_matched_forms(
             ("όσασταν", "όσαστε"),
             ("ιόμασταν", "ιόμαστε"),
             ("ούμασταν", "ούμαστε"),
+            # imperfect passive 2pl alternates
+            ("ιόσασταν", "ιόσαστε"),
+            ("ούσασταν", "ούσαστε"),
             # new: participle gender endings
             ("ος", "η"),
             ("ος", "ο"),
@@ -758,6 +847,7 @@ def clean_up_matched_forms(
                     word_prefix = bare_f[: space_dash + 1]
                     dash_part = bare_f[space_dash + 1 :]
 
+                expanded_ok = False
                 for from_, to in suffix_replacements:
                     if dash_part == f"-{to}":
                         for j in range(i - 1, -1, -1):
@@ -770,8 +860,10 @@ def clean_up_matched_forms(
                             if bare_base.endswith(from_):
                                 expanded = bare_base[: -len(from_)] + to
                                 new_forms[i] = f"{pre}{word_prefix}{expanded}{suf}"
+                                expanded_ok = True
                                 break
-                        break
+                        if expanded_ok:
+                            break
 
         for f in new_forms:
             if "-" in f and len(f) > 1:
@@ -798,6 +890,7 @@ def extract_one(
             if matcher.max_forms is not None and len(ret) >= matcher.max_forms:
                 break
     ret = clean_up_matched_forms(l, ret, entry)
+    ret = list(dict.fromkeys(ret))  # deduplicate preserving order
     return "/".join(ret)
 
 
@@ -1108,6 +1201,8 @@ def process_entry(config: LanguageConfig, entry: Entry) -> dict[str, Any] | None
         return None
 
     filtered_forms = [f for f in entry.forms if form_is_clean_conjugation(f)]
+    if config.code == "el":
+        filtered_forms = preprocess_el_forms(filtered_forms)
     try:
         conj = extract_conjugations_from_forms(config, filtered_forms, entry)
     except Exception as e:
