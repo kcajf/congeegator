@@ -8,6 +8,7 @@
 	import { tenseSettings } from '$lib/i18n.svelte';
 	import { formatPronoun, getExternalLinks, parseAndFormatForm } from '$lib/langTools';
 	import { triggerLangSync } from '$lib/syncManager.svelte';
+	import { getTenseWikiLink } from '$lib/tenseWikiLinks';
 	import { tick } from 'svelte';
 	import type { ConjugationForms } from '$lib/types';
 	import type { PageProps } from './$types';
@@ -157,14 +158,29 @@
 
 	{#each tenseGroups as tenseGroup (tenseGroup.name)}
 		{#if tenseGroup.tenseIndices.some((i) => !isTenseEmpty(data.verb.conjugation[i]))}
-			<h2>{getTenseDisplayName(tenseGroup.name)}</h2>
+			<!-- eslint-disable svelte/no-navigation-without-resolve -- external Wikipedia URLs -->
+			<h2>
+				{#if getTenseWikiLink(tenseGroup.name)}<a
+						href={getTenseWikiLink(tenseGroup.name)}
+						target="_blank"
+						rel="noopener noreferrer"
+						class="tense-wiki-link">{getTenseDisplayName(tenseGroup.name)}</a
+					>{:else}{getTenseDisplayName(tenseGroup.name)}{/if}
+			</h2>
 			<div class="tenseGroup">
 				{#each tenseGroup.tenseIndices as tenseI (tenseI)}
 					{@const tenseForms = data.verb.conjugation[tenseI]}
 					{#if !isTenseEmpty(tenseForms)}
 						{#if Array.isArray(tenseForms)}
 							<div class="tense">
-								<h3>{getTenseDisplayName(tenseNames[tenseI])}</h3>
+								<h3>
+									{#if getTenseWikiLink(tenseNames[tenseI])}<a
+											href={getTenseWikiLink(tenseNames[tenseI])}
+											target="_blank"
+											rel="noopener noreferrer"
+											class="tense-wiki-link">{getTenseDisplayName(tenseNames[tenseI])}</a
+										>{:else}{getTenseDisplayName(tenseNames[tenseI])}{/if}
+								</h3>
 								<table class="tenseTable">
 									<tbody>
 										{#each tenseForms as form, formI (formI)}
@@ -184,13 +200,21 @@
 							</div>
 						{:else}
 							<div class="tense tense-inline" class:highlight={isHighlighted(tenseForms)}>
-								<h3 class="tense-inline-name">{getTenseDisplayName(tenseNames[tenseI])}</h3>
+								<h3 class="tense-inline-name">
+									{#if getTenseWikiLink(tenseNames[tenseI])}<a
+											href={getTenseWikiLink(tenseNames[tenseI])}
+											target="_blank"
+											rel="noopener noreferrer"
+											class="tense-wiki-link">{getTenseDisplayName(tenseNames[tenseI])}</a
+										>{:else}{getTenseDisplayName(tenseNames[tenseI])}{/if}
+								</h3>
 								<span class="tense-inline-value">{@render formDisplay(tenseForms)}</span>
 							</div>
 						{/if}
 					{/if}
 				{/each}
 			</div>
+			<!-- eslint-enable svelte/no-navigation-without-resolve -->
 		{/if}
 	{/each}
 	{#if presentMarkers.any}
@@ -349,5 +373,14 @@
 		display: inline-flex;
 		align-items: baseline;
 		gap: 0.3rem;
+	}
+
+	.tense-wiki-link {
+		color: inherit;
+		text-decoration: none;
+	}
+
+	.tense-wiki-link:hover {
+		text-decoration: underline;
 	}
 </style>
