@@ -248,12 +248,20 @@
 
 <style>
 	:global(html) {
+		font-size: 120%;
 		scrollbar-gutter: stable;
 		/* Optional: modern thin scrollbar for Firefox/Chrome */
 		/* scrollbar-width: thin; */
 		scrollbar-color: rgba(155, 155, 155, 0.5) transparent;
 		overscroll-behavior-y: none;
 	}
+
+	@media (max-width: 600px) {
+		:global(html) {
+			font-size: 105%;
+		}
+	}
+
 	:global(body) {
 		margin: 0;
 		background-color: white;
