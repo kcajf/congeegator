@@ -9,6 +9,7 @@ import pytest
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from data_processing import (
+    DE_CONFIG,
     EL_CONFIG,
     ES_CONFIG,
     FR_CONFIG,
@@ -146,6 +147,43 @@ class TestSpanishSearchIndex:
         idx = _idx(self.names, "ir")
         assert idx in self.index["i"]
         assert idx in self.index["ir"]
+
+
+# -- German ------------------------------------------------------------------
+
+
+class TestGermanSearchIndex:
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        self.index, self.names = _build_index_for_lang("de")
+
+    def test_sein_prefix_excludes_verbs_using_sein_as_auxiliary(self):
+        """'sein' prefix should not contain gehen/machen/können (they use sein/haben as auxiliary)."""
+        gehen_idx = _idx(self.names, "gehen")
+        machen_idx = _idx(self.names, "machen")
+        koennen_idx = _idx(self.names, "können")
+        assert gehen_idx not in self.index.get("sein", [])
+        assert machen_idx not in self.index.get("sein", [])
+        assert koennen_idx not in self.index.get("sein", [])
+
+    def test_haben_prefix_excludes_verbs_using_haben_as_auxiliary(self):
+        """'habe' prefix should not contain verbs that only use haben as an auxiliary."""
+        # machen uses "haben" as auxiliary — it should not appear under "habe" prefix
+        # (unless machen has its own conjugation starting with "habe", which it doesn't)
+        machen_idx = _idx(self.names, "machen")
+        gehen_idx = _idx(self.names, "gehen")
+        assert machen_idx not in self.index.get("habe", [])
+        assert gehen_idx not in self.index.get("habe", [])
+
+    def test_past_participle_gemacht_indexed(self):
+        """Past participle 'gemacht' (from machen) should be indexed."""
+        idx = _idx(self.names, "machen")
+        assert idx in self.index.get("gema", [])
+
+    def test_past_participle_gegangen_indexed(self):
+        """Past participle 'gegangen' (from gehen) should be indexed."""
+        idx = _idx(self.names, "gehen")
+        assert idx in self.index.get("gega", [])
 
 
 # -- Truncation --------------------------------------------------------------

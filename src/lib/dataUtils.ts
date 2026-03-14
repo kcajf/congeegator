@@ -13,3 +13,7 @@ export function getLangDataUrl(langCode: string) {
 export function langName(langCode: string) {
 	return manifest.languages[langCode].name;
 }
+
+export function langWiktionaryName(langCode: string) {
+	return manifest.languages[langCode].englishWiktionaryName;
+}
