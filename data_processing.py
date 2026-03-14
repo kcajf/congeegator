@@ -601,6 +601,7 @@ DE_CONFIG = LanguageConfig(
         TenseGroup("de_subj_i_grp", re.compile(r"^de_subj_i($|_)")),
         TenseGroup("de_subj_ii_grp", re.compile(r"^de_subj_ii($|_)")),
     ],
+    rare_tags=("archaic",),
 )
 ES_PRES_INDIC_HABER = ("he", "has", "ha", "hemos", "habéis", "han")
 ES_IMPERF_INDIC_HABER = ("había", "habías", "había", "habíamos", "habíais", "habían")

@@ -19,8 +19,8 @@ from data_processing import CacheManager, Entry
 FIXTURE_VERBS = {
     "fr": {"être", "avoir", "aller", "manger", "finir"},
     "el": {"έχω", "είμαι", "κάνω", "θέλω", "λέω", "ευχαριστώ", "απαντάω"},
-    "de": {"haben", "sein", "machen", "gehen", "können"},
-    "es": {"hablar", "ser", "tener", "ir", "hacer"},
+    "de": {"haben", "sein", "machen", "gehen", "können", "erheben"},
+    "es": {"hablar", "ser", "tener", "ir", "hacer", "llover"},
     "it": {"parlare", "essere", "avere", "fare", "andare"},
     "en": {"be", "have", "walk", "go", "make"},
 }
