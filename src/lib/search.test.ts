@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { findMatches, prefixLookup, stripDiacritics, toPhoneticEl } from './search';
+import {
+	findMatches,
+	includesWholeWord,
+	prefixLookup,
+	stripDiacritics,
+	toPhoneticEl
+} from './search';
 import type { SearchIndex, VerbRecord } from './types';
 
 function makeVerb(overrides: Partial<VerbRecord> & Pick<VerbRecord, 'name'>): VerbRecord {
@@ -324,5 +330,68 @@ describe('toPhoneticEl', () => {
 
 	it('converts γγ', () => {
 		expect(toPhoneticEl('αγγελία')).toBe('angelia');
+	});
+});
+
+describe('includesWholeWord', () => {
+	it('matches exact word', () => {
+		expect(includesWholeWord('former', 'former')).toBe(true);
+	});
+
+	it('does not match as prefix', () => {
+		expect(includesWholeWord('formera', 'former')).toBe(false);
+	});
+
+	it('does not match as suffix', () => {
+		expect(includesWholeWord('informer', 'former')).toBe(false);
+	});
+
+	it('matches word bounded by spaces', () => {
+		expect(includesWholeWord('je former vous', 'former')).toBe(true);
+	});
+
+	it('respects accented character boundaries', () => {
+		expect(includesWholeWord('mangé', 'mange')).toBe(false);
+		expect(includesWholeWord('mangé', 'mangé')).toBe(true);
+	});
+
+	it('handles Greek letter boundaries', () => {
+		expect(includesWholeWord('κάνω', 'κάνω')).toBe(true);
+		expect(includesWholeWord('κάνωμε', 'κάνω')).toBe(false);
+	});
+});
+
+describe('findMatches with requireExactWord', () => {
+	it('excludes prefix matches when requireExactWord is true', () => {
+		const verb = makeVerb({
+			name: 'former',
+			conjugation: ['formera', 'formeront', 'forment']
+		});
+		const results = findMatches(verb, 'former', 'former', 'fr', true);
+		expect(results).toContainEqual({ root: 'former', matched: 'former', quality: 0, freq: 0 });
+		expect(results).not.toContainEqual(expect.objectContaining({ matched: 'formera' }));
+		expect(results).not.toContainEqual(expect.objectContaining({ matched: 'formeront' }));
+	});
+
+	it('includes prefix matches when requireExactWord is false', () => {
+		const verb = makeVerb({
+			name: 'former',
+			conjugation: ['formera', 'formeront']
+		});
+		const results = findMatches(verb, 'former', 'former', 'fr', false);
+		expect(results).toContainEqual(expect.objectContaining({ matched: 'formera' }));
+		expect(results).toContainEqual(expect.objectContaining({ matched: 'formeront' }));
+	});
+
+	it('still matches diacritics-stripped forms as whole words', () => {
+		const verb = makeVerb({ name: 'être', nameNoDiacritics: 'etre' });
+		const results = findMatches(verb, 'etre', 'etre', 'fr', true);
+		expect(results).toContainEqual({ root: 'être', matched: 'être', quality: 1, freq: 0 });
+	});
+
+	it('excludes diacritics-stripped partial matches', () => {
+		const verb = makeVerb({ name: 'êtreindre' });
+		const results = findMatches(verb, 'etre', 'etre', 'fr', true);
+		expect(results).toEqual([]);
 	});
 });
