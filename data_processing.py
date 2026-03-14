@@ -570,6 +570,7 @@ FR_CONFIG = LanguageConfig(
         TenseGroup("fr_imper", re.compile(r"^fr_imper_(?!s_)")),
         TenseGroup("fr_impers", re.compile(r"^fr_impers_")),
     ],
+    max_conj_tables=2,
 )
 
 DE_CONFIG = LanguageConfig(
