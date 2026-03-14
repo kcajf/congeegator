@@ -102,7 +102,8 @@
 
 		await tick();
 
-		// Only re-focus on desktop (non-touch) devices — on mobile, refocusing would re-open the keyboard
+		// After selecting a search result, only re-focus on desktop — on mobile, hiding the keyboard
+		// prevents it from covering the conjugation table the user just navigated to
 		if (searchInput && !window.matchMedia('(pointer: coarse)').matches) {
 			searchInput.focus();
 		}
@@ -202,7 +203,7 @@
 			/>
 		</div>
 
-		<LanguagePicker />
+		<LanguagePicker onSelect={() => searchInput?.focus()} />
 	</nav>
 
 	<div class="content">
