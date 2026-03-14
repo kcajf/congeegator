@@ -533,7 +533,7 @@ FR_CONFIG = LanguageConfig(
     name="français",
     english_wiktionary_name="French",
     tenses=(
-        TenseConfig("fr_impers_pres_partic", FormMatcher(("participle", "present"))),
+        TenseConfig("fr_impers_pres_partic", FormMatcher(("participle", "present"), exclude_tags=("multiword-construction",))),
         TenseConfig("fr_impers_past_partic", FormMatcher(("participle", "past"))),
         full_tense("fr", "fr_indic_pres", ("present", "indicative")),
         full_tense("fr", "fr_indic_imperf", ("imperfect", "indicative")),
