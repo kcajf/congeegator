@@ -184,6 +184,7 @@
 		padding-right: 0;
 		margin-left: 0;
 		margin-right: 0;
+		white-space: nowrap;
 	}
 
 	h2 {
@@ -202,7 +203,7 @@
 
 	.tenseGroup {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+		grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
 		max-width: calc(3 * 16rem + 2 * 1rem);
 		gap: 1rem;
 	}
