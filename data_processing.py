@@ -349,6 +349,8 @@ class LanguageConfig(msgspec.Struct, frozen=True):
     tenses: tuple[TenseConfig, ...]
     tense_groups: list[TenseGroup]
     phonetic_fn: Callable[[str], str] | None = None
+    max_conj_tables: int | None = None  # When set, only use forms from the first N conjugation tables
+    rare_tags: tuple[str, ...] = ()  # Forms with these Wiktionary tags get wrapped in [] markers
 
 
 def full_tense(
@@ -701,6 +703,8 @@ IT_CONFIG = LanguageConfig(
         TenseGroup("it_imper", re.compile(r"^it_imper$")),
         TenseGroup("it_impers", re.compile(r"^it_impers_")),
     ],
+    max_conj_tables=2,
+    rare_tags=("archaic", "literary", "dialectal", "poetic"),
 )
 
 EN_PRES_HAVE = ("have", "have", "has", "have", "have", "have")
@@ -934,6 +938,27 @@ def clean_up_matched_forms(
     return forms
 
 
+def filter_forms_by_table(
+    all_forms: list[Form], max_tables: int
+) -> list[Form]:
+    """Filter forms to only include those from the first `max_tables` conjugation tables.
+
+    Table boundaries are identified by `table-tags` entries in the unfiltered forms list.
+    Forms before the first table-tags entry are in table 1.
+    """
+    table_num = 1
+    result: list[Form] = []
+    for form in all_forms:
+        if "table-tags" in form.tags:
+            table_num += 1
+            continue
+        if table_num > max_tables:
+            continue
+        if form_is_clean_conjugation(form):
+            result.append(form)
+    return result
+
+
 def extract_one(
     l: LanguageConfig, matcher: FormMatcher, forms: list[Form], entry: Entry
 ) -> str:
@@ -945,6 +970,8 @@ def extract_one(
         assert form.form is not None
         if matcher.matches(form):
             formatted = matcher.format(form)
+            if l.rare_tags and form.tags & set(l.rare_tags):
+                formatted = f"[{formatted}]"
             if formatted in seen:
                 continue
             ret.append(formatted)
@@ -1263,7 +1290,10 @@ def process_entry(config: LanguageConfig, entry: Entry) -> dict[str, Any] | None
     if not any(x.source == "conjugation" for x in entry.forms):
         return None
 
-    filtered_forms = [f for f in entry.forms if form_is_clean_conjugation(f)]
+    if config.max_conj_tables is not None:
+        filtered_forms = filter_forms_by_table(entry.forms, config.max_conj_tables)
+    else:
+        filtered_forms = [f for f in entry.forms if form_is_clean_conjugation(f)]
     if config.code == "el":
         filtered_forms = preprocess_el_forms(filtered_forms)
     try:
