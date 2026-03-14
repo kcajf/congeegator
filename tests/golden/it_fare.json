@@ -1,0 +1,128 @@
+{
+  "name": "fare",
+  "nameNoDiacritics": "fare",
+  "conjugation": [
+    "fàre",
+    "facèndo",
+    "facènte",
+    "fàtto",
+    [
+      "fàccio/fò/fòne/fàzzo",
+      "fài/fàci",
+      "fà/fàce/fàne/fào",
+      "facciàmo/fàmo/facémo",
+      "fàte/facéte",
+      "fànno/fàco"
+    ],
+    [
+      "facévo/fàvo/facéva/facìa",
+      "facévi/fàvi",
+      "facéva/féa/fàva/facìa",
+      "facevàmo/facémio/facévimo/facévamo/facìamo",
+      "facevàte/facévio/facévivo/facévavo/facìavo",
+      "facévano/féano/facéveno/fàvano/facìano"
+    ],
+    [
+      "féci/féi/féce/facéi/facétti/facétte",
+      "facésti/fésti/facéssi/facìssi/fecésti",
+      "féce/fé/féo/facé/facéne/facétte",
+      "facémmo/fémmo/facéssimo/fecéstimo",
+      "facéste/féste/facéssivo/fecéstivo",
+      "fécero/fénno/férono/féciono/féro/féceno/facérno/facétteno/férno"
+    ],
+    [
+      "farò/farrò/faròne/farròne/farràggio/farràio",
+      "farài/farrài",
+      "farà/farrà/faràne/farràne/farrao",
+      "farémo/farrémo",
+      "faréte/farréte",
+      "farànno/faròrno/farrànno/farràco"
+    ],
+    [
+      "ho fàtto",
+      "hai fàtto",
+      "ha fàtto",
+      "abbiamo fàtto",
+      "avete fàtto",
+      "hanno fàtto"
+    ],
+    [
+      "avevo fàtto",
+      "avevi fàtto",
+      "aveva fàtto",
+      "avevamo fàtto",
+      "avevate fàtto",
+      "avevano fàtto"
+    ],
+    [
+      "ebbi fàtto",
+      "avesti fàtto",
+      "ebbe fàtto",
+      "avemmo fàtto",
+      "aveste fàtto",
+      "ebbero fàtto"
+    ],
+    [
+      "avrò fàtto",
+      "avrai fàtto",
+      "avrà fàtto",
+      "avremo fàtto",
+      "avrete fàtto",
+      "avranno fàtto"
+    ],
+    [
+      "farèi/farébbi/farébbe/farìa/fécera",
+      "farésti/faréssi/farìssi/féceri",
+      "farèbbe/farébbe/farìa/fécera",
+      "farémmo/faréssimo/farìamo/farràmo",
+      "faréste/faréssivo/farìavo/farràte",
+      "farèbbero/farébbero/farébbeno/farìeno/fécerano"
+    ],
+    [
+      "avrei fàtto",
+      "avresti fàtto",
+      "avrebbe fàtto",
+      "avremmo fàtto",
+      "avreste fàtto",
+      "avrebbero fàtto"
+    ],
+    [
+      "fàccia/fàcci/fàzza",
+      "fàccia/fàcci/fàzza",
+      "fàccia/fàcci/fàzza",
+      "facciàmo/fàmo/fazzàmo",
+      "facciàte/fàte/fazzàte",
+      "fàcciano/fàccino/fàzzano"
+    ],
+    [
+      "facéssi/féssi",
+      "facéssi/féssi",
+      "facésse/fésse",
+      "facéssimo/féssimo/fecéssimo",
+      "facéste/féste/facéssivo/fecéssivo",
+      "facéssero/féssero/facéssino/fecéssino"
+    ],
+    [
+      "abbia fàtto",
+      "abbia fàtto",
+      "abbia fàtto",
+      "abbiamo fàtto",
+      "abbiate fàtto",
+      "abbiano fàtto"
+    ],
+    [
+      "avessi fàtto",
+      "avessi fàtto",
+      "avesse fàtto",
+      "avessimo fàtto",
+      "aveste fàtto",
+      "avessero fàtto"
+    ],
+    [
+      "fài/fà/fà’",
+      "facciàmo/fàmo/fazzàmo",
+      "fàte/facéte"
+    ]
+  ],
+  "gloss": "to do"
+}

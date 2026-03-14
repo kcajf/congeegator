@@ -73,7 +73,9 @@ export type VerbExternalLink = {
 const WR_LANG_CODES: Record<string, string> = {
 	fr: 'fren',
 	el: 'gren',
-	de: 'deen'
+	de: 'deen',
+	es: 'esen',
+	it: 'iten'
 };
 
 export function getExternalLinks(

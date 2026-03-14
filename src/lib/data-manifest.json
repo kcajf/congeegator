@@ -1,8 +1,8 @@
 {
   "languages": {
     "fr": {
-      "dataHash": "d48f61d4",
-      "dataSize": 24284,
+      "dataHash": "f09a5ad6",
+      "dataSize": 9138451,
       "code": "fr",
       "name": "français",
       "englishWiktionaryName": "French",
@@ -162,8 +162,8 @@
       ]
     },
     "el": {
-      "dataHash": "c3f5dd23",
-      "dataSize": 57247,
+      "dataHash": "7af6af39",
+      "dataSize": 5171925,
       "code": "el",
       "name": "ελληνικά",
       "englishWiktionaryName": "Greek",
@@ -354,8 +354,8 @@
       ]
     },
     "de": {
-      "dataHash": "1729c1ea",
-      "dataSize": 37528,
+      "dataHash": "c043f258",
+      "dataSize": 17551783,
       "code": "de",
       "name": "Deutsch",
       "englishWiktionaryName": "German",
@@ -536,8 +536,8 @@
       ]
     },
     "es": {
-      "dataHash": "61987d3b",
-      "dataSize": 25797,
+      "dataHash": "e6b69e3a",
+      "dataSize": 9786102,
       "code": "es",
       "name": "español",
       "englishWiktionaryName": "Spanish",
@@ -677,6 +677,203 @@
             0,
             1,
             2
+          ]
+        }
+      ]
+    },
+    "it": {
+      "dataHash": "dd7d99f2",
+      "dataSize": 22178904,
+      "code": "it",
+      "name": "italiano",
+      "englishWiktionaryName": "Italian",
+      "tenseNames": [
+        "it_impers_inf",
+        "it_impers_gerund",
+        "it_impers_pres_partic",
+        "it_impers_past_partic",
+        "it_indic_pres",
+        "it_indic_imperf",
+        "it_indic_past_hist",
+        "it_indic_fut",
+        "it_indic_pres_perf",
+        "it_indic_pluperf",
+        "it_indic_past_ant",
+        "it_indic_fut_perf",
+        "it_cond_pres",
+        "it_cond_past",
+        "it_subj_pres",
+        "it_subj_imperf",
+        "it_subj_past",
+        "it_subj_pluperf",
+        "it_imper"
+      ],
+      "tensePronouns": [
+        [],
+        [],
+        [],
+        [],
+        [
+          "io",
+          "tu",
+          "lui/lei",
+          "noi",
+          "voi",
+          "loro"
+        ],
+        [
+          "io",
+          "tu",
+          "lui/lei",
+          "noi",
+          "voi",
+          "loro"
+        ],
+        [
+          "io",
+          "tu",
+          "lui/lei",
+          "noi",
+          "voi",
+          "loro"
+        ],
+        [
+          "io",
+          "tu",
+          "lui/lei",
+          "noi",
+          "voi",
+          "loro"
+        ],
+        [
+          "io",
+          "tu",
+          "lui/lei",
+          "noi",
+          "voi",
+          "loro"
+        ],
+        [
+          "io",
+          "tu",
+          "lui/lei",
+          "noi",
+          "voi",
+          "loro"
+        ],
+        [
+          "io",
+          "tu",
+          "lui/lei",
+          "noi",
+          "voi",
+          "loro"
+        ],
+        [
+          "io",
+          "tu",
+          "lui/lei",
+          "noi",
+          "voi",
+          "loro"
+        ],
+        [
+          "io",
+          "tu",
+          "lui/lei",
+          "noi",
+          "voi",
+          "loro"
+        ],
+        [
+          "io",
+          "tu",
+          "lui/lei",
+          "noi",
+          "voi",
+          "loro"
+        ],
+        [
+          "io",
+          "tu",
+          "lui/lei",
+          "noi",
+          "voi",
+          "loro"
+        ],
+        [
+          "io",
+          "tu",
+          "lui/lei",
+          "noi",
+          "voi",
+          "loro"
+        ],
+        [
+          "io",
+          "tu",
+          "lui/lei",
+          "noi",
+          "voi",
+          "loro"
+        ],
+        [
+          "io",
+          "tu",
+          "lui/lei",
+          "noi",
+          "voi",
+          "loro"
+        ],
+        [
+          "(tu)",
+          "(noi)",
+          "(voi)"
+        ]
+      ],
+      "tenseGroups": [
+        {
+          "name": "it_indic",
+          "tenseIndices": [
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11
+          ]
+        },
+        {
+          "name": "it_subj",
+          "tenseIndices": [
+            14,
+            15,
+            16,
+            17
+          ]
+        },
+        {
+          "name": "it_cond",
+          "tenseIndices": [
+            12,
+            13
+          ]
+        },
+        {
+          "name": "it_imper",
+          "tenseIndices": [
+            18
+          ]
+        },
+        {
+          "name": "it_impers",
+          "tenseIndices": [
+            0,
+            1,
+            2,
+            3
           ]
         }
       ]
