@@ -7,7 +7,7 @@
     "hablado/hablada/hablados/habladas",
     [
       "hablo",
-      "hablas/hablás",
+      "hablas",
       "habla",
       "hablamos",
       "habláis",
@@ -63,7 +63,7 @@
     ],
     [
       "hable",
-      "hables/hablés",
+      "hables",
       "hable",
       "hablemos",
       "habléis",
@@ -78,7 +78,7 @@
       "hablaran/hablasen"
     ],
     [
-      "habla/hablá",
+      "habla",
       "hable",
       "hablemos",
       "hablad",
