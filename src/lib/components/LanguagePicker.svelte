@@ -15,8 +15,7 @@
 
 <div class="picker-container" use:clickOutside={() => (isOpen = false)}>
 	<button class="trigger" onclick={() => (isOpen = !isOpen)}>
-		<span class="mobile-only">{currentLang}</span>
-		<span class="desktop-only">{langName(currentLang)}</span>
+		{langName(currentLang)}
 		<svg class="chevron" class:open={isOpen} width="10" height="6" viewBox="0 0 10 6" fill="none">
 			<path
 				d="M1 1L5 5L9 1"
@@ -44,24 +43,6 @@
 </div>
 
 <style>
-	.mobile-only {
-		display: none;
-	}
-	.desktop-only {
-		display: block;
-	}
-
-	@media (max-width: 768px) {
-		.mobile-only {
-			display: inline-block;
-			width: 1.4em;
-			text-align: center;
-		}
-		.desktop-only {
-			display: none;
-		}
-	}
-
 	.picker-container {
 		position: relative;
 	}
