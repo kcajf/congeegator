@@ -21,8 +21,8 @@
 	<h2>About</h2>
 	<p>Congeegator is a fast, offline, multilingual conjugation app.</p>
 	<p>
-		Type above to search. In non-latin alphabets, you can fuzzily search 'phonetically' (e.g.
-		'eimai' in Greek).
+		Type above to search. You can search for infinitives or conjugated forms. Non-latin alphabets
+		support fuzzy 'phonetic' search (e.g. 'eimai' in Greek).
 	</p>
 
 	{#if !isStandalone}
