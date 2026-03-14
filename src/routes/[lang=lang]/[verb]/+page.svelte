@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/state';
 	import wiktionaryLogoRaw from '$lib/assets/wiktionary_favicon_en.svg?raw';
 	import wordreferenceLogoRaw from '$lib/assets/wordreference_favicon.svg?raw';
@@ -9,7 +10,7 @@
 	import { formatPronoun, getExternalLinks, parseAndFormatForm } from '$lib/langTools';
 	import { searchLangState } from '$lib/searchLang.svelte';
 	import { getTenseWikiLink } from '$lib/tenseWikiLinks';
-	import { onMount, tick } from 'svelte';
+	import { tick } from 'svelte';
 	import type { ConjugationForms } from '$lib/types';
 	import type { PageProps } from './$types';
 
@@ -54,9 +55,13 @@
 	const tensePronouns = $derived(langManifest.tensePronouns);
 	const tenseGroups = $derived(langManifest.tenseGroups);
 
-	// Sync language picker on mount (e.g. direct URL navigation to a different language)
-	onMount(() => {
-		searchLangState.set(data.verb.lang);
+	// Sync search language to match the verb page on navigation (not reactively,
+	// to avoid a feedback loop when the user picks a different language in the picker).
+	// afterNavigate covers both initial mount and client-side navigations.
+	afterNavigate(() => {
+		if (data.verb?.lang) {
+			searchLangState.set(data.verb.lang);
+		}
 	});
 
 	const externalLinks = $derived(
