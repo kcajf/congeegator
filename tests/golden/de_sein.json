@@ -55,7 +55,7 @@
     "gewesen",
     [
       "sei",
-      "seist/seiest",
+      "seist/{seiest}",
       "sei",
       "seien",
       "seiet",
@@ -63,7 +63,7 @@
     ],
     [
       "sei gewesen",
-      "seist gewesen/seiest gewesen",
+      "seist gewesen/{seiest gewesen}",
       "sei gewesen",
       "seien gewesen",
       "seiet gewesen",
@@ -87,18 +87,18 @@
     ],
     [
       "wäre",
-      "wärst/wärest",
+      "wärst/{wärest}",
       "wäre",
       "wären",
-      "wärt/wäret",
+      "wärt/{wäret}",
       "wären"
     ],
     [
       "wäre gewesen",
-      "wärst gewesen/wärest gewesen",
+      "wärst gewesen/{wärest gewesen}",
       "wäre gewesen",
       "wären gewesen",
-      "wärt gewesen/wäret gewesen",
+      "wärt gewesen/{wäret gewesen}",
       "wären gewesen"
     ],
     [
