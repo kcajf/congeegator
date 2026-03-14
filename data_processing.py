@@ -589,10 +589,10 @@ ES_CONFIG = LanguageConfig(
         TenseConfig("es_impers_gerund", FormMatcher(("gerund",))),
         TenseConfig("es_impers_past_partic", FormMatcher(("participle", "past"))),
         # Indicative
-        full_tense("es", "es_indic_pres", ("present", "indicative")),
-        full_tense("es", "es_indic_pret", ("preterite", "indicative")),
-        full_tense("es", "es_indic_imperf", ("imperfect", "indicative")),
-        full_tense("es", "es_indic_fut", ("future", "indicative")),
+        full_tense("es", "es_indic_pres", ("present", "indicative"), exclude_tags=("vos-form",)),
+        full_tense("es", "es_indic_pret", ("preterite", "indicative"), exclude_tags=("vos-form",)),
+        full_tense("es", "es_indic_imperf", ("imperfect", "indicative"), exclude_tags=("vos-form",)),
+        full_tense("es", "es_indic_fut", ("future", "indicative"), exclude_tags=("vos-form",)),
         repeated_tense(
             "es", "es_indic_pres_perf", ("participle", "past", "masculine", "singular"), ES_PRES_INDIC_HABER
         ),
@@ -600,15 +600,15 @@ ES_CONFIG = LanguageConfig(
             "es", "es_indic_pluperf", ("participle", "past", "masculine", "singular"), ES_IMPERF_INDIC_HABER
         ),
         # Conditional
-        full_tense("es", "es_cond_pres", ("conditional",)),
+        full_tense("es", "es_cond_pres", ("conditional",), exclude_tags=("vos-form",)),
         # Subjunctive
-        full_tense("es", "es_subj_pres", ("present", "subjunctive")),
-        full_tense("es", "es_subj_imperf", ("imperfect", "subjunctive")),
+        full_tense("es", "es_subj_pres", ("present", "subjunctive"), exclude_tags=("vos-form",)),
+        full_tense("es", "es_subj_imperf", ("imperfect", "subjunctive"), exclude_tags=("vos-form",)),
         # Imperative (5 forms — no 1st person singular)
         TenseConfig(
             "es_imper",
             (
-                FormMatcher(("second-person", "singular", "imperative"), pronoun="tú"),
+                FormMatcher(("second-person", "singular", "imperative"), pronoun="tú", exclude_tags=("vos-form",)),
                 FormMatcher(("third-person", "singular", "imperative"), pronoun="usted"),
                 FormMatcher(("first-person", "plural", "imperative"), pronoun="nosotros/-as"),
                 FormMatcher(("second-person", "plural", "imperative"), pronoun="vosotros/-as"),
