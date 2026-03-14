@@ -977,12 +977,18 @@ def build_search_index(
     log.info("generating search index")
     searchable_words = defaultdict[str, set[int]](lambda: set())
 
+    GERMAN_AUXILIARY_INFINITIVES = {"haben", "sein"}
+
     def add_to_index(s: str, idx: int):
         if s == "" or s == "-":
             return
         for ss in s.split("/"):
             if ' ' in ss:
-                ss = ss.split(' ')[-1]
+                words = ss.split(' ')
+                if len(words) >= 3 and words[-1] in GERMAN_AUXILIARY_INFINITIVES:
+                    ss = words[-2]
+                else:
+                    ss = words[-1]
             searchable_words[ss].add(idx)
             searchable_words[strip_diacritics(ss)].add(idx)
             if phonetic_fn:
@@ -1002,7 +1008,6 @@ def build_search_index(
                 add_to_index(c, i)
             else:
                 for cc in c:
-                    # TODO; drop auxiliary? or split on word boundaries
                     add_to_index(cc, i)
 
     index = defaultdict[str, set[int]](lambda: set())

@@ -159,6 +159,48 @@ describe('findMatches', () => {
 		expect(results[0]).toEqual({ root: 'avoir', matched: 'mangé', quality: 0, freq: 0 });
 	});
 
+	it('collapses 3-word compound with "haben" to past participle', () => {
+		const verb = makeVerb({
+			name: 'machen',
+			lang: 'de',
+			conjugation: ['werde gemacht haben', 'wirst gemacht haben']
+		});
+		const results = findMatches(verb, 'gemacht', 'gemacht', 'de');
+		expect(results).toHaveLength(1);
+		expect(results[0]).toEqual({ root: 'machen', matched: 'gemacht', quality: 0, freq: 0 });
+	});
+
+	it('collapses 3-word compound with "sein" to past participle', () => {
+		const verb = makeVerb({
+			name: 'gehen',
+			lang: 'de',
+			conjugation: ['werde gegangen sein', 'wirst gegangen sein']
+		});
+		const results = findMatches(verb, 'gegangen', 'gegangen', 'de');
+		expect(results).toHaveLength(1);
+		expect(results[0]).toEqual({ root: 'gehen', matched: 'gegangen', quality: 0, freq: 0 });
+	});
+
+	it('3-word compound does NOT match auxiliary "sein"', () => {
+		const verb = makeVerb({
+			name: 'gehen',
+			lang: 'de',
+			conjugation: ['werde gegangen sein']
+		});
+		const results = findMatches(verb, 'sein', 'sein', 'de');
+		expect(results).toEqual([]);
+	});
+
+	it('2-word compound with "sein" as last word still works', () => {
+		const verb = makeVerb({
+			name: 'sein',
+			lang: 'de',
+			conjugation: ['werde sein']
+		});
+		const results = findMatches(verb, 'sein', 'sein', 'de');
+		expect(results).toContainEqual({ root: 'sein', matched: 'sein', quality: 0, freq: 0 });
+	});
+
 	it('still matches verb name directly when it matches the query', () => {
 		const verb = makeVerb({
 			name: 'biegen',
