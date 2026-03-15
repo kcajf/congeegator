@@ -5,7 +5,6 @@
 	import { dev } from '$app/environment';
 	import appleIcon180 from '$lib/assets/apple-touch-icon-180x180.png';
 	import congeegatorSVG from '$lib/assets/congeegator.svg';
-	import favicon from '$lib/assets/favicon.ico';
 	import LanguagePicker from '$lib/components/LanguagePicker.svelte';
 	import ToastStack from '$lib/components/ToastStack.svelte';
 	import { db } from '$lib/db';
@@ -174,7 +173,7 @@
 	<meta name="svelte-version" content="5" />
 
 	<!-- copied from output of `npm run generate-pwa-assets` -->
-	<link rel="icon" href={favicon} sizes="any" />
+	<link rel="icon" href="/favicon.ico" sizes="any" />
 	<link rel="apple-touch-icon" href={appleIcon180} />
 
 	<meta name="application-name" content={appTitle} />
