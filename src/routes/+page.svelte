@@ -5,13 +5,6 @@
 	import { page } from '$app/stores';
 	import { manifest } from '$lib/dataUtils';
 	import { appTitle, siteUrl } from '$lib/defs';
-
-	const langNames = Object.values(manifest.languages).map((l) => l.englishWiktionaryName);
-	const langList =
-		langNames.length > 1
-			? langNames.slice(0, -1).join(', ') + ', and ' + langNames[langNames.length - 1]
-			: langNames[0];
-	const description = `A fast, offline verb conjugation app. Search and browse conjugation tables for ${langList}.`;
 	import { tenseSettings } from '$lib/i18n.svelte';
 	import { searchLangState } from '$lib/searchLang.svelte';
 
@@ -69,8 +62,8 @@
 		</p>
 	{/if}
 
-	<p>Inspired by <a href="https://ilelleon.com">ilelleon.com</a>.</p>
-	<p>Built by <a href="https://jackfrigaard.com">Jack Frigaard</a>.</p>
+	<p>Heavily inspired by <a href="https://ilelleon.com">ilelleon.com</a>.</p>
+	<p>A vibeproject by <a href="https://jackfrigaard.com">Jack Frigaard</a>.</p>
 </section>
 
 <section>
