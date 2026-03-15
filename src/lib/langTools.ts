@@ -111,9 +111,7 @@ function abbreviateVariantsDetailed(parts: string[]): {
 	if (commonSuffixCount > 0) {
 		suffix =
 			' ' +
-			remainingWordArrays[0]
-				.slice(remainingWordArrays[0].length - commonSuffixCount)
-				.join(' ');
+			remainingWordArrays[0].slice(remainingWordArrays[0].length - commonSuffixCount).join(' ');
 		items = items.map((item) => ({
 			...item,
 			text: item.text.slice(0, item.text.length - suffix.length)
