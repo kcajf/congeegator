@@ -27,8 +27,6 @@
 	import { pwaInfo } from 'virtual:pwa-info';
 	import type { LayoutProps } from './$types';
 
-	const PUBLIC_R2_URL = import.meta.env.VITE_R2_URL;
-
 	async function nukeState() {
 		await db.delete();
 		localStorage.clear();
@@ -185,8 +183,6 @@
 		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 		{@html webManifestLink}
 	{/if}
-
-	<link rel="preconnect" href={PUBLIC_R2_URL} />
 </svelte:head>
 
 <div class="container">
