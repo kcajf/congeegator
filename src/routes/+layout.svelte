@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { beforeNavigate, goto } from '$app/navigation';
+	import { afterNavigate, goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 
 	import { dev } from '$app/environment';
@@ -82,7 +82,7 @@
 	let searchResults = $state<SearchResult[]>([]);
 
 	// Clear search on any navigation (logo click, back button, etc.)
-	beforeNavigate(() => {
+	afterNavigate(() => {
 		searchTerm = '';
 	});
 
