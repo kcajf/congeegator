@@ -32,7 +32,7 @@
 
 	{#if isOpen}
 		<div class="dropdown" transition:slide={{ duration: 100 }}>
-			{#each Object.values(manifest.languages) as lang (lang.code)}
+			{#each Object.values(manifest.languages).toSorted( (a, b) => a.name.localeCompare( b.name, undefined, { sensitivity: 'base' } ) ) as lang (lang.code)}
 				<button
 					class="option"
 					class:active={lang.code === currentLang}
