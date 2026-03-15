@@ -1241,13 +1241,39 @@ def entry_is_clean_verb_root(entry: Entry) -> bool:
 
 
 def extract_gloss(entry: Entry) -> Optional[str]:
-    """Extract the first English gloss from an entry's senses, skipping form_of/alt_of senses."""
-    for sense in entry.senses:
-        if sense.form_of or sense.alt_of:
+    """Extract up to 3 diverse English glosses from an entry's senses.
+
+    Uses glosses[-1] (the specific definition) rather than glosses[0] (often a
+    category header like "As an auxiliary verb:"). Deduplicates by category header
+    to get diverse meanings across sense groups. Appends "..." when more senses exist.
+    """
+    valid_senses = [
+        s for s in entry.senses if not s.form_of and not s.alt_of and s.glosses
+    ]
+    if not valid_senses:
+        return None
+
+    seen_headers: set[str] = set()
+    glosses: list[str] = []
+    for sense in valid_senses:
+        header = sense.glosses[0] if len(sense.glosses) > 1 else ""
+        if header in seen_headers:
             continue
-        if sense.glosses:
-            return sense.glosses[0]
-    return None
+        if header:
+            seen_headers.add(header)
+        gloss = sense.glosses[-1]
+        if gloss not in glosses:
+            glosses.append(gloss)
+        if len(glosses) >= 3:
+            break
+
+    if not glosses:
+        return None
+
+    result = "; ".join(glosses)
+    if len(valid_senses) > len(glosses):
+        result += "; ..."
+    return result
 
 
 def fr_is_aspirated(entry: Entry) -> bool:
