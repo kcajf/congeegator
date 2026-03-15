@@ -256,6 +256,10 @@
 		color: #858585;
 	}
 
+	.tenseTable td:nth-child(2) {
+		white-space: nowrap;
+	}
+
 	.tenseTable td {
 		padding-left: 0;
 		padding-right: 0;
@@ -278,9 +282,8 @@
 	}
 
 	.tenseGroup {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
-		max-width: calc(3 * 16rem + 2 * 1rem);
+		display: flex;
+		flex-wrap: wrap;
 		gap: 1rem;
 	}
 
@@ -288,7 +291,7 @@
 		display: flex;
 		align-items: baseline;
 		gap: 0.5rem;
-		grid-column: 1 / -1;
+		width: 100%;
 	}
 
 	.tense-inline + .tense-inline {
