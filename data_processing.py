@@ -351,6 +351,7 @@ class LanguageConfig(msgspec.Struct, frozen=True):
     phonetic_fn: Callable[[str], str] | None = None
     max_conj_tables: int | None = None  # When set, only use forms from the first N conjugation tables
     rare_tags: tuple[str, ...] = ()  # Forms with these Wiktionary tags get wrapped in [] markers
+    exclude_tags: tuple[str, ...] = ()  # Forms with any of these Wiktionary tags are excluded entirely
 
 
 def full_tense(
@@ -520,6 +521,8 @@ EL_CONFIG = LanguageConfig(
         TenseGroup("el_impers", re.compile(r"^el_impers_")),
     ],
     phonetic_fn=to_phonetic_el,
+    exclude_tags=("dated", "archaic"),
+    rare_tags=("rare",),
 )
 
 
@@ -1015,6 +1018,8 @@ def extract_one(
             continue
         assert form.form is not None
         if matcher.matches(form):
+            if l.exclude_tags and form.tags & set(l.exclude_tags):
+                continue
             formatted = matcher.format(form)
             if l.rare_tags and form.tags & set(l.rare_tags):
                 formatted = f"[{formatted}]"
