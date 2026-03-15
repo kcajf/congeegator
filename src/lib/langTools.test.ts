@@ -48,6 +48,26 @@ describe('formatForm', () => {
 	it('abbreviates non-additive Greek 2-form normally', () => {
 		expect(formatForm('γεννάω/γεννώ')).toBe('γεννάω/-ώ');
 	});
+
+	it('factors out suffix in German compound tenses (bin/habe)', () => {
+		expect(formatForm('bin gehumpelt/habe gehumpelt')).toBe('bin/habe gehumpelt');
+	});
+
+	it('factors out suffix in German compound tenses (war/hatte)', () => {
+		expect(formatForm('war gehumpelt/hatte gehumpelt')).toBe('war/hatte gehumpelt');
+	});
+
+	it('factors out suffix in German 3-way compound tense', () => {
+		expect(formatForm('seist gehumpelt/seiest gehumpelt/habest gehumpelt')).toBe(
+			'seist/seiest/habest gehumpelt'
+		);
+	});
+
+	it('factors prefix not suffix in German Future II (werde gehumpelt sein/haben)', () => {
+		expect(formatForm('werde gehumpelt sein/werde gehumpelt haben')).toBe(
+			'werde gehumpelt sein/haben'
+		);
+	});
 });
 
 describe('parseAndFormatForm', () => {
@@ -116,8 +136,9 @@ describe('parseAndFormatForm', () => {
 	it('handles German volle Endung in compound forms', () => {
 		const result = parseAndFormatForm('seist gegangen/{seiest gegangen}');
 		expect(result).toEqual([
-			{ text: 'seist gegangen', markers: [] },
-			{ text: 'seiest gegangen', markers: ['formal'], separator: '/' }
+			{ text: 'seist', markers: [] },
+			{ text: 'seiest', markers: ['formal'], separator: '/' },
+			{ text: ' gegangen', markers: [] }
 		]);
 	});
 
@@ -136,6 +157,15 @@ describe('parseAndFormatForm', () => {
 			{ text: '-άν', markers: [], separator: '/' },
 			{ text: '-ούν', markers: [], separator: '/' },
 			{ text: '(ε)', markers: ['rare'] }
+		]);
+	});
+
+	it('factors suffix with markers in German compound tense', () => {
+		const result = parseAndFormatForm('seist abgeartet/{seiest abgeartet}');
+		expect(result).toEqual([
+			{ text: 'seist', markers: [] },
+			{ text: 'seiest', markers: ['formal'], separator: '/' },
+			{ text: ' abgeartet', markers: [] }
 		]);
 	});
 });
