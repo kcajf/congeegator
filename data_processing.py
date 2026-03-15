@@ -1253,6 +1253,8 @@ def extract_gloss(entry: Entry) -> Optional[str]:
     if not valid_senses:
         return None
 
+    # Deduplicate by category header (glosses[0]) to pick one sense per group,
+    # e.g. one from "As an auxiliary verb:", one from "As a copulative verb:", etc.
     seen_headers: set[str] = set()
     glosses: list[str] = []
     for sense in valid_senses:
@@ -1261,7 +1263,15 @@ def extract_gloss(entry: Entry) -> Optional[str]:
             continue
         if header:
             seen_headers.add(header)
-        gloss = sense.glosses[-1]
+        # Use glosses[-1] — the specific definition, not glosses[0] which is
+        # often a category header like "As an auxiliary verb:"
+        gloss = sense.glosses[-1][0].lower() + sense.glosses[-1][1:]
+        # Strip parenthetical clarifications for brevity
+        gloss = re.sub(r"\s*\(.*?\)", "", gloss).strip()
+        # Take first clause only — Wiktionary glosses can contain semicolons
+        gloss = gloss.split(";")[0].strip()
+        # Normalise trailing punctuation
+        gloss = gloss.rstrip(".")
         if gloss not in glosses:
             glosses.append(gloss)
         if len(glosses) >= 3:
