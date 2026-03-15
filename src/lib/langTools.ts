@@ -65,9 +65,14 @@ interface AbbrevItem {
 	mergedSourceIndex?: number;
 }
 
-function abbreviateVariantsDetailed(parts: string[]): { prefix: string; items: AbbrevItem[] } {
-	if (parts.length === 0) return { prefix: '', items: [] };
-	if (parts.length === 1) return { prefix: '', items: [{ text: parts[0], sourceIndex: 0 }] };
+function abbreviateVariantsDetailed(parts: string[]): {
+	prefix: string;
+	suffix: string;
+	items: AbbrevItem[];
+} {
+	if (parts.length === 0) return { prefix: '', suffix: '', items: [] };
+	if (parts.length === 1)
+		return { prefix: '', suffix: '', items: [{ text: parts[0], sourceIndex: 0 }] };
 
 	// Factor out common whole-word prefix across ALL parts
 	const wordArrays = parts.map((p) => p.split(' '));
@@ -87,6 +92,30 @@ function abbreviateVariantsDetailed(parts: string[]): { prefix: string; items: A
 	if (commonWordCount > 0) {
 		prefix = wordArrays[0].slice(0, commonWordCount).join(' ') + ' ';
 		items = items.map((item) => ({ ...item, text: item.text.slice(prefix.length) }));
+	}
+
+	// Factor out common whole-word suffix across ALL parts (after prefix removal)
+	let suffix = '';
+	const remainingWordArrays = items.map((item) => item.text.split(' '));
+	let commonSuffixCount = 0;
+	outerSuffix: while (true) {
+		const idx = remainingWordArrays[0].length - 1 - commonSuffixCount;
+		if (idx < 1) break; // must leave ≥1 word
+		const word = remainingWordArrays[0][idx];
+		for (let i = 1; i < remainingWordArrays.length; i++) {
+			const oi = remainingWordArrays[i].length - 1 - commonSuffixCount;
+			if (oi < 1 || remainingWordArrays[i][oi] !== word) break outerSuffix;
+		}
+		commonSuffixCount++;
+	}
+	if (commonSuffixCount > 0) {
+		suffix =
+			' ' +
+			remainingWordArrays[0].slice(remainingWordArrays[0].length - commonSuffixCount).join(' ');
+		items = items.map((item) => ({
+			...item,
+			text: item.text.slice(0, item.text.length - suffix.length)
+		}));
 	}
 
 	// Phase 1: Merge adjacent additive pairs
@@ -123,13 +152,18 @@ function abbreviateVariantsDetailed(parts: string[]): { prefix: string; items: A
 		}
 	}
 
-	return { prefix, items };
+	return { prefix, suffix, items };
 }
 
-export function abbreviateVariants(parts: string[]): { prefix: string; parts: string[] } {
-	const { prefix, items } = abbreviateVariantsDetailed(parts);
+export function abbreviateVariants(parts: string[]): {
+	prefix: string;
+	suffix: string;
+	parts: string[];
+} {
+	const { prefix, suffix, items } = abbreviateVariantsDetailed(parts);
 	return {
 		prefix,
+		suffix,
 		parts: items.map((item) => item.text + (item.additiveSuffix ? `(${item.additiveSuffix})` : ''))
 	};
 }
@@ -137,7 +171,7 @@ export function abbreviateVariants(parts: string[]): { prefix: string; parts: st
 export function formatForm(form: string): string {
 	const parts = form.split('/');
 	if (parts.length <= 1) return form;
-	const { prefix, parts: abbrevParts } = abbreviateVariants(parts);
+	const { prefix, suffix, parts: abbrevParts } = abbreviateVariants(parts);
 	let result = prefix + abbrevParts[0];
 	for (let i = 1; i < abbrevParts.length; i++) {
 		if (abbrevParts[i].startsWith('(')) {
@@ -146,7 +180,7 @@ export function formatForm(form: string): string {
 			result += '/' + abbrevParts[i];
 		}
 	}
-	return result;
+	return result + suffix;
 }
 
 export function parseAndFormatForm(raw: string): FormSegment[] {
@@ -187,7 +221,7 @@ export function parseAndFormatForm(raw: string): FormSegment[] {
 
 	// Build full text per slash-group and abbreviate (detailed)
 	const groupTexts = slashGroups.map((g) => g.map((i) => tokens[i].text).join(' - '));
-	const { prefix, items } = abbreviateVariantsDetailed(groupTexts);
+	const { prefix, suffix, items } = abbreviateVariantsDetailed(groupTexts);
 
 	// Map items back to segments
 	const segments: FormSegment[] = [];
@@ -224,6 +258,11 @@ export function parseAndFormatForm(raw: string): FormSegment[] {
 				markers: tokens[mergedGroup[0]].markers
 			});
 		}
+	}
+
+	// Append suffix as a final segment with no markers
+	if (suffix) {
+		segments.push({ text: suffix, markers: [] });
 	}
 
 	return segments;
