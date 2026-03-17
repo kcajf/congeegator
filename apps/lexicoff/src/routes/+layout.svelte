@@ -18,6 +18,7 @@
 		type SearchResult
 	} from '$lib/search';
 	import { searchLangState } from '$lib/searchLang.svelte';
+	import { globalSync } from '$lib/syncManager.svelte';
 	import { toasts } from '$lib/toasts.svelte';
 	import type { DictRecord } from '$lib/types';
 	import { onMount, tick } from 'svelte';
@@ -242,7 +243,13 @@
 			</ul>
 		{:else if searchTerm.trim().length >= 1}
 			{#if !searchLangState.indexData}
-				<div class="no-results">Loading...</div>
+				<div class="no-results">
+					{#if globalSync.map[searchLangState.lang]?.status === 'ready'}
+						Loading...
+					{:else}
+						Download a language from the homepage to search
+					{/if}
+				</div>
 			{:else}
 				<div class="no-results">No matches found</div>
 			{/if}

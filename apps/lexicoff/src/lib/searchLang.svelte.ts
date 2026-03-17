@@ -1,7 +1,6 @@
 import { browser } from '$app/environment';
 import { db } from './db';
 import { manifest } from './dataUtils';
-import { triggerLangSync } from './syncManager.svelte';
 import type { SearchIndex } from './types';
 
 export const defaultLang = 'fr';
@@ -33,7 +32,6 @@ class SearchLangState {
 		if (browser) {
 			localStorage.setItem('searchLang', this.lang);
 			this.reloadIndex();
-			triggerLangSync(this.lang);
 		}
 	}
 
