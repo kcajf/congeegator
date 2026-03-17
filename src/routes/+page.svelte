@@ -6,6 +6,8 @@
 	import { manifest } from '$lib/dataUtils';
 	import { appTitle, siteUrl } from '$lib/defs';
 	import { tenseSettings } from '$lib/i18n.svelte';
+	import { searchLangState } from '$lib/searchLang.svelte';
+	import { storageEstimate } from '$lib/storageEstimate.svelte';
 
 	const langNames = Object.values(manifest.languages).map((l) => l.englishWiktionaryName);
 	const langList =
@@ -13,7 +15,6 @@
 			? langNames.slice(0, -1).join(', ') + ', and ' + langNames[langNames.length - 1]
 			: langNames[0];
 	const description = `A fast, offline verb conjugation app. Search and browse conjugation tables for ${langList}.`;
-	import { searchLangState } from '$lib/searchLang.svelte';
 
 	$effect(() => {
 		if (!browser) return;
@@ -85,6 +86,10 @@
 	</label>
 </section>
 
+{#if storageEstimate.formatted}
+	<p class="storage-info">{storageEstimate.formatted}</p>
+{/if}
+
 <style>
 	section {
 		margin-bottom: 2rem;
@@ -120,5 +125,11 @@
 
 	a:hover {
 		color: #3a6347;
+	}
+
+	.storage-info {
+		margin-top: 1rem;
+		font-size: 0.85rem;
+		color: #888;
 	}
 </style>
