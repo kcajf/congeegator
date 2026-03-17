@@ -2,6 +2,7 @@ import { browser } from '$app/environment';
 import { langName } from './dataUtils';
 import { db } from './db';
 import { searchLangState } from './searchLang.svelte';
+import { storageEstimate } from './storageEstimate.svelte';
 import { toasts } from './toasts.svelte';
 
 let worker: Worker | undefined;
@@ -63,6 +64,7 @@ if (browser) {
 				}
 				delete syncToastCreatedAt[lang];
 				searchLangState.reloadIndex(lang);
+				storageEstimate.refresh();
 			};
 
 			const elapsed = Date.now() - (syncToastCreatedAt[lang] ?? 0);

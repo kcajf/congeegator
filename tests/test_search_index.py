@@ -13,6 +13,7 @@ from data_processing import (
     EL_CONFIG,
     ES_CONFIG,
     FR_CONFIG,
+    build_gloss_index,
     build_search_index,
     to_phonetic_el,
 )
@@ -197,3 +198,55 @@ class TestIndexTruncation:
             index, _ = _build_index_for_lang(lang)
             for prefix, ids in index.items():
                 assert len(ids) <= 200, f"{lang} prefix '{prefix}' has {len(ids)} entries"
+
+
+# -- Gloss index -------------------------------------------------------------
+
+
+def _build_gloss_index_for_lang(lang: str) -> tuple[dict[str, list[int]], list[str]]:
+    """Process fixture verbs and build a gloss index. Returns (index, verb_names)."""
+    config = CONFIGS[lang]
+    entries = load_fixture_entries(lang)
+    verbs = []
+    for verb_name in FIXTURE_VERBS[lang]:
+        result = process_entry(config, entries[verb_name])
+        assert result is not None
+        verbs.append(result)
+    verbs.sort(key=lambda x: x["nameNoDiacritics"])
+    index = build_gloss_index(verbs)
+    verb_names = [v["name"] for v in verbs]
+    return index, verb_names
+
+
+class TestGlossIndex:
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        self.index, self.names = _build_gloss_index_for_lang("fr")
+
+    def test_content_word_indexed(self):
+        """'manger' (gloss: 'to eat') should be findable via 'eat'."""
+        idx = _idx(self.names, "manger")
+        assert idx in self.index.get("eat", [])
+
+    def test_stop_words_excluded(self):
+        """Common stop words should not appear as keys."""
+        assert "the" not in self.index
+        assert "and" not in self.index
+        assert "for" not in self.index
+        assert "something" not in self.index
+
+    def test_short_words_excluded(self):
+        """Words shorter than 3 chars should not be indexed."""
+        for key in self.index:
+            assert len(key) >= 3, f"Gloss index contains short key '{key}'"
+
+    def test_entries_capped(self):
+        """No gloss index entry should exceed 200 IDs."""
+        for word, ids in self.index.items():
+            assert len(ids) <= 200, f"Gloss word '{word}' has {len(ids)} entries"
+
+    def test_whole_word_keys(self):
+        """Keys should be whole words, not prefixes."""
+        # 'eat' should be a key but partial prefixes of it should not
+        assert "eat" in self.index
+        assert "ea" not in self.index

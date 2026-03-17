@@ -25,20 +25,20 @@ export async function loadSingleVerb(
 
 	// 2. Fetch from Network (SSR or Cache Miss)
 	// This works on both Server (Cloudflare Worker) and Browser
-	const url = `${getLangDataUrl(lang)}/verbs/${verb.toLowerCase()}.json`;
-	// console.log(`Fetching ${url}`)
+	const verbLower = verb.toLowerCase();
+	const url = `${getLangDataUrl(lang)}/chunks/${verbLower[0]}.json`;
 	const response = await fetcher(url);
 
-	if (response.status == 404) {
-		// TODO: just redirect?
+	if (!response.ok) {
 		error(404, { message: `Verb ${verb} not found` });
 	}
 
-	if (!response.ok) {
-		throw new Error(`Verb ${verb} not found`);
+	const chunk = await response.json();
+	const raw = chunk[verbLower];
+	if (!raw) {
+		error(404, { message: `Verb ${verb} not found` });
 	}
 
-	const raw = await response.json();
 	return { ...raw, lang } as VerbRecord;
 }
 

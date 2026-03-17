@@ -7,13 +7,14 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
       - uses: prefix-dev/setup-pixi@v0.8.1
         with:
           pixi-version: v0.46.0
+          cache: true
 
       - uses: actions/setup-node@v4
         with:
@@ -23,9 +24,8 @@ jobs:
       - run: npm ci
 
       - name: Install rclone
-        run: sudo apt-get install -y -qq rclone
+        run: curl -fsS https://downloads.rclone.org/rclone-current-linux-amd64.zip -o /tmp/rclone.zip && unzip -qj /tmp/rclone.zip '*/rclone' -d /usr/local/bin/
 
-      # Configure rclone for R2 upload
       - name: Configure rclone
         run: |
           rclone config create r2-congeegator s3 \

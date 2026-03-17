@@ -40,7 +40,7 @@ def log_timing(label: str):
 
 # Timestamp version of pinned source data in R2.
 # Update by running: pixi run pin-source-data
-SOURCE_DATA_VERSION = "2026-03-14T175626Z"
+SOURCE_DATA_VERSION = "2026-03-16T074135Z"
 
 
 class CacheManager:
@@ -1135,14 +1135,17 @@ def write_language_data(data: dict[str, Any], lang_dir: str, pretty: bool = Fals
         f.write(_orjson_dump(data, pretty))
     log.info(f"Wrote {out_path}")
 
-    # single verbs file
-    single_verbs_dir = os.path.join(lang_dir, "verbs")
-    os.makedirs(single_verbs_dir)
+    # chunked verb files (grouped by first letter, lowercased)
+    chunks_dir = os.path.join(lang_dir, "chunks")
+    os.makedirs(chunks_dir)
+    chunks: dict[str, dict[str, Any]] = {}
     for verb_data in data["verbs"]:
-        with open(
-            os.path.join(single_verbs_dir, f"{verb_data['name']}.json"), "wb"
-        ) as f:
-            f.write(_orjson_dump(verb_data, pretty))
+        key = verb_data["name"].lower()
+        letter = key[0]
+        chunks.setdefault(letter, {})[key] = verb_data
+    for letter, chunk_data in chunks.items():
+        with open(os.path.join(chunks_dir, f"{letter}.json"), "wb") as f:
+            f.write(_orjson_dump(chunk_data, pretty))
 
     # index file
     with open(os.path.join(lang_dir, "index.json"), "wb") as f:
@@ -1264,12 +1267,37 @@ def entry_is_clean_verb_root(entry: Entry) -> bool:
     return True
 
 
+_JUNK_GLOSS_PREFIXES = (
+    "used to form",
+    "used for forming",
+    "used as a",
+    "used as an",
+    "used with",
+    "forms composite",
+    "forms the",
+    "synonym of",
+    "alternative form of",
+    "compound of",
+    "see the full list",
+    "post-1990",
+)
+
+
+def _is_junk_gloss(gloss: str) -> bool:
+    """Return True if a gloss is a meta-description rather than a definition."""
+    lower = gloss.lower()
+    return any(lower.startswith(p) for p in _JUNK_GLOSS_PREFIXES)
+
+
 def extract_gloss(entry: Entry) -> Optional[str]:
     """Extract up to 3 diverse English glosses from an entry's senses.
 
     Uses glosses[-1] (the specific definition) rather than glosses[0] (often a
     category header like "As an auxiliary verb:"). Deduplicates by category header
     to get diverse meanings across sense groups. Appends "..." when more senses exist.
+
+    Filters out meta-glosses (grammar notes, "synonym of", etc.) and strips
+    bracketed context ([with dative 'to someone']) from definitions.
     """
     valid_senses = [
         s for s in entry.senses if not s.form_of and not s.alt_of and s.glosses
@@ -1290,13 +1318,18 @@ def extract_gloss(entry: Entry) -> Optional[str]:
         # Use glosses[-1] — the specific definition, not glosses[0] which is
         # often a category header like "As an auxiliary verb:"
         gloss = sense.glosses[-1][0].lower() + sense.glosses[-1][1:]
+        # Skip meta-glosses (grammar notes, "synonym of", etc.)
+        if _is_junk_gloss(gloss):
+            continue
         # Strip parenthetical clarifications for brevity
         gloss = re.sub(r"\s*\(.*?\)", "", gloss).strip()
+        # Strip bracketed context (grammar notes like [with dative 'to someone'])
+        gloss = re.sub(r"\s*\[.*?\]", "", gloss).strip()
         # Take first clause only — Wiktionary glosses can contain semicolons
         gloss = gloss.split(";")[0].strip()
         # Normalise trailing punctuation
         gloss = gloss.rstrip(".")
-        if gloss not in glosses:
+        if gloss and gloss not in glosses:
             glosses.append(gloss)
         if len(glosses) >= 3:
             break
@@ -1383,6 +1416,93 @@ def build_search_index(
 
     log.info(f"Longest index entry: '{max_key}', {max_hits} hits")
 
+    return ret
+
+
+# Stop words for gloss search index: standard English function words (3+ chars)
+# plus gloss-specific noise words that appear in many definitions.
+GLOSS_STOP_WORDS = frozenset(
+    {
+        # Standard English function words (3+ chars)
+        "the",
+        "and",
+        "for",
+        "not",
+        "out",
+        "off",
+        "has",
+        "are",
+        "was",
+        "but",
+        "can",
+        "may",
+        "all",
+        "any",
+        "its",
+        "also",
+        "been",
+        "into",
+        "from",
+        "with",
+        "that",
+        "this",
+        "than",
+        "when",
+        "very",
+        "more",
+        "most",
+        "such",
+        "other",
+        # Gloss-specific noise
+        "something",
+        "someone",
+        "oneself",
+        "one's",
+        "etc",
+        "e.g",
+        "e.g.",
+        "especially",
+        "synonym",
+        "spelling",
+        "chiefly",
+        "usually",
+        "often",
+        "sometimes",
+    }
+)
+
+MIN_GLOSS_WORD_LENGTH = 3
+
+
+def build_gloss_index(verbs: list[dict[str, Any]]) -> dict[str, list[int]]:
+    """Build a whole-word index mapping English gloss words to verb IDs.
+
+    Unlike the main search index which uses prefix expansion (1-4 char keys),
+    this index uses whole words as keys. This keeps the index small and avoids
+    low-quality partial matches on common English words.
+    """
+    log.info("generating gloss index")
+    word_to_ids: defaultdict[str, set[int]] = defaultdict(set)
+
+    for i, v in enumerate(verbs):
+        gloss = v.get("gloss", "")
+        if not gloss:
+            continue
+        for clause in gloss.split("; "):
+            if clause == "...":
+                continue
+            if _is_junk_gloss(clause):
+                continue
+            # Strip bracketed context
+            clause = re.sub(r"\s*\[.*?\]", "", clause)
+            for token in re.split(r"[\s,;]+", clause.lower()):
+                word = token.strip("().[]'\"")
+                if len(word) >= MIN_GLOSS_WORD_LENGTH and word not in GLOSS_STOP_WORDS:
+                    word_to_ids[word].add(i)
+
+    MAX_PREFIX_IDS = 200
+    ret = {k: sorted(v)[:MAX_PREFIX_IDS] for k, v in word_to_ids.items()}
+    log.info(f"Gloss index: {len(ret)} unique words")
     return ret
 
 
@@ -1476,9 +1596,13 @@ def generate_data_for_lang(wiki_lang: str, lang: LanguageConfig, dev: bool):
     with log_timing(f"{lang.code} search index"):
         search_index = build_search_index(verbs, phonetic_fn=lang.phonetic_fn)
 
+    with log_timing(f"{lang.code} gloss index"):
+        gloss_index = build_gloss_index(verbs)
+
     return {
         "verbs": verbs,
         "searchIndex": search_index,
+        "glossIndex": gloss_index,
     }
 
 

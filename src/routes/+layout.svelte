@@ -11,7 +11,9 @@
 	import { appTitle, myPurple } from '$lib/defs';
 	import { tenseSettings } from '$lib/i18n.svelte';
 	import {
+		findGlossMatch,
 		findMatches,
+		glossLookup,
 		MAX_PREFIX_IDS,
 		MAX_SEARCH_RESULTS,
 		prefixLookup,
@@ -46,7 +48,7 @@
 			const updateSW = registerSW({
 				immediate: true,
 				onRegisteredSW(_url: string, registration: ServiceWorkerRegistration | undefined) {
-					const TAP_TO_UPDATE = 'New app version available. Tap here to reload.';
+					const TAP_TO_UPDATE = 'New app version available. Tap to reload.';
 					if (registration?.waiting) {
 						toasts.add(TAP_TO_UPDATE, {
 							dismissAfter: 0,
@@ -119,6 +121,7 @@
 
 	$effect(() => {
 		const index = searchLangState.indexData;
+		const glossIndex = searchLangState.glossIndexData;
 
 		const currentLang = searchLangState.lang;
 		const requireExactWord = /\S\s+$/.test(searchTerm);
@@ -131,14 +134,22 @@
 		}
 
 		const allPrefixIds = prefixLookup(index, currentQuery);
+		const prefixIds = allPrefixIds.slice(0, MAX_PREFIX_IDS);
 
-		if (allPrefixIds.length == 0) {
+		// Gloss lookup: whole-word match, only for 3+ char queries
+		const glossIds =
+			glossIndex && originalQuery.length >= 3 ? glossLookup(glossIndex, originalQuery) : [];
+		const glossIdSet = new Set(glossIds);
+
+		// Merge IDs, deduplicating
+		const allIds = [...new Set([...prefixIds, ...glossIds])];
+
+		if (allIds.length === 0) {
 			searchResults = [];
 			return;
 		}
 
-		const prefixIds = allPrefixIds.slice(0, MAX_PREFIX_IDS);
-		const dbKeys = prefixIds.map((id) => [currentLang, id]);
+		const dbKeys = allIds.map((id) => [currentLang, id]);
 
 		db.verbs
 			.bulkGet(dbKeys)
@@ -150,11 +161,20 @@
 				)
 					return;
 
-				searchResults = data
-					.filter((v): v is VerbRecord => !!v)
-					.flatMap((v) =>
-						findMatches(v, originalQuery, currentQuery, currentLang, requireExactWord)
-					)
+				const verbs = data.filter((v): v is VerbRecord => !!v);
+
+				const nativeResults = verbs.flatMap((v) =>
+					findMatches(v, originalQuery, currentQuery, currentLang, requireExactWord)
+				);
+
+				// Gloss results: only for verbs from gloss lookup, deduplicated against native results
+				const nativeRoots = new Set(nativeResults.map((r) => r.root));
+				const glossResults = verbs
+					.filter((v) => glossIdSet.has(v.id) && !nativeRoots.has(v.name))
+					.map((v) => findGlossMatch(v, originalQuery))
+					.filter((r): r is SearchResult => r !== null);
+
+				searchResults = [...nativeResults, ...glossResults]
 					.sort(
 						(a, b) =>
 							a.quality - b.quality || b.freq - a.freq || a.matched.length - b.matched.length
@@ -223,8 +243,13 @@
 							onmousedown={(e) => e.preventDefault()}
 							class="result-link"
 						>
-							{item.matched}
-							{item.root != item.matched ? `(${item.root})` : ' '}
+							{#if item.quality === 3}
+								{item.root}
+								<span class="gloss-hint">{item.matched}</span>
+							{:else}
+								{item.matched}
+								{item.root != item.matched ? `(${item.root})` : ' '}
+							{/if}
 						</a>
 					</li>
 				{/each}
@@ -359,6 +384,12 @@
 	.result-link:focus {
 		background-color: #f5f5f5;
 		outline: none;
+	}
+
+	.gloss-hint {
+		font-style: italic;
+		color: #858585;
+		font-size: 0.85em;
 	}
 
 	.nuke-btn {

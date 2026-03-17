@@ -107,7 +107,7 @@
 		right: 0;
 		background: #f2efef;
 		padding: 0.15rem 0.4rem 0.4rem;
-		z-index: 100;
+		z-index: 1100;
 		max-height: 300px;
 		overflow-y: auto;
 	}
