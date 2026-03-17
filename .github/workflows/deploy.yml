@@ -29,10 +29,9 @@ jobs:
             lexicoff:
               - 'apps/lexicoff/**'
 
-  # Generate data — only if pipeline code changed (or manual dispatch)
+  # Generate data — always runs to ensure manifest is correct
   generate:
     needs: changes
-    if: needs.changes.outputs.pipeline == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -96,11 +95,7 @@ jobs:
   # Deploy Congeegator — if app or pipeline changed
   deploy-congeegator:
     needs: [changes, generate]
-    if: |
-      always() &&
-      needs.changes.result == 'success' &&
-      (needs.generate.result == 'success' || needs.generate.result == 'skipped') &&
-      (needs.changes.outputs.congeegator == 'true' || needs.changes.outputs.pipeline == 'true')
+    if: needs.changes.outputs.congeegator == 'true' || needs.changes.outputs.pipeline == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -113,11 +108,9 @@ jobs:
           cache-dependency-path: apps/congeegator/package-lock.json
 
       - name: Remove stale manifest
-        if: needs.generate.result == 'success'
         run: rm apps/congeegator/src/lib/data-manifest.json
 
       - name: Download fresh manifest
-        if: needs.generate.result == 'success'
         uses: actions/download-artifact@v4
         with:
           name: data-manifests
@@ -140,11 +133,7 @@ jobs:
   # Deploy Lexicoff — if app or pipeline changed
   deploy-lexicoff:
     needs: [changes, generate]
-    if: |
-      always() &&
-      needs.changes.result == 'success' &&
-      (needs.generate.result == 'success' || needs.generate.result == 'skipped') &&
-      (needs.changes.outputs.lexicoff == 'true' || needs.changes.outputs.pipeline == 'true')
+    if: needs.changes.outputs.lexicoff == 'true' || needs.changes.outputs.pipeline == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
