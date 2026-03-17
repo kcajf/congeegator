@@ -95,7 +95,7 @@
 {#if storageEstimate.formatted}
 	<p class="storage-info">
 		{storageEstimate.formatted}
-		&middot; <button class="link-btn" onclick={clearCache}>clear cache</button>
+		&middot; <button class="link-btn" onclick={clearCache}>clear storage</button>
 	</p>
 {/if}
 
