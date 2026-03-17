@@ -3,11 +3,29 @@
 	import { slide } from 'svelte/transition';
 	import { langName, manifest } from '$lib/dataUtils';
 	import { searchLangState } from '$lib/searchLang.svelte';
+	import { globalSync } from '$lib/syncManager.svelte';
 
 	let { onSelect }: { onSelect?: () => void } = $props();
 
 	let currentLang = $derived(searchLangState.lang);
 	let isOpen = $state(false);
+
+	const installedLangs = $derived(
+		Object.values(manifest.languages)
+			.filter((lang) => globalSync.map[lang.code]?.status === 'ready')
+			.toSorted((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }))
+	);
+
+	const hasInstalled = $derived(installedLangs.length > 0);
+
+	// Auto-select first installed language if current selection is no longer installed
+	$effect(() => {
+		if (!globalSync.initialized) return;
+		const currentInstalled = globalSync.map[currentLang]?.status === 'ready';
+		if (!currentInstalled && installedLangs.length > 0) {
+			searchLangState.set(installedLangs[0].code);
+		}
+	});
 
 	function select(newLang: string) {
 		searchLangState.set(newLang);
@@ -16,34 +34,36 @@
 	}
 </script>
 
-<div class="picker-container" use:clickOutside={() => (isOpen = false)}>
-	<button class="trigger" onclick={() => (isOpen = !isOpen)}>
-		{langName(currentLang)}
-		<svg class="chevron" class:open={isOpen} width="10" height="6" viewBox="0 0 10 6" fill="none">
-			<path
-				d="M1 1L5 5L9 1"
-				stroke="currentColor"
-				stroke-width="1.5"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-			/>
-		</svg>
-	</button>
+{#if hasInstalled}
+	<div class="picker-container" use:clickOutside={() => (isOpen = false)}>
+		<button class="trigger" onclick={() => (isOpen = !isOpen)}>
+			{langName(currentLang)}
+			<svg class="chevron" class:open={isOpen} width="10" height="6" viewBox="0 0 10 6" fill="none">
+				<path
+					d="M1 1L5 5L9 1"
+					stroke="currentColor"
+					stroke-width="1.5"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				/>
+			</svg>
+		</button>
 
-	{#if isOpen}
-		<div class="dropdown" transition:slide={{ duration: 100 }}>
-			{#each Object.values(manifest.languages).toSorted( (a, b) => a.name.localeCompare( b.name, undefined, { sensitivity: 'base' } ) ) as lang (lang.code)}
-				<button
-					class="option"
-					class:active={lang.code === currentLang}
-					onclick={() => select(lang.code)}
-				>
-					{lang.name}
-				</button>
-			{/each}
-		</div>
-	{/if}
-</div>
+		{#if isOpen}
+			<div class="dropdown" transition:slide={{ duration: 100 }}>
+				{#each installedLangs as lang (lang.code)}
+					<button
+						class="option"
+						class:active={lang.code === currentLang}
+						onclick={() => select(lang.code)}
+					>
+						{lang.name}
+					</button>
+				{/each}
+			</div>
+		{/if}
+	</div>
+{/if}
 
 <style>
 	.picker-container {

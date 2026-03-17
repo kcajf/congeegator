@@ -1,16 +1,19 @@
 import { browser } from '$app/environment';
-import { langName } from './dataUtils';
 import { db } from './db';
 import { searchLangState } from './searchLang.svelte';
 import { storageEstimate } from './storageEstimate.svelte';
-import { toasts } from './toasts.svelte';
 
 let worker: Worker | undefined;
 let workerReady: Promise<void> | undefined;
 
-const syncToastIds: Record<string, string> = {};
-const syncToastCreatedAt: Record<string, number> = {};
-const MIN_TOAST_MS = 800;
+export interface LangSyncInfo {
+	hash: string;
+	status: 'downloading' | 'installing' | 'ready' | 'error';
+	receivedBytes?: number;
+	totalBytes?: number;
+	percent?: number | null;
+	errorMessage?: string;
+}
 
 if (browser) {
 	worker = new Worker(new URL('./sync.worker.ts', import.meta.url), {
@@ -27,49 +30,34 @@ if (browser) {
 	});
 
 	worker.onmessage = (e) => {
-		const { type, lang, error, phase, percent } = e.data;
+		const { type, lang, error, phase, percent, receivedBytes, totalBytes } = e.data;
 		if (type === 'READY') return;
-		const name = langName(lang);
 
 		if (type === 'PROGRESS') {
-			const isUpdate = !!globalSync.map[lang];
-			const verb = phase === 'installing' ? 'Installing' : isUpdate ? 'Updating' : 'Downloading';
-			const pctStr = percent != null ? ` ${percent}%` : '';
-			const message = `${verb} ${name}${pctStr}`;
-			const showEllipsis = percent == null;
-
-			if (!syncToastIds[lang]) {
-				syncToastIds[lang] = toasts.add(message, {
-					dismissAfter: 0,
-					showEllipsis
-				});
-				syncToastCreatedAt[lang] = Date.now();
-			} else {
-				toasts.update(syncToastIds[lang], message, {
-					dismissAfter: 0,
-					showEllipsis
-				});
-			}
+			const existing = globalSync.map[lang];
+			globalSync.map[lang] = {
+				hash: existing?.hash ?? '',
+				status: phase === 'installing' ? 'installing' : 'downloading',
+				receivedBytes,
+				totalBytes,
+				percent
+			};
 		}
 
 		if (type === 'COMPLETE') {
-			const id = syncToastIds[lang];
-			const showReady = () => {
-				if (id) {
-					toasts.update(id, `${name} ready for offline`);
-					delete syncToastIds[lang];
-				}
-				delete syncToastCreatedAt[lang];
-				searchLangState.reloadIndex(lang);
-				storageEstimate.refresh();
+			const existing = globalSync.map[lang];
+			globalSync.map[lang] = {
+				hash: existing?.hash ?? '',
+				status: 'ready'
 			};
-
-			const elapsed = Date.now() - (syncToastCreatedAt[lang] ?? 0);
-			if (elapsed < MIN_TOAST_MS) {
-				setTimeout(showReady, MIN_TOAST_MS - elapsed);
-			} else {
-				showReady();
-			}
+			// Re-read hash from DB to get the actual stored hash
+			db.metadata.get(lang).then((meta) => {
+				if (meta) {
+					globalSync.map[lang] = { hash: meta.hash, status: 'ready' };
+				}
+			});
+			searchLangState.reloadIndex(lang);
+			storageEstimate.refresh();
 		}
 
 		if (type === 'SKIPPED') {
@@ -78,15 +66,23 @@ if (browser) {
 
 		if (type === 'ERROR') {
 			console.error(`${lang} sync error:`, error);
-			const reason = error === 'offline' ? ': offline' : '';
-			const message = `Failed to sync ${name}${reason}`;
-			const id = syncToastIds[lang];
-			if (id) {
-				toasts.update(id, message, { dismissAfter: 6000 });
-				delete syncToastIds[lang];
-			} else {
-				toasts.add(message, { dismissAfter: 6000 });
+			const existing = globalSync.map[lang];
+			if (existing?.status === 'ready') {
+				// Keep existing ready state on error (e.g. offline update attempt)
+				return;
 			}
+			globalSync.map[lang] = {
+				hash: existing?.hash ?? '',
+				status: 'error',
+				errorMessage: error === 'offline' ? 'Offline' : (error ?? 'Unknown error')
+			};
+		}
+
+		if (type === 'DELETED') {
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			const { [lang]: _, ...rest } = globalSync.map;
+			globalSync.map = rest;
+			storageEstimate.refresh();
 		}
 	};
 }
@@ -101,9 +97,13 @@ export async function triggerLangSync(lang: string) {
 	worker.postMessage({ lang });
 }
 
-interface LangSyncInfo {
-	hash: string;
-	status: 'idle' | 'syncing' | 'ready';
+export async function deleteLang(lang: string) {
+	if (!worker || !workerReady) {
+		console.warn('Worker not initialized. Are you on the server?');
+		return;
+	}
+	await workerReady;
+	worker.postMessage({ lang, type: 'delete' });
 }
 
 class GlobalSyncRegistry {
@@ -129,10 +129,6 @@ class GlobalSyncRegistry {
 
 		this.map = initialMap;
 		this.initialized = true;
-	}
-
-	update(lang: string, hash: string, status: LangSyncInfo['status']) {
-		this.map[lang] = { hash, status };
 	}
 }
 

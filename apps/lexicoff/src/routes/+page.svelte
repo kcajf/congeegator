@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { appTitle, siteUrl } from '$lib/defs';
-	import { manifest } from '$lib/dataUtils';
+	import DownloadManager from '$lib/components/DownloadManager.svelte';
 </script>
 
 <svelte:head>
@@ -16,14 +16,7 @@
 	<h1>{appTitle}</h1>
 	<p class="tagline">Free offline dictionary powered by Wiktionary</p>
 
-	<div class="languages">
-		<h2>Languages</h2>
-		<ul>
-			{#each Object.values(manifest.languages) as lang (lang.code)}
-				<li>{lang.name} ({lang.englishWiktionaryName})</li>
-			{/each}
-		</ul>
-	</div>
+	<DownloadManager />
 
 	<div class="about">
 		<h2>About</h2>
@@ -54,20 +47,6 @@
 		color: var(--text-muted);
 		margin: 0 0 2rem;
 		font-size: 0.95rem;
-	}
-
-	h2 {
-		font-size: 1.1rem;
-		margin: 1.5rem 0 0.5rem;
-	}
-
-	ul {
-		padding-left: 1.2rem;
-		margin: 0;
-	}
-
-	li {
-		padding: 0.15rem 0;
 	}
 
 	.about p {

@@ -4,8 +4,25 @@ import type { DictRecord } from './types';
 
 self.postMessage({ type: 'READY' });
 
-self.onmessage = async (e: MessageEvent<{ lang: string }>) => {
-	const { lang } = e.data;
+self.onmessage = async (e: MessageEvent<{ lang: string; type?: string }>) => {
+	const { lang, type: msgType } = e.data;
+
+	if (msgType === 'delete') {
+		try {
+			await db.transaction('rw', [db.entries, db.metadata], async () => {
+				await db.entries.where({ lang }).delete();
+				await db.metadata.delete(lang);
+			});
+			self.postMessage({ type: 'DELETED', lang });
+		} catch (error) {
+			self.postMessage({
+				type: 'ERROR',
+				lang,
+				error: error instanceof Error ? error.message : String(error)
+			});
+		}
+		return;
+	}
 
 	async function doSync() {
 		console.log(`starting to syncLanguage ${lang}`);
@@ -34,30 +51,44 @@ self.onmessage = async (e: MessageEvent<{ lang: string }>) => {
 				const url = `${getLangDataUrl(lang)}/data.json`;
 				const response = await fetch(url);
 				const totalBytes = remote.dataSize ?? null;
-				let receivedBytes = 0;
-				const chunks: Uint8Array[] = [];
-				const reader = response.body!.getReader();
-				let lastPercent: number | null = -1;
 
-				while (true) {
-					const { done, value } = await reader.read();
-					if (done) break;
-					chunks.push(value);
-					receivedBytes += value.length;
-					const percent = totalBytes ? Math.round((receivedBytes / totalBytes) * 100) : null;
-					if (percent !== lastPercent) {
-						self.postMessage({ type: 'PROGRESS', lang, phase: 'downloading', percent });
-						lastPercent = percent;
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				let raw: any;
+				if (response.body) {
+					let receivedBytes = 0;
+					const chunks: Uint8Array[] = [];
+					const reader = response.body.getReader();
+					let lastPercent: number | null = -1;
+
+					while (true) {
+						const { done, value } = await reader.read();
+						if (done) break;
+						chunks.push(value);
+						receivedBytes += value.length;
+						const percent = totalBytes ? Math.round((receivedBytes / totalBytes) * 100) : null;
+						if (percent !== lastPercent) {
+							self.postMessage({
+								type: 'PROGRESS',
+								lang,
+								phase: 'downloading',
+								percent,
+								receivedBytes,
+								totalBytes
+							});
+							lastPercent = percent;
+						}
 					}
-				}
 
-				const fullArray = new Uint8Array(receivedBytes);
-				let offset = 0;
-				for (const chunk of chunks) {
-					fullArray.set(chunk, offset);
-					offset += chunk.length;
+					const fullArray = new Uint8Array(receivedBytes);
+					let offset = 0;
+					for (const chunk of chunks) {
+						fullArray.set(chunk, offset);
+						offset += chunk.length;
+					}
+					raw = JSON.parse(new TextDecoder().decode(fullArray));
+				} else {
+					raw = await response.json();
 				}
-				const raw = JSON.parse(new TextDecoder().decode(fullArray));
 
 				const records: DictRecord[] = raw['entries'].map(
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
