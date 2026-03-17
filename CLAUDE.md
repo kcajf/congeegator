@@ -148,8 +148,11 @@ Generated into `apps/*/static/`. Large sitemaps (>40K URLs) are automatically sp
 ### CI/Deploy Flow
 
 - **PR CI:** `ci-congeegator.yml` and `ci-lexicoff.yml` with path filters on `apps/<app>/**` and `pipeline/**`. Runs lint, typecheck, build, pipeline golden tests, manifest metadata check.
-- **Merge to main:** `deploy-congeegator.yml` and `deploy-lexicoff.yml` each generate data (pipeline runs in both — to be optimized), upload to R2, build, and deploy.
-- **Manual deploy:** `npm run deploy:prod` from the app directory.
+- **Deploy (`deploy.yml`):** Single workflow with path-based conditional jobs:
+  - `changes` job detects what changed (`pipeline/**`, `apps/congeegator/**`, `apps/lexicoff/**`)
+  - `generate` job runs the pipeline once — **only if pipeline code changed** (or manual dispatch). Uploads data to R2 and passes manifests as artifacts.
+  - `deploy-congeegator` / `deploy-lexicoff` jobs run in parallel if their app or the pipeline changed. UI-only changes skip generation entirely (~30s deploy).
+- **Manual deploy:** `workflow_dispatch` on `deploy.yml` runs everything (generate + both deploys). Or `npm run deploy:prod` from app directory for local deploy.
 - **Pin source data:** Monthly cron (`pin-source-data.yml`). Downloads latest data, updates `SOURCE_DATA_VERSION`, regenerates output, opens PR.
 
 ### Manifest Metadata Check
