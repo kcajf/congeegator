@@ -19,8 +19,8 @@
 		"r2-cleanup:prod": "rclone delete r2-congeegator:congeegator/data/v1/ --min-age 90d --fast-list --stats-one-line --s3-no-check-bucket --transfers 512 --checkers 512 --progress",
 		"r2-upload:staging": "rclone copy r2_data r2-congeegator:congeegator-dev --transfers 512 --checkers 512 --s3-no-check-bucket --fast-list --stats-one-line --stats=5s --size-only --progress",
 		"r2-upload:prod": "rclone copy r2_data r2-congeegator:congeegator --transfers 512 --checkers 512 --s3-no-check-bucket  --fast-list --stats-one-line --stats=5s --size-only --progress",
-		"deploy:staging": "pixi run python data_processing.py && npm run r2-upload:staging && npm run build:staging && npx wrangler deploy --env=staging",
-		"deploy:prod": "pixi run python data_processing.py && npm run r2-upload:prod && npm run build:prod && npx wrangler deploy --env=production",
+		"deploy:staging": "cd ../.. && pixi run generate && cd apps/congeegator && npm run r2-upload:staging && npm run build:staging && npx wrangler deploy --env=staging",
+		"deploy:prod": "cd ../.. && pixi run generate && cd apps/congeegator && npm run r2-upload:prod && npm run build:prod && npx wrangler deploy --env=production",
 		"wrangler-dev": "npm run build && npx wrangler dev --remote",
 		"test": "vitest run",
 		"test:watch": "vitest"

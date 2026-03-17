@@ -1,11 +1,6 @@
-import os
-import sys
-
 import pytest
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-
-from data_processing import to_phonetic_el
+from pipeline.utils import to_phonetic_el
 
 
 @pytest.mark.parametrize(
