@@ -25,7 +25,7 @@ def write_language_data(data: dict[str, Any], lang_dir: str, entries_key: str = 
     chunks: dict[str, dict[str, Any]] = {}
     for entry_data in data[entries_key]:
         key = entry_data[name_key].lower()
-        letter = key[0] if key else "_"
+        letter = key[0] if key and key[0].isalnum() else "_"
         chunks.setdefault(letter, {})[key] = entry_data
     for letter, chunk_data in chunks.items():
         with open(os.path.join(chunks_dir, f"{letter}.json"), "wb") as f:
