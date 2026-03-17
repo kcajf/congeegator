@@ -40,7 +40,7 @@ def log_timing(label: str):
 
 # Timestamp version of pinned source data in R2.
 # Update by running: pixi run pin-source-data
-SOURCE_DATA_VERSION = "2026-03-14T175626Z"
+SOURCE_DATA_VERSION = "2026-03-16T074135Z"
 
 
 class CacheManager:
