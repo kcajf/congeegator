@@ -10,13 +10,23 @@ from .utils import _orjson_dump
 log = logging.getLogger(__name__)
 
 
-def write_language_data(data: dict[str, Any], lang_dir: str, entries_key: str = "verbs", name_key: str = "name", pretty: bool = False):
+def write_language_data(data: dict[str, Any], lang_dir: str, entries_key: str = "verbs", name_key: str = "name", pretty: bool = False, ndjson: bool = False):
     os.makedirs(lang_dir, exist_ok=True)
 
     # full data file
-    out_path = os.path.join(lang_dir, "data.json")
-    with open(out_path, "wb") as f:
-        f.write(_orjson_dump(data, pretty))
+    if ndjson:
+        out_path = os.path.join(lang_dir, "data.ndjson")
+        header = {k: v for k, v in data.items() if k != entries_key}
+        lines = [_orjson_dump(header)]
+        for entry in data[entries_key]:
+            lines.append(_orjson_dump(entry))
+        raw_bytes = b"\n".join(lines)
+        with open(out_path, "wb") as f:
+            f.write(raw_bytes)
+    else:
+        out_path = os.path.join(lang_dir, "data.json")
+        with open(out_path, "wb") as f:
+            f.write(_orjson_dump(data, pretty))
     log.info(f"Wrote {out_path}")
 
     # chunked files (grouped by first letter, lowercased)
@@ -47,10 +57,11 @@ def write_data_manifest(
     configs: list,
     make_metadata: Callable,
     manifest_path: str,
+    data_filename: str = "data.json",
 ):
     language_hashes = {}
     for config in configs:
-        data_path = os.path.join(data_dir, config.code, "data.json")
+        data_path = os.path.join(data_dir, config.code, data_filename)
         if not os.path.exists(data_path):
             continue
 
