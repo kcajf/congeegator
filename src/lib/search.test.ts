@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
+	findGlossMatch,
 	findMatches,
+	glossLookup,
 	includesWholeWord,
 	prefixLookup,
 	stripDiacritics,
@@ -393,5 +395,59 @@ describe('findMatches with requireExactWord', () => {
 		const verb = makeVerb({ name: 'êtreindre' });
 		const results = findMatches(verb, 'etre', 'etre', 'fr', true);
 		expect(results).toEqual([]);
+	});
+});
+
+describe('glossLookup', () => {
+	it('returns IDs for exact word match', () => {
+		const index: SearchIndex = new Map([['eat', [0, 5]]]);
+		expect(glossLookup(index, 'eat')).toEqual([0, 5]);
+	});
+
+	it('returns [] when no match', () => {
+		const index: SearchIndex = new Map([['eat', [0]]]);
+		expect(glossLookup(index, 'ea')).toEqual([]);
+	});
+
+	it('returns [] for empty index', () => {
+		const index: SearchIndex = new Map();
+		expect(glossLookup(index, 'eat')).toEqual([]);
+	});
+});
+
+describe('findGlossMatch', () => {
+	it('matches whole word in gloss', () => {
+		const verb = makeVerb({ name: 'manger', gloss: 'to eat' });
+		expect(findGlossMatch(verb, 'eat')).toEqual({
+			root: 'manger',
+			matched: 'to eat',
+			quality: 3,
+			freq: 0
+		});
+	});
+
+	it('returns null when gloss does not contain query as whole word', () => {
+		const verb = makeVerb({ name: 'battre', gloss: 'to beat' });
+		expect(findGlossMatch(verb, 'eat')).toBeNull();
+	});
+
+	it('returns null when verb has no gloss', () => {
+		const verb = makeVerb({ name: 'manger' });
+		expect(findGlossMatch(verb, 'eat')).toBeNull();
+	});
+
+	it('matches case-insensitively', () => {
+		const verb = makeVerb({ name: 'manger', gloss: 'to Eat' });
+		expect(findGlossMatch(verb, 'eat')).not.toBeNull();
+	});
+
+	it('matches word in multi-sense gloss', () => {
+		const verb = makeVerb({ name: 'avoir', gloss: 'to have; to possess; ...' });
+		expect(findGlossMatch(verb, 'possess')).toEqual({
+			root: 'avoir',
+			matched: 'to have; to possess; ...',
+			quality: 3,
+			freq: 0
+		});
 	});
 });

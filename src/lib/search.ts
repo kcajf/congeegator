@@ -6,7 +6,7 @@ export const MAX_SEARCH_RESULTS = 50;
 export type SearchResult = {
 	root: string;
 	matched: string;
-	quality: number; // 0 = exact, 1 = diacritics-stripped, 2 = phonetic
+	quality: number; // 0 = exact, 1 = diacritics-stripped, 2 = phonetic, 3 = gloss
 	freq: number;
 };
 
@@ -205,4 +205,19 @@ export function findMatches(
 	}
 
 	return [...seen.values()];
+}
+
+export function glossLookup(glossIndex: SearchIndex, query: string): Id[] {
+	return glossIndex.get(query) ?? [];
+}
+
+export function findGlossMatch(verb: VerbRecord, glossQuery: string): SearchResult | null {
+	if (!verb.gloss) return null;
+	if (!includesWholeWord(verb.gloss.toLowerCase(), glossQuery)) return null;
+	return {
+		root: verb.name,
+		matched: verb.gloss,
+		quality: 3,
+		freq: verb.freq
+	};
 }
