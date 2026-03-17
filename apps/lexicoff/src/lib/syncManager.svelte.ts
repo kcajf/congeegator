@@ -8,7 +8,7 @@ let workerReady: Promise<void> | undefined;
 
 export interface LangSyncInfo {
 	hash: string;
-	status: 'downloading' | 'installing' | 'ready' | 'error';
+	status: 'syncing' | 'ready' | 'error';
 	receivedBytes?: number;
 	totalBytes?: number;
 	percent?: number | null;
@@ -30,14 +30,14 @@ if (browser) {
 	});
 
 	worker.onmessage = (e) => {
-		const { type, lang, error, phase, percent, receivedBytes, totalBytes } = e.data;
+		const { type, lang, error, percent, receivedBytes, totalBytes } = e.data;
 		if (type === 'READY') return;
 
 		if (type === 'PROGRESS') {
 			const existing = globalSync.map[lang];
 			globalSync.map[lang] = {
 				hash: existing?.hash ?? '',
-				status: phase === 'installing' ? 'installing' : 'downloading',
+				status: 'syncing',
 				receivedBytes,
 				totalBytes,
 				percent
