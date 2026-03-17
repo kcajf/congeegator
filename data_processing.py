@@ -1135,14 +1135,17 @@ def write_language_data(data: dict[str, Any], lang_dir: str, pretty: bool = Fals
         f.write(_orjson_dump(data, pretty))
     log.info(f"Wrote {out_path}")
 
-    # single verbs file
-    single_verbs_dir = os.path.join(lang_dir, "verbs")
-    os.makedirs(single_verbs_dir)
+    # chunked verb files (grouped by first letter, lowercased)
+    chunks_dir = os.path.join(lang_dir, "chunks")
+    os.makedirs(chunks_dir)
+    chunks: dict[str, dict[str, Any]] = {}
     for verb_data in data["verbs"]:
-        with open(
-            os.path.join(single_verbs_dir, f"{verb_data['name']}.json"), "wb"
-        ) as f:
-            f.write(_orjson_dump(verb_data, pretty))
+        key = verb_data["name"].lower()
+        letter = key[0]
+        chunks.setdefault(letter, {})[key] = verb_data
+    for letter, chunk_data in chunks.items():
+        with open(os.path.join(chunks_dir, f"{letter}.json"), "wb") as f:
+            f.write(_orjson_dump(chunk_data, pretty))
 
     # index file
     with open(os.path.join(lang_dir, "index.json"), "wb") as f:
