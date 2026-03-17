@@ -71,67 +71,52 @@ self.onmessage = async (e: MessageEvent<{ lang: string; type?: string }>) => {
 				// Delete old entries before streaming new ones
 				await db.entries.where({ lang }).delete();
 
-				// Byte counter transform — inline in the pipeline, no tee()
-				let receivedBytes = 0;
-				let lastPercent: number | null = -1;
-				const byteCounter = new TransformStream({
-					transform(chunk: Uint8Array, controller) {
-						receivedBytes += chunk.length;
-						const percent = totalBytes ? Math.round((receivedBytes / totalBytes) * 100) : null;
-						if (percent !== lastPercent) {
-							self.postMessage({
-								type: 'PROGRESS',
-								lang,
-								receivedBytes,
-								totalBytes,
-								percent
-							});
-							lastPercent = percent;
-						}
-						controller.enqueue(chunk);
-					}
-				});
-
-				// Line splitter transform
-				let buf = '';
-				const lineSplitter = new TransformStream<string, string>({
-					transform(chunk, controller) {
-						buf += chunk;
-						const lines = buf.split('\n');
-						buf = lines.pop()!;
-						for (const line of lines) {
-							if (line) controller.enqueue(line);
-						}
-					},
-					flush(controller) {
-						if (buf) controller.enqueue(buf);
-					}
-				});
-
-				const lineReader = ndjsonResponse.body
-					.pipeThrough(byteCounter)
-					.pipeThrough(new TextDecoderStream())
-					.pipeThrough(lineSplitter)
-					.getReader();
-
-				// Stream entries and batch insert
+				// Read chunks, decode, split lines, batch insert — all in one loop.
+				// No TransformStream pipeline: one await per network chunk, not per line.
+				const reader = ndjsonResponse.body.getReader();
+				const decoder = new TextDecoder();
 				const BATCH_SIZE = 5000;
 				let batch: DictRecord[] = [];
 				let id = 0;
+				let receivedBytes = 0;
+				let lastPercent: number | null = -1;
+				let partial = '';
 
-				while (true) {
-					const { done, value } = await lineReader.read();
+				for (;;) {
+					const { done, value } = await reader.read();
 					if (done) break;
 
-					batch.push({ ...JSON.parse(value), id: id++, lang });
+					receivedBytes += value.length;
+					const percent = totalBytes ? Math.round((receivedBytes / totalBytes) * 100) : null;
+					if (percent !== lastPercent) {
+						self.postMessage({
+							type: 'PROGRESS',
+							lang,
+							receivedBytes,
+							totalBytes,
+							percent
+						});
+						lastPercent = percent;
+					}
 
-					if (batch.length >= BATCH_SIZE) {
-						await db.entries.bulkPut(batch);
-						batch = [];
+					const text = partial + decoder.decode(value, { stream: true });
+					const lines = text.split('\n');
+					partial = lines.pop()!;
+
+					for (const line of lines) {
+						if (!line) continue;
+						batch.push({ ...JSON.parse(line), id: id++, lang });
+						if (batch.length >= BATCH_SIZE) {
+							await db.entries.bulkPut(batch);
+							batch = [];
+						}
 					}
 				}
 
-				// Flush remaining
+				// Handle final partial line
+				if (partial) {
+					batch.push({ ...JSON.parse(partial), id: id++, lang });
+				}
 				if (batch.length > 0) {
 					await db.entries.bulkPut(batch);
 				}
