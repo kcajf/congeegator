@@ -207,13 +207,10 @@ export function findMatches(
 	return [...seen.values()];
 }
 
-export function glossLookup(glossIndex: SearchIndex, query: string): Id[] {
-	return glossIndex.get(query) ?? [];
-}
-
 export function findGlossMatch(verb: VerbRecord, glossQuery: string): SearchResult | null {
 	if (!verb.gloss) return null;
-	if (!includesWholeWord(verb.gloss.toLowerCase(), glossQuery)) return null;
+	const escaped = glossQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	if (!new RegExp(`(?<!\\p{L})${escaped}`, 'u').test(verb.gloss.toLowerCase())) return null;
 	return {
 		root: verb.name,
 		matched: verb.gloss,

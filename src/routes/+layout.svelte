@@ -13,7 +13,6 @@
 	import {
 		findGlossMatch,
 		findMatches,
-		glossLookup,
 		MAX_PREFIX_IDS,
 		MAX_SEARCH_RESULTS,
 		prefixLookup,
@@ -121,7 +120,6 @@
 
 	$effect(() => {
 		const index = searchLangState.indexData;
-		const glossIndex = searchLangState.glossIndexData;
 
 		const currentLang = searchLangState.lang;
 		const requireExactWord = /\S\s+$/.test(searchTerm);
@@ -136,20 +134,12 @@
 		const allPrefixIds = prefixLookup(index, currentQuery);
 		const prefixIds = allPrefixIds.slice(0, MAX_PREFIX_IDS);
 
-		// Gloss lookup: whole-word match, only for 3+ char queries
-		const glossIds =
-			glossIndex && originalQuery.length >= 3 ? glossLookup(glossIndex, originalQuery) : [];
-		const glossIdSet = new Set(glossIds);
-
-		// Merge IDs, deduplicating
-		const allIds = [...new Set([...prefixIds, ...glossIds])];
-
-		if (allIds.length === 0) {
+		if (prefixIds.length === 0) {
 			searchResults = [];
 			return;
 		}
 
-		const dbKeys = allIds.map((id) => [currentLang, id]);
+		const dbKeys = prefixIds.map((id) => [currentLang, id]);
 
 		db.verbs
 			.bulkGet(dbKeys)
@@ -167,12 +157,15 @@
 					findMatches(v, originalQuery, currentQuery, currentLang, requireExactWord)
 				);
 
-				// Gloss results: only for verbs from gloss lookup, deduplicated against native results
+				// Gloss results: for candidates without a native match, check gloss (3+ char queries)
 				const nativeRoots = new Set(nativeResults.map((r) => r.root));
-				const glossResults = verbs
-					.filter((v) => glossIdSet.has(v.id) && !nativeRoots.has(v.name))
-					.map((v) => findGlossMatch(v, originalQuery))
-					.filter((r): r is SearchResult => r !== null);
+				const glossResults =
+					originalQuery.length >= 3
+						? verbs
+								.filter((v) => !nativeRoots.has(v.name))
+								.map((v) => findGlossMatch(v, originalQuery))
+								.filter((r): r is SearchResult => r !== null)
+						: [];
 
 				searchResults = [...nativeResults, ...glossResults]
 					.sort(

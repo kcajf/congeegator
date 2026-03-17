@@ -17,7 +17,6 @@ class SearchLangState {
 	lang = $state(getInitialLang());
 
 	indexData = $state.raw<SearchIndex | undefined>(undefined);
-	glossIndexData = $state.raw<SearchIndex | undefined>(undefined);
 
 	constructor() {
 		this.onChanged();
@@ -48,7 +47,6 @@ class SearchLangState {
 		// On sync reload, keep old index visible until new one is ready.
 		if (!completedLang) {
 			this.indexData = undefined;
-			this.glossIndexData = undefined;
 		}
 
 		db.metadata
@@ -56,9 +54,6 @@ class SearchLangState {
 			.then((data) => {
 				if (this.lang === lang && data?.searchIndex) {
 					this.indexData = new Map(Object.entries(data.searchIndex));
-					this.glossIndexData = data.glossIndex
-						? new Map(Object.entries(data.glossIndex))
-						: undefined;
 				}
 			})
 			.catch((err) => {
