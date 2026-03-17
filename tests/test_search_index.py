@@ -245,8 +245,15 @@ class TestGlossIndex:
         for word, ids in self.index.items():
             assert len(ids) <= 200, f"Gloss word '{word}' has {len(ids)} entries"
 
-    def test_whole_word_keys(self):
-        """Keys should be whole words, not prefixes."""
-        # 'eat' should be a key but partial prefixes of it should not
+    def test_prefix_keys(self):
+        """Gloss words are expanded into prefix keys (3-6 chars)."""
+        # 'eat' (3 chars) produces a single prefix key 'eat'
         assert "eat" in self.index
+        # 'ea' is below MIN_GLOSS_PREFIX (3) so should not be a key
         assert "ea" not in self.index
+        # Longer gloss words produce multiple prefix keys (3-6 chars each)
+        # 'attend' from 'aller' gloss should produce 'att', 'atte', 'atten', 'attend'
+        assert "att" in self.index
+        assert "atte" in self.index
+        assert "atten" in self.index
+        assert "attend" in self.index

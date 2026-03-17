@@ -399,14 +399,22 @@ describe('findMatches with requireExactWord', () => {
 });
 
 describe('glossLookup', () => {
-	it('returns IDs for exact word match', () => {
+	it('returns IDs for exact prefix key match', () => {
 		const index: SearchIndex = new Map([['eat', [0, 5]]]);
 		expect(glossLookup(index, 'eat')).toEqual([0, 5]);
 	});
 
-	it('returns [] when no match', () => {
+	it('falls back to shorter prefix key', () => {
+		const index: SearchIndex = new Map([
+			['eat', [0, 5]],
+			['eati', [0]]
+		]);
+		expect(glossLookup(index, 'eating')).toEqual([0]);
+	});
+
+	it('returns [] when no prefix matches', () => {
 		const index: SearchIndex = new Map([['eat', [0]]]);
-		expect(glossLookup(index, 'ea')).toEqual([]);
+		expect(glossLookup(index, 'xyz')).toEqual([]);
 	});
 
 	it('returns [] for empty index', () => {
@@ -426,9 +434,24 @@ describe('findGlossMatch', () => {
 		});
 	});
 
-	it('returns null when gloss does not contain query as whole word', () => {
+	it('matches word-start prefix in gloss', () => {
+		const verb = makeVerb({ name: 'manger', gloss: 'to eat' });
+		expect(findGlossMatch(verb, 'ea')).toEqual({
+			root: 'manger',
+			matched: 'to eat',
+			quality: 3,
+			freq: 0
+		});
+	});
+
+	it('does not match prefix inside another word', () => {
 		const verb = makeVerb({ name: 'battre', gloss: 'to beat' });
 		expect(findGlossMatch(verb, 'eat')).toBeNull();
+	});
+
+	it('does not match prefix mid-word', () => {
+		const verb = makeVerb({ name: 'battre', gloss: 'to beat' });
+		expect(findGlossMatch(verb, 'ea')).toBeNull();
 	});
 
 	it('returns null when verb has no gloss', () => {
@@ -449,5 +472,10 @@ describe('findGlossMatch', () => {
 			quality: 3,
 			freq: 0
 		});
+	});
+
+	it('matches prefix of word in multi-sense gloss', () => {
+		const verb = makeVerb({ name: 'avoir', gloss: 'to have; to possess; ...' });
+		expect(findGlossMatch(verb, 'poss')).not.toBeNull();
 	});
 });

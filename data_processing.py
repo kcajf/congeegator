@@ -1505,9 +1505,18 @@ def build_gloss_index(verbs: list[dict[str, Any]]) -> dict[str, list[int]]:
                 if len(word) >= MIN_GLOSS_WORD_LENGTH and word not in GLOSS_STOP_WORDS:
                     word_to_ids[word].add(i)
 
+    MIN_GLOSS_PREFIX = 3
+    MAX_GLOSS_PREFIX = 6
     MAX_PREFIX_IDS = 200
-    ret = {k: sorted(v)[:MAX_PREFIX_IDS] for k, v in word_to_ids.items()}
-    log.info(f"Gloss index: {len(ret)} unique words")
+
+    index: defaultdict[str, set[int]] = defaultdict(set)
+    for word, ids in word_to_ids.items():
+        for prefix_len in range(MIN_GLOSS_PREFIX, MAX_GLOSS_PREFIX + 1):
+            prefix = word[:prefix_len].lower()
+            index[prefix].update(ids)
+
+    ret = {k: sorted(v)[:MAX_PREFIX_IDS] for k, v in index.items()}
+    log.info(f"Gloss index: {len(ret)} unique prefix keys")
     return ret
 
 
