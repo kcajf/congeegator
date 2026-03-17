@@ -1,5 +1,6 @@
 import { getLangDataUrl, manifest } from './dataUtils';
 import { db } from './db';
+import { maybeDecompress } from './decompress';
 import type { VerbRecord } from './types';
 
 self.postMessage({ type: 'READY' });
@@ -53,13 +54,16 @@ self.onmessage = async (e: MessageEvent<{ lang: string }>) => {
 					}
 				}
 
-				const fullArray = new Uint8Array(receivedBytes);
+				const compressed = new Uint8Array(receivedBytes);
 				let offset = 0;
 				for (const chunk of chunks) {
-					fullArray.set(chunk, offset);
+					compressed.set(chunk, offset);
 					offset += chunk.length;
 				}
-				const raw = JSON.parse(new TextDecoder().decode(fullArray));
+				// maybeDecompress handles browsers that don't support Content-Encoding: zstd
+				// (e.g. Safari) by detecting zstd magic bytes and decompressing manually.
+				// On Chrome/Firefox the browser already decompressed, so this is a no-op.
+				const raw = JSON.parse(new TextDecoder().decode(maybeDecompress(compressed)));
 
 				const records: VerbRecord[] = raw['verbs'].map(
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any

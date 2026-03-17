@@ -50,6 +50,7 @@
 		"vitest": "^4.1.0"
 	},
 	"dependencies": {
-		"dexie": "^4.2.1"
+		"dexie": "^4.2.1",
+		"fzstd": "^0.0.9"
 	}
 }

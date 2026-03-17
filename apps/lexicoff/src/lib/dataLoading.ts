@@ -2,6 +2,7 @@ import { browser } from '$app/environment';
 import { error } from '@sveltejs/kit';
 import Dexie from 'dexie';
 import { db } from './db';
+import { fetchJson } from './decompress';
 import type { DictRecord } from './types';
 import { getLangDataUrl, manifest } from './dataUtils';
 
@@ -30,13 +31,16 @@ export async function loadWord(
 
 	// 2. Fetch from Network (SSR or Cache Miss)
 	const url = `${getLangDataUrl(lang)}/chunks/${wordLower[0]}.json`;
-	const response = await fetcher(url);
 
-	if (!response.ok) {
-		error(404, { message: `Word "${word}" not found` });
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	let chunk: any;
+	try {
+		chunk = await fetchJson(url, fetcher);
+	} catch (e: unknown) {
+		const status = (e as { status?: number }).status;
+		error(status === 404 ? 404 : 500, { message: `Word "${word}" not found` });
 	}
 
-	const chunk = await response.json();
 	const raw = chunk[wordLower];
 	if (!raw) {
 		error(404, { message: `Word "${word}" not found` });
@@ -75,10 +79,6 @@ export async function loadWordIndex(lang: string, fetcher: typeof fetch): Promis
 	}
 
 	const url = `${getLangDataUrl(lang)}/index.json`;
-	const res = await fetcher(url);
-
-	if (!res.ok) throw new Error(`Error loading index for ${lang}`);
-
-	const words: string[] = await res.json();
+	const words = (await fetchJson(url, fetcher)) as string[];
 	return words;
 }

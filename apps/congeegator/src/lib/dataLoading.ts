@@ -2,6 +2,7 @@ import { browser } from '$app/environment';
 import { error } from '@sveltejs/kit';
 import Dexie from 'dexie';
 import { db } from './db';
+import { fetchJson } from './decompress';
 import type { VerbRecord } from './types';
 import { getLangDataUrl, manifest } from './dataUtils';
 
@@ -27,13 +28,16 @@ export async function loadSingleVerb(
 	// This works on both Server (Cloudflare Worker) and Browser
 	const verbLower = verb.toLowerCase();
 	const url = `${getLangDataUrl(lang)}/chunks/${verbLower[0]}.json`;
-	const response = await fetcher(url);
 
-	if (!response.ok) {
-		error(404, { message: `Verb ${verb} not found` });
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	let chunk: any;
+	try {
+		chunk = await fetchJson(url, fetcher);
+	} catch (e: unknown) {
+		const status = (e as { status?: number }).status;
+		error(status === 404 ? 404 : 500, { message: `Verb ${verb} not found` });
 	}
 
-	const chunk = await response.json();
 	const raw = chunk[verbLower];
 	if (!raw) {
 		error(404, { message: `Verb ${verb} not found` });
@@ -67,11 +71,6 @@ export async function loadVerbIndex(lang: string, fetcher: typeof fetch): Promis
 	// This runs on the Cloudflare Worker during the initial page load
 	// but runs in the browser if IndexedDB was empty.
 	const url = `${getLangDataUrl(lang)}/index.json`;
-	// console.log(`Fetching ${url}`)
-	const res = await fetcher(url);
-
-	if (!res.ok) throw new Error(`Error loading index for ${lang}`);
-
-	const verbs: string[] = await res.json();
+	const verbs = (await fetchJson(url, fetcher)) as string[];
 	return verbs;
 }
