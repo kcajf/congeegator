@@ -10,7 +10,7 @@ A monorepo for Wiktionary-powered language apps. Contains:
 - **Lexicoff** (`apps/lexicoff/`) — An offline dictionary PWA (all parts of speech). SvelteKit 2 / Svelte 5, Cloudflare Workers. https://lexicoff.com
 - **Pipeline** (`pipeline/`) — A shared Python data pipeline that processes Wiktionary JSONL data from kaikki.org. One loop over source data produces both conjugation and dictionary output.
 
-Both apps support French, Greek, German, Spanish, Italian, and English.
+Supported languages are configured in `pipeline/conjugation.py` (`CONFIG`) and `pipeline/dictionary.py` (`DICT_CONFIGS`).
 
 ## Directory Structure
 
