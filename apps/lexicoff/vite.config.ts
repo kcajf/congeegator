@@ -1,0 +1,46 @@
+import { sveltekit } from '@sveltejs/kit/vite';
+import { SvelteKitPWA } from '@vite-pwa/sveltekit';
+import { defineConfig } from 'vite';
+
+export const brandColor = '#f0f3fb';
+
+export default defineConfig({
+	plugins: [
+		sveltekit(),
+		SvelteKitPWA({
+			strategies: 'generateSW',
+			registerType: 'prompt',
+			manifest: {
+				name: 'Lexicoff',
+				short_name: 'Lexicoff',
+				theme_color: brandColor,
+				background_color: brandColor
+			},
+			pwaAssets: {
+				config: true
+			},
+			kit: {
+				adapterFallback: undefined
+			},
+			workbox: {
+				globPatterns: [
+					'client/**/*.{js,css,ico,png,svg,webp}',
+					'prerendered/pages/app-shell.html',
+					'prerendered/pages/**/*.json'
+				],
+				modifyURLPrefix: {
+					'client/': '/',
+					'prerendered/pages/': '/'
+				},
+				directoryIndex: null,
+				navigateFallback: '/app-shell.html',
+				navigateFallbackDenylist: [/^\/_app\//, /\/[^/]+\.[^/]+$/],
+				manifestTransforms: [
+					async (manifest) => {
+						return { manifest };
+					}
+				]
+			}
+		})
+	]
+});
