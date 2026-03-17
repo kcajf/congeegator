@@ -1,10 +1,30 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
 	import { toasts } from '$lib/toasts.svelte';
+
+	let bottomOffset = $state(0);
+
+	$effect(() => {
+		if (typeof window === 'undefined' || !window.visualViewport) return;
+
+		const vv = window.visualViewport;
+
+		function update() {
+			bottomOffset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+		}
+
+		vv.addEventListener('resize', update);
+		vv.addEventListener('scroll', update);
+
+		return () => {
+			vv.removeEventListener('resize', update);
+			vv.removeEventListener('scroll', update);
+		};
+	});
 </script>
 
 {#if toasts.list.length > 0}
-	<div class="toast-stack" aria-live="polite">
+	<div class="toast-stack" aria-live="polite" style:bottom="{bottomOffset}px">
 		{#each toasts.list as toast (toast.id)}
 			<div
 				class="toast"
@@ -42,6 +62,17 @@
 		letter-spacing: 0.02em;
 		pointer-events: auto;
 		text-align: center;
+	}
+
+	.toast:last-child::after {
+		content: '';
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: calc(100% - 1px);
+		height: 100vh;
+		background: inherit;
+		pointer-events: none;
 	}
 
 	.toast.clickable {
