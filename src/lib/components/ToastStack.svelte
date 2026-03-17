@@ -2,6 +2,9 @@
 	import { fly } from 'svelte/transition';
 	import { toasts } from '$lib/toasts.svelte';
 
+	// Offset toasts above the mobile virtual keyboard using the visualViewport API.
+	// On iOS Safari, position:fixed bottom:0 renders behind the keyboard since the
+	// layout viewport doesn't shrink — visualViewport.height does.
 	let bottomOffset = $state(0);
 
 	$effect(() => {
@@ -64,6 +67,8 @@
 		text-align: center;
 	}
 
+	/* Extends the last toast's background color downward to fill the gap between
+	   the toast stack and the screen edge when bottomOffset lifts the stack. */
 	.toast:last-child::after {
 		content: '';
 		position: absolute;
