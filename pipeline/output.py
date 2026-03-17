@@ -83,57 +83,75 @@ def write_data_manifest(
         )
 
 
+MAX_URLS_PER_SITEMAP = 40_000
+
+
+def _write_sitemap(path: str, url_lines: list[str]):
+    lines = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+        *url_lines,
+        "</urlset>",
+        "",
+    ]
+    with open(path, "w") as f:
+        f.write("\n".join(lines))
+
+
 def generate_sitemaps(data: dict[str, dict[str, Any]], static_dir: str, base_url: str, entries_key: str = "verbs", name_key: str = "name"):
     os.makedirs(static_dir, exist_ok=True)
 
     lang_codes = sorted(data.keys())
 
+    # Collect all sitemap filenames as we generate them
+    sitemap_files: list[str] = []
+
+    # Homepage sitemap
+    homepage_file = "sitemap-homepage.xml"
+    sitemap_files.append(homepage_file)
+    _write_sitemap(
+        os.path.join(static_dir, homepage_file),
+        [f"  <url><loc>{base_url}/</loc></url>"],
+    )
+    log.info(f"Wrote {os.path.join(static_dir, homepage_file)}")
+
+    # Per-language sitemaps (split if > MAX_URLS_PER_SITEMAP)
+    for lang in lang_codes:
+        seen_names: set[str] = set()
+        url_lines: list[str] = []
+        for entry in data[lang][entries_key]:
+            name = entry[name_key]
+            if name not in seen_names:
+                encoded_name = urllib.parse.quote(name, safe="")
+                url_lines.append(f"  <url><loc>{base_url}/{lang}/{encoded_name}</loc></url>")
+                seen_names.add(name)
+
+        if len(url_lines) <= MAX_URLS_PER_SITEMAP:
+            filename = f"sitemap-{lang}.xml"
+            sitemap_files.append(filename)
+            _write_sitemap(os.path.join(static_dir, filename), url_lines)
+            log.info(f"Wrote {os.path.join(static_dir, filename)} ({len(url_lines)} URLs)")
+        else:
+            part = 1
+            for i in range(0, len(url_lines), MAX_URLS_PER_SITEMAP):
+                chunk = url_lines[i : i + MAX_URLS_PER_SITEMAP]
+                filename = f"sitemap-{lang}-{part}.xml"
+                sitemap_files.append(filename)
+                _write_sitemap(os.path.join(static_dir, filename), chunk)
+                log.info(f"Wrote {os.path.join(static_dir, filename)} ({len(chunk)} URLs)")
+                part += 1
+
+    # Sitemap index
     sitemap_index_lines = [
         '<?xml version="1.0" encoding="UTF-8"?>',
         '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
     ]
-    sitemap_index_lines.append(
-        f"  <sitemap><loc>{base_url}/sitemap-homepage.xml</loc></sitemap>"
-    )
-    for lang in lang_codes:
-        sitemap_index_lines.append(
-            f"  <sitemap><loc>{base_url}/sitemap-{lang}.xml</loc></sitemap>"
-        )
+    for filename in sitemap_files:
+        sitemap_index_lines.append(f"  <sitemap><loc>{base_url}/{filename}</loc></sitemap>")
     sitemap_index_lines.append("</sitemapindex>")
     sitemap_index_lines.append("")
 
     index_path = os.path.join(static_dir, "sitemap.xml")
     with open(index_path, "w") as f:
         f.write("\n".join(sitemap_index_lines))
-    log.info(f"Wrote {index_path}")
-
-    homepage_lines = [
-        '<?xml version="1.0" encoding="UTF-8"?>',
-        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
-        f"  <url><loc>{base_url}/</loc></url>",
-        "</urlset>",
-        "",
-    ]
-    homepage_path = os.path.join(static_dir, "sitemap-homepage.xml")
-    with open(homepage_path, "w") as f:
-        f.write("\n".join(homepage_lines))
-    log.info(f"Wrote {homepage_path}")
-
-    for lang in lang_codes:
-        lines = [
-            '<?xml version="1.0" encoding="UTF-8"?>',
-            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
-        ]
-        seen_names: set[str] = set()
-        for entry in data[lang][entries_key]:
-            if entry[name_key] not in seen_names:
-                encoded_name = urllib.parse.quote(entry[name_key], safe="")
-                lines.append(f"  <url><loc>{base_url}/{lang}/{encoded_name}</loc></url>")
-                seen_names.add(entry[name_key])
-        lines.append("</urlset>")
-        lines.append("")
-
-        lang_path = os.path.join(static_dir, f"sitemap-{lang}.xml")
-        with open(lang_path, "w") as f:
-            f.write("\n".join(lines))
-        log.info(f"Wrote {lang_path} ({len(seen_names)} entries)")
+    log.info(f"Wrote {index_path} ({len(sitemap_files)} sitemaps)")
