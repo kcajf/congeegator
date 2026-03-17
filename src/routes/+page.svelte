@@ -4,10 +4,16 @@
 	import { resolve } from '$app/paths';
 	import { page } from '$app/stores';
 	import { manifest } from '$lib/dataUtils';
+	import { db } from '$lib/db';
 	import { appTitle, siteUrl } from '$lib/defs';
 	import { tenseSettings } from '$lib/i18n.svelte';
 	import { searchLangState } from '$lib/searchLang.svelte';
 	import { storageEstimate } from '$lib/storageEstimate.svelte';
+
+	async function clearCache() {
+		await db.delete();
+		location.reload();
+	}
 
 	const langNames = Object.values(manifest.languages).map((l) => l.englishWiktionaryName);
 	const langList =
@@ -87,7 +93,10 @@
 </section>
 
 {#if storageEstimate.formatted}
-	<p class="storage-info">{storageEstimate.formatted}</p>
+	<p class="storage-info">
+		{storageEstimate.formatted}
+		&middot; <button class="link-btn" onclick={clearCache}>clear cache</button>
+	</p>
 {/if}
 
 <style>
@@ -125,6 +134,18 @@
 
 	a:hover {
 		color: #3a6347;
+	}
+
+	.link-btn {
+		all: unset;
+		text-decoration: underline;
+		text-underline-offset: 2px;
+		color: #888;
+		cursor: pointer;
+	}
+
+	.link-btn:hover {
+		color: #666;
 	}
 
 	.storage-info {
