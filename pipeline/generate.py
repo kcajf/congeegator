@@ -366,10 +366,10 @@ def main():
             for lang in dict_data.keys():
                 lang_dir = os.path.join(dict_data_dir, lang)
                 log.info(f"Writing lexicoff {lang_dir}")
-                write_language_data(dict_data[lang], lang_dir, entries_key="entries", name_key="word", pretty=args.pretty)
+                write_language_data(dict_data[lang], lang_dir, entries_key="entries", name_key="word", pretty=args.pretty, ndjson=True)
 
         dict_manifest_path = os.path.join("apps", "lexicoff", "src", "lib", "data-manifest.json")
-        write_data_manifest(dict_data_dir, DICT_CONFIGS, make_dict_language_static_metadata, dict_manifest_path)
+        write_data_manifest(dict_data_dir, DICT_CONFIGS, make_dict_language_static_metadata, dict_manifest_path, data_filename="data.ndjson")
 
     total = time.monotonic() - total_start
     log.info(f"[timing] total: {total:.1f}s")
