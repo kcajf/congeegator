@@ -48,7 +48,7 @@
 			const updateSW = registerSW({
 				immediate: true,
 				onRegisteredSW(_url: string, registration: ServiceWorkerRegistration | undefined) {
-					const TAP_TO_UPDATE = 'New app version available. Tap here to reload.';
+					const TAP_TO_UPDATE = 'New app version available. Tap to reload.';
 					if (registration?.waiting) {
 						toasts.add(TAP_TO_UPDATE, {
 							dismissAfter: 0,
