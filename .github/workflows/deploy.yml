@@ -73,13 +73,17 @@ jobs:
       - name: Generate data
         run: pixi run generate
 
-      - name: Upload data to R2
+      - name: Upload congeegator data to R2
         run: |
-          for app in congeegator lexicoff; do
-            rclone copy "apps/$app/r2_data" r2-congeegator:congeegator \
-              --transfers 512 --checkers 512 --s3-no-check-bucket \
-              --fast-list --stats-one-line --stats=5s --size-only
-          done
+          rclone copy apps/congeegator/r2_data r2-congeegator:congeegator \
+            --transfers 512 --checkers 512 --s3-no-check-bucket \
+            --fast-list --stats-one-line --stats=5s --size-only
+
+      - name: Upload lexicoff data to R2
+        run: |
+          rclone copy apps/lexicoff/r2_data r2-congeegator:congeegator \
+            --transfers 512 --checkers 512 --s3-no-check-bucket \
+            --fast-list --stats-one-line --stats=5s --size-only
 
       - name: Upload manifests
         uses: actions/upload-artifact@v4
