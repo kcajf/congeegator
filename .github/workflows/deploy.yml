@@ -77,13 +77,15 @@ jobs:
         run: |
           rclone copy apps/congeegator/r2_data r2-congeegator:congeegator \
             --transfers 512 --checkers 512 --s3-no-check-bucket \
-            --fast-list --stats-one-line --stats=5s --size-only
+            --fast-list --stats-one-line --stats=5s --size-only \
+            --header-upload "Content-Encoding: zstd"
 
       - name: Upload lexicoff data to R2
         run: |
           rclone copy apps/lexicoff/r2_data r2-congeegator:congeegator \
             --transfers 512 --checkers 512 --s3-no-check-bucket \
-            --fast-list --stats-one-line --stats=5s --size-only
+            --fast-list --stats-one-line --stats=5s --size-only \
+            --header-upload "Content-Encoding: zstd"
 
       - name: Upload manifests
         uses: actions/upload-artifact@v4

@@ -5,19 +5,33 @@ import os
 import urllib.parse
 from typing import Any, Callable
 
+import zstandard
+
 from .utils import _orjson_dump
 
 log = logging.getLogger(__name__)
 
+ZSTD_LEVEL = 19
 
-def write_language_data(data: dict[str, Any], lang_dir: str, entries_key: str = "verbs", name_key: str = "name", pretty: bool = False):
+
+def _zstd_compress(data: bytes, level: int = ZSTD_LEVEL) -> bytes:
+    cctx = zstandard.ZstdCompressor(level=level)
+    return cctx.compress(data)
+
+
+def write_language_data(data: dict[str, Any], lang_dir: str, entries_key: str = "verbs", name_key: str = "name", pretty: bool = False) -> int:
+    """Write language data files (compressed with zstd). Returns uncompressed data.json size."""
     os.makedirs(lang_dir, exist_ok=True)
 
     # full data file
     out_path = os.path.join(lang_dir, "data.json")
+    raw_bytes = _orjson_dump(data, pretty)
+    uncompressed_size = len(raw_bytes)
+    compressed = _zstd_compress(raw_bytes)
     with open(out_path, "wb") as f:
-        f.write(_orjson_dump(data, pretty))
-    log.info(f"Wrote {out_path}")
+        f.write(compressed)
+    ratio = len(compressed) / uncompressed_size * 100
+    log.info(f"Wrote {out_path} ({uncompressed_size} -> {len(compressed)} bytes, {ratio:.1f}%)")
 
     # chunked files (grouped by first letter, lowercased)
     chunks_dir = os.path.join(lang_dir, "chunks")
@@ -29,7 +43,7 @@ def write_language_data(data: dict[str, Any], lang_dir: str, entries_key: str = 
         chunks.setdefault(letter, {})[key] = entry_data
     for letter, chunk_data in chunks.items():
         with open(os.path.join(chunks_dir, f"{letter}.json"), "wb") as f:
-            f.write(_orjson_dump(chunk_data, pretty))
+            f.write(_zstd_compress(_orjson_dump(chunk_data, pretty)))
 
     # index file
     seen_names: set[str] = set()
@@ -39,7 +53,9 @@ def write_language_data(data: dict[str, Any], lang_dir: str, entries_key: str = 
             unique_names.append(x[name_key])
             seen_names.add(x[name_key])
     with open(os.path.join(lang_dir, "index.json"), "wb") as f:
-        f.write(_orjson_dump(unique_names, pretty))
+        f.write(_zstd_compress(_orjson_dump(unique_names, pretty)))
+
+    return uncompressed_size
 
 
 def write_data_manifest(
@@ -47,6 +63,7 @@ def write_data_manifest(
     configs: list,
     make_metadata: Callable,
     manifest_path: str,
+    uncompressed_sizes: dict[str, int] | None = None,
 ):
     language_hashes = {}
     for config in configs:
@@ -54,7 +71,10 @@ def write_data_manifest(
         if not os.path.exists(data_path):
             continue
 
-        data_size = os.path.getsize(data_path)
+        if uncompressed_sizes and config.code in uncompressed_sizes:
+            data_size = uncompressed_sizes[config.code]
+        else:
+            data_size = os.path.getsize(data_path)
 
         with open(data_path, "rb") as f:
             h = hashlib.file_digest(f, "md5").hexdigest()[:8]
