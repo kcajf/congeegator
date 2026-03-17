@@ -5,29 +5,28 @@ import os
 import urllib.parse
 from typing import Any, Callable
 
-import zstandard
+import brotli
 
 from .utils import _orjson_dump
 
 log = logging.getLogger(__name__)
 
-ZSTD_LEVEL = 6
+BROTLI_QUALITY = 6
 
 
-def _zstd_compress(data: bytes, level: int = ZSTD_LEVEL) -> bytes:
-    cctx = zstandard.ZstdCompressor(level=level)
-    return cctx.compress(data)
+def _brotli_compress(data: bytes, quality: int = BROTLI_QUALITY) -> bytes:
+    return brotli.compress(data, quality=quality)
 
 
 def write_language_data(data: dict[str, Any], lang_dir: str, entries_key: str = "verbs", name_key: str = "name", pretty: bool = False) -> int:
-    """Write language data files (compressed with zstd). Returns uncompressed data.json size."""
+    """Write language data files (compressed with brotli). Returns uncompressed data.json size."""
     os.makedirs(lang_dir, exist_ok=True)
 
     # full data file
     out_path = os.path.join(lang_dir, "data.json")
     raw_bytes = _orjson_dump(data, pretty)
     uncompressed_size = len(raw_bytes)
-    compressed = _zstd_compress(raw_bytes)
+    compressed = _brotli_compress(raw_bytes)
     with open(out_path, "wb") as f:
         f.write(compressed)
     ratio = len(compressed) / uncompressed_size * 100
@@ -43,7 +42,7 @@ def write_language_data(data: dict[str, Any], lang_dir: str, entries_key: str = 
         chunks.setdefault(letter, {})[key] = entry_data
     for letter, chunk_data in chunks.items():
         with open(os.path.join(chunks_dir, f"{letter}.json"), "wb") as f:
-            f.write(_zstd_compress(_orjson_dump(chunk_data, pretty)))
+            f.write(_brotli_compress(_orjson_dump(chunk_data, pretty)))
 
     # index file
     seen_names: set[str] = set()
@@ -53,7 +52,7 @@ def write_language_data(data: dict[str, Any], lang_dir: str, entries_key: str = 
             unique_names.append(x[name_key])
             seen_names.add(x[name_key])
     with open(os.path.join(lang_dir, "index.json"), "wb") as f:
-        f.write(_zstd_compress(_orjson_dump(unique_names, pretty)))
+        f.write(_brotli_compress(_orjson_dump(unique_names, pretty)))
 
     return uncompressed_size
 

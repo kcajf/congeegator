@@ -38,7 +38,7 @@ export const GET: RequestHandler = async ({ params }) => {
 		};
 
 		if (ext === '.json') {
-			headers['Content-Encoding'] = 'zstd';
+			headers['Content-Encoding'] = 'br';
 		}
 
 		return new Response(file, { headers });
