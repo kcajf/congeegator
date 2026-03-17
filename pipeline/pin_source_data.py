@@ -27,7 +27,7 @@ import requests
 import zstandard
 from tqdm import tqdm
 
-from pipeline.conjugation import CONFIG
+from .conjugation import CONFIG
 
 log = logging.getLogger(__name__)
 
@@ -146,7 +146,7 @@ def _upload_to_r2(local_path: str, r2_path: str):
 
 def _update_version_in_source(version: str):
     """Update SOURCE_DATA_VERSION in pipeline/cache.py."""
-    dp_path = os.path.join(os.path.dirname(__file__), "pipeline", "cache.py")
+    dp_path = os.path.join(os.path.dirname(__file__), "cache.py")
     with open(dp_path, "r") as f:
         content = f.read()
 
@@ -167,7 +167,7 @@ def _run_pipeline():
     log.info("Running full data pipeline...")
     result = subprocess.run(
         [sys.executable, "-m", "pipeline.generate"],
-        cwd=os.path.dirname(__file__) or ".",
+        cwd=os.path.dirname(os.path.dirname(__file__)) or ".",
     )
     if result.returncode != 0:
         print("Pipeline failed!", file=sys.stderr)
@@ -196,7 +196,7 @@ def main():
     print(f"\nDone! SOURCE_DATA_VERSION updated to {version}")
     print("Next steps:")
     print("  1. Review golden test diffs: pixi run test")
-    print("  2. Update golden files if needed: pixi run pytest tests/ --update-golden")
+    print("  2. Update golden files if needed: pixi run pytest pipeline/tests/ --update-golden")
     print("  3. Commit: pipeline/cache.py, apps/congeegator/src/lib/data-manifest.json, pipeline/tests/golden/")
 
 

@@ -9,7 +9,7 @@ version = "0.1.0"
 generate = "python -m pipeline.generate"
 generate-dev = "python -m pipeline.generate --dev"
 test = "pytest pipeline/tests/ -v"
-pin-source-data = "python pin_source_data.py"
+pin-source-data = "python -m pipeline.pin_source_data"
 
 [dependencies]
 python = ">=3.14.2,<3.15"
