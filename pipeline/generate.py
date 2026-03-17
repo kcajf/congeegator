@@ -354,8 +354,9 @@ def main():
 
     # --- Lexicoff output ---
     if dict_data:
-        # Sitemaps skipped for now — dict sitemaps are too large for Cloudflare Workers static assets
-        # (English sitemap alone is ~40MB with 700K entries)
+        with log_timing("generate lexicoff sitemaps"):
+            dict_sitemaps_dir = os.path.join("apps", "lexicoff", "static")
+            generate_sitemaps(dict_data, dict_sitemaps_dir, base_url=LEXICOFF_BASE_URL, entries_key="entries", name_key="word")
 
         dict_r2_dir = os.path.join("apps", "lexicoff", "r2_data")
         dict_data_dir = os.path.join(dict_r2_dir, "data", f"v{DATA_VERSION}")
