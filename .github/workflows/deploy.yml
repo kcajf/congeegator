@@ -23,7 +23,9 @@ jobs:
 
       - run: npm ci
 
-      # Configure rclone for R2 upload (rclone is preinstalled on GitHub runners)
+      - name: Install rclone
+        run: curl -fsS https://downloads.rclone.org/rclone-current-linux-amd64.zip -o /tmp/rclone.zip && unzip -qj /tmp/rclone.zip '*/rclone' -d /usr/local/bin/
+
       - name: Configure rclone
         run: |
           rclone config create r2-congeegator s3 \
