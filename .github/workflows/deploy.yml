@@ -6,33 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  # Detect which paths changed to decide what to run
-  changes:
-    runs-on: ubuntu-latest
-    outputs:
-      pipeline: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.pipeline }}
-      congeegator: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.congeegator }}
-      lexicoff: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.lexicoff }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
-        id: filter
-        if: github.event_name != 'workflow_dispatch'
-        with:
-          filters: |
-            pipeline:
-              - 'pipeline/**'
-              - 'pixi.toml'
-              - 'pixi.lock'
-            congeegator:
-              - 'apps/congeegator/**'
-            lexicoff:
-              - 'apps/lexicoff/**'
-
-  # Generate data — only if pipeline code changed (or manual dispatch)
   generate:
-    needs: changes
-    if: needs.changes.outputs.pipeline == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -93,14 +67,8 @@ jobs:
             apps/congeegator/src/lib/data-manifest.json
             apps/lexicoff/src/lib/data-manifest.json
 
-  # Deploy Congeegator — if app or pipeline changed
   deploy-congeegator:
-    needs: [changes, generate]
-    if: |
-      always() &&
-      needs.changes.result == 'success' &&
-      (needs.generate.result == 'success' || needs.generate.result == 'skipped') &&
-      (needs.changes.outputs.congeegator == 'true' || needs.changes.outputs.pipeline == 'true')
+    needs: generate
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -113,11 +81,9 @@ jobs:
           cache-dependency-path: apps/congeegator/package-lock.json
 
       - name: Remove stale manifest
-        if: needs.generate.result == 'success'
         run: rm apps/congeegator/src/lib/data-manifest.json
 
       - name: Download fresh manifest
-        if: needs.generate.result == 'success'
         uses: actions/download-artifact@v4
         with:
           name: data-manifests
@@ -137,14 +103,8 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
-  # Deploy Lexicoff — if app or pipeline changed
   deploy-lexicoff:
-    needs: [changes, generate]
-    if: |
-      always() &&
-      needs.changes.result == 'success' &&
-      (needs.generate.result == 'success' || needs.generate.result == 'skipped') &&
-      (needs.changes.outputs.lexicoff == 'true' || needs.changes.outputs.pipeline == 'true')
+    needs: generate
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -157,11 +117,9 @@ jobs:
           cache-dependency-path: apps/lexicoff/package-lock.json
 
       - name: Remove stale manifest
-        if: needs.generate.result == 'success'
         run: rm apps/lexicoff/src/lib/data-manifest.json
 
       - name: Download fresh manifest
-        if: needs.generate.result == 'success'
         uses: actions/download-artifact@v4
         with:
           name: data-manifests
