@@ -10,7 +10,7 @@ from .utils import _orjson_dump
 log = logging.getLogger(__name__)
 
 
-def write_language_data(data: dict[str, Any], lang_dir: str, entries_key: str = "verbs", pretty: bool = False):
+def write_language_data(data: dict[str, Any], lang_dir: str, entries_key: str = "verbs", name_key: str = "name", pretty: bool = False):
     os.makedirs(lang_dir, exist_ok=True)
 
     # full data file
@@ -24,7 +24,7 @@ def write_language_data(data: dict[str, Any], lang_dir: str, entries_key: str = 
     os.makedirs(chunks_dir)
     chunks: dict[str, dict[str, Any]] = {}
     for entry_data in data[entries_key]:
-        key = entry_data["name"].lower()
+        key = entry_data[name_key].lower()
         letter = key[0] if key else "_"
         chunks.setdefault(letter, {})[key] = entry_data
     for letter, chunk_data in chunks.items():
@@ -35,9 +35,9 @@ def write_language_data(data: dict[str, Any], lang_dir: str, entries_key: str = 
     seen_names: set[str] = set()
     unique_names: list[str] = []
     for x in data[entries_key]:
-        if x["name"] not in seen_names:
-            unique_names.append(x["name"])
-            seen_names.add(x["name"])
+        if x[name_key] not in seen_names:
+            unique_names.append(x[name_key])
+            seen_names.add(x[name_key])
     with open(os.path.join(lang_dir, "index.json"), "wb") as f:
         f.write(_orjson_dump(unique_names, pretty))
 
@@ -83,7 +83,7 @@ def write_data_manifest(
         )
 
 
-def generate_sitemaps(data: dict[str, dict[str, Any]], static_dir: str, base_url: str, entries_key: str = "verbs"):
+def generate_sitemaps(data: dict[str, dict[str, Any]], static_dir: str, base_url: str, entries_key: str = "verbs", name_key: str = "name"):
     os.makedirs(static_dir, exist_ok=True)
 
     lang_codes = sorted(data.keys())
@@ -126,10 +126,10 @@ def generate_sitemaps(data: dict[str, dict[str, Any]], static_dir: str, base_url
         ]
         seen_names: set[str] = set()
         for entry in data[lang][entries_key]:
-            if entry["name"] not in seen_names:
-                encoded_name = urllib.parse.quote(entry["name"], safe="")
+            if entry[name_key] not in seen_names:
+                encoded_name = urllib.parse.quote(entry[name_key], safe="")
                 lines.append(f"  <url><loc>{base_url}/{lang}/{encoded_name}</loc></url>")
-                seen_names.add(entry["name"])
+                seen_names.add(entry[name_key])
         lines.append("</urlset>")
         lines.append("")
 

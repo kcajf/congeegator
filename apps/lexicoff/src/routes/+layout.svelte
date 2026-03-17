@@ -1,0 +1,398 @@
+<script lang="ts">
+	import { afterNavigate, goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
+
+	import { dev } from '$app/environment';
+	import LanguagePicker from '$lib/components/LanguagePicker.svelte';
+	import ToastStack from '$lib/components/ToastStack.svelte';
+	import { db } from '$lib/db';
+	import { appTitle, brandColor } from '$lib/defs';
+	import {
+		findGlossMatch,
+		findMatches,
+		MAX_PREFIX_IDS,
+		MAX_SEARCH_RESULTS,
+		prefixLookup,
+		stripDiacritics,
+		toPhonetic,
+		type SearchResult
+	} from '$lib/search';
+	import { searchLangState } from '$lib/searchLang.svelte';
+	import { toasts } from '$lib/toasts.svelte';
+	import type { DictRecord } from '$lib/types';
+	import { onMount, tick } from 'svelte';
+	import { pwaInfo } from 'virtual:pwa-info';
+	import type { LayoutProps } from './$types';
+
+	async function nukeState() {
+		await db.delete();
+		localStorage.clear();
+		const regs = await navigator.serviceWorker?.getRegistrations();
+		for (const r of regs ?? []) await r.unregister();
+		location.reload();
+	}
+
+	let { children }: LayoutProps = $props();
+
+	const webManifestLink = $derived(pwaInfo?.webManifest?.linkTag ?? '');
+
+	onMount(async () => {
+		if (pwaInfo) {
+			const { registerSW } = await import('virtual:pwa-register');
+			const updateSW = registerSW({
+				immediate: true,
+				onRegisteredSW(_url: string, registration: ServiceWorkerRegistration | undefined) {
+					const TAP_TO_UPDATE = 'New app version available. Tap to reload.';
+					if (registration?.waiting) {
+						toasts.add(TAP_TO_UPDATE, {
+							dismissAfter: 0,
+							onclick: () => updateSW(true)
+						});
+					}
+
+					registration?.addEventListener('updatefound', () => {
+						const newWorker = registration.installing;
+						newWorker?.addEventListener('statechange', () => {
+							if (newWorker.state === 'activated') {
+								toasts.add('App ready to work offline');
+							}
+							if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+								toasts.add(TAP_TO_UPDATE, {
+									dismissAfter: 0,
+									onclick: () => updateSW(true)
+								});
+							}
+						});
+					});
+				},
+				onRegisterError(error: Error) {
+					console.error('SW registration error', error);
+				}
+			});
+		}
+	});
+
+	let searchTerm = $state('');
+	let searchInput: HTMLInputElement | undefined = $state();
+
+	let searchResults = $state<SearchResult[]>([]);
+
+	afterNavigate(() => {
+		searchTerm = '';
+	});
+
+	async function selectResult(item: SearchResult) {
+		const base = resolve('/[lang=lang]/[word]', {
+			lang: searchLangState.lang,
+			word: item.word
+		});
+		await goto(base);
+
+		searchTerm = '';
+
+		await tick();
+
+		if (searchInput && !window.matchMedia('(pointer: coarse)').matches) {
+			searchInput.focus();
+		}
+	}
+
+	function handleKeydown(e: KeyboardEvent) {
+		if (e.key === 'Enter' && searchResults.length > 0) {
+			e.preventDefault();
+			searchInput?.blur();
+			selectResult(searchResults[0]);
+		} else if (e.key === 'Escape') {
+			searchTerm = '';
+			searchInput?.blur();
+		}
+	}
+
+	$effect(() => {
+		const index = searchLangState.indexData;
+
+		const currentLang = searchLangState.lang;
+		const originalQuery = searchTerm.toLowerCase().trim();
+		const stripped = stripDiacritics(originalQuery);
+		const currentQuery = toPhonetic(currentLang, stripped);
+		if (!index || currentQuery.length < 1) {
+			searchResults = [];
+			return;
+		}
+
+		const allPrefixIds = prefixLookup(index, currentQuery);
+		const prefixIds = allPrefixIds.slice(0, MAX_PREFIX_IDS);
+
+		if (prefixIds.length === 0) {
+			searchResults = [];
+			return;
+		}
+
+		const dbKeys = prefixIds.map((id) => [currentLang, id]);
+
+		db.entries
+			.bulkGet(dbKeys)
+			.then((data) => {
+				if (
+					currentQuery !== toPhonetic(currentLang, stripDiacritics(searchTerm.toLowerCase().trim()))
+				)
+					return;
+
+				const entries = data.filter((v): v is DictRecord => !!v);
+
+				const nativeResults = entries.flatMap((e) =>
+					findMatches(e, originalQuery, currentQuery, currentLang)
+				);
+
+				const nativeWords = new Set(nativeResults.map((r) => r.word + ':' + r.pos));
+				const glossResults =
+					originalQuery.length >= 3
+						? entries
+								.filter((e) => !nativeWords.has(e.word + ':' + e.pos))
+								.map((e) => findGlossMatch(e, originalQuery))
+								.filter((r): r is SearchResult => r !== null)
+						: [];
+
+				// Deduplicate by word (collapse multiple POS into one result)
+				// eslint-disable-next-line svelte/prefer-svelte-reactivity
+				const byWord = new Map<string, SearchResult>();
+				for (const r of [...nativeResults, ...glossResults]) {
+					const existing = byWord.get(r.word);
+					if (
+						!existing ||
+						r.quality < existing.quality ||
+						(r.quality === existing.quality && r.freq > existing.freq)
+					) {
+						byWord.set(r.word, r);
+					}
+				}
+
+				searchResults = [...byWord.values()]
+					.sort((a, b) => a.quality - b.quality || b.freq - a.freq || a.word.length - b.word.length)
+					.slice(0, MAX_SEARCH_RESULTS);
+			})
+			.catch((err) => {
+				console.error('Search lookup failed:', err);
+				searchResults = [];
+			});
+	});
+</script>
+
+<svelte:head>
+	<meta name="theme-color" content={brandColor} />
+	<meta name="application-name" content={appTitle} />
+
+	{#if webManifestLink}
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+		{@html webManifestLink}
+	{/if}
+</svelte:head>
+
+<div class="container">
+	<nav class="navbar">
+		<a href={resolve('/')} class="logo">{appTitle}</a>
+
+		<div class="search-container">
+			<input
+				bind:value={searchTerm}
+				bind:this={searchInput}
+				onkeydown={handleKeydown}
+				onfocus={() => searchInput?.select()}
+				type="text"
+				id="searchInput"
+				placeholder="search..."
+				autocapitalize="off"
+				autocorrect="off"
+				autocomplete="off"
+			/>
+		</div>
+
+		<LanguagePicker onSelect={() => searchInput?.focus()} />
+	</nav>
+
+	<div class="content">
+		{#if searchResults.length > 0}
+			<ul class="results-list">
+				{#each searchResults as item (item.word)}
+					<li>
+						<a
+							href={resolve('/[lang=lang]/[word]', {
+								lang: searchLangState.lang,
+								word: item.word
+							})}
+							onclick={(e) => {
+								e.preventDefault();
+								selectResult(item);
+							}}
+							onmousedown={(e) => e.preventDefault()}
+							class="result-link"
+						>
+							{#if item.quality === 3}
+								{item.word}
+								<span class="gloss-hint">{item.matched}</span>
+							{:else if item.matched !== item.word}
+								{item.matched}
+								<span class="root-hint">({item.word})</span>
+							{:else}
+								{item.word}
+							{/if}
+						</a>
+					</li>
+				{/each}
+			</ul>
+		{:else if searchTerm.trim().length >= 1}
+			{#if !searchLangState.indexData}
+				<div class="no-results">Loading...</div>
+			{:else}
+				<div class="no-results">No matches found</div>
+			{/if}
+		{:else}
+			{@render children()}
+		{/if}
+	</div>
+</div>
+
+<ToastStack />
+
+{#if dev}
+	<button class="nuke-btn" onclick={nukeState}>nuke state</button>
+{/if}
+
+<style>
+	:global(html) {
+		font-size: 120%;
+		scrollbar-gutter: stable;
+		scrollbar-color: rgba(155, 155, 155, 0.5) transparent;
+		overscroll-behavior-y: none;
+		touch-action: manipulation;
+	}
+
+	:global(:root) {
+		--brand: #f0f3fb;
+		--text: #1a1a2e;
+		--text-muted: #666;
+		--border: #ddd;
+	}
+
+	@media (max-width: 600px) {
+		:global(html) {
+			font-size: 105%;
+		}
+	}
+
+	:global(body) {
+		margin: 0;
+		background-color: var(--brand);
+		font-family: Georgia, 'Times New Roman', Times, serif;
+		color: var(--text);
+	}
+
+	.logo {
+		font-size: 1.3rem;
+		font-weight: bold;
+		text-decoration: none;
+		color: var(--text);
+		white-space: nowrap;
+	}
+
+	.container {
+		max-width: 50rem;
+		margin: 0 auto;
+		min-height: 100dvh;
+	}
+
+	.navbar {
+		position: sticky;
+		top: 0;
+		z-index: 10;
+		background-color: var(--brand);
+		padding: 0.5rem 0.75rem 0;
+		display: flex;
+		align-items: center;
+		justify-content: flex-start;
+	}
+
+	.content {
+		padding: 0 0.75rem 2rem;
+	}
+
+	.search-container {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		max-width: 30rem;
+		padding-left: 1rem;
+		padding-right: 0.5rem;
+	}
+
+	.search-container input {
+		appearance: none;
+		background-color: transparent;
+		padding: 0.5rem 0.2rem;
+		border: 0px solid var(--border);
+		border-bottom: 1px solid var(--border);
+		font-size: 1rem;
+		font-family: inherit;
+		outline: none;
+		min-width: 0;
+		width: 100%;
+		transition:
+			width 0.3s ease,
+			border-color 0.3s ease;
+	}
+
+	.results-list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		max-width: 25rem;
+	}
+
+	.no-results {
+		padding: 1rem 0;
+		color: var(--text-muted);
+		font-size: 0.9rem;
+	}
+
+	.results-list li + li {
+		border-top: 1px solid var(--border);
+	}
+
+	.result-link {
+		text-decoration: none;
+		color: inherit;
+		display: block;
+		padding: 0.5rem 0;
+	}
+
+	.result-link:hover,
+	.result-link:focus {
+		background-color: #e8ecf4;
+		outline: none;
+	}
+
+	.gloss-hint {
+		font-style: italic;
+		color: #858585;
+		font-size: 0.85em;
+	}
+
+	.root-hint {
+		color: #858585;
+		font-size: 0.85em;
+	}
+
+	.nuke-btn {
+		position: fixed;
+		top: 0.5rem;
+		right: 0.5rem;
+		background: #c00;
+		color: white;
+		border: none;
+		padding: 0.3rem 0.6rem;
+		font-size: 0.7rem;
+		cursor: pointer;
+		z-index: 9999;
+		opacity: 0.6;
+	}
+</style>

@@ -1,0 +1,35 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "lexicoff",
+	"main": ".svelte-kit/cloudflare/_worker.js",
+	"compatibility_date": "2026-01-01",
+	"compatibility_flags": ["nodejs_compat"],
+	"preview_urls": true,
+	"assets": {
+		"binding": "ASSETS",
+		"directory": ".svelte-kit/cloudflare"
+	},
+	"observability": {
+		"enabled": true
+	},
+	"env": {
+		"staging": {
+			"vars": {},
+			"routes": [
+				{
+					"pattern": "staging.lexicoff.com",
+					"custom_domain": true
+				}
+			]
+		},
+		"production": {
+			"vars": {},
+			"routes": [
+				{
+					"pattern": "lexicoff.com",
+					"custom_domain": true
+				}
+			]
+		}
+	}
+}
