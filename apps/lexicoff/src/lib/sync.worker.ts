@@ -71,18 +71,12 @@ self.onmessage = async (e: MessageEvent<{ lang: string; type?: string }>) => {
 				// Delete old entries before streaming new ones
 				await db.entries.where({ lang }).delete();
 
-				// Set up byte counting via tee
+				// Byte counter transform — inline in the pipeline, no tee()
 				let receivedBytes = 0;
 				let lastPercent: number | null = -1;
-				const [countStream, parseStream] = ndjsonResponse.body.tee();
-
-				// Byte counter runs in background
-				const countDone = (async () => {
-					const reader = countStream.getReader();
-					while (true) {
-						const { done, value } = await reader.read();
-						if (done) break;
-						receivedBytes += value.length;
+				const byteCounter = new TransformStream({
+					transform(chunk: Uint8Array, controller) {
+						receivedBytes += chunk.length;
 						const percent = totalBytes ? Math.round((receivedBytes / totalBytes) * 100) : null;
 						if (percent !== lastPercent) {
 							self.postMessage({
@@ -94,8 +88,9 @@ self.onmessage = async (e: MessageEvent<{ lang: string; type?: string }>) => {
 							});
 							lastPercent = percent;
 						}
+						controller.enqueue(chunk);
 					}
-				})();
+				});
 
 				// Line splitter transform
 				let buf = '';
@@ -113,7 +108,8 @@ self.onmessage = async (e: MessageEvent<{ lang: string; type?: string }>) => {
 					}
 				});
 
-				const lineReader = parseStream
+				const lineReader = ndjsonResponse.body
+					.pipeThrough(byteCounter)
 					.pipeThrough(new TextDecoderStream())
 					.pipeThrough(lineSplitter)
 					.getReader();
@@ -140,7 +136,7 @@ self.onmessage = async (e: MessageEvent<{ lang: string; type?: string }>) => {
 					await db.entries.bulkPut(batch);
 				}
 
-				const [searchIndex] = await Promise.all([searchIndexPromise, countDone]);
+				const searchIndex = await searchIndexPromise;
 
 				// Write metadata last for atomicity
 				await db.metadata.put({
