@@ -143,7 +143,7 @@ def entry_is_valid(entry: Entry) -> bool:
         return False
     if entry.pos not in INCLUDED_POS:
         return False
-    if entry.word is None:
+    if not entry.word or not entry.word[0].isalpha():
         return False
     if entry.senses and all(
         "form-of" in s.tags or "alt-of" in s.tags for s in entry.senses
