@@ -87,8 +87,7 @@ self.onmessage = async (e: MessageEvent<{ lang: string }>) => {
 					await db.metadata.put({
 						lang: lang,
 						hash: remote.dataHash,
-						searchIndex: raw['searchIndex'],
-						glossIndex: raw['glossIndex'] ?? null
+						searchIndex: raw['searchIndex']
 					});
 				});
 

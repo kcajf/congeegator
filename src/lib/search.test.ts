@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import {
 	findGlossMatch,
 	findMatches,
-	glossLookup,
 	includesWholeWord,
 	prefixLookup,
 	stripDiacritics,
@@ -395,31 +394,6 @@ describe('findMatches with requireExactWord', () => {
 		const verb = makeVerb({ name: 'êtreindre' });
 		const results = findMatches(verb, 'etre', 'etre', 'fr', true);
 		expect(results).toEqual([]);
-	});
-});
-
-describe('glossLookup', () => {
-	it('returns IDs for exact prefix key match', () => {
-		const index: SearchIndex = new Map([['eat', [0, 5]]]);
-		expect(glossLookup(index, 'eat')).toEqual([0, 5]);
-	});
-
-	it('falls back to shorter prefix key', () => {
-		const index: SearchIndex = new Map([
-			['eat', [0, 5]],
-			['eati', [0]]
-		]);
-		expect(glossLookup(index, 'eating')).toEqual([0]);
-	});
-
-	it('returns [] when no prefix matches', () => {
-		const index: SearchIndex = new Map([['eat', [0]]]);
-		expect(glossLookup(index, 'xyz')).toEqual([]);
-	});
-
-	it('returns [] for empty index', () => {
-		const index: SearchIndex = new Map();
-		expect(glossLookup(index, 'eat')).toEqual([]);
 	});
 });
 

@@ -1358,72 +1358,6 @@ def fr_is_aspirated(entry: Entry) -> bool:
     return False
 
 
-def build_search_index(
-    verbs: list[dict[str, Any]],
-    phonetic_fn: Callable[[str], str] | None = None,
-) -> dict[str, list[int]]:
-    log.info("generating search index")
-    searchable_words = defaultdict[str, set[int]](lambda: set())
-
-    GERMAN_AUXILIARY_INFINITIVES = {"haben", "sein"}
-
-    def add_to_index(s: str, idx: int):
-        if s == "" or s == "-":
-            return
-        for ss in s.split("/"):
-            if ' ' in ss:
-                words = ss.split(' ')
-                if len(words) >= 3 and words[-1] in GERMAN_AUXILIARY_INFINITIVES:
-                    ss = words[-2]
-                else:
-                    ss = words[-1]
-            searchable_words[ss].add(idx)
-            searchable_words[strip_diacritics(ss)].add(idx)
-            if phonetic_fn:
-                phonetic = phonetic_fn(ss)
-                if phonetic != ss and phonetic != strip_diacritics(ss):
-                    searchable_words[phonetic].add(idx)
-
-    for i, v in enumerate(verbs):
-        searchable_words[v["name"]].add(i)
-        searchable_words[strip_diacritics(v["name"])].add(i)
-        if phonetic_fn:
-            phonetic = phonetic_fn(v["name"])
-            if phonetic != v["name"] and phonetic != strip_diacritics(v["name"]):
-                searchable_words[phonetic].add(i)
-        for c in v["conjugation"]:
-            if isinstance(c, str):
-                add_to_index(c, i)
-            else:
-                for cc in c:
-                    add_to_index(cc, i)
-
-    index = defaultdict[str, set[int]](lambda: set())
-
-    MIN_PREFIX = 1
-    MAX_PREFIX = 4
-    MAX_PREFIX_IDS = 200
-
-    for word, indices in searchable_words.items():
-        for prefix_len in range(MIN_PREFIX, MAX_PREFIX + 1):
-            word_prefix = word[:prefix_len].lower()
-            for i in indices:
-                index[word_prefix].add(i)
-
-    ret = {k: sorted(v)[:MAX_PREFIX_IDS] for k, v in index.items()}
-
-    max_hits = 0
-    max_key = None
-    for k, v in ret.items():
-        if len(v) > max_hits:
-            max_hits = len(v)
-            max_key = k
-
-    log.info(f"Longest index entry: '{max_key}', {max_hits} hits")
-
-    return ret
-
-
 # Stop words for gloss search index: standard English function words (3+ chars)
 # plus gloss-specific noise words that appear in many definitions.
 GLOSS_STOP_WORDS = frozenset(
@@ -1479,16 +1413,48 @@ GLOSS_STOP_WORDS = frozenset(
 MIN_GLOSS_WORD_LENGTH = 3
 
 
-def build_gloss_index(verbs: list[dict[str, Any]]) -> dict[str, list[int]]:
-    """Build a whole-word index mapping English gloss words to verb IDs.
+def build_search_index(
+    verbs: list[dict[str, Any]],
+    phonetic_fn: Callable[[str], str] | None = None,
+) -> dict[str, list[int]]:
+    log.info("generating search index")
+    searchable_words = defaultdict[str, set[int]](lambda: set())
 
-    Unlike the main search index which uses prefix expansion (1-4 char keys),
-    this index uses whole words as keys. This keeps the index small and avoids
-    low-quality partial matches on common English words.
-    """
-    log.info("generating gloss index")
-    word_to_ids: defaultdict[str, set[int]] = defaultdict(set)
+    GERMAN_AUXILIARY_INFINITIVES = {"haben", "sein"}
 
+    def add_to_index(s: str, idx: int):
+        if s == "" or s == "-":
+            return
+        for ss in s.split("/"):
+            if ' ' in ss:
+                words = ss.split(' ')
+                if len(words) >= 3 and words[-1] in GERMAN_AUXILIARY_INFINITIVES:
+                    ss = words[-2]
+                else:
+                    ss = words[-1]
+            searchable_words[ss].add(idx)
+            searchable_words[strip_diacritics(ss)].add(idx)
+            if phonetic_fn:
+                phonetic = phonetic_fn(ss)
+                if phonetic != ss and phonetic != strip_diacritics(ss):
+                    searchable_words[phonetic].add(idx)
+
+    for i, v in enumerate(verbs):
+        searchable_words[v["name"]].add(i)
+        searchable_words[strip_diacritics(v["name"])].add(i)
+        if phonetic_fn:
+            phonetic = phonetic_fn(v["name"])
+            if phonetic != v["name"] and phonetic != strip_diacritics(v["name"]):
+                searchable_words[phonetic].add(i)
+        for c in v["conjugation"]:
+            if isinstance(c, str):
+                add_to_index(c, i)
+            else:
+                for cc in c:
+                    add_to_index(cc, i)
+
+    # Collect gloss words (English definitions) with prefix range 3-6
+    gloss_words = defaultdict[str, set[int]](lambda: set())
     for i, v in enumerate(verbs):
         gloss = v.get("gloss", "")
         if not gloss:
@@ -1498,25 +1464,43 @@ def build_gloss_index(verbs: list[dict[str, Any]]) -> dict[str, list[int]]:
                 continue
             if _is_junk_gloss(clause):
                 continue
-            # Strip bracketed context
             clause = re.sub(r"\s*\[.*?\]", "", clause)
             for token in re.split(r"[\s,;]+", clause.lower()):
                 word = token.strip("().[]'\"")
                 if len(word) >= MIN_GLOSS_WORD_LENGTH and word not in GLOSS_STOP_WORDS:
-                    word_to_ids[word].add(i)
+                    gloss_words[word].add(i)
 
-    MIN_GLOSS_PREFIX = 3
-    MAX_GLOSS_PREFIX = 6
+    index = defaultdict[str, set[int]](lambda: set())
+
+    MIN_PREFIX = 1
+    MAX_PREFIX = 4
     MAX_PREFIX_IDS = 200
 
-    index: defaultdict[str, set[int]] = defaultdict(set)
-    for word, ids in word_to_ids.items():
+    for word, indices in searchable_words.items():
+        for prefix_len in range(MIN_PREFIX, MAX_PREFIX + 1):
+            word_prefix = word[:prefix_len].lower()
+            for i in indices:
+                index[word_prefix].add(i)
+
+    # Gloss words use prefix range 3-6
+    MIN_GLOSS_PREFIX = 3
+    MAX_GLOSS_PREFIX = 6
+    for word, ids in gloss_words.items():
         for prefix_len in range(MIN_GLOSS_PREFIX, MAX_GLOSS_PREFIX + 1):
             prefix = word[:prefix_len].lower()
             index[prefix].update(ids)
 
     ret = {k: sorted(v)[:MAX_PREFIX_IDS] for k, v in index.items()}
-    log.info(f"Gloss index: {len(ret)} unique prefix keys")
+
+    max_hits = 0
+    max_key = None
+    for k, v in ret.items():
+        if len(v) > max_hits:
+            max_hits = len(v)
+            max_key = k
+
+    log.info(f"Longest index entry: '{max_key}', {max_hits} hits")
+
     return ret
 
 
@@ -1610,13 +1594,9 @@ def generate_data_for_lang(wiki_lang: str, lang: LanguageConfig, dev: bool):
     with log_timing(f"{lang.code} search index"):
         search_index = build_search_index(verbs, phonetic_fn=lang.phonetic_fn)
 
-    with log_timing(f"{lang.code} gloss index"):
-        gloss_index = build_gloss_index(verbs)
-
     return {
         "verbs": verbs,
         "searchIndex": search_index,
-        "glossIndex": gloss_index,
     }
 
 

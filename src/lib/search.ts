@@ -207,10 +207,6 @@ export function findMatches(
 	return [...seen.values()];
 }
 
-export function glossLookup(glossIndex: SearchIndex, query: string): Id[] {
-	return prefixLookup(glossIndex, query);
-}
-
 export function findGlossMatch(verb: VerbRecord, glossQuery: string): SearchResult | null {
 	if (!verb.gloss) return null;
 	const escaped = glossQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

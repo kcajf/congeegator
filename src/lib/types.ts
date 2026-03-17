@@ -38,5 +38,4 @@ export interface MetaEntry {
 	lang: string;
 	hash: string;
 	searchIndex: SearchIndexStorage;
-	glossIndex?: SearchIndexStorage;
 }
