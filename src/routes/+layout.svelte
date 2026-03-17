@@ -255,7 +255,7 @@
 		/* scrollbar-width: thin; */
 		scrollbar-color: rgba(155, 155, 155, 0.5) transparent;
 		overscroll-behavior-y: none;
-		touch-action: manipulation;
+		touch-action: manipulation; /* disable double-tap zoom on mobile */
 	}
 
 	:global(:root) {
