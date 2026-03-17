@@ -112,12 +112,16 @@ jobs:
           cache: npm
           cache-dependency-path: apps/congeegator/package-lock.json
 
+      - name: Remove stale manifest
+        if: needs.generate.result == 'success'
+        run: rm apps/congeegator/src/lib/data-manifest.json
+
       - name: Download fresh manifest
         if: needs.generate.result == 'success'
         uses: actions/download-artifact@v4
         with:
           name: data-manifests
-          path: .
+          path: apps
 
       - run: npm ci
         working-directory: apps/congeegator
@@ -152,12 +156,16 @@ jobs:
           cache: npm
           cache-dependency-path: apps/lexicoff/package-lock.json
 
+      - name: Remove stale manifest
+        if: needs.generate.result == 'success'
+        run: rm apps/lexicoff/src/lib/data-manifest.json
+
       - name: Download fresh manifest
         if: needs.generate.result == 'success'
         uses: actions/download-artifact@v4
         with:
           name: data-manifests
-          path: .
+          path: apps
 
       - run: npm ci
         working-directory: apps/lexicoff
