@@ -32,16 +32,13 @@ export const GET: RequestHandler = async ({ params }) => {
 			contentType += '; charset=utf-8';
 		}
 
-		const headers: Record<string, string> = {
-			'Content-Type': contentType,
-			'x-local-proxy': 'true'
-		};
-
-		if (ext === '.json') {
-			headers['Content-Encoding'] = 'zstd';
-		}
-
-		return new Response(file, { headers });
+		return new Response(file, {
+			headers: {
+				'Content-Type': contentType,
+				// Optional: helpful for debugging local assets
+				'x-local-proxy': 'true'
+			}
+		});
 	} catch {
 		throw error(404, 'File not found');
 	}

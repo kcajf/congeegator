@@ -343,15 +343,14 @@ def main():
         conj_data_dir = os.path.join(conj_r2_dir, "data", f"v{DATA_VERSION}")
         shutil.rmtree(conj_data_dir, ignore_errors=True)
 
-        conj_uncompressed_sizes: dict[str, int] = {}
         with log_timing("write congeegator output files"):
             for lang in conj_data.keys():
                 lang_dir = os.path.join(conj_data_dir, lang)
                 log.info(f"Writing congeegator {lang_dir}")
-                conj_uncompressed_sizes[lang] = write_language_data(conj_data[lang], lang_dir, entries_key="verbs", name_key="name", pretty=args.pretty)
+                write_language_data(conj_data[lang], lang_dir, entries_key="verbs", name_key="name", pretty=args.pretty)
 
         conj_manifest_path = os.path.join("apps", "congeegator", "src", "lib", "data-manifest.json")
-        write_data_manifest(conj_data_dir, CONFIG, make_language_static_metadata, conj_manifest_path, uncompressed_sizes=conj_uncompressed_sizes)
+        write_data_manifest(conj_data_dir, CONFIG, make_language_static_metadata, conj_manifest_path)
 
     # --- Lexicoff output ---
     if dict_data:
@@ -363,15 +362,14 @@ def main():
         dict_data_dir = os.path.join(dict_r2_dir, "data", f"v{DATA_VERSION}")
         shutil.rmtree(dict_data_dir, ignore_errors=True)
 
-        dict_uncompressed_sizes: dict[str, int] = {}
         with log_timing("write lexicoff output files"):
             for lang in dict_data.keys():
                 lang_dir = os.path.join(dict_data_dir, lang)
                 log.info(f"Writing lexicoff {lang_dir}")
-                dict_uncompressed_sizes[lang] = write_language_data(dict_data[lang], lang_dir, entries_key="entries", name_key="word", pretty=args.pretty)
+                write_language_data(dict_data[lang], lang_dir, entries_key="entries", name_key="word", pretty=args.pretty)
 
         dict_manifest_path = os.path.join("apps", "lexicoff", "src", "lib", "data-manifest.json")
-        write_data_manifest(dict_data_dir, DICT_CONFIGS, make_dict_language_static_metadata, dict_manifest_path, uncompressed_sizes=dict_uncompressed_sizes)
+        write_data_manifest(dict_data_dir, DICT_CONFIGS, make_dict_language_static_metadata, dict_manifest_path)
 
     total = time.monotonic() - total_start
     log.info(f"[timing] total: {total:.1f}s")
