@@ -25,4 +25,4 @@ __pycache__/
 cache/
 
 r2_data/
-static/sitemap*.xml
+**/static/sitemap*.xml
