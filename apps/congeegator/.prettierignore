@@ -7,10 +7,7 @@ bun.lockb
 pixi.lock
 .claude/
 .github/
-.pytest_cache/
-
 # Machine-generated files
-tests/golden/
 src/lib/data-manifest.json
 
 # Miscellaneous

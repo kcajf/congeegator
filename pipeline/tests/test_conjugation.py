@@ -1,23 +1,24 @@
-"""Golden tests for data_processing.process_entry().
+"""Golden tests for conjugation extraction.
 
-Each test loads a raw Wiktionary JSONL fixture, runs process_entry(),
+Each test loads a raw Wiktionary JSONL fixture, runs extract_conjugation(),
 and compares output to a committed golden file. Use --update-golden
 to regenerate golden files after intentional changes.
 """
 
 import json
 import os
-import sys
 
 import msgspec
 import pytest
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-
-from data_processing import DE_CONFIG, EL_CONFIG, EN_CONFIG, ES_CONFIG, FR_CONFIG, IT_CONFIG, Entry, LanguageConfig, process_entry
+from pipeline.conjugation import (
+    DE_CONFIG, EL_CONFIG, EN_CONFIG, ES_CONFIG, FR_CONFIG, IT_CONFIG,
+    LanguageConfig, extract_conjugation as process_entry,
+)
+from pipeline.wiktionary import Entry
 
 FIXTURES_DIR = os.path.join(os.path.dirname(__file__), "fixtures")
-GOLDEN_DIR = os.path.join(os.path.dirname(__file__), "golden")
+GOLDEN_DIR = os.path.join(os.path.dirname(__file__), "golden", "conj")
 
 CONFIGS: dict[str, LanguageConfig] = {
     "fr": FR_CONFIG,
@@ -255,7 +256,7 @@ def test_german_archaic_bracket_spot_checks(
 
 def test_check_manifest_metadata():
     """Verify that check_manifest_metadata passes with the current committed manifest."""
-    from data_processing import check_manifest_metadata
+    from pipeline.generate import check_manifest_metadata
 
     assert check_manifest_metadata(), (
         "Manifest metadata doesn't match current LanguageConfig definitions. "

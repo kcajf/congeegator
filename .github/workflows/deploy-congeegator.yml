@@ -1,7 +1,10 @@
-name: Deploy
+name: Deploy (Congeegator)
 on:
   push:
     branches: [main]
+    paths:
+      - 'apps/congeegator/**'
+      - 'pipeline/**'
   workflow_dispatch:
 
 jobs:
@@ -20,8 +23,10 @@ jobs:
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: apps/congeegator/package-lock.json
 
       - run: npm ci
+        working-directory: apps/congeegator
 
       - name: Install rclone
         run: curl -fsS https://downloads.rclone.org/rclone-current-linux-amd64.zip -o /tmp/rclone.zip && unzip -qj /tmp/rclone.zip '*/rclone' -d /usr/local/bin/
@@ -40,10 +45,10 @@ jobs:
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
 
-      # Cache downloaded source data (keyed by SOURCE_DATA_VERSION in data_processing.py)
+      # Cache downloaded source data (keyed by SOURCE_DATA_VERSION in pipeline/cache.py)
       - name: Get source data version
         id: source-version
-        run: echo "version=$(grep -oP 'SOURCE_DATA_VERSION = "\K[^"]+' data_processing.py)" >> "$GITHUB_OUTPUT"
+        run: echo "version=$(grep -oP 'SOURCE_DATA_VERSION = "\K[^"]+' pipeline/cache.py)" >> "$GITHUB_OUTPUT"
 
       - name: Cache source data
         uses: actions/cache@v4
@@ -53,17 +58,20 @@ jobs:
 
       # Generate data from pinned source (fetches via public R2 URL, no creds needed)
       - name: Generate data
-        run: pixi run python data_processing.py
+        run: pixi run generate
 
       - name: Upload data to R2
         run: npm run r2-upload:prod
+        working-directory: apps/congeegator
 
       # Build and deploy
       - name: Build
         run: npm run build:prod
+        working-directory: apps/congeegator
 
       - name: Deploy to Cloudflare Workers
         run: npx wrangler deploy --env=production
+        working-directory: apps/congeegator
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

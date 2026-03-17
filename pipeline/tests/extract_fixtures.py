@@ -2,19 +2,17 @@
 """One-time utility to extract raw Wiktionary JSONL entries for key verbs from the cache.
 
 Usage:
-    pixi run python tests/extract_fixtures.py
+    pixi run python -m pipeline.tests.extract_fixtures
 
-Requires cached filtered data in cache/ (run data_processing.py first to populate).
+Requires cached filtered data in cache/ (run the pipeline first to populate).
 """
 
 import os
-import sys
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 import msgspec
 
-from data_processing import CacheManager, Entry
+from pipeline.cache import CacheManager
+from pipeline.wiktionary import Entry
 
 FIXTURE_VERBS = {
     "fr": {"être", "avoir", "aller", "manger", "finir"},

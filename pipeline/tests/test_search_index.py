@@ -1,22 +1,11 @@
 """Tests for build_search_index: verifies key verbs appear under expected prefixes,
 including diacritic-stripped and phonetic variants."""
 
-import os
-import sys
-
 import pytest
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-
-from data_processing import (
-    DE_CONFIG,
-    EL_CONFIG,
-    ES_CONFIG,
-    FR_CONFIG,
-    build_search_index,
-    to_phonetic_el,
-)
-from test_data_processing import CONFIGS, FIXTURE_VERBS, load_fixture_entries, process_entry
+from pipeline.search import build_search_index
+from pipeline.utils import to_phonetic_el
+from pipeline.tests.test_conjugation import CONFIGS, FIXTURE_VERBS, load_fixture_entries, process_entry
 
 
 def _build_index_for_lang(lang: str) -> tuple[dict[str, list[int]], list[str]]:

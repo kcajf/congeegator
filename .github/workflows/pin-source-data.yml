@@ -62,3 +62,7 @@ jobs:
             Review golden test diffs and update golden files if needed.
           branch: pin-source-data
           delete-branch: true
+          add-paths: |
+            pipeline/cache.py
+            apps/*/src/lib/data-manifest.json
+            pipeline/tests/golden/

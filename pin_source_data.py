@@ -7,7 +7,7 @@ Usage:
 Steps:
 1. Downloads raw Wiktionary data from kaikki.org and filters to relevant languages
 2. Uploads filtered .zst files to R2 at source-data/<timestamp>/
-3. Updates SOURCE_DATA_VERSION in data_processing.py
+3. Updates SOURCE_DATA_VERSION in pipeline/cache.py
 4. Runs the full pipeline to regenerate r2_data/ and data-manifest.json
 
 After running, review golden test diffs (pixi run test), then commit.
@@ -27,7 +27,7 @@ import requests
 import zstandard
 from tqdm import tqdm
 
-from data_processing import CONFIG
+from pipeline.conjugation import CONFIG
 
 log = logging.getLogger(__name__)
 
@@ -145,8 +145,8 @@ def _upload_to_r2(local_path: str, r2_path: str):
 
 
 def _update_version_in_source(version: str):
-    """Update SOURCE_DATA_VERSION in data_processing.py."""
-    dp_path = os.path.join(os.path.dirname(__file__), "data_processing.py")
+    """Update SOURCE_DATA_VERSION in pipeline/cache.py."""
+    dp_path = os.path.join(os.path.dirname(__file__), "pipeline", "cache.py")
     with open(dp_path, "r") as f:
         content = f.read()
 
@@ -166,7 +166,7 @@ def _run_pipeline():
     """Run the full data pipeline."""
     log.info("Running full data pipeline...")
     result = subprocess.run(
-        [sys.executable, "data_processing.py"],
+        [sys.executable, "-m", "pipeline.generate"],
         cwd=os.path.dirname(__file__) or ".",
     )
     if result.returncode != 0:
@@ -197,7 +197,7 @@ def main():
     print("Next steps:")
     print("  1. Review golden test diffs: pixi run test")
     print("  2. Update golden files if needed: pixi run pytest tests/ --update-golden")
-    print("  3. Commit: data_processing.py, src/lib/data-manifest.json, tests/golden/")
+    print("  3. Commit: pipeline/cache.py, apps/congeegator/src/lib/data-manifest.json, pipeline/tests/golden/")
 
 
 if __name__ == "__main__":

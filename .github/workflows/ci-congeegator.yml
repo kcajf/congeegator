@@ -1,7 +1,11 @@
-name: CI
+name: CI (Congeegator)
 on:
   pull_request:
     branches: [main]
+    paths:
+      - 'apps/congeegator/**'
+      - 'pipeline/**'
+      - 'pixi.toml'
 
 jobs:
   ci:
@@ -13,14 +17,20 @@ jobs:
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: apps/congeegator/package-lock.json
       - run: npm ci
+        working-directory: apps/congeegator
       - run: npm run lint
+        working-directory: apps/congeegator
       - run: npm run check
+        working-directory: apps/congeegator
       - run: npm test
+        working-directory: apps/congeegator
       - run: npm run build:staging
+        working-directory: apps/congeegator
       - uses: prefix-dev/setup-pixi@v0.8.1
         with:
           pixi-version: v0.46.0
           cache: true
       - run: pixi run test
-      - run: pixi run python data_processing.py --check-manifest-metadata
+      - run: pixi run python -m pipeline.generate --check-manifest-metadata
