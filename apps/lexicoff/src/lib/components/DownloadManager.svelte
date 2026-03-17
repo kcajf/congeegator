@@ -23,12 +23,10 @@
 	<div class="lang-list">
 		{#each languages as lang (lang.code)}
 			{@const info = globalSync.map[lang.code]}
-			{@const isDownloading = info?.status === 'downloading'}
-			{@const isInstalling = info?.status === 'installing'}
+			{@const isSyncing = info?.status === 'syncing'}
 			{@const isReady = info?.status === 'ready'}
 			{@const isError = info?.status === 'error'}
 			{@const hasUpdate = isReady && info.hash !== lang.dataHash}
-			{@const busy = isDownloading || isInstalling}
 			<div class="lang-row">
 				<div class="lang-info">
 					<span class="lang-name">{lang.name}</span>
@@ -36,17 +34,13 @@
 				</div>
 
 				<div class="lang-status">
-					{#if busy}
+					{#if isSyncing}
 						<div class="progress-area">
 							<span class="progress-text">
-								{#if isDownloading}
-									{#if info.receivedBytes != null && info.totalBytes}
-										{formatBytes(info.receivedBytes)} / {formatBytes(info.totalBytes)}
-									{:else}
-										Downloading...
-									{/if}
+								{#if info.receivedBytes != null && info.totalBytes}
+									{formatBytes(info.receivedBytes)} / {formatBytes(info.totalBytes)}
 								{:else}
-									Installing {info.percent ?? 0}%
+									Syncing...
 								{/if}
 							</span>
 							<div class="progress-bar">
