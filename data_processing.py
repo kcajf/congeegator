@@ -8,10 +8,12 @@ import re
 import shutil
 import sys
 import tempfile
+import time
 import typing
 import unicodedata
 import urllib.parse
 from collections import defaultdict
+from contextlib import contextmanager
 from typing import Any, Callable, Optional
 
 import msgspec
@@ -23,6 +25,18 @@ from rich.pretty import pprint
 from wordfreq import zipf_frequency
 
 log = logging.getLogger(__name__)
+
+
+@contextmanager
+def log_timing(label: str):
+    """Context manager that logs elapsed time for a block."""
+    start = time.monotonic()
+    log.info(f"[timing] {label}: started")
+    try:
+        yield
+    finally:
+        elapsed = time.monotonic() - start
+        log.info(f"[timing] {label}: {elapsed:.1f}s")
 
 # Timestamp version of pinned source data in R2.
 # Update by running: pixi run pin-source-data
@@ -351,6 +365,7 @@ class LanguageConfig(msgspec.Struct, frozen=True):
     phonetic_fn: Callable[[str], str] | None = None
     max_conj_tables: int | None = None  # When set, only use forms from the first N conjugation tables
     rare_tags: tuple[str, ...] = ()  # Forms with these Wiktionary tags get wrapped in [] markers
+    exclude_tags: tuple[str, ...] = ()  # Forms with any of these Wiktionary tags are excluded entirely
 
 
 def full_tense(
@@ -520,6 +535,8 @@ EL_CONFIG = LanguageConfig(
         TenseGroup("el_impers", re.compile(r"^el_impers_")),
     ],
     phonetic_fn=to_phonetic_el,
+    exclude_tags=("dated", "archaic"),
+    rare_tags=("rare",),
 )
 
 
@@ -1015,6 +1032,8 @@ def extract_one(
             continue
         assert form.form is not None
         if matcher.matches(form):
+            if l.exclude_tags and form.tags & set(l.exclude_tags):
+                continue
             formatted = matcher.format(form)
             if l.rare_tags and form.tags & set(l.rare_tags):
                 formatted = f"[{formatted}]"
@@ -1100,30 +1119,35 @@ def count_conjs(thing) -> int:
     return n
 
 
+def _orjson_dump(obj: Any, pretty: bool = False) -> bytes:
+    opts = orjson.OPT_NON_STR_KEYS
+    if pretty:
+        opts |= orjson.OPT_INDENT_2
+    return orjson.dumps(obj, option=opts)
+
+
 def write_language_data(data: dict[str, Any], lang_dir: str, pretty: bool = False):
     os.makedirs(lang_dir, exist_ok=True)
 
-    indent = 2 if pretty else None
-
     # full data file
     out_path = os.path.join(lang_dir, "data.json")
-    with open(out_path, "w") as f:
-        log.info(f"Wrote {out_path}")
-        json.dump(data, f, indent=indent, ensure_ascii=False)
+    with open(out_path, "wb") as f:
+        f.write(_orjson_dump(data, pretty))
+    log.info(f"Wrote {out_path}")
 
     # single verbs file
     single_verbs_dir = os.path.join(lang_dir, "verbs")
     os.makedirs(single_verbs_dir)
     for verb_data in data["verbs"]:
         with open(
-            os.path.join(single_verbs_dir, f"{verb_data['name']}.json"), "w"
+            os.path.join(single_verbs_dir, f"{verb_data['name']}.json"), "wb"
         ) as f:
-            json.dump(verb_data, f, indent=indent, ensure_ascii=False)
+            f.write(_orjson_dump(verb_data, pretty))
 
     # index file
-    with open(os.path.join(lang_dir, "index.json"), "w") as f:
+    with open(os.path.join(lang_dir, "index.json"), "wb") as f:
         names = [x["name"] for x in data["verbs"]]
-        json.dump(names, f, indent=indent, ensure_ascii=False)
+        f.write(_orjson_dump(names, pretty))
 
 
 def make_language_static_metadata(config: LanguageConfig):
@@ -1408,45 +1432,49 @@ def process_entry(config: LanguageConfig, entry: Entry) -> dict[str, Any] | None
 def generate_data_for_lang(wiki_lang: str, lang: LanguageConfig, dev: bool):
     log.info(f"generating {lang.code} data")
     cache = CacheManager()
-    data = cache.get_lang_filtered_raw_data(wiki_lang, lang.code)
+
+    with log_timing(f"{lang.code} download"):
+        data = list(cache.get_lang_filtered_raw_data(wiki_lang, lang.code))
 
     verbs: list[dict[str, Any]] = []
-
     seen_verbs: set[str] = set()
 
-    for line in data:
-        entry_just_pos = msgspec.json.decode(line, type=EntryJustPos)
-        if entry_just_pos.pos == "hard-redirect":
-            continue
+    with log_timing(f"{lang.code} process entries"):
+        for line in data:
+            entry_just_pos = msgspec.json.decode(line, type=EntryJustPos)
+            if entry_just_pos.pos == "hard-redirect":
+                continue
 
-        entry = msgspec.json.decode(line, type=Entry)
-        assert entry.lang_code == lang.code
+            entry = msgspec.json.decode(line, type=Entry)
+            assert entry.lang_code == lang.code
 
-        if entry.word in seen_verbs:
-            log.debug(f"duplicate: {entry.word}")
-            continue
+            if entry.word in seen_verbs:
+                log.debug(f"duplicate: {entry.word}")
+                continue
 
-        processed = process_entry(lang, entry)
-        if processed is None:
-            continue
+            processed = process_entry(lang, entry)
+            if processed is None:
+                continue
 
-        verbs.append(processed)
-        seen_verbs.add(entry.word)
+            verbs.append(processed)
+            seen_verbs.add(entry.word)
 
-        if dev and len(seen_verbs) > 20:
-            break
+            if dev and len(seen_verbs) > 20:
+                break
 
     log.info(f"{lang.code} has {len(verbs)} entries")
     verbs = sorted(verbs, key=lambda x: x["nameNoDiacritics"])
 
-    for verb in verbs:
-        verb["freq"] = round(zipf_frequency(verb["name"], lang.code), 2)
+    with log_timing(f"{lang.code} word frequencies"):
+        for verb in verbs:
+            verb["freq"] = round(zipf_frequency(verb["name"], lang.code), 2)
 
     unique_verbs = {x["name"] for x in verbs}
     if len(unique_verbs) != len(verbs):
         raise ValueError("duplicates")
 
-    search_index = build_search_index(verbs, phonetic_fn=lang.phonetic_fn)
+    with log_timing(f"{lang.code} search index"):
+        search_index = build_search_index(verbs, phonetic_fn=lang.phonetic_fn)
 
     return {
         "verbs": verbs,
@@ -1574,10 +1602,14 @@ def main():
         ok = check_manifest_metadata()
         sys.exit(0 if ok else 1)
 
-    data = generate_data(dev=args.dev)
+    total_start = time.monotonic()
 
-    sitemaps_dir = os.path.join(os.path.dirname(__file__), "static")
-    generate_sitemaps(data, sitemaps_dir)
+    with log_timing("generate data (all languages)"):
+        data = generate_data(dev=args.dev)
+
+    with log_timing("generate sitemaps"):
+        sitemaps_dir = os.path.join(os.path.dirname(__file__), "static")
+        generate_sitemaps(data, sitemaps_dir)
 
     DATA_VERSION = "1"
 
@@ -1585,13 +1617,16 @@ def main():
     data_dir = os.path.join(static_dir, "data", f"v{DATA_VERSION}")
     shutil.rmtree(data_dir, ignore_errors=True)
 
-    for lang in data.keys():
-        lang_dir = os.path.join(data_dir, lang)
-        log.info(f"Writing {lang_dir}")
-        write_language_data(data[lang], lang_dir, pretty=args.pretty)
+    with log_timing("write output files"):
+        for lang in data.keys():
+            lang_dir = os.path.join(data_dir, lang)
+            log.info(f"Writing {lang_dir}")
+            write_language_data(data[lang], lang_dir, pretty=args.pretty)
 
     write_data_manifest(data_dir)
-    log.info("all done")
+
+    total = time.monotonic() - total_start
+    log.info(f"[timing] total: {total:.1f}s")
 
 
 if __name__ == "__main__":
