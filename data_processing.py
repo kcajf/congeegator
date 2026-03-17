@@ -1309,6 +1309,7 @@ def extract_gloss(entry: Entry) -> Optional[str]:
     # e.g. one from "As an auxiliary verb:", one from "As a copulative verb:", etc.
     seen_headers: set[str] = set()
     glosses: list[str] = []
+    has_more = False
     for sense in valid_senses:
         header = sense.glosses[0] if len(sense.glosses) > 1 else ""
         if header in seen_headers:
@@ -1317,28 +1318,32 @@ def extract_gloss(entry: Entry) -> Optional[str]:
             seen_headers.add(header)
         # Use glosses[-1] — the specific definition, not glosses[0] which is
         # often a category header like "As an auxiliary verb:"
-        gloss = sense.glosses[-1][0].lower() + sense.glosses[-1][1:]
+        raw_gloss = sense.glosses[-1][0].lower() + sense.glosses[-1][1:]
         # Skip meta-glosses (grammar notes, "synonym of", etc.)
-        if _is_junk_gloss(gloss):
+        if _is_junk_gloss(raw_gloss):
             continue
         # Strip parenthetical clarifications for brevity
-        gloss = re.sub(r"\s*\(.*?\)", "", gloss).strip()
+        raw_gloss = re.sub(r"\s*\(.*?\)", "", raw_gloss).strip()
         # Strip bracketed context (grammar notes like [with dative 'to someone'])
-        gloss = re.sub(r"\s*\[.*?\]", "", gloss).strip()
-        # Take first clause only — Wiktionary glosses can contain semicolons
-        gloss = gloss.split(";")[0].strip()
-        # Normalise trailing punctuation
-        gloss = gloss.rstrip(".")
-        if gloss and gloss not in glosses:
-            glosses.append(gloss)
-        if len(glosses) >= 3:
+        raw_gloss = re.sub(r"\s*\[.*?\]", "", raw_gloss).strip()
+        # Split on semicolons and treat each part as a candidate
+        parts = [p.strip().rstrip(".") for p in raw_gloss.split(";")]
+        for part in parts:
+            if not part or _is_junk_gloss(part):
+                continue
+            if part not in glosses:
+                if len(glosses) >= 3:
+                    has_more = True
+                    break
+                glosses.append(part)
+        if has_more:
             break
 
     if not glosses:
         return None
 
     result = "; ".join(glosses)
-    if len(valid_senses) > len(glosses):
+    if has_more:
         result += "; ..."
     return result
 
