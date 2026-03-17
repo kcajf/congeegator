@@ -23,10 +23,7 @@ jobs:
 
       - run: npm ci
 
-      - name: Install rclone
-        run: sudo apt-get install -y -qq rclone
-
-      # Configure rclone for R2 upload
+      # Configure rclone for R2 upload (rclone is preinstalled on GitHub runners)
       - name: Configure rclone
         run: |
           rclone config create r2-congeegator s3 \
