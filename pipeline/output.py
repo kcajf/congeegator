@@ -11,7 +11,7 @@ from .utils import _orjson_dump
 
 log = logging.getLogger(__name__)
 
-ZSTD_LEVEL = 6
+ZSTD_LEVEL = 19
 
 
 def _zstd_compress(data: bytes, level: int = ZSTD_LEVEL) -> bytes:
