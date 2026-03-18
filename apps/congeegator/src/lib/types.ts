@@ -37,6 +37,7 @@ export type SearchIndexStorage = Record<string, Id[]>;
 export interface MetaEntry {
 	lang: string;
 	hash: string;
+	entryCount?: number;
 }
 
 export interface SearchIndexEntry {

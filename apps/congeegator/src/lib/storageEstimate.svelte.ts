@@ -27,7 +27,8 @@ class StorageEstimate {
 	async refresh() {
 		if (!browser) return;
 		try {
-			this.verbCount = await db.verbs.count();
+			const meta = await db.metadata.toArray();
+			this.verbCount = meta.reduce((sum, m) => sum + (m.entryCount ?? 0), 0);
 		} catch {
 			this.verbCount = null;
 		}
