@@ -1,3 +1,4 @@
+import Dexie from 'dexie';
 import { getLangDataUrl, manifest } from './dataUtils';
 import { db } from './db';
 import type { DictRecord } from './types';
@@ -8,19 +9,30 @@ self.onmessage = async (e: MessageEvent<{ lang: string; type?: string }>) => {
 	const { lang, type: msgType } = e.data;
 
 	if (msgType === 'delete') {
-		try {
-			await db.transaction('rw', [db.entries, db.metadata, db.searchIndices], async () => {
-				await db.entries.where({ lang }).delete();
-				await db.metadata.delete(lang);
-				await db.searchIndices.delete(lang);
-			});
-			self.postMessage({ type: 'DELETED', lang });
-		} catch (error) {
-			self.postMessage({
-				type: 'ERROR',
-				lang,
-				error: error instanceof Error ? error.message : String(error)
-			});
+		const doDelete = async () => {
+			try {
+				await db.transaction('rw', [db.entries, db.metadata, db.searchIndices], async () => {
+					await db.entries
+						.where('[lang+id]')
+						.between([lang, Dexie.minKey], [lang, Dexie.maxKey], true, true)
+						.delete();
+					await db.metadata.delete(lang);
+					await db.searchIndices.delete(lang);
+				});
+				self.postMessage({ type: 'DELETED', lang });
+			} catch (error) {
+				self.postMessage({
+					type: 'ERROR',
+					lang,
+					error: error instanceof Error ? error.message : String(error)
+				});
+			}
+		};
+
+		if (navigator.locks) {
+			await navigator.locks.request(`sync-${lang}`, doDelete);
+		} else {
+			await doDelete();
 		}
 		return;
 	}
@@ -70,7 +82,10 @@ self.onmessage = async (e: MessageEvent<{ lang: string; type?: string }>) => {
 				const totalBytes = remote.dataSize ?? null;
 
 				// Delete old entries before streaming new ones
-				await db.entries.where({ lang }).delete();
+				await db.entries
+					.where('[lang+id]')
+					.between([lang, Dexie.minKey], [lang, Dexie.maxKey], true, true)
+					.delete();
 
 				// Read chunks, decode, split lines, batch insert — all in one loop.
 				// No TransformStream pipeline: one await per network chunk, not per line.
