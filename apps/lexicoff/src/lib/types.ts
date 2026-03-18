@@ -21,7 +21,6 @@ export interface DictSense {
 export interface DictRecord {
 	id: Id;
 	word: string;
-	wordNoDiacritics: string;
 	lang: string;
 	pos: string;
 	senses: DictSense[];
@@ -30,15 +29,4 @@ export interface DictRecord {
 	forms?: string[];
 	pronunciation?: string;
 	etymology?: string;
-}
-
-export interface SearchPrefixEntry {
-	lang: string;
-	prefix: string;
-	ids: Id[];
-}
-
-export interface MetaEntry {
-	lang: string;
-	hash: string;
 }

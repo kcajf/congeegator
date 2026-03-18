@@ -44,6 +44,6 @@
 		"vitest": "^4.1.0"
 	},
 	"dependencies": {
-		"dexie": "^4.2.1"
+		"wa-sqlite": "^1.0.0"
 	}
 }

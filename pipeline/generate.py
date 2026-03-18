@@ -8,11 +8,9 @@ import argparse
 import json
 import logging
 import os
-import re
 import shutil
 import sys
 import time
-from collections import defaultdict
 from typing import Any
 
 import msgspec
@@ -22,99 +20,13 @@ from .cache import CacheManager
 from .conjugation import CONFIG, LanguageConfig, extract_conjugation, make_language_static_metadata
 from .dictionary import DICT_CONFIGS, DictLanguageConfig, process_dict_entry, make_dict_language_static_metadata
 from .gloss import extract_gloss
-from .output import generate_sitemaps, write_data_manifest, write_language_data
-from .search import build_search_index, GLOSS_STOP_WORDS, MIN_GLOSS_WORD_LENGTH
+from .output import generate_sitemaps, write_data_manifest, write_language_data, write_sqlite_manifest
+from .search import build_search_index
+from .sqlite_output import write_sqlite_database
 from .utils import log_timing, strip_diacritics
 from .wiktionary import Entry, EntryJustPos
 
 log = logging.getLogger(__name__)
-
-
-def build_dict_search_index(
-    entries: list[dict[str, Any]],
-    phonetic_fn=None,
-) -> dict[str, list[int]]:
-    """Build a prefix search index for dictionary entries.
-
-    Indexes entry words, their diacritics-stripped forms, phonetic forms,
-    inflected forms, and gloss words.
-    """
-    from .gloss import _is_junk_gloss
-
-    log.info("generating dict search index")
-    searchable_words = defaultdict[str, set[int]](lambda: set())
-
-    for i, entry in enumerate(entries):
-        word = entry["word"]
-        searchable_words[word].add(i)
-        stripped = strip_diacritics(word)
-        searchable_words[stripped].add(i)
-        if phonetic_fn:
-            phonetic = phonetic_fn(word)
-            if phonetic != word and phonetic != stripped:
-                searchable_words[phonetic].add(i)
-
-        # Index inflected forms
-        for form in entry.get("forms", []):
-            if not form or form == "-":
-                continue
-            searchable_words[form].add(i)
-            searchable_words[strip_diacritics(form)].add(i)
-            if phonetic_fn:
-                phonetic = phonetic_fn(form)
-                if phonetic != form and phonetic != strip_diacritics(form):
-                    searchable_words[phonetic].add(i)
-
-    # Collect gloss words (English definitions) with prefix range 3-6
-    gloss_words = defaultdict[str, set[int]](lambda: set())
-    for i, entry in enumerate(entries):
-        for sense in entry.get("senses", []):
-            gloss = sense.get("gloss", "")
-            if not gloss:
-                continue
-            for clause in gloss.split("; "):
-                if clause == "...":
-                    continue
-                if _is_junk_gloss(clause):
-                    continue
-                clause = re.sub(r"\s*\[.*?\]", "", clause)
-                for token in re.split(r"[\s,;]+", clause.lower()):
-                    word = token.strip("().[]'\"")
-                    if len(word) >= MIN_GLOSS_WORD_LENGTH and word not in GLOSS_STOP_WORDS:
-                        gloss_words[word].add(i)
-
-    index = defaultdict[str, set[int]](lambda: set())
-
-    MIN_PREFIX = 1
-    MAX_PREFIX = 4
-    MAX_PREFIX_IDS = 200
-
-    for word, indices in searchable_words.items():
-        for prefix_len in range(MIN_PREFIX, MAX_PREFIX + 1):
-            word_prefix = word[:prefix_len].lower()
-            for i in indices:
-                index[word_prefix].add(i)
-
-    # Gloss words use prefix range 3-6
-    MIN_GLOSS_PREFIX = 3
-    MAX_GLOSS_PREFIX = 6
-    for word, ids in gloss_words.items():
-        for prefix_len in range(MIN_GLOSS_PREFIX, MAX_GLOSS_PREFIX + 1):
-            prefix = word[:prefix_len].lower()
-            index[prefix].update(ids)
-
-    ret = {k: sorted(v)[:MAX_PREFIX_IDS] for k, v in index.items()}
-
-    max_hits = 0
-    max_key = None
-    for k, v in ret.items():
-        if len(v) > max_hits:
-            max_hits = len(v)
-            max_key = k
-
-    log.info(f"Longest dict index entry: '{max_key}', {max_hits} hits")
-
-    return ret
 
 
 def generate_data_for_lang(
@@ -187,18 +99,14 @@ def generate_data_for_lang(
     # Build dictionary output
     if dict_config is not None and dict_entries:
         log.info(f"{lang_code} has {len(dict_entries)} dictionary entries")
-        dict_entries = sorted(dict_entries, key=lambda x: x.get("wordNoDiacritics", x["word"]))
+        dict_entries = sorted(dict_entries, key=lambda x: strip_diacritics(x["word"]))
 
         with log_timing(f"{lang_code} dict word frequencies"):
             for entry in dict_entries:
                 entry["freq"] = round(zipf_frequency(entry["word"], lang_code), 2)
 
-        with log_timing(f"{lang_code} dict search index"):
-            dict_search_index = build_dict_search_index(dict_entries, phonetic_fn=dict_config.phonetic_fn)
-
         dict_data = {
             "entries": dict_entries,
-            "searchIndex": dict_search_index,
         }
 
     return conj_data, dict_data
@@ -352,24 +260,27 @@ def main():
         conj_manifest_path = os.path.join("apps", "congeegator", "src", "lib", "data-manifest.json")
         write_data_manifest(conj_data_dir, CONFIG, make_language_static_metadata, conj_manifest_path)
 
-    # --- Lexicoff output ---
+    # --- Lexicoff output (SQLite) ---
     if dict_data:
-        with log_timing("generate lexicoff sitemaps"):
-            dict_sitemaps_dir = os.path.join("apps", "lexicoff", "static")
-            generate_sitemaps(dict_data, dict_sitemaps_dir, base_url=LEXICOFF_BASE_URL, entries_key="entries", name_key="word")
-
         dict_r2_dir = os.path.join("apps", "lexicoff", "r2_data")
         dict_data_dir = os.path.join(dict_r2_dir, "data", f"v{DATA_VERSION}")
         shutil.rmtree(dict_data_dir, ignore_errors=True)
 
-        with log_timing("write lexicoff output files"):
-            for lang in dict_data.keys():
-                lang_dir = os.path.join(dict_data_dir, lang)
-                log.info(f"Writing lexicoff {lang_dir}")
-                write_language_data(dict_data[lang], lang_dir, entries_key="entries", name_key="word", pretty=args.pretty, ndjson=True)
+        with log_timing("write lexicoff sqlite databases"):
+            for lang_code in dict_data.keys():
+                lang_dir = os.path.join(dict_data_dir, lang_code)
+                os.makedirs(lang_dir, exist_ok=True)
+                sqlite_path = os.path.join(lang_dir, f"{lang_code}.sqlite")
+                dict_config = dict_configs[lang_code]
+                write_sqlite_database(
+                    dict_data[lang_code]["entries"],
+                    lang_code,
+                    phonetic_fn=dict_config.phonetic_fn,
+                    output_path=sqlite_path,
+                )
 
         dict_manifest_path = os.path.join("apps", "lexicoff", "src", "lib", "data-manifest.json")
-        write_data_manifest(dict_data_dir, DICT_CONFIGS, make_dict_language_static_metadata, dict_manifest_path, data_filename="data.ndjson")
+        write_sqlite_manifest(dict_data_dir, DICT_CONFIGS, make_dict_language_static_metadata, dict_manifest_path)
 
     total = time.monotonic() - total_start
     log.info(f"[timing] total: {total:.1f}s")

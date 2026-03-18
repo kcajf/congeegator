@@ -99,6 +99,51 @@ def write_data_manifest(
         )
 
 
+def write_sqlite_manifest(
+    data_dir: str,
+    configs: list,
+    make_metadata: Callable,
+    manifest_path: str,
+):
+    """Write a data-manifest.json for SQLite-based languages (Lexicoff).
+
+    Hashes the .sqlite file per language, renames to hashed dir.
+    """
+    language_hashes = {}
+    for config in configs:
+        sqlite_path = os.path.join(data_dir, config.code, f"{config.code}.sqlite")
+        if not os.path.exists(sqlite_path):
+            continue
+
+        data_size = os.path.getsize(sqlite_path)
+
+        with open(sqlite_path, "rb") as f:
+            h = hashlib.file_digest(f, "md5").hexdigest()[:8]
+
+        hashed_data_dir = os.path.join(data_dir, f"{config.code}-{h}")
+        os.rename(os.path.join(data_dir, config.code), hashed_data_dir)
+
+        log.info(f"{config.code}: dataHash={h} dataSize={data_size}")
+
+        language_hashes[config.code] = {
+            "dataHash": h,
+            "dataSize": data_size,
+            **make_metadata(config),
+        }
+
+    log.info(f"Writing {manifest_path}")
+    os.makedirs(os.path.dirname(manifest_path), exist_ok=True)
+    with open(manifest_path, "w") as f:
+        json.dump(
+            {
+                "languages": language_hashes,
+            },
+            f,
+            indent=2,
+            ensure_ascii=False,
+        )
+
+
 MAX_URLS_PER_SITEMAP = 40_000
 
 

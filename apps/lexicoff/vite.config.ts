@@ -24,7 +24,7 @@ export default defineConfig({
 			},
 			workbox: {
 				globPatterns: [
-					'client/**/*.{js,css,ico,png,svg,webp}',
+					'client/**/*.{js,css,ico,png,svg,webp,wasm}',
 					'prerendered/pages/app-shell.html',
 					'prerendered/pages/**/*.json'
 				],

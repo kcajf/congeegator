@@ -4,7 +4,7 @@ from typing import Any, Callable, Optional
 
 import msgspec
 
-from .utils import _cat_names, strip_diacritics, to_phonetic_el
+from .utils import _cat_names, to_phonetic_el
 from .wiktionary import Entry
 
 log = logging.getLogger(__name__)
@@ -167,7 +167,6 @@ def process_dict_entry(config: DictLanguageConfig, entry: Entry) -> dict[str, An
         return None
     processed: dict[str, Any] = {
         "word": entry.word,
-        "wordNoDiacritics": strip_diacritics(entry.word),
         "pos": entry.pos,
         "senses": senses,
     }
