@@ -55,7 +55,7 @@ if (browser) {
 					globalSync.map[lang] = { hash: meta.hash, status: 'ready' };
 				}
 			});
-			searchLangState.reloadIndex(lang);
+			searchLangState.checkReady(lang);
 		}
 
 		if (type === 'ERROR') {

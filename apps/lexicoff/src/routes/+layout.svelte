@@ -20,7 +20,7 @@
 	import { searchLangState } from '$lib/searchLang.svelte';
 	import { globalSync } from '$lib/syncManager.svelte';
 	import { toasts } from '$lib/toasts.svelte';
-	import type { DictRecord } from '$lib/types';
+	import type { DictRecord, Id } from '$lib/types';
 	import { onMount, tick } from 'svelte';
 	import { pwaInfo } from 'virtual:pwa-info';
 	import type { LayoutProps } from './$types';
@@ -110,69 +110,72 @@
 	}
 
 	$effect(() => {
-		const index = searchLangState.indexData;
+		const ready = searchLangState.indexReady;
 
 		const currentLang = searchLangState.lang;
 		const originalQuery = searchTerm.toLowerCase().trim();
 		const stripped = stripDiacritics(originalQuery);
 		const currentQuery = toPhonetic(currentLang, stripped);
-		if (!index || currentQuery.length < 1) {
+		if (!ready || currentQuery.length < 1) {
 			searchResults = [];
 			return;
 		}
 
-		const allPrefixIds = prefixLookup(index, currentQuery);
-		const prefixIds = allPrefixIds.slice(0, MAX_PREFIX_IDS);
+		prefixLookup(currentLang, currentQuery)
+			.then((allPrefixIds: Id[]) => {
+				const prefixIds = allPrefixIds.slice(0, MAX_PREFIX_IDS);
 
-		if (prefixIds.length === 0) {
-			searchResults = [];
-			return;
-		}
-
-		const dbKeys = prefixIds.map((id) => [currentLang, id]);
-
-		db.entries
-			.bulkGet(dbKeys)
-			.then((data) => {
-				if (
-					currentQuery !== toPhonetic(currentLang, stripDiacritics(searchTerm.toLowerCase().trim()))
-				)
+				if (prefixIds.length === 0) {
+					searchResults = [];
 					return;
-
-				const entries = data.filter((v): v is DictRecord => !!v);
-
-				const nativeResults = entries.flatMap((e) =>
-					findMatches(e, originalQuery, currentQuery, currentLang)
-				);
-
-				const nativeWords = new Set(nativeResults.map((r) => r.word + ':' + r.pos));
-				const glossResults =
-					originalQuery.length >= 3
-						? entries
-								.filter((e) => !nativeWords.has(e.word + ':' + e.pos))
-								.map((e) => findGlossMatch(e, originalQuery))
-								.filter((r): r is SearchResult => r !== null)
-						: [];
-
-				// Deduplicate by word (collapse multiple POS into one result)
-				// eslint-disable-next-line svelte/prefer-svelte-reactivity
-				const byWord = new Map<string, SearchResult>();
-				for (const r of [...nativeResults, ...glossResults]) {
-					const existing = byWord.get(r.word);
-					if (
-						!existing ||
-						r.quality < existing.quality ||
-						(r.quality === existing.quality && r.freq > existing.freq)
-					) {
-						byWord.set(r.word, r);
-					}
 				}
 
-				searchResults = [...byWord.values()]
-					.sort((a, b) => a.quality - b.quality || b.freq - a.freq || a.word.length - b.word.length)
-					.slice(0, MAX_SEARCH_RESULTS);
+				const dbKeys = prefixIds.map((id) => [currentLang, id]);
+
+				return db.entries.bulkGet(dbKeys).then((data) => {
+					if (
+						currentQuery !==
+						toPhonetic(currentLang, stripDiacritics(searchTerm.toLowerCase().trim()))
+					)
+						return;
+
+					const entries = data.filter((v): v is DictRecord => !!v);
+
+					const nativeResults = entries.flatMap((e) =>
+						findMatches(e, originalQuery, currentQuery, currentLang)
+					);
+
+					const nativeWords = new Set(nativeResults.map((r) => r.word + ':' + r.pos));
+					const glossResults =
+						originalQuery.length >= 3
+							? entries
+									.filter((e) => !nativeWords.has(e.word + ':' + e.pos))
+									.map((e) => findGlossMatch(e, originalQuery))
+									.filter((r): r is SearchResult => r !== null)
+							: [];
+
+					// Deduplicate by word (collapse multiple POS into one result)
+					// eslint-disable-next-line svelte/prefer-svelte-reactivity
+					const byWord = new Map<string, SearchResult>();
+					for (const r of [...nativeResults, ...glossResults]) {
+						const existing = byWord.get(r.word);
+						if (
+							!existing ||
+							r.quality < existing.quality ||
+							(r.quality === existing.quality && r.freq > existing.freq)
+						) {
+							byWord.set(r.word, r);
+						}
+					}
+
+					searchResults = [...byWord.values()]
+						.sort(
+							(a, b) => a.quality - b.quality || b.freq - a.freq || a.word.length - b.word.length
+						)
+						.slice(0, MAX_SEARCH_RESULTS);
+				});
 			})
-			.catch((err) => {
+			.catch((err: unknown) => {
 				console.error('Search lookup failed:', err);
 				searchResults = [];
 			});
@@ -242,7 +245,7 @@
 				{/each}
 			</ul>
 		{:else if searchTerm.trim().length >= 1}
-			{#if !searchLangState.indexData}
+			{#if !searchLangState.indexReady}
 				<div class="no-results">
 					{#if globalSync.map[searchLangState.lang]?.status === 'ready'}
 						Loading...
