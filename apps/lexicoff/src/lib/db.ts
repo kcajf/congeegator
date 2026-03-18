@@ -6,7 +6,7 @@ export class DictionaryDatabase extends Dexie {
 	metadata!: Table<MetaEntry>;
 
 	constructor() {
-		super('LexicoffDB');
+		super('LexicoffDB', { chromeTransactionDurability: 'relaxed' });
 		this.version(1).stores({
 			entries: '[lang+id], [lang+word]',
 			metadata: 'lang'
