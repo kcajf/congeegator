@@ -56,6 +56,16 @@ function init() {
 // Initialize eagerly on import
 init();
 
+// Promise that resolves once syncManager has discovered and opened all OPFS databases.
+// Call resolveDbsReady() from syncManager after init completes.
+let _resolveDbsReady: () => void;
+export const dbsReady: Promise<void> = new Promise((r) => {
+	_resolveDbsReady = r;
+});
+export function resolveDbsReady() {
+	_resolveDbsReady();
+}
+
 async function send(type: string, data: Record<string, unknown> = {}): Promise<unknown> {
 	if (!worker || !ready) throw new Error('SQLite worker not available (server-side?)');
 	await ready;

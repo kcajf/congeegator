@@ -1,5 +1,6 @@
 import { browser } from '$app/environment';
 import * as sqliteClient from './sqliteClient';
+import { resolveDbsReady } from './sqliteClient';
 import { manifest } from './dataUtils';
 import { searchLangState } from './searchLang.svelte';
 
@@ -145,6 +146,9 @@ class GlobalSyncRegistry {
 		}
 
 		this.initialized = true;
+		resolveDbsReady();
+		// Notify search that installed languages are ready
+		searchLangState.checkReady();
 	}
 }
 

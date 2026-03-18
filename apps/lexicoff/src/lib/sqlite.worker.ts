@@ -1,22 +1,10 @@
 /**
- * SQLite Web Worker — handles all database queries via wa-sqlite + OPFS.
+ * SQLite Web Worker — handles all database queries via @sqlite.org/sqlite-wasm.
  *
- * Uses AccessHandlePoolVFS for synchronous OPFS access (works without
- * COOP/COEP headers, compatible with Safari 17+).
+ * Uses the official SQLite WASM build with built-in FTS5 and OPFS support.
  */
 
-import SQLiteESMFactory from 'wa-sqlite/dist/wa-sqlite.mjs';
-import * as SQLite from 'wa-sqlite/src/sqlite-api.js';
-import type { SQLiteAPI } from 'wa-sqlite/src/sqlite-api.js';
-import { AccessHandlePoolVFS } from 'wa-sqlite/src/examples/AccessHandlePoolVFS.js';
-
-interface QueryRequest {
-	id: number;
-	type: 'search' | 'getWord' | 'isInstalled' | 'getInstalledLangs' | 'open' | 'close' | 'list';
-	lang?: string;
-	query?: string;
-	word?: string;
-}
+import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
 
 interface SearchResult {
 	word: string;
@@ -26,81 +14,96 @@ interface SearchResult {
 	freq: number;
 }
 
-let sqlite3: SQLiteAPI;
-let vfs: AccessHandlePoolVFS;
-
-// Map of lang code → database pointer (number)
-const openDbs = new Map<string, number>();
+/* eslint-disable @typescript-eslint/no-explicit-any */
+let sqlite3: any;
+const openDbs = new Map<string, any>();
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 async function init() {
-	const module = await SQLiteESMFactory();
-	sqlite3 = SQLite.Factory(module);
-	vfs = new AccessHandlePoolVFS('/lexicoff');
-	await vfs.isReady;
-	sqlite3.vfs_register(vfs);
+	sqlite3 = await sqlite3InitModule({ print: console.log, printErr: console.error });
 	self.postMessage({ type: 'READY' });
 }
 
-function getDb(lang: string): number | null {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getDb(lang: string): any | null {
 	return openDbs.get(lang) ?? null;
 }
 
 async function openDb(lang: string, hash: string): Promise<boolean> {
 	if (openDbs.has(lang)) {
-		// Already open — close and reopen for potential update
 		try {
-			sqlite3.close(openDbs.get(lang)!);
+			openDbs.get(lang).close();
 		} catch {
 			// ignore
 		}
 		openDbs.delete(lang);
 	}
 
-	const filename = `${lang}-${hash}.sqlite`;
 	try {
-		const db = await sqlite3.open_v2(
-			filename,
-			SQLite.SQLITE_OPEN_READONLY | SQLite.SQLITE_OPEN_URI,
-			'AccessHandlePoolVFS'
+		// Read the .sqlite file from OPFS into memory
+		const bytes = await readOpfsFile(lang, hash);
+		if (!bytes) return false;
+
+		// Create in-memory DB and deserialize the file contents
+		const p = sqlite3.wasm.allocFromTypedArray(bytes);
+		const db = new sqlite3.oo1.DB();
+		const rc = sqlite3.capi.sqlite3_deserialize(
+			db.pointer,
+			'main',
+			p,
+			bytes.byteLength,
+			bytes.byteLength,
+			sqlite3.capi.SQLITE_DESERIALIZE_FREEONCLOSE | sqlite3.capi.SQLITE_DESERIALIZE_READONLY
 		);
+		if (rc !== 0) {
+			console.error(`sqlite3_deserialize failed: rc=${rc}`);
+			db.close();
+			return false;
+		}
 		openDbs.set(lang, db);
 		return true;
-	} catch {
+	} catch (e) {
+		console.error(`Failed to open ${lang}-${hash}:`, e);
 		return false;
+	}
+}
+
+async function readOpfsFile(lang: string, hash: string): Promise<Uint8Array | null> {
+	try {
+		const root = await navigator.storage.getDirectory();
+		const dir = await root.getDirectoryHandle('lexicoff');
+		const fileHandle = await dir.getFileHandle(`${lang}-${hash}.sqlite`);
+		const file = await fileHandle.getFile();
+		const buffer = await file.arrayBuffer();
+		return new Uint8Array(buffer);
+	} catch {
+		return null;
 	}
 }
 
 async function closeDb(lang: string) {
 	const db = openDbs.get(lang);
-	if (db !== undefined) {
-		sqlite3.close(db);
+	if (db) {
+		db.close();
 		openDbs.delete(lang);
 	}
 }
 
-function execQuery(
-	db: number,
-	sql: string,
-	params: SQLite.SQLiteCompatibleType[] = []
-): unknown[][] {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function execQuery(db: any, sql: string, params: unknown[] = []): unknown[][] {
 	const rows: unknown[][] = [];
-	for (const stmt of sqlite3.statements(db, sql)) {
-		if (params.length > 0) {
-			sqlite3.bind_collection(stmt, params);
-		}
-		const cols = sqlite3.column_count(stmt);
-		while (sqlite3.step(stmt) === SQLite.SQLITE_ROW) {
-			const row: unknown[] = [];
-			for (let i = 0; i < cols; i++) {
-				row.push(sqlite3.column(stmt, i));
-			}
-			rows.push(row);
-		}
-	}
+	db.exec({
+		sql,
+		bind: params.length > 0 ? params : undefined,
+		callback: (row: unknown[]) => {
+			rows.push([...row]);
+		},
+		rowMode: 'array'
+	});
 	return rows;
 }
 
-function search(lang: string, query: string, phoneticQuery: string): SearchResult[] {
+async function search(lang: string, query: string, phoneticQuery: string): Promise<SearchResult[]> {
 	const db = getDb(lang);
 	if (!db) return [];
 
@@ -117,7 +120,6 @@ function search(lang: string, query: string, phoneticQuery: string): SearchResul
 	const ftsPrefix = ftsQuery + '*';
 
 	// Search word and forms (quality 0/1 via diacritics), gloss (quality 3)
-	// FTS5 with remove_diacritics 2 handles accent-insensitive matching natively
 	const sql = `
 		SELECT e.word, e.pos, e.freq, 'word' as match_type
 		FROM entries e
@@ -160,12 +162,10 @@ function search(lang: string, query: string, phoneticQuery: string): SearchResul
 			try {
 				const phoneticRows = execQuery(
 					db,
-					`
-					SELECT e.word, e.pos, e.freq
+					`SELECT e.word, e.pos, e.freq
 					FROM entries e
 					JOIN (SELECT rowid FROM entries_fts WHERE phonetic MATCH ?) AS fts ON e.id = fts.rowid
-					LIMIT 100
-				`,
+					LIMIT 100`,
 					[ftsPhonetic + '*']
 				);
 				for (const [word, pos, freq] of phoneticRows) {
@@ -231,17 +231,15 @@ function search(lang: string, query: string, phoneticQuery: string): SearchResul
 		.slice(0, 50);
 }
 
-function getWord(lang: string, word: string): unknown[] {
+async function getWord(lang: string, word: string): Promise<unknown[]> {
 	const db = getDb(lang);
 	if (!db) return [];
 
 	const rows = execQuery(
 		db,
-		`
-		SELECT id, word, pos, senses, freq, gender, forms, pronunciation, etymology
+		`SELECT id, word, pos, senses, freq, gender, forms, pronunciation, etymology
 		FROM entries WHERE word = ? COLLATE NOCASE
-		ORDER BY freq DESC
-	`,
+		ORDER BY freq DESC`,
 		[word]
 	);
 
@@ -262,15 +260,10 @@ function getInstalledLangs(): string[] {
 	return [...openDbs.keys()];
 }
 
-/**
- * List OPFS files to find installed databases.
- * Returns [lang, hash] pairs.
- */
 async function listOpfsFiles(): Promise<[string, string][]> {
 	const results: [string, string][] = [];
 	try {
 		const root = await navigator.storage.getDirectory();
-		// AccessHandlePoolVFS stores files under /lexicoff directory
 		let dir: FileSystemDirectoryHandle;
 		try {
 			dir = await root.getDirectoryHandle('lexicoff');
@@ -290,30 +283,30 @@ async function listOpfsFiles(): Promise<[string, string][]> {
 	return results;
 }
 
-self.onmessage = async (e: MessageEvent<QueryRequest>) => {
-	const { id, type, lang, query, word } = e.data;
+self.onmessage = async (e: MessageEvent) => {
+	const { id, type, lang, query, word, phoneticQuery } = e.data;
 
 	try {
 		let result: unknown;
 
 		switch (type) {
 			case 'search':
-				result = search(lang!, query!, e.data.query ?? '');
+				result = await search(lang, query, phoneticQuery ?? '');
 				break;
 			case 'getWord':
-				result = getWord(lang!, word!);
+				result = await getWord(lang, word);
 				break;
 			case 'isInstalled':
-				result = openDbs.has(lang!);
+				result = openDbs.has(lang);
 				break;
 			case 'getInstalledLangs':
 				result = getInstalledLangs();
 				break;
 			case 'open':
-				result = await openDb(lang!, query!);
+				result = await openDb(lang, query);
 				break;
 			case 'close':
-				await closeDb(lang!);
+				await closeDb(lang);
 				result = true;
 				break;
 			case 'list':
