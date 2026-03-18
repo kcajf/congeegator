@@ -1,7 +1,6 @@
 import { browser } from '$app/environment';
 import { db } from './db';
 import { searchLangState } from './searchLang.svelte';
-import { storageEstimate } from './storageEstimate.svelte';
 
 let worker: Worker | undefined;
 let workerReady: Promise<void> | undefined;
@@ -57,7 +56,6 @@ if (browser) {
 				}
 			});
 			searchLangState.reloadIndex(lang);
-			storageEstimate.refresh();
 		}
 
 		if (type === 'SKIPPED') {
@@ -80,7 +78,6 @@ if (browser) {
 
 		if (type === 'DELETED') {
 			// Map already updated optimistically in deleteLang()
-			storageEstimate.refresh();
 		}
 	};
 }
