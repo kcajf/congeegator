@@ -29,11 +29,7 @@ self.onmessage = async (e: MessageEvent<{ lang: string; type?: string }>) => {
 			}
 		};
 
-		if (navigator.locks) {
-			await navigator.locks.request(`sync-${lang}`, doDelete);
-		} else {
-			await doDelete();
-		}
+		await doDelete();
 		return;
 	}
 
@@ -192,15 +188,5 @@ self.onmessage = async (e: MessageEvent<{ lang: string; type?: string }>) => {
 		}
 	}
 
-	if (navigator.locks) {
-		await navigator.locks.request(`sync-${lang}`, { ifAvailable: true }, async (lock) => {
-			if (!lock) {
-				self.postMessage({ type: 'SKIPPED', lang });
-				return;
-			}
-			await doSync();
-		});
-	} else {
-		await doSync();
-	}
+	await doSync();
 };

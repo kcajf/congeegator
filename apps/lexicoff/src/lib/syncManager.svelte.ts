@@ -58,10 +58,6 @@ if (browser) {
 			searchLangState.reloadIndex(lang);
 		}
 
-		if (type === 'SKIPPED') {
-			console.log(`${lang} loading: skipped (already in progress)`);
-		}
-
 		if (type === 'ERROR') {
 			console.error(`${lang} sync error:`, error);
 			const existing = globalSync.map[lang];
