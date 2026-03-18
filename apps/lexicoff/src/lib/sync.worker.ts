@@ -81,6 +81,7 @@ self.onmessage = async (e: MessageEvent<{ lang: string; type?: string }>) => {
 				let receivedBytes = 0;
 				let lastPercent: number | null = -1;
 				let partial = '';
+				let pendingWrite: Promise<void> | undefined;
 
 				for (;;) {
 					const { done, value } = await reader.read();
@@ -105,18 +106,29 @@ self.onmessage = async (e: MessageEvent<{ lang: string; type?: string }>) => {
 
 					for (const line of lines) {
 						if (!line) continue;
-						batch.push({ ...JSON.parse(line), id: id++, lang });
+						const entry = JSON.parse(line);
+						entry.id = id++;
+						entry.lang = lang;
+						batch.push(entry);
 						if (batch.length >= BATCH_SIZE) {
-							await db.entries.bulkPut(batch);
+							if (pendingWrite) await pendingWrite;
+							const toWrite = batch;
 							batch = [];
+							pendingWrite = db.entries.bulkPut(toWrite).then(() => {});
 						}
 					}
 				}
 
 				// Handle final partial line
 				if (partial) {
-					batch.push({ ...JSON.parse(partial), id: id++, lang });
+					const entry = JSON.parse(partial);
+					entry.id = id++;
+					entry.lang = lang;
+					batch.push(entry);
 				}
+
+				// Flush remaining
+				if (pendingWrite) await pendingWrite;
 				if (batch.length > 0) {
 					await db.entries.bulkPut(batch);
 				}
