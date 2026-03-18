@@ -1,28 +1,13 @@
-import { db } from './db';
-import type { Id, DictRecord } from './types';
-
-export const MAX_PREFIX_IDS = 200;
-export const MAX_SEARCH_RESULTS = 50;
-
-export type SearchResult = {
-	word: string;
-	pos: string;
-	matched: string;
-	quality: number; // 0 = exact, 1 = diacritics-stripped, 2 = phonetic, 3 = gloss
-	freq: number;
-};
+/**
+ * Phonetic utilities for query transformation (main thread).
+ *
+ * These are used to prepare the search query before sending to the
+ * SQLite worker. The worker uses these to match against the phonetic
+ * FTS5 column (Greek only).
+ */
 
 export function stripDiacritics(s: string): string {
 	return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-}
-
-export async function prefixLookup(lang: string, query: string): Promise<Id[]> {
-	for (let i = query.length; i > 0; i--) {
-		const prefix = query.slice(0, i);
-		const row = await db.searchPrefixes.get({ lang, prefix });
-		if (row) return row.ids;
-	}
-	return [];
 }
 
 export function toPhoneticEl(s: string): string {
@@ -132,67 +117,4 @@ export function toPhoneticEl(s: string): string {
 export function toPhonetic(lang: string, s: string): string {
 	if (lang === 'el') return toPhoneticEl(s);
 	return s;
-}
-
-function matchQuality(
-	form: string,
-	originalQuery: string,
-	phoneticQuery: string,
-	lang: string
-): number | null {
-	if (form.toLowerCase().includes(originalQuery)) return 0;
-	const strippedForm = stripDiacritics(form).toLowerCase();
-	const strippedQuery = stripDiacritics(originalQuery);
-	if (strippedForm.includes(strippedQuery)) return 1;
-	if (toPhonetic(lang, strippedForm).includes(phoneticQuery)) return 2;
-	return null;
-}
-
-export function findMatches(
-	entry: DictRecord,
-	originalQuery: string,
-	phoneticQuery: string,
-	lang: string
-): SearchResult[] {
-	const seen = new Map<string, SearchResult>();
-
-	const consider = (form: string) => {
-		const quality = matchQuality(form, originalQuery, phoneticQuery, lang);
-		if (quality === null) return;
-		const key = entry.word + ':' + entry.pos;
-		const existing = seen.get(key);
-		if (!existing || quality < existing.quality) {
-			seen.set(key, {
-				word: entry.word,
-				pos: entry.pos,
-				matched: form,
-				quality,
-				freq: entry.freq
-			});
-		}
-	};
-
-	consider(entry.word);
-	for (const form of entry.forms ?? []) {
-		consider(form);
-	}
-
-	return [...seen.values()];
-}
-
-export function findGlossMatch(entry: DictRecord, glossQuery: string): SearchResult | null {
-	for (const sense of entry.senses) {
-		if (!sense.gloss) continue;
-		const escaped = glossQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-		if (new RegExp(`(?<!\\p{L})${escaped}`, 'u').test(sense.gloss.toLowerCase())) {
-			return {
-				word: entry.word,
-				pos: entry.pos,
-				matched: sense.gloss,
-				quality: 3,
-				freq: entry.freq
-			};
-		}
-	}
-	return null;
 }

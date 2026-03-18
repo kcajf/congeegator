@@ -1,5 +1,5 @@
 import { browser } from '$app/environment';
-import { db } from './db';
+import * as sqliteClient from './sqliteClient';
 import { manifest } from './dataUtils';
 
 export const defaultLang = 'fr';
@@ -43,15 +43,15 @@ class SearchLangState {
 			this.indexReady = false;
 		}
 
-		db.metadata
-			.get(lang)
-			.then((meta) => {
-				if (this.lang === lang && meta?.hash) {
+		sqliteClient
+			.isInstalled(lang)
+			.then((installed) => {
+				if (this.lang === lang && installed) {
 					this.indexReady = true;
 				}
 			})
 			.catch((err) => {
-				console.error(`Failed to check search index for ${lang}:`, err);
+				console.error(`Failed to check if ${lang} is installed:`, err);
 			});
 	}
 }

@@ -44,6 +44,6 @@
 		"vitest": "^4.1.0"
 	},
 	"dependencies": {
-		"dexie": "^4.2.1"
+		"@sqlite.org/sqlite-wasm": "^3.51.2-build8"
 	}
 }

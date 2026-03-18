@@ -59,7 +59,7 @@
 		{/if}
 	</header>
 
-	{#each data.entries as entry (entry.pos)}
+	{#each data.entries as entry (entry.id)}
 		<section class="pos-section">
 			<h2 class="pos-label">
 				{POS_LABELS[entry.pos] ?? entry.pos}

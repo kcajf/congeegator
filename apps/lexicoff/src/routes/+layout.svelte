@@ -5,31 +5,28 @@
 	import { dev } from '$app/environment';
 	import LanguagePicker from '$lib/components/LanguagePicker.svelte';
 	import ToastStack from '$lib/components/ToastStack.svelte';
-	import { db } from '$lib/db';
 	import { appTitle, brandColor } from '$lib/defs';
-	import {
-		findGlossMatch,
-		findMatches,
-		MAX_PREFIX_IDS,
-		MAX_SEARCH_RESULTS,
-		prefixLookup,
-		stripDiacritics,
-		toPhonetic,
-		type SearchResult
-	} from '$lib/search';
+	import * as sqliteClient from '$lib/sqliteClient';
+	import type { SearchResult } from '$lib/sqliteClient';
 	import { searchLangState } from '$lib/searchLang.svelte';
 	import { globalSync } from '$lib/syncManager.svelte';
 	import { toasts } from '$lib/toasts.svelte';
-	import type { DictRecord, Id } from '$lib/types';
+	import { stripDiacritics, toPhonetic } from '$lib/phonetic';
 	import { onMount, tick } from 'svelte';
 	import { pwaInfo } from 'virtual:pwa-info';
 	import type { LayoutProps } from './$types';
 
 	async function nukeState() {
-		await db.delete();
 		localStorage.clear();
 		const regs = await navigator.serviceWorker?.getRegistrations();
 		for (const r of regs ?? []) await r.unregister();
+		// Clear OPFS
+		try {
+			const root = await navigator.storage.getDirectory();
+			await root.removeEntry('lexicoff', { recursive: true });
+		} catch {
+			/* ignore */
+		}
 		location.reload();
 	}
 
@@ -114,69 +111,23 @@
 
 		const currentLang = searchLangState.lang;
 		const originalQuery = searchTerm.toLowerCase().trim();
-		const stripped = stripDiacritics(originalQuery);
-		const currentQuery = toPhonetic(currentLang, stripped);
-		if (!ready || currentQuery.length < 1) {
+		if (!ready || originalQuery.length < 1) {
 			searchResults = [];
 			return;
 		}
 
-		prefixLookup(currentLang, currentQuery)
-			.then((allPrefixIds: Id[]) => {
-				const prefixIds = allPrefixIds.slice(0, MAX_PREFIX_IDS);
+		const stripped = stripDiacritics(originalQuery);
+		const phoneticQuery = toPhonetic(currentLang, stripped);
 
-				if (prefixIds.length === 0) {
-					searchResults = [];
-					return;
-				}
-
-				const dbKeys = prefixIds.map((id) => [currentLang, id]);
-
-				return db.entries.bulkGet(dbKeys).then((data) => {
-					if (
-						currentQuery !==
-						toPhonetic(currentLang, stripDiacritics(searchTerm.toLowerCase().trim()))
-					)
-						return;
-
-					const entries = data.filter((v): v is DictRecord => !!v);
-
-					const nativeResults = entries.flatMap((e) =>
-						findMatches(e, originalQuery, currentQuery, currentLang)
-					);
-
-					const nativeWords = new Set(nativeResults.map((r) => r.word + ':' + r.pos));
-					const glossResults =
-						originalQuery.length >= 3
-							? entries
-									.filter((e) => !nativeWords.has(e.word + ':' + e.pos))
-									.map((e) => findGlossMatch(e, originalQuery))
-									.filter((r): r is SearchResult => r !== null)
-							: [];
-
-					// Deduplicate by word (collapse multiple POS into one result)
-					// eslint-disable-next-line svelte/prefer-svelte-reactivity
-					const byWord = new Map<string, SearchResult>();
-					for (const r of [...nativeResults, ...glossResults]) {
-						const existing = byWord.get(r.word);
-						if (
-							!existing ||
-							r.quality < existing.quality ||
-							(r.quality === existing.quality && r.freq > existing.freq)
-						) {
-							byWord.set(r.word, r);
-						}
-					}
-
-					searchResults = [...byWord.values()]
-						.sort(
-							(a, b) => a.quality - b.quality || b.freq - a.freq || a.word.length - b.word.length
-						)
-						.slice(0, MAX_SEARCH_RESULTS);
-				});
+		sqliteClient
+			.search(currentLang, originalQuery, phoneticQuery)
+			.then((results) => {
+				// Verify query hasn't changed while waiting
+				if (originalQuery !== searchTerm.toLowerCase().trim()) return;
+				searchResults = results;
 			})
 			.catch((err: unknown) => {
-				console.error('Search lookup failed:', err);
+				console.error('Search failed:', err);
 				searchResults = [];
 			});
 	});

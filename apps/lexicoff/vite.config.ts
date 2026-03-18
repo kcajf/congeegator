@@ -5,6 +5,15 @@ import { defineConfig } from 'vite';
 export const brandColor = '#f0f3fb';
 
 export default defineConfig({
+	server: {
+		headers: {
+			'Cross-Origin-Opener-Policy': 'same-origin',
+			'Cross-Origin-Embedder-Policy': 'require-corp'
+		}
+	},
+	optimizeDeps: {
+		exclude: ['@sqlite.org/sqlite-wasm']
+	},
 	plugins: [
 		sveltekit(),
 		SvelteKitPWA({
@@ -24,7 +33,7 @@ export default defineConfig({
 			},
 			workbox: {
 				globPatterns: [
-					'client/**/*.{js,css,ico,png,svg,webp}',
+					'client/**/*.{js,css,ico,png,svg,webp,wasm}',
 					'prerendered/pages/app-shell.html',
 					'prerendered/pages/**/*.json'
 				],

@@ -1,5 +1,7 @@
 import { browser } from '$app/environment';
-import { db } from './db';
+import * as sqliteClient from './sqliteClient';
+import { resolveDbsReady } from './sqliteClient';
+import { manifest } from './dataUtils';
 import { searchLangState } from './searchLang.svelte';
 
 let worker: Worker | undefined;
@@ -15,7 +17,7 @@ export interface LangSyncInfo {
 }
 
 if (browser) {
-	worker = new Worker(new URL('./sync.worker.ts', import.meta.url), {
+	worker = new Worker(new URL('./download.worker.ts', import.meta.url), {
 		type: 'module'
 	});
 
@@ -29,7 +31,7 @@ if (browser) {
 	});
 
 	worker.onmessage = (e) => {
-		const { type, lang, error, percent, receivedBytes, totalBytes } = e.data;
+		const { type, lang, error, percent, receivedBytes, totalBytes, hash } = e.data;
 		if (type === 'READY') return;
 
 		if (type === 'PROGRESS') {
@@ -44,25 +46,26 @@ if (browser) {
 		}
 
 		if (type === 'COMPLETE') {
-			const existing = globalSync.map[lang];
-			globalSync.map[lang] = {
-				hash: existing?.hash ?? '',
-				status: 'ready'
-			};
-			// Re-read hash from DB to get the actual stored hash
-			db.metadata.get(lang).then((meta) => {
-				if (meta) {
-					globalSync.map[lang] = { hash: meta.hash, status: 'ready' };
+			const dataHash = hash || manifest.languages[lang]?.dataHash || '';
+			// Open the downloaded database in the SQLite worker
+			sqliteClient.openDb(lang, dataHash).then((ok) => {
+				if (ok) {
+					globalSync.map[lang] = { hash: dataHash, status: 'ready' };
+					searchLangState.checkReady(lang);
+				} else {
+					globalSync.map[lang] = {
+						hash: dataHash,
+						status: 'error',
+						errorMessage: 'Failed to open database'
+					};
 				}
 			});
-			searchLangState.checkReady(lang);
 		}
 
 		if (type === 'ERROR') {
 			console.error(`${lang} sync error:`, error);
 			const existing = globalSync.map[lang];
 			if (existing?.status === 'ready') {
-				// Keep existing ready state on error (e.g. offline update attempt)
 				return;
 			}
 			globalSync.map[lang] = {
@@ -94,7 +97,9 @@ export async function deleteLang(lang: string) {
 		return;
 	}
 	await workerReady;
-	// Optimistic UI: remove from map immediately so the user sees instant feedback
+	// Close the SQLite database first
+	await sqliteClient.closeDb(lang);
+	// Optimistic UI: remove from map immediately
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const { [lang]: _removed, ...rest } = globalSync.map;
 	globalSync.map = rest;
@@ -112,18 +117,38 @@ class GlobalSyncRegistry {
 	}
 
 	private async init() {
-		const metadata = await db.metadata.toArray();
-
-		const initialMap: Record<string, LangSyncInfo> = {};
-		for (const entry of metadata) {
-			initialMap[entry.lang] = {
-				hash: entry.hash,
-				status: 'ready'
-			};
+		// Delete old IndexedDB if present (one-time migration from Dexie)
+		try {
+			const dbs = await indexedDB.databases?.();
+			if (dbs?.find((db) => db.name === 'LexicoffDB')) {
+				indexedDB.deleteDatabase('LexicoffDB');
+				console.log('Deleted old LexicoffDB IndexedDB');
+			}
+		} catch {
+			// indexedDB.databases() not available in all browsers
 		}
 
-		this.map = initialMap;
+		// Discover installed databases from OPFS and open them
+		try {
+			const files = await sqliteClient.listOpfsFiles();
+			const initialMap: Record<string, LangSyncInfo> = {};
+
+			for (const [lang, hash] of files) {
+				const opened = await sqliteClient.openDb(lang, hash);
+				if (opened) {
+					initialMap[lang] = { hash, status: 'ready' };
+				}
+			}
+
+			this.map = initialMap;
+		} catch (err) {
+			console.error('Failed to discover OPFS databases:', err);
+		}
+
 		this.initialized = true;
+		resolveDbsReady();
+		// Notify search that installed languages are ready
+		searchLangState.checkReady();
 	}
 }
 
