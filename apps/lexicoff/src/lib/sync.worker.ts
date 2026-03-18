@@ -9,9 +9,10 @@ self.onmessage = async (e: MessageEvent<{ lang: string; type?: string }>) => {
 
 	if (msgType === 'delete') {
 		try {
-			await db.transaction('rw', [db.entries, db.metadata], async () => {
+			await db.transaction('rw', [db.entries, db.metadata, db.searchIndices], async () => {
 				await db.entries.where({ lang }).delete();
 				await db.metadata.delete(lang);
+				await db.searchIndices.delete(lang);
 			});
 			self.postMessage({ type: 'DELETED', lang });
 		} catch (error) {
@@ -135,12 +136,10 @@ self.onmessage = async (e: MessageEvent<{ lang: string; type?: string }>) => {
 
 				const searchIndex = await searchIndexPromise;
 
-				// Write metadata last for atomicity
-				await db.metadata.put({
-					lang,
-					hash: remote.dataHash,
-					searchIndex: searchIndex.searchIndex
-				});
+				// Write search index first, metadata last for atomicity —
+				// if it fails partway, missing metadata triggers a retry.
+				await db.searchIndices.put({ lang, searchIndex: searchIndex.searchIndex });
+				await db.metadata.put({ lang, hash: remote.dataHash });
 
 				console.log(`Inserted ${id} ${lang} entries. sync finished`);
 			} else {

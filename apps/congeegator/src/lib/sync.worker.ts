@@ -73,7 +73,7 @@ self.onmessage = async (e: MessageEvent<{ lang: string }>) => {
 				self.postMessage({ type: 'PROGRESS', lang, phase: 'installing', percent: 0 });
 				const CHUNK_SIZE = 500;
 				const totalChunks = Math.ceil(records.length / CHUNK_SIZE);
-				await db.transaction('rw', [db.verbs, db.metadata], async () => {
+				await db.transaction('rw', [db.verbs, db.metadata, db.searchIndices], async () => {
 					await db.verbs.where({ lang: lang }).delete();
 					for (let i = 0; i < totalChunks; i++) {
 						await db.verbs.bulkPut(records.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE));
@@ -84,11 +84,8 @@ self.onmessage = async (e: MessageEvent<{ lang: string }>) => {
 							percent: Math.round(((i + 1) / totalChunks) * 100)
 						});
 					}
-					await db.metadata.put({
-						lang: lang,
-						hash: remote.dataHash,
-						searchIndex: raw['searchIndex']
-					});
+					await db.searchIndices.put({ lang, searchIndex: raw['searchIndex'] });
+					await db.metadata.put({ lang, hash: remote.dataHash });
 				});
 
 				console.log(`Inserted ${records.length} ${lang} verbs. sync finished`);
