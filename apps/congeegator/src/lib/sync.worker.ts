@@ -1,3 +1,4 @@
+import Dexie from 'dexie';
 import { getLangDataUrl, manifest } from './dataUtils';
 import { db } from './db';
 import type { VerbRecord } from './types';
@@ -74,7 +75,10 @@ self.onmessage = async (e: MessageEvent<{ lang: string }>) => {
 				const CHUNK_SIZE = 500;
 				const totalChunks = Math.ceil(records.length / CHUNK_SIZE);
 				await db.transaction('rw', [db.verbs, db.metadata, db.searchIndices], async () => {
-					await db.verbs.where({ lang: lang }).delete();
+					await db.verbs
+						.where('[lang+id]')
+						.between([lang, Dexie.minKey], [lang, Dexie.maxKey], true, true)
+						.delete();
 					for (let i = 0; i < totalChunks; i++) {
 						await db.verbs.bulkPut(records.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE));
 						self.postMessage({

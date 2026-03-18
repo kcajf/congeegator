@@ -79,9 +79,7 @@ if (browser) {
 		}
 
 		if (type === 'DELETED') {
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			const { [lang]: _, ...rest } = globalSync.map;
-			globalSync.map = rest;
+			// Map already updated optimistically in deleteLang()
 			storageEstimate.refresh();
 		}
 	};
@@ -103,6 +101,10 @@ export async function deleteLang(lang: string) {
 		return;
 	}
 	await workerReady;
+	// Optimistic UI: remove from map immediately so the user sees instant feedback
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const { [lang]: _removed, ...rest } = globalSync.map;
+	globalSync.map = rest;
 	worker.postMessage({ lang, type: 'delete' });
 }
 
