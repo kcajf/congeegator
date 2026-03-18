@@ -1,7 +1,7 @@
 import Dexie from 'dexie';
 import { getLangDataUrl, manifest } from './dataUtils';
 import { db } from './db';
-import type { DictRecord } from './types';
+import type { DictRecord, SearchPrefixEntry } from './types';
 
 self.postMessage({ type: 'READY' });
 
@@ -11,13 +11,16 @@ self.onmessage = async (e: MessageEvent<{ lang: string; type?: string }>) => {
 	if (msgType === 'delete') {
 		const doDelete = async () => {
 			try {
-				await db.transaction('rw', [db.entries, db.metadata, db.searchIndices], async () => {
+				await db.transaction('rw', [db.entries, db.metadata, db.searchPrefixes], async () => {
 					await db.entries
 						.where('[lang+id]')
 						.between([lang, Dexie.minKey], [lang, Dexie.maxKey], true, true)
 						.delete();
+					await db.searchPrefixes
+						.where('[lang+prefix]')
+						.between([lang, Dexie.minKey], [lang, Dexie.maxKey], true, true)
+						.delete();
 					await db.metadata.delete(lang);
-					await db.searchIndices.delete(lang);
 				});
 				self.postMessage({ type: 'DELETED', lang });
 			} catch (error) {
@@ -64,28 +67,26 @@ self.onmessage = async (e: MessageEvent<{ lang: string; type?: string }>) => {
 				});
 
 				const baseUrl = getLangDataUrl(lang);
-				const [ndjsonResponse, searchIndexResponse] = await Promise.all([
-					fetch(`${baseUrl}/data.ndjson`),
-					fetch(`${baseUrl}/searchIndex.json`)
-				]);
+				const ndjsonResponse = await fetch(`${baseUrl}/data.ndjson`);
 
 				if (!ndjsonResponse.ok) throw new Error(`HTTP ${ndjsonResponse.status}`);
-				if (!searchIndexResponse.ok)
-					throw new Error(`searchIndex HTTP ${searchIndexResponse.status}`);
 				if (!ndjsonResponse.body) throw new Error('ReadableStream not supported');
 
-				const searchIndexPromise = searchIndexResponse.json();
 				const totalBytes = remote.dataSize ?? null;
 
-				// Delete old entries before streaming new ones
-				await db.entries
-					.where('[lang+id]')
-					.between([lang, Dexie.minKey], [lang, Dexie.maxKey], true, true)
-					.delete();
+				// Delete old entries and search prefixes before streaming new ones
+				await Promise.all([
+					db.entries
+						.where('[lang+id]')
+						.between([lang, Dexie.minKey], [lang, Dexie.maxKey], true, true)
+						.delete(),
+					db.searchPrefixes
+						.where('[lang+prefix]')
+						.between([lang, Dexie.minKey], [lang, Dexie.maxKey], true, true)
+						.delete()
+				]);
 
-				// Read chunks, decode, split lines, batch insert — all in one loop.
-				// Bounded write queue decouples reads from IndexedDB writes so progress
-				// updates reflect actual network throughput instead of stalling during writes.
+				// Stream entries from data.ndjson
 				const reader = ndjsonResponse.body.getReader();
 				const decoder = new TextDecoder();
 				const BATCH_SIZE = 5000;
@@ -148,7 +149,7 @@ self.onmessage = async (e: MessageEvent<{ lang: string; type?: string }>) => {
 					batch.push(entry);
 				}
 
-				// Flush remaining writes
+				// Flush remaining entry writes
 				if (batch.length > 0) {
 					pendingWrites.push(db.entries.bulkPut(batch).then(() => {}));
 				}
@@ -163,11 +164,45 @@ self.onmessage = async (e: MessageEvent<{ lang: string; type?: string }>) => {
 					percent: totalBytes ? 100 : null
 				});
 
-				const searchIndex = await searchIndexPromise;
+				// Stream search index NDJSON sequentially (after entries are done)
+				const siResponse = await fetch(`${baseUrl}/searchIndex.ndjson`);
+				if (!siResponse.ok) throw new Error(`searchIndex HTTP ${siResponse.status}`);
+				if (!siResponse.body) throw new Error('ReadableStream not supported');
 
-				// Write search index first, metadata last for atomicity —
-				// if it fails partway, missing metadata triggers a retry.
-				await db.searchIndices.put({ lang, searchIndex: searchIndex.searchIndex });
+				const siReader = siResponse.body.getReader();
+				const siDecoder = new TextDecoder();
+				const SI_BATCH_SIZE = 2000;
+				let siBatch: SearchPrefixEntry[] = [];
+				let siPartial = '';
+
+				for (;;) {
+					const { done, value } = await siReader.read();
+					if (done) break;
+
+					const text = siPartial + siDecoder.decode(value, { stream: true });
+					const lines = text.split('\n');
+					siPartial = lines.pop()!;
+
+					for (const line of lines) {
+						if (!line) continue;
+						const row = JSON.parse(line);
+						siBatch.push({ lang, prefix: row.p, ids: row.ids });
+						if (siBatch.length >= SI_BATCH_SIZE) {
+							await db.searchPrefixes.bulkPut(siBatch);
+							siBatch = [];
+						}
+					}
+				}
+
+				if (siPartial) {
+					const row = JSON.parse(siPartial);
+					siBatch.push({ lang, prefix: row.p, ids: row.ids });
+				}
+				if (siBatch.length > 0) {
+					await db.searchPrefixes.bulkPut(siBatch);
+				}
+
+				// Write metadata last — atomicity sentinel
 				await db.metadata.put({ lang, hash: remote.dataHash });
 
 				console.log(`Inserted ${id} ${lang} entries. sync finished`);

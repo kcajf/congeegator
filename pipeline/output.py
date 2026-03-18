@@ -21,11 +21,13 @@ def write_language_data(data: dict[str, Any], lang_dir: str, entries_key: str = 
             lines.append(_orjson_dump(entry))
         with open(out_path, "wb") as f:
             f.write(b"\n".join(lines))
-        # Write non-entry data (searchIndex etc.) as separate file
+        # Write search index as NDJSON (one line per prefix)
         extra = {k: v for k, v in data.items() if k != entries_key}
-        if extra:
-            with open(os.path.join(lang_dir, "searchIndex.json"), "wb") as f:
-                f.write(_orjson_dump(extra))
+        search_index = extra.get("searchIndex", {})
+        if search_index:
+            with open(os.path.join(lang_dir, "searchIndex.ndjson"), "wb") as f:
+                lines = [_orjson_dump({"p": p, "ids": ids}) for p, ids in search_index.items()]
+                f.write(b"\n".join(lines))
     else:
         out_path = os.path.join(lang_dir, "data.json")
         with open(out_path, "wb") as f:

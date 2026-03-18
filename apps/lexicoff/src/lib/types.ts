@@ -32,15 +32,13 @@ export interface DictRecord {
 	etymology?: string;
 }
 
-export type SearchIndex = Map<string, Id[]>;
-export type SearchIndexStorage = Record<string, Id[]>;
+export interface SearchPrefixEntry {
+	lang: string;
+	prefix: string;
+	ids: Id[];
+}
 
 export interface MetaEntry {
 	lang: string;
 	hash: string;
-}
-
-export interface SearchIndexEntry {
-	lang: string;
-	searchIndex: SearchIndexStorage;
 }

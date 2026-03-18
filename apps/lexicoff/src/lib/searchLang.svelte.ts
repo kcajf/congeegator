@@ -1,7 +1,6 @@
 import { browser } from '$app/environment';
 import { db } from './db';
 import { manifest } from './dataUtils';
-import type { SearchIndex } from './types';
 
 export const defaultLang = 'fr';
 
@@ -15,7 +14,7 @@ function getInitialLang(): string {
 class SearchLangState {
 	lang = $state(getInitialLang());
 
-	indexData = $state.raw<SearchIndex | undefined>(undefined);
+	indexReady = $state(false);
 
 	constructor() {
 		this.onChanged();
@@ -31,28 +30,28 @@ class SearchLangState {
 	onChanged() {
 		if (browser) {
 			localStorage.setItem('searchLang', this.lang);
-			this.reloadIndex();
+			this.checkReady();
 		}
 	}
 
-	reloadIndex(completedLang?: string) {
+	checkReady(completedLang?: string) {
 		const lang = this.lang;
 
 		if (completedLang && completedLang !== lang) return;
 
 		if (!completedLang) {
-			this.indexData = undefined;
+			this.indexReady = false;
 		}
 
-		db.searchIndices
+		db.metadata
 			.get(lang)
-			.then((data) => {
-				if (this.lang === lang && data?.searchIndex) {
-					this.indexData = new Map(Object.entries(data.searchIndex));
+			.then((meta) => {
+				if (this.lang === lang && meta?.hash) {
+					this.indexReady = true;
 				}
 			})
 			.catch((err) => {
-				console.error(`Failed to load search index for ${lang}:`, err);
+				console.error(`Failed to check search index for ${lang}:`, err);
 			});
 	}
 }

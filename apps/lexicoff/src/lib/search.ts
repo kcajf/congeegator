@@ -1,4 +1,5 @@
-import type { Id, SearchIndex, DictRecord } from './types';
+import { db } from './db';
+import type { Id, DictRecord } from './types';
 
 export const MAX_PREFIX_IDS = 200;
 export const MAX_SEARCH_RESULTS = 50;
@@ -15,12 +16,11 @@ export function stripDiacritics(s: string): string {
 	return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
 
-export function prefixLookup(index: SearchIndex, query: string): Id[] {
+export async function prefixLookup(lang: string, query: string): Promise<Id[]> {
 	for (let i = query.length; i > 0; i--) {
 		const prefix = query.slice(0, i);
-		if (index.has(prefix)) {
-			return index.get(prefix)!;
-		}
+		const row = await db.searchPrefixes.get({ lang, prefix });
+		if (row) return row.ids;
 	}
 	return [];
 }
