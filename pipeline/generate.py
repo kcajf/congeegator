@@ -262,6 +262,7 @@ def main():
 
     # --- Lexicoff output (SQLite) ---
     if dict_data:
+        dict_configs_by_code = {c.code: c for c in DICT_CONFIGS}
         dict_r2_dir = os.path.join("apps", "lexicoff", "r2_data")
         dict_data_dir = os.path.join(dict_r2_dir, "data", f"v{DATA_VERSION}")
         shutil.rmtree(dict_data_dir, ignore_errors=True)
@@ -271,7 +272,7 @@ def main():
                 lang_dir = os.path.join(dict_data_dir, lang_code)
                 os.makedirs(lang_dir, exist_ok=True)
                 sqlite_path = os.path.join(lang_dir, f"{lang_code}.sqlite")
-                dict_config = dict_configs[lang_code]
+                dict_config = dict_configs_by_code[lang_code]
                 write_sqlite_database(
                     dict_data[lang_code]["entries"],
                     lang_code,
