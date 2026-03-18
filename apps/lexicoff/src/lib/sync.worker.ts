@@ -88,24 +88,28 @@ self.onmessage = async (e: MessageEvent<{ lang: string; type?: string }>) => {
 					.delete();
 
 				// Read chunks, decode, split lines, batch insert — all in one loop.
-				// No TransformStream pipeline: one await per network chunk, not per line.
+				// Bounded write queue decouples reads from IndexedDB writes so progress
+				// updates reflect actual network throughput instead of stalling during writes.
 				const reader = ndjsonResponse.body.getReader();
 				const decoder = new TextDecoder();
 				const BATCH_SIZE = 5000;
+				const MAX_PENDING = 3;
+				const PROGRESS_INTERVAL_MS = 150;
 				let batch: DictRecord[] = [];
 				let id = 0;
 				let receivedBytes = 0;
-				let lastPercent: number | null = -1;
 				let partial = '';
-				let pendingWrite: Promise<void> | undefined;
+				let lastProgressTime = 0;
+				const pendingWrites: Promise<void>[] = [];
 
 				for (;;) {
 					const { done, value } = await reader.read();
 					if (done) break;
 
 					receivedBytes += value.length;
-					const percent = totalBytes ? Math.round((receivedBytes / totalBytes) * 100) : null;
-					if (percent !== lastPercent) {
+					const now = performance.now();
+					if (now - lastProgressTime >= PROGRESS_INTERVAL_MS) {
+						const percent = totalBytes ? Math.round((receivedBytes / totalBytes) * 100) : null;
 						self.postMessage({
 							type: 'PROGRESS',
 							lang,
@@ -113,7 +117,7 @@ self.onmessage = async (e: MessageEvent<{ lang: string; type?: string }>) => {
 							totalBytes,
 							percent
 						});
-						lastPercent = percent;
+						lastProgressTime = now;
 					}
 
 					const text = partial + decoder.decode(value, { stream: true });
@@ -127,10 +131,15 @@ self.onmessage = async (e: MessageEvent<{ lang: string; type?: string }>) => {
 						entry.lang = lang;
 						batch.push(entry);
 						if (batch.length >= BATCH_SIZE) {
-							if (pendingWrite) await pendingWrite;
+							if (pendingWrites.length >= MAX_PENDING) {
+								await pendingWrites[0];
+							}
 							const toWrite = batch;
 							batch = [];
-							pendingWrite = db.entries.bulkPut(toWrite).then(() => {});
+							const p = db.entries.bulkPut(toWrite).then(() => {
+								pendingWrites.splice(pendingWrites.indexOf(p), 1);
+							});
+							pendingWrites.push(p);
 						}
 					}
 				}
@@ -143,11 +152,20 @@ self.onmessage = async (e: MessageEvent<{ lang: string; type?: string }>) => {
 					batch.push(entry);
 				}
 
-				// Flush remaining
-				if (pendingWrite) await pendingWrite;
+				// Flush remaining writes
 				if (batch.length > 0) {
-					await db.entries.bulkPut(batch);
+					pendingWrites.push(db.entries.bulkPut(batch).then(() => {}));
 				}
+				await Promise.all(pendingWrites);
+
+				// Send final 100% progress
+				self.postMessage({
+					type: 'PROGRESS',
+					lang,
+					receivedBytes,
+					totalBytes,
+					percent: totalBytes ? 100 : null
+				});
 
 				const searchIndex = await searchIndexPromise;
 
