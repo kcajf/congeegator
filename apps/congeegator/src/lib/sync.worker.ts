@@ -89,7 +89,7 @@ self.onmessage = async (e: MessageEvent<{ lang: string }>) => {
 						});
 					}
 					await db.searchIndices.put({ lang, searchIndex: raw['searchIndex'] });
-					await db.metadata.put({ lang, hash: remote.dataHash });
+					await db.metadata.put({ lang, hash: remote.dataHash, entryCount: records.length });
 				});
 
 				console.log(`Inserted ${records.length} ${lang} verbs. sync finished`);
