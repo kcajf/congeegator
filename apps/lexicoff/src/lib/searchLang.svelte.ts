@@ -44,7 +44,7 @@ class SearchLangState {
 			this.indexData = undefined;
 		}
 
-		db.metadata
+		db.searchIndices
 			.get(lang)
 			.then((data) => {
 				if (this.lang === lang && data?.searchIndex) {
