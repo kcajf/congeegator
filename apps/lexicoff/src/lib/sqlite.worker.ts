@@ -105,11 +105,24 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 	const trimmed = query.trim().toLowerCase();
 	if (!trimmed) return [];
 
-	// Escape FTS5 special characters
-	const ftsQuery = trimmed.replace(/['"*^]/g, '').replace(/\s+/g, ' ');
-	if (!ftsQuery) return [];
+	// Strip everything except Unicode letters, numbers, and spaces to avoid FTS5 syntax errors
+	// (handles -, +, (), :, etc. that FTS5 interprets as operators)
+	const sanitized = trimmed
+		.replace(/[^\p{L}\p{N}\s]/gu, '')
+		.replace(/\s+/g, ' ')
+		.trim();
+	if (!sanitized) return [];
 
-	const ftsPrefix = ftsQuery + '*';
+	// Quote each token to prevent FTS5 operator interpretation (AND, OR, NOT, NEAR),
+	// and prefix-match the last token for search-as-you-type
+	const tokens = sanitized.split(' ');
+	const ftsPrefix =
+		tokens.length === 1
+			? `"${tokens[0]}"*`
+			: tokens
+					.slice(0, -1)
+					.map((t) => `"${t}"`)
+					.join(' ') + ` "${tokens[tokens.length - 1]}"*`;
 
 	// Search word and forms (quality 0/1 via diacritics), gloss (quality 3)
 	const sql = `
@@ -149,7 +162,10 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 
 	// Phonetic search (quality 2) — only if phoneticQuery differs from query
 	if (phoneticQuery && phoneticQuery !== trimmed) {
-		const ftsPhonetic = phoneticQuery.replace(/['"*^]/g, '').replace(/\s+/g, ' ');
+		const ftsPhonetic = phoneticQuery
+			.replace(/[^\p{L}\p{N}\s]/gu, '')
+			.replace(/\s+/g, ' ')
+			.trim();
 		if (ftsPhonetic) {
 			try {
 				const phoneticRows = execQuery(
@@ -158,7 +174,7 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 					FROM entries e
 					JOIN (SELECT rowid FROM entries_fts WHERE phonetic MATCH ?) AS fts ON e.id = fts.rowid
 					LIMIT 100`,
-					[ftsPhonetic + '*']
+					[`"${ftsPhonetic}"*`]
 				);
 				for (const [word, pos, freq] of phoneticRows) {
 					const key = `${word}:${pos}`;
