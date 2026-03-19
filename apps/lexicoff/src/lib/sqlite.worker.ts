@@ -119,7 +119,13 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 		.replace(/\s+/g, ' ') // collapse duplicate spaces
 		.trim();
 	if (!sanitized) return [];
-	const ftsPrefix = `"${sanitized}"*`;
+	// Quote tokens to prevent FTS5 keyword interpretation, prefix-match last token.
+	// No phrase queries — FTS5 table uses detail='column' (no position data).
+	const ftsPrefix =
+		sanitized
+			.split(' ')
+			.map((t) => `"${t}"`)
+			.join(' ') + '*';
 
 	// Search word and forms (quality 0/1 via diacritics), gloss (quality 3)
 	const sql = `
@@ -153,8 +159,8 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 				});
 			}
 		}
-	} catch {
-		// FTS query syntax error — return empty
+	} catch (e) {
+		console.error(`FTS5 search failed for MATCH ${ftsPrefix}`, e);
 	}
 
 	// Phonetic search (quality 2) — only if phoneticQuery differs from query
@@ -163,6 +169,11 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 			.replace(/[^\p{L}\p{N}\s]/gu, ' ') // strip non-letter/number chars
 			.replace(/\s+/g, ' ') // collapse duplicate spaces
 			.trim();
+		const phoneticFts =
+			phonetic
+				.split(' ')
+				.map((t) => `"${t}"`)
+				.join(' ') + '*';
 		if (phonetic) {
 			try {
 				const phoneticRows = execQuery(
@@ -171,7 +182,7 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 					FROM entries e
 					JOIN (SELECT rowid FROM entries_fts WHERE phonetic MATCH ?) AS fts ON e.id = fts.rowid
 					LIMIT 100`,
-					[`"${phonetic}"*`]
+					[phoneticFts]
 				);
 				for (const [word, pos, freq] of phoneticRows) {
 					const key = `${word}:${pos}`;
@@ -185,8 +196,8 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 						});
 					}
 				}
-			} catch {
-				// ignore
+			} catch (e) {
+				console.error(`FTS5 phonetic search failed for MATCH ${phoneticFts}`, e);
 			}
 		}
 	}
