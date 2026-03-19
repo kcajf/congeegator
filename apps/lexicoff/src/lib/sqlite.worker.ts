@@ -29,7 +29,13 @@ async function init() {
 	} catch {
 		// Corrupted pool state — wipe and retry from scratch
 		const root = await navigator.storage.getDirectory();
-		await root.removeEntry('lexicoff-sahpool', { recursive: true }).catch(() => {});
+		// removeEntry({ recursive }) not supported on iOS Safari — delete children manually
+		const sahDir = await root.getDirectoryHandle('lexicoff-sahpool').catch(() => null);
+		if (sahDir) {
+			// @ts-expect-error — entries() not in all TS libs
+			for await (const [name] of sahDir.entries()) await sahDir.removeEntry(name as string);
+			await root.removeEntry('lexicoff-sahpool');
+		}
 		try {
 			poolUtil = await sqlite3.installOpfsSAHPoolVfs({
 				...opts,
@@ -299,10 +305,6 @@ async function listOpfsFiles(): Promise<[string, string][]> {
 		// @ts-expect-error — entries() not in all TS libs
 		for await (const [name] of dir.entries()) {
 			const n = name as string;
-			if (n.endsWith('.tmp')) {
-				await dir.removeEntry(n);
-				continue;
-			}
 			const match = n.match(/^([a-z]{2})-([a-f0-9]{8})\.sqlite$/);
 			if (match && !seen.has(`${match[1]}-${match[2]}`)) {
 				results.push([match[1], match[2]]);
