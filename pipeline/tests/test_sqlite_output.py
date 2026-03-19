@@ -168,6 +168,24 @@ class TestSqliteOutput:
         finally:
             os.unlink(path)
 
+    def test_fts5_hyphenated_word(self, sample_entries):
+        """Hyphenated words must be searchable with per-token quoting (detail='column')."""
+        entries = sample_entries + [
+            {"word": "self-service", "pos": "noun", "senses": [{"gloss": "serve yourself"}], "freq": 3.0},
+        ]
+        path = _make_db(entries)
+        try:
+            conn = sqlite3.connect(path)
+            # Per-token AND with prefix — the pattern used by the frontend
+            rows = conn.execute(FTS_WORD_QUERY.format(col="word"), ('"self" "serv"*',)).fetchall()
+            assert any(r[0] == "self-service" for r in rows)
+            # Phrase queries must NOT be used (detail='column' doesn't support them)
+            with pytest.raises(sqlite3.OperationalError, match="phrase queries are not supported"):
+                conn.execute(FTS_WORD_QUERY.format(col="word"), ('"self service"*',)).fetchall()
+            conn.close()
+        finally:
+            os.unlink(path)
+
     def test_fts5_diacritics(self, sample_entries):
         """FTS5 unicode61 remove_diacritics 2 should match accent-insensitively."""
         path = _make_db(sample_entries)

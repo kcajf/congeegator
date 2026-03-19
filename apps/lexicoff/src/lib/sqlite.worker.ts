@@ -119,7 +119,13 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 		.replace(/\s+/g, ' ') // collapse duplicate spaces
 		.trim();
 	if (!sanitized) return [];
-	const ftsPrefix = `"${sanitized}"*`;
+	// Quote each token to prevent FTS5 keyword interpretation (AND/OR/NOT/NEAR),
+	// then prefix-match on the last token. Can't use phrase queries because detail='column'.
+	const ftsPrefix =
+		sanitized
+			.split(' ')
+			.map((t) => `"${t}"`)
+			.join(' ') + '*';
 
 	// Search word and forms (quality 0/1 via diacritics), gloss (quality 3)
 	const sql = `
@@ -171,7 +177,12 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 					FROM entries e
 					JOIN (SELECT rowid FROM entries_fts WHERE phonetic MATCH ?) AS fts ON e.id = fts.rowid
 					LIMIT 100`,
-					[`"${phonetic}"*`]
+					[
+						phonetic
+							.split(' ')
+							.map((t) => `"${t}"`)
+							.join(' ') + '*'
+					]
 				);
 				for (const [word, pos, freq] of phoneticRows) {
 					const key = `${word}:${pos}`;
