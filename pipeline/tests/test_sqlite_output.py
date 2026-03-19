@@ -6,6 +6,7 @@ import sqlite3
 import tempfile
 
 import pytest
+import zstandard
 
 from pipeline.sqlite_output import write_sqlite_database
 from pipeline.utils import to_phonetic_el
@@ -245,5 +246,39 @@ class TestSqliteOutput:
             words = {r[0] for r in rows}
             assert "grand" in words
             conn.close()
+        finally:
+            os.unlink(path)
+
+    def test_fts_detail_column(self, sample_entries):
+        path = _make_db(sample_entries)
+        try:
+            conn = sqlite3.connect(path)
+            sql = conn.execute(
+                "SELECT sql FROM sqlite_master WHERE name = 'entries_fts'"
+            ).fetchone()[0]
+            assert "detail='column'" in sql
+            conn.close()
+        finally:
+            os.unlink(path)
+
+    def test_fts_optimize_integrity(self, sample_entries):
+        path = _make_db(sample_entries)
+        try:
+            conn = sqlite3.connect(path)
+            assert conn.execute("PRAGMA integrity_check").fetchone()[0] == "ok"
+            rows = conn.execute(FTS_WORD_QUERY.format(col="word"), ("par*",)).fetchall()
+            assert "parler" in {r[0] for r in rows}
+            conn.close()
+        finally:
+            os.unlink(path)
+
+    def test_zstd_roundtrip(self, sample_entries):
+        path = _make_db(sample_entries)
+        try:
+            with open(path, "rb") as f:
+                original = f.read()
+            compressed = zstandard.ZstdCompressor(level=9).compress(original)
+            assert len(compressed) < len(original)
+            assert zstandard.ZstdDecompressor().decompress(compressed) == original
         finally:
             os.unlink(path)

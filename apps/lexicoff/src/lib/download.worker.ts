@@ -1,10 +1,11 @@
 /**
- * Download Worker — fetches .sqlite files from R2 and writes to OPFS.
+ * Download Worker — fetches .sqlite.zst files from R2, stream-decompresses, and writes to OPFS.
  *
  * Separate from the SQLite worker so downloads don't block queries.
  * Reports PROGRESS / COMPLETE / ERROR / DELETED messages.
  */
 
+import { Decompress } from 'fzstd';
 import { getLangDataUrl, manifest } from './dataUtils';
 
 self.postMessage({ type: 'READY' });
@@ -42,7 +43,7 @@ async function doDownload(lang: string) {
 		});
 
 		const baseUrl = getLangDataUrl(lang);
-		const url = `${baseUrl}/${lang}.sqlite`;
+		const url = `${baseUrl}/${lang}.sqlite.zst`;
 		const response = await fetch(url);
 
 		if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -61,14 +62,19 @@ async function doDownload(lang: string) {
 		const fileHandle = await dir.getFileHandle(filename, { create: true });
 		const writable = await fileHandle.createWritable();
 
+		// Stream-decompress zstd chunks to OPFS
+		let pending: Uint8Array[] = [];
+		const decompressor = new Decompress((chunk) => pending.push(chunk));
+
 		try {
 			for (;;) {
 				const { done, value } = await reader.read();
+				decompressor.push(value ?? new Uint8Array(0), done);
+				for (const chunk of pending) await writable.write(chunk as unknown as ArrayBuffer);
+				pending = [];
 				if (done) break;
 
-				await writable.write(value as unknown as ArrayBuffer);
-				receivedBytes += value.length;
-
+				receivedBytes += value!.length;
 				const now = performance.now();
 				if (now - lastProgressTime >= PROGRESS_INTERVAL_MS) {
 					const percent = totalBytes ? Math.round((receivedBytes / totalBytes) * 100) : null;
