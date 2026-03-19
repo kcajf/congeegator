@@ -55,11 +55,12 @@ async function doDownload(lang: string) {
 		let lastProgressTime = 0;
 		const PROGRESS_INTERVAL_MS = 150;
 
-		// Stream directly to OPFS
+		// Stream to a .tmp file, rename on success so partial downloads are never visible
 		const filename = `${lang}-${remote.dataHash}.sqlite`;
+		const tmpFilename = `${filename}.tmp`;
 		const root = await navigator.storage.getDirectory();
 		const dir = await root.getDirectoryHandle('lexicoff', { create: true });
-		const fileHandle = await dir.getFileHandle(filename, { create: true });
+		const fileHandle = await dir.getFileHandle(tmpFilename, { create: true });
 		const writable = await fileHandle.createWritable();
 
 		// Stream-decompress zstd chunks to OPFS
@@ -85,9 +86,12 @@ async function doDownload(lang: string) {
 			await writable.close();
 		} catch (e) {
 			await writable.close();
-			await dir.removeEntry(filename);
+			await dir.removeEntry(tmpFilename);
 			throw e;
 		}
+
+		// @ts-expect-error — move() not in all TS libs but supported in Chrome 110+/Firefox 120+
+		await (await dir.getFileHandle(tmpFilename)).move(filename);
 
 		// Send 100%
 		self.postMessage({

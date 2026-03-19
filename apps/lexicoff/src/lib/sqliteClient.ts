@@ -26,7 +26,7 @@ export const sqliteReady: Promise<void> = new Promise((r) => {
 	_resolveSqliteReady = r;
 });
 
-export function isSahPoolAvailable(): boolean {
+export function isSahPoolAvailable() {
 	return sahPoolAvailable;
 }
 
