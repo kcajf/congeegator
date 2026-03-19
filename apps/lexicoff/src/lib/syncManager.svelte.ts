@@ -1,6 +1,6 @@
 import { browser } from '$app/environment';
 import * as sqliteClient from './sqliteClient';
-import { resolveDbsReady, isSahPoolAvailable, getWorkerReady } from './sqliteClient';
+import { resolveDbsReady, isSahPoolAvailable, sqliteReady } from './sqliteClient';
 import { manifest } from './dataUtils';
 import { searchLangState } from './searchLang.svelte';
 
@@ -119,9 +119,7 @@ class GlobalSyncRegistry {
 	}
 
 	private async init() {
-		// Wait for worker readiness before checking SAH Pool
-		const wr = getWorkerReady();
-		if (wr) await wr;
+		await sqliteReady;
 
 		if (!isSahPoolAvailable()) {
 			this.initialized = true;

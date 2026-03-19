@@ -17,48 +17,44 @@ export type SearchResult = {
 };
 
 let worker: Worker | undefined;
-let workerReady: Promise<void> | undefined;
 let sahPoolAvailable = false;
 let msgId = 0;
 const pending = new Map<number, { resolve: (v: unknown) => void; reject: (e: Error) => void }>();
+
+let _resolveSqliteReady: () => void;
+export const sqliteReady: Promise<void> = new Promise((r) => {
+	_resolveSqliteReady = r;
+});
 
 export function isSahPoolAvailable(): boolean {
 	return sahPoolAvailable;
 }
 
-export function getWorkerReady(): Promise<void> | undefined {
-	return workerReady;
-}
-
 function init() {
-	if (!browser) return;
+	if (!browser) {
+		_resolveSqliteReady();
+		return;
+	}
 
 	worker = new Worker(new URL('./sqlite.worker.ts', import.meta.url), { type: 'module' });
 
-	workerReady = new Promise<void>((resolve) => {
-		const onReady = (e: MessageEvent) => {
-			if (e.data.type === 'READY') {
-				sahPoolAvailable = !!e.data.sahPoolAvailable;
-				worker!.removeEventListener('message', onReady);
-				resolve();
-			}
-		};
-		worker!.addEventListener('message', onReady);
-		worker!.onerror = () => resolve();
-	});
+	const onReady = (e: MessageEvent) => {
+		if (e.data.type !== 'READY') return;
+		sahPoolAvailable = !!e.data.sahPoolAvailable;
+		worker!.removeEventListener('message', onReady);
+		_resolveSqliteReady();
+	};
+	worker.addEventListener('message', onReady);
+	worker.onerror = () => _resolveSqliteReady();
 
 	worker.onmessage = (e: MessageEvent) => {
 		if (e.data.type === 'READY') return;
 		const { id, result, error } = e.data;
 		const p = pending.get(id);
-		if (p) {
-			pending.delete(id);
-			if (error) {
-				p.reject(new Error(error));
-			} else {
-				p.resolve(result);
-			}
-		}
+		if (!p) return;
+		pending.delete(id);
+		if (error) p.reject(new Error(error));
+		else p.resolve(result);
 	};
 }
 
@@ -76,8 +72,8 @@ export function resolveDbsReady() {
 }
 
 async function send(type: string, data: Record<string, unknown> = {}): Promise<unknown> {
-	if (!worker || !workerReady) throw new Error('SQLite worker not available (server-side?)');
-	await workerReady;
+	if (!worker) throw new Error('SQLite worker not available (server-side?)');
+	await sqliteReady;
 	const id = msgId++;
 	return new Promise((resolve, reject) => {
 		pending.set(id, { resolve, reject });

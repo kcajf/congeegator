@@ -256,9 +256,9 @@ async function getWord(lang: string, word: string): Promise<unknown[]> {
 }
 
 async function listOpfsFiles(): Promise<[string, string][]> {
-	const results: [string, string][] = [];
+	if (!poolUtil) return [];
 
-	if (!poolUtil) return results;
+	const results: [string, string][] = [];
 
 	// Check SAH pool for already-imported databases
 	const poolFiles = poolUtil.getFileNames() as string[];
