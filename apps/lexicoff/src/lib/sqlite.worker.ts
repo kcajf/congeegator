@@ -119,8 +119,8 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 		.replace(/\s+/g, ' ') // collapse duplicate spaces
 		.trim();
 	if (!sanitized) return [];
-	// Quote each token to prevent FTS5 keyword interpretation (AND/OR/NOT/NEAR),
-	// then prefix-match on the last token. Can't use phrase queries because detail='column'.
+	// Quote tokens to prevent FTS5 keyword interpretation, prefix-match last token.
+	// No phrase queries — FTS5 table uses detail='column' (no position data).
 	const ftsPrefix =
 		sanitized
 			.split(' ')
@@ -160,7 +160,7 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 			}
 		}
 	} catch (e) {
-		console.error(`FTS5 search failed for query=${JSON.stringify(ftsPrefix)}`, e);
+		console.error(`FTS5 search failed for MATCH ${ftsPrefix}`, e);
 	}
 
 	// Phonetic search (quality 2) — only if phoneticQuery differs from query
@@ -169,6 +169,11 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 			.replace(/[^\p{L}\p{N}\s]/gu, ' ') // strip non-letter/number chars
 			.replace(/\s+/g, ' ') // collapse duplicate spaces
 			.trim();
+		const phoneticFts =
+			phonetic
+				.split(' ')
+				.map((t) => `"${t}"`)
+				.join(' ') + '*';
 		if (phonetic) {
 			try {
 				const phoneticRows = execQuery(
@@ -177,12 +182,7 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 					FROM entries e
 					JOIN (SELECT rowid FROM entries_fts WHERE phonetic MATCH ?) AS fts ON e.id = fts.rowid
 					LIMIT 100`,
-					[
-						phonetic
-							.split(' ')
-							.map((t) => `"${t}"`)
-							.join(' ') + '*'
-					]
+					[phoneticFts]
 				);
 				for (const [word, pos, freq] of phoneticRows) {
 					const key = `${word}:${pos}`;
@@ -197,10 +197,7 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 					}
 				}
 			} catch (e) {
-				console.error(
-					`FTS5 phonetic search failed for query=${JSON.stringify(`"${phonetic}"*`)}`,
-					e
-				);
+				console.error(`FTS5 phonetic search failed for MATCH ${phoneticFts}`, e);
 			}
 		}
 	}
