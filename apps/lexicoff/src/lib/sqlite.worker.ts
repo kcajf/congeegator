@@ -1,7 +1,8 @@
 /**
- * SQLite Web Worker — handles all database queries via @sqlite.org/sqlite-wasm.
+ * SQLite Web Worker — all database queries via @sqlite.org/sqlite-wasm.
  *
- * Uses the official SQLite WASM build with built-in FTS5 and OPFS support.
+ * Uses SAH Pool VFS to read pages on demand from OPFS,
+ * never loading entire databases into memory.
  */
 
 import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
@@ -16,77 +17,68 @@ interface SearchResult {
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 let sqlite3: any;
+let poolUtil: any;
 const openDbs = new Map<string, any>();
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
 async function init() {
 	sqlite3 = await sqlite3InitModule({ print: console.log, printErr: console.error });
+	poolUtil = await sqlite3.installOpfsSAHPoolVfs({
+		name: 'lexicoff-pool',
+		directory: '/lexicoff-sahpool',
+		initialCapacity: 24 // 6 langs * ~3 slots (db + journal + temp) + buffer
+	});
 	self.postMessage({ type: 'READY' });
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getDb(lang: string): any | null {
-	return openDbs.get(lang) ?? null;
 }
 
 async function openDb(lang: string, hash: string): Promise<boolean> {
 	if (openDbs.has(lang)) {
-		try {
-			openDbs.get(lang).close();
-		} catch {
-			// ignore
-		}
+		openDbs.get(lang).close();
 		openDbs.delete(lang);
 	}
 
-	try {
-		// Read the .sqlite file from OPFS into memory
-		const bytes = await readOpfsFile(lang, hash);
-		if (!bytes) return false;
+	const fname = `/${lang}-${hash}.sqlite`;
+	const existingFiles = poolUtil.getFileNames() as string[];
 
-		// Create in-memory DB and deserialize the file contents
-		const p = sqlite3.wasm.allocFromTypedArray(bytes);
-		const db = new sqlite3.oo1.DB();
-		const rc = sqlite3.capi.sqlite3_deserialize(
-			db.pointer,
-			'main',
-			p,
-			bytes.byteLength,
-			bytes.byteLength,
-			sqlite3.capi.SQLITE_DESERIALIZE_FREEONCLOSE | sqlite3.capi.SQLITE_DESERIALIZE_READONLY
-		);
-		if (rc !== 0) {
-			console.error(`sqlite3_deserialize failed: rc=${rc}`);
-			db.close();
-			return false;
+	if (!existingFiles.includes(fname)) {
+		// Clean up old versions of this lang
+		for (const f of existingFiles) {
+			if (f.startsWith(`/${lang}-`) && f.endsWith('.sqlite')) poolUtil.unlink(f);
 		}
-		openDbs.set(lang, db);
-		return true;
-	} catch (e) {
-		console.error(`Failed to open ${lang}-${hash}:`, e);
-		return false;
-	}
-}
 
-async function readOpfsFile(lang: string, hash: string): Promise<Uint8Array | null> {
-	try {
+		await poolUtil.reserveMinimumCapacity(poolUtil.getFileCount() + 3);
+
+		// Stream-import from raw OPFS into pool in 64KB chunks
 		const root = await navigator.storage.getDirectory();
 		const dir = await root.getDirectoryHandle('lexicoff');
-		const fileHandle = await dir.getFileHandle(`${lang}-${hash}.sqlite`);
-		const file = await fileHandle.getFile();
-		const buffer = await file.arrayBuffer();
-		return new Uint8Array(buffer);
-	} catch {
-		return null;
+		const file = await (await dir.getFileHandle(`${lang}-${hash}.sqlite`)).getFile();
+		let offset = 0;
+		await poolUtil.importDb(fname, async (): Promise<Uint8Array | undefined> => {
+			if (offset >= file.size) return undefined;
+			const end = Math.min(offset + 65536, file.size);
+			const chunk = new Uint8Array(await file.slice(offset, end).arrayBuffer());
+			offset = end;
+			return chunk;
+		});
+
+		// Raw OPFS file is now in the pool — delete it
+		await dir.removeEntry(`${lang}-${hash}.sqlite`);
 	}
+
+	const db = new poolUtil.OpfsSAHPoolDb(fname, 'r');
+	openDbs.set(lang, db);
+	return true;
 }
 
 async function closeDb(lang: string) {
 	const db = openDbs.get(lang);
-	if (db) {
-		db.close();
-		openDbs.delete(lang);
-	}
+	if (!db) return;
+	db.close();
+	openDbs.delete(lang);
+}
+
+function deleteFromPool(lang: string, hash: string) {
+	poolUtil.unlink(`/${lang}-${hash}.sqlite`);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -104,7 +96,7 @@ function execQuery(db: any, sql: string, params: unknown[] = []): unknown[][] {
 }
 
 async function search(lang: string, query: string, phoneticQuery: string): Promise<SearchResult[]> {
-	const db = getDb(lang);
+	const db = openDbs.get(lang);
 	if (!db) return [];
 
 	const results: SearchResult[] = [];
@@ -232,7 +224,7 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 }
 
 async function getWord(lang: string, word: string): Promise<unknown[]> {
-	const db = getDb(lang);
+	const db = openDbs.get(lang);
 	if (!db) return [];
 
 	const rows = execQuery(
@@ -256,35 +248,36 @@ async function getWord(lang: string, word: string): Promise<unknown[]> {
 	}));
 }
 
-function getInstalledLangs(): string[] {
-	return [...openDbs.keys()];
-}
-
 async function listOpfsFiles(): Promise<[string, string][]> {
 	const results: [string, string][] = [];
+
+	// Check SAH pool for already-imported databases
+	const poolFiles = poolUtil.getFileNames() as string[];
+	for (const name of poolFiles) {
+		const match = name.match(/^\/([a-z]{2})-([a-f0-9]{8})\.sqlite$/);
+		if (match) results.push([match[1], match[2]]);
+	}
+
+	// Check raw OPFS for downloaded-but-not-yet-imported files
+	const seen = new Set(results.map(([lang, hash]) => `${lang}-${hash}`));
 	try {
 		const root = await navigator.storage.getDirectory();
-		let dir: FileSystemDirectoryHandle;
-		try {
-			dir = await root.getDirectoryHandle('lexicoff');
-		} catch {
-			return results;
-		}
+		const dir = await root.getDirectoryHandle('lexicoff');
 		// @ts-expect-error — entries() not in all TS libs
 		for await (const [name] of dir.entries()) {
 			const match = (name as string).match(/^([a-z]{2})-([a-f0-9]{8})\.sqlite$/);
-			if (match) {
+			if (match && !seen.has(`${match[1]}-${match[2]}`)) {
 				results.push([match[1], match[2]]);
 			}
 		}
 	} catch {
-		// OPFS not available
+		// No raw OPFS directory yet
 	}
 	return results;
 }
 
 self.onmessage = async (e: MessageEvent) => {
-	const { id, type, lang, query, word, phoneticQuery } = e.data;
+	const { id, type, lang, query, word, phoneticQuery, hash } = e.data;
 
 	try {
 		let result: unknown;
@@ -300,7 +293,7 @@ self.onmessage = async (e: MessageEvent) => {
 				result = openDbs.has(lang);
 				break;
 			case 'getInstalledLangs':
-				result = getInstalledLangs();
+				result = [...openDbs.keys()];
 				break;
 			case 'open':
 				result = await openDb(lang, query);
@@ -311,6 +304,10 @@ self.onmessage = async (e: MessageEvent) => {
 				break;
 			case 'list':
 				result = await listOpfsFiles();
+				break;
+			case 'deleteFromPool':
+				deleteFromPool(lang, hash);
+				result = true;
 				break;
 		}
 

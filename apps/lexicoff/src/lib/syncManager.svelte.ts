@@ -97,8 +97,10 @@ export async function deleteLang(lang: string) {
 		return;
 	}
 	await workerReady;
-	// Close the SQLite database first
+	// Close the SQLite database and clean up pool entry
+	const langHash = globalSync.map[lang].hash;
 	await sqliteClient.closeDb(lang);
+	await sqliteClient.deleteFromPool(lang, langHash);
 	// Optimistic UI: remove from map immediately
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const { [lang]: _removed, ...rest } = globalSync.map;
@@ -117,17 +119,6 @@ class GlobalSyncRegistry {
 	}
 
 	private async init() {
-		// Delete old IndexedDB if present (one-time migration from Dexie)
-		try {
-			const dbs = await indexedDB.databases?.();
-			if (dbs?.find((db) => db.name === 'LexicoffDB')) {
-				indexedDB.deleteDatabase('LexicoffDB');
-				console.log('Deleted old LexicoffDB IndexedDB');
-			}
-		} catch {
-			// indexedDB.databases() not available in all browsers
-		}
-
 		// Discover installed databases from OPFS and open them
 		try {
 			const files = await sqliteClient.listOpfsFiles();
