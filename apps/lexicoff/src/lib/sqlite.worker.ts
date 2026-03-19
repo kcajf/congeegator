@@ -153,8 +153,8 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 				});
 			}
 		}
-	} catch {
-		// FTS query syntax error — return empty
+	} catch (e) {
+		console.error(`FTS5 search failed for query=${JSON.stringify(ftsPrefix)}`, e);
 	}
 
 	// Phonetic search (quality 2) — only if phoneticQuery differs from query
@@ -185,8 +185,11 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 						});
 					}
 				}
-			} catch {
-				// ignore
+			} catch (e) {
+				console.error(
+					`FTS5 phonetic search failed for query=${JSON.stringify(`"${phonetic}"*`)}`,
+					e
+				);
 			}
 		}
 	}
