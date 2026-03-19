@@ -23,15 +23,21 @@ const openDbs = new Map<string, any>();
 
 async function init() {
 	sqlite3 = await sqlite3InitModule({ print: console.log, printErr: console.error });
-	poolUtil = await sqlite3.installOpfsSAHPoolVfs({
-		name: 'lexicoff-pool',
-		directory: '/lexicoff-sahpool',
-		initialCapacity: 24 // 6 langs * ~3 slots (db + journal + temp) + buffer
-	});
-	self.postMessage({ type: 'READY' });
+	try {
+		poolUtil = await sqlite3.installOpfsSAHPoolVfs({
+			name: 'lexicoff-pool',
+			directory: '/lexicoff-sahpool',
+			initialCapacity: 24 // 6 langs * ~3 slots (db + journal + temp) + buffer
+		});
+	} catch (err) {
+		console.warn('SAH Pool VFS unavailable:', err);
+	}
+	self.postMessage({ type: 'READY', sahPoolAvailable: !!poolUtil });
 }
 
 async function openDb(lang: string, hash: string): Promise<boolean> {
+	if (!poolUtil) return false;
+
 	if (openDbs.has(lang)) {
 		openDbs.get(lang).close();
 		openDbs.delete(lang);
@@ -78,6 +84,7 @@ async function closeDb(lang: string) {
 }
 
 function deleteFromPool(lang: string, hash: string) {
+	if (!poolUtil) return;
 	poolUtil.unlink(`/${lang}-${hash}.sqlite`);
 }
 
@@ -112,7 +119,13 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 		.replace(/\s+/g, ' ') // collapse duplicate spaces
 		.trim();
 	if (!sanitized) return [];
-	const ftsPrefix = `"${sanitized}"*`;
+	// Quote tokens to prevent FTS5 keyword interpretation, prefix-match last token.
+	// No phrase queries — FTS5 table uses detail='column' (no position data).
+	const ftsPrefix =
+		sanitized
+			.split(' ')
+			.map((t) => `"${t}"`)
+			.join(' ') + '*';
 
 	// Search word and forms (quality 0/1 via diacritics), gloss (quality 3)
 	const sql = `
@@ -147,7 +160,7 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 			}
 		}
 	} catch (e) {
-		console.error(`FTS5 search failed for query=${JSON.stringify(ftsPrefix)}`, e);
+		console.error(`FTS5 search failed for MATCH ${ftsPrefix}`, e);
 	}
 
 	// Phonetic search (quality 2) — only if phoneticQuery differs from query
@@ -156,6 +169,11 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 			.replace(/[^\p{L}\p{N}\s]/gu, ' ') // strip non-letter/number chars
 			.replace(/\s+/g, ' ') // collapse duplicate spaces
 			.trim();
+		const phoneticFts =
+			phonetic
+				.split(' ')
+				.map((t) => `"${t}"`)
+				.join(' ') + '*';
 		if (phonetic) {
 			try {
 				const phoneticRows = execQuery(
@@ -164,7 +182,7 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 					FROM entries e
 					JOIN (SELECT rowid FROM entries_fts WHERE phonetic MATCH ?) AS fts ON e.id = fts.rowid
 					LIMIT 100`,
-					[`"${phonetic}"*`]
+					[phoneticFts]
 				);
 				for (const [word, pos, freq] of phoneticRows) {
 					const key = `${word}:${pos}`;
@@ -179,10 +197,7 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 					}
 				}
 			} catch (e) {
-				console.error(
-					`FTS5 phonetic search failed for query=${JSON.stringify(`"${phonetic}"*`)}`,
-					e
-				);
+				console.error(`FTS5 phonetic search failed for MATCH ${phoneticFts}`, e);
 			}
 		}
 	}
@@ -258,6 +273,8 @@ async function getWord(lang: string, word: string): Promise<unknown[]> {
 }
 
 async function listOpfsFiles(): Promise<[string, string][]> {
+	if (!poolUtil) return [];
+
 	const results: [string, string][] = [];
 
 	// Check SAH pool for already-imported databases
