@@ -111,7 +111,7 @@ def write_sqlite_manifest(
     """
     language_hashes = {}
     for config in configs:
-        sqlite_path = os.path.join(data_dir, config.code, f"{config.code}.sqlite")
+        sqlite_path = os.path.join(data_dir, config.code, f"{config.code}.sqlite.zst")
         if not os.path.exists(sqlite_path):
             continue
 

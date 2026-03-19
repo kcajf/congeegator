@@ -13,7 +13,8 @@ const mimetypes: Record<string, string> = {
 	'.jpg': 'image/jpeg',
 	'.svg': 'image/svg+xml',
 	'.ndjson': 'application/x-ndjson',
-	'.sqlite': 'application/x-sqlite3'
+	'.sqlite': 'application/x-sqlite3',
+	'.zst': 'application/zstd'
 };
 
 export const GET: RequestHandler = async ({ params }) => {

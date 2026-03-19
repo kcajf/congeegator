@@ -35,7 +35,8 @@ CREATE VIRTUAL TABLE entries_fts USING fts5(
     phonetic,
     content='',
     content_rowid='id',
-    tokenize='unicode61 remove_diacritics 2'
+    tokenize='unicode61 remove_diacritics 2',
+    detail='column'
 );
 
 CREATE TABLE metadata (
@@ -113,6 +114,11 @@ def write_sqlite_database(
 
         conn.execute("PRAGMA journal_mode=DELETE")
         conn.commit()
+
+        # Merge all FTS5 b-tree segments into one
+        conn.execute("INSERT INTO entries_fts(entries_fts) VALUES('optimize')")
+        conn.commit()
+
         conn.execute("VACUUM")
         conn.execute("PRAGMA optimize")
 

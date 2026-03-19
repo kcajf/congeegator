@@ -13,6 +13,8 @@ import sys
 import time
 from typing import Any
 
+import zstandard
+
 import msgspec
 from wordfreq import zipf_frequency
 
@@ -279,6 +281,13 @@ def main():
                     phonetic_fn=dict_config.phonetic_fn,
                     output_path=sqlite_path,
                 )
+
+                # Compress with zstd and remove original
+                zst_path = sqlite_path + ".zst"
+                cctx = zstandard.ZstdCompressor(level=9)
+                with open(sqlite_path, "rb") as f_in, open(zst_path, "wb") as f_out:
+                    cctx.copy_stream(f_in, f_out)
+                os.remove(sqlite_path)
 
         dict_manifest_path = os.path.join("apps", "lexicoff", "src", "lib", "data-manifest.json")
         write_sqlite_manifest(dict_data_dir, DICT_CONFIGS, make_dict_language_static_metadata, dict_manifest_path)
