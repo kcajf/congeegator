@@ -23,14 +23,21 @@ const openDbs = new Map<string, any>();
 
 async function init() {
 	sqlite3 = await sqlite3InitModule({ print: console.log, printErr: console.error });
+	const opts = { name: 'lexicoff-pool', directory: '/lexicoff-sahpool', initialCapacity: 6 };
 	try {
-		poolUtil = await sqlite3.installOpfsSAHPoolVfs({
-			name: 'lexicoff-pool',
-			directory: '/lexicoff-sahpool',
-			initialCapacity: 24 // 6 langs * ~3 slots (db + journal + temp) + buffer
-		});
-	} catch (err) {
-		console.warn('SAH Pool VFS unavailable:', err);
+		poolUtil = await sqlite3.installOpfsSAHPoolVfs(opts);
+	} catch {
+		// Corrupted pool state — wipe and retry from scratch
+		const root = await navigator.storage.getDirectory();
+		await root.removeEntry('lexicoff-sahpool', { recursive: true }).catch(() => {});
+		try {
+			poolUtil = await sqlite3.installOpfsSAHPoolVfs({
+				...opts,
+				forceReinitIfPreviouslyFailed: true
+			});
+		} catch (e) {
+			console.warn('SAH Pool VFS unavailable:', e);
+		}
 	}
 	self.postMessage({ type: 'READY', sahPoolAvailable: !!poolUtil });
 }
@@ -284,14 +291,19 @@ async function listOpfsFiles(): Promise<[string, string][]> {
 		if (match) results.push([match[1], match[2]]);
 	}
 
-	// Check raw OPFS for downloaded-but-not-yet-imported files
+	// Check raw OPFS for downloaded-but-not-yet-imported files, clean up partial downloads
 	const seen = new Set(results.map(([lang, hash]) => `${lang}-${hash}`));
 	try {
 		const root = await navigator.storage.getDirectory();
 		const dir = await root.getDirectoryHandle('lexicoff');
 		// @ts-expect-error — entries() not in all TS libs
 		for await (const [name] of dir.entries()) {
-			const match = (name as string).match(/^([a-z]{2})-([a-f0-9]{8})\.sqlite$/);
+			const n = name as string;
+			if (n.endsWith('.tmp')) {
+				await dir.removeEntry(n);
+				continue;
+			}
+			const match = n.match(/^([a-z]{2})-([a-f0-9]{8})\.sqlite$/);
 			if (match && !seen.has(`${match[1]}-${match[2]}`)) {
 				results.push([match[1], match[2]]);
 			}
