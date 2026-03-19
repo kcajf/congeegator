@@ -125,6 +125,10 @@ export async function closeDb(lang: string): Promise<void> {
 	await send('close', { lang });
 }
 
+export async function deleteFromPool(lang: string, hash: string): Promise<void> {
+	await send('deleteFromPool', { lang, hash });
+}
+
 export async function listOpfsFiles(): Promise<[string, string][]> {
 	return (await send('list')) as [string, string][];
 }
