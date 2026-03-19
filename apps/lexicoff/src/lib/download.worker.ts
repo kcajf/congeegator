@@ -50,24 +50,37 @@ async function doDownload(lang: string) {
 
 		const totalBytes = remote.dataSize ?? null;
 		const reader = response.body.getReader();
-		const chunks: Uint8Array[] = [];
 		let receivedBytes = 0;
 		let lastProgressTime = 0;
 		const PROGRESS_INTERVAL_MS = 150;
 
-		for (;;) {
-			const { done, value } = await reader.read();
-			if (done) break;
+		// Stream directly to OPFS
+		const filename = `${lang}-${remote.dataHash}.sqlite`;
+		const root = await navigator.storage.getDirectory();
+		const dir = await root.getDirectoryHandle('lexicoff', { create: true });
+		const fileHandle = await dir.getFileHandle(filename, { create: true });
+		const writable = await fileHandle.createWritable();
 
-			chunks.push(value);
-			receivedBytes += value.length;
+		try {
+			for (;;) {
+				const { done, value } = await reader.read();
+				if (done) break;
 
-			const now = performance.now();
-			if (now - lastProgressTime >= PROGRESS_INTERVAL_MS) {
-				const percent = totalBytes ? Math.round((receivedBytes / totalBytes) * 100) : null;
-				self.postMessage({ type: 'PROGRESS', lang, receivedBytes, totalBytes, percent });
-				lastProgressTime = now;
+				await writable.write(value as unknown as ArrayBuffer);
+				receivedBytes += value.length;
+
+				const now = performance.now();
+				if (now - lastProgressTime >= PROGRESS_INTERVAL_MS) {
+					const percent = totalBytes ? Math.round((receivedBytes / totalBytes) * 100) : null;
+					self.postMessage({ type: 'PROGRESS', lang, receivedBytes, totalBytes, percent });
+					lastProgressTime = now;
+				}
 			}
+			await writable.close();
+		} catch (e) {
+			await writable.close();
+			await dir.removeEntry(filename);
+			throw e;
 		}
 
 		// Send 100%
@@ -78,18 +91,6 @@ async function doDownload(lang: string) {
 			totalBytes,
 			percent: totalBytes ? 100 : null
 		});
-
-		// Concatenate chunks into a single buffer
-		const fullBuffer = new Uint8Array(receivedBytes);
-		let offset = 0;
-		for (const chunk of chunks) {
-			fullBuffer.set(chunk, offset);
-			offset += chunk.length;
-		}
-
-		// Write to OPFS
-		const filename = `${lang}-${remote.dataHash}.sqlite`;
-		await writeToOpfs(filename, fullBuffer);
 
 		// Remove old versions of this language
 		await removeOldVersions(lang, remote.dataHash);
@@ -134,17 +135,6 @@ async function doDelete(lang: string) {
 			error: error instanceof Error ? error.message : String(error)
 		});
 	}
-}
-
-async function writeToOpfs(filename: string, data: Uint8Array) {
-	const root = await navigator.storage.getDirectory();
-	const dir = await root.getDirectoryHandle('lexicoff', { create: true });
-	const fileHandle = await dir.getFileHandle(filename, { create: true });
-
-	// Use writable stream (more widely supported than sync access handle from main/worker)
-	const writable = await fileHandle.createWritable();
-	await writable.write(data as unknown as ArrayBuffer);
-	await writable.close();
 }
 
 async function removeOldVersions(lang: string, currentHash: string) {
