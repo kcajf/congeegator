@@ -105,14 +105,13 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 	const trimmed = query.trim().toLowerCase();
 	if (!trimmed) return [];
 
-	// Replace non-word chars with spaces so hyphenated words ("self-service") split into
-	// proper tokens matching the unicode61 tokenizer. \p{L} = Unicode letters, \p{N} = numbers.
+	// \p{L} = unicode letters, \p{N} = numbers — replace everything else with spaces
+	// so e.g. "self-service" → "self service" (matching the FTS5 unicode61 tokenizer)
 	const sanitized = trimmed
-		.replace(/[^\p{L}\p{N}\s]/gu, ' ') // keep only letters, numbers, whitespace
-		.replace(/\s+/g, ' ') // collapse multiple spaces
+		.replace(/[^\p{L}\p{N}\s]/gu, ' ') // strip non-letter/number chars
+		.replace(/\s+/g, ' ') // collapse duplicate spaces
 		.trim();
 	if (!sanitized) return [];
-	// Phrase match: tokens must appear adjacent and in order (e.g. "self service"*)
 	const ftsPrefix = `"${sanitized}"*`;
 
 	// Search word and forms (quality 0/1 via diacritics), gloss (quality 3)
@@ -154,8 +153,8 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 	// Phonetic search (quality 2) — only if phoneticQuery differs from query
 	if (phoneticQuery && phoneticQuery !== trimmed) {
 		const phonetic = phoneticQuery
-			.replace(/[^\p{L}\p{N}\s]/gu, ' ') // keep only letters, numbers, whitespace
-			.replace(/\s+/g, ' ') // collapse multiple spaces
+			.replace(/[^\p{L}\p{N}\s]/gu, ' ') // strip non-letter/number chars
+			.replace(/\s+/g, ' ') // collapse duplicate spaces
 			.trim();
 		if (phonetic) {
 			try {
