@@ -20,9 +20,12 @@ vite.config.ts.timestamp-*
 .pixi/*
 !.pixi/config.toml
 
-.claude/
 __pycache__/
 cache/
 
 r2_data/
 **/static/sitemap*.xml
+
+# Claude Code
+.claude/settings.local.json
+.claude/worktrees/
