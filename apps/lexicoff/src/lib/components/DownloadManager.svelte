@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { manifest } from '$lib/dataUtils';
 	import { globalSync, triggerLangSync, deleteLang } from '$lib/syncManager.svelte';
+	import { isSahPoolAvailable } from '$lib/sqliteClient';
 
 	function formatSize(bytes: number): string {
 		if (bytes < 1024) return `${bytes} B`;
@@ -16,10 +17,18 @@
 	const languages = Object.values(manifest.languages).toSorted((a, b) =>
 		a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
 	);
+
+	const sahAvailable = $derived(globalSync.initialized ? isSahPoolAvailable() : true);
 </script>
 
 <div class="download-manager">
 	<h2>Languages</h2>
+	{#if !sahAvailable}
+		<p class="unavailable-notice">
+			Offline downloads are not supported in this browser. Try the latest version of Chrome, Edge,
+			or Firefox.
+		</p>
+	{/if}
 	<div class="lang-list">
 		{#each languages as lang (lang.code)}
 			{@const info = globalSync.map[lang.code]}
@@ -61,7 +70,11 @@
 						</button>
 						<button class="btn btn-remove" onclick={() => deleteLang(lang.code)}> Remove </button>
 					{:else}
-						<button class="btn btn-install" onclick={() => triggerLangSync(lang.code)}>
+						<button
+							class="btn btn-install"
+							onclick={() => triggerLangSync(lang.code)}
+							disabled={!sahAvailable}
+						>
 							Install
 						</button>
 					{/if}
@@ -176,5 +189,16 @@
 
 	.btn-remove {
 		color: var(--text-muted);
+	}
+
+	.btn:disabled {
+		opacity: 0.4;
+		cursor: not-allowed;
+	}
+
+	.unavailable-notice {
+		font-size: 0.85rem;
+		color: var(--text-muted);
+		margin: 0.5rem 0;
 	}
 </style>

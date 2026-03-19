@@ -1,6 +1,6 @@
 import { browser } from '$app/environment';
 import * as sqliteClient from './sqliteClient';
-import { resolveDbsReady } from './sqliteClient';
+import { resolveDbsReady, isSahPoolAvailable, getWorkerReady } from './sqliteClient';
 import { manifest } from './dataUtils';
 import { searchLangState } from './searchLang.svelte';
 
@@ -119,6 +119,16 @@ class GlobalSyncRegistry {
 	}
 
 	private async init() {
+		// Wait for worker readiness before checking SAH Pool
+		const wr = getWorkerReady();
+		if (wr) await wr;
+
+		if (!isSahPoolAvailable()) {
+			this.initialized = true;
+			resolveDbsReady();
+			return;
+		}
+
 		// Discover installed databases from OPFS and open them
 		try {
 			const files = await sqliteClient.listOpfsFiles();

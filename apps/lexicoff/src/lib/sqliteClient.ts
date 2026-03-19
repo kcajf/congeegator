@@ -17,25 +17,34 @@ export type SearchResult = {
 };
 
 let worker: Worker | undefined;
-let ready: Promise<void> | undefined;
+let workerReady: Promise<void> | undefined;
+let sahPoolAvailable = false;
 let msgId = 0;
 const pending = new Map<number, { resolve: (v: unknown) => void; reject: (e: Error) => void }>();
+
+export function isSahPoolAvailable(): boolean {
+	return sahPoolAvailable;
+}
+
+export function getWorkerReady(): Promise<void> | undefined {
+	return workerReady;
+}
 
 function init() {
 	if (!browser) return;
 
 	worker = new Worker(new URL('./sqlite.worker.ts', import.meta.url), { type: 'module' });
 
-	ready = new Promise<void>((resolve) => {
+	workerReady = new Promise<void>((resolve) => {
 		const onReady = (e: MessageEvent) => {
 			if (e.data.type === 'READY') {
+				sahPoolAvailable = !!e.data.sahPoolAvailable;
 				worker!.removeEventListener('message', onReady);
 				resolve();
 			}
 		};
 		worker!.addEventListener('message', onReady);
-		// Timeout fallback
-		setTimeout(resolve, 5000);
+		worker!.onerror = () => resolve();
 	});
 
 	worker.onmessage = (e: MessageEvent) => {
@@ -67,8 +76,8 @@ export function resolveDbsReady() {
 }
 
 async function send(type: string, data: Record<string, unknown> = {}): Promise<unknown> {
-	if (!worker || !ready) throw new Error('SQLite worker not available (server-side?)');
-	await ready;
+	if (!worker || !workerReady) throw new Error('SQLite worker not available (server-side?)');
+	await workerReady;
 	const id = msgId++;
 	return new Promise((resolve, reject) => {
 		pending.set(id, { resolve, reject });
