@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { appTitle, siteUrl } from '$lib/defs';
 	import DownloadManager from '$lib/components/DownloadManager.svelte';
+	import { appTitle, siteUrl } from '$lib/defs';
 </script>
 
 <svelte:head>
@@ -13,9 +13,6 @@
 </svelte:head>
 
 <div class="home">
-	<h1>{appTitle}</h1>
-	<p class="tagline">Free offline dictionary powered by Wiktionary</p>
-
 	<DownloadManager />
 
 	<div class="about">
