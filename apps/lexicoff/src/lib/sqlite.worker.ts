@@ -23,15 +23,21 @@ const openDbs = new Map<string, any>();
 
 async function init() {
 	sqlite3 = await sqlite3InitModule({ print: console.log, printErr: console.error });
-	poolUtil = await sqlite3.installOpfsSAHPoolVfs({
-		name: 'lexicoff-pool',
-		directory: '/lexicoff-sahpool',
-		initialCapacity: 24 // 6 langs * ~3 slots (db + journal + temp) + buffer
-	});
-	self.postMessage({ type: 'READY' });
+	try {
+		poolUtil = await sqlite3.installOpfsSAHPoolVfs({
+			name: 'lexicoff-pool',
+			directory: '/lexicoff-sahpool',
+			initialCapacity: 24 // 6 langs * ~3 slots (db + journal + temp) + buffer
+		});
+	} catch (err) {
+		console.warn('SAH Pool VFS unavailable:', err);
+	}
+	self.postMessage({ type: 'READY', sahPoolAvailable: !!poolUtil });
 }
 
 async function openDb(lang: string, hash: string): Promise<boolean> {
+	if (!poolUtil) return false;
+
 	if (openDbs.has(lang)) {
 		openDbs.get(lang).close();
 		openDbs.delete(lang);
@@ -78,6 +84,7 @@ async function closeDb(lang: string) {
 }
 
 function deleteFromPool(lang: string, hash: string) {
+	if (!poolUtil) return;
 	poolUtil.unlink(`/${lang}-${hash}.sqlite`);
 }
 
@@ -255,6 +262,8 @@ async function getWord(lang: string, word: string): Promise<unknown[]> {
 }
 
 async function listOpfsFiles(): Promise<[string, string][]> {
+	if (!poolUtil) return [];
+
 	const results: [string, string][] = [];
 
 	// Check SAH pool for already-imported databases
