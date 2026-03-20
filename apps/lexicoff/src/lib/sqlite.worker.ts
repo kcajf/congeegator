@@ -7,12 +7,23 @@
 
 import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
 
-interface SearchResult {
+interface InternalResult {
 	word: string;
 	pos: string;
 	matched: string;
 	quality: number; // 0=word, 1=form, 2=phonetic, 3=gloss, 4=fuzzy
 	freq: number;
+	id: number;
+}
+
+interface SearchResult {
+	word: string;
+	pos: string;
+	matched: string;
+	quality: number;
+	freq: number;
+	glosses: string[];
+	matchedGlossIdx?: number;
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -181,7 +192,7 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 	const db = openDbs.get(lang);
 	if (!db) return [];
 
-	const seen = new Map<string, SearchResult>();
+	const seen = new Map<string, InternalResult>();
 
 	const trimmed = query.trim().toLowerCase();
 	if (!trimmed) return [];
@@ -211,14 +222,15 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 			`SELECT id, word, pos, freq FROM entries WHERE word = ? COLLATE NOCASE LIMIT 5`,
 			[trimmed]
 		);
-		for (const [, word, pos, freq] of exactRows) {
+		for (const [id, word, pos, freq] of exactRows) {
 			const key = `${word}:${pos}`;
 			seen.set(key, {
 				word: word as string,
 				pos: pos as string,
 				matched: word as string,
 				quality: 0,
-				freq: freq as number
+				freq: freq as number,
+				id: id as number
 			});
 		}
 	} catch {
@@ -236,43 +248,27 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 
 	for (const [col, quality] of colQueries) {
 		try {
-			const isGloss = quality === 3;
 			const rows = execQuery(
 				db,
-				`SELECT e.word, e.pos, e.freq${isGloss ? ', e.senses' : ''}
+				`SELECT e.id, e.word, e.pos, e.freq
 				FROM entries e
 				JOIN (SELECT rowid FROM entries_fts WHERE ${col} MATCH ?) AS fts ON e.id = fts.rowid
 				LIMIT 50`,
 				[ftsPrefix]
 			);
 			for (const row of rows) {
-				const [word, pos, freq] = row;
+				const [id, word, pos, freq] = row;
 				const key = `${word}:${pos}`;
 				if (quality === 0) wordMatchCount++;
 				const existing = seen.get(key);
 				if (!existing || quality < existing.quality) {
-					let matched = word as string;
-					if (isGloss) {
-						try {
-							const senses = JSON.parse(row[3] as string);
-							matched = '';
-							for (const s of senses) {
-								if (s.gloss && s.gloss.toLowerCase().includes(trimmed)) {
-									matched = s.gloss;
-									break;
-								}
-							}
-							if (!matched) matched = senses[0]?.gloss ?? (word as string);
-						} catch {
-							matched = word as string;
-						}
-					}
 					seen.set(key, {
 						word: word as string,
 						pos: pos as string,
-						matched,
+						matched: word as string,
 						quality,
-						freq: freq as number
+						freq: freq as number,
+						id: id as number
 					});
 				}
 			}
@@ -296,13 +292,13 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 			try {
 				const phoneticRows = execQuery(
 					db,
-					`SELECT e.word, e.pos, e.freq
+					`SELECT e.id, e.word, e.pos, e.freq
 					FROM entries e
 					JOIN (SELECT rowid FROM entries_fts WHERE phonetic MATCH ?) AS fts ON e.id = fts.rowid
 					LIMIT 50`,
 					[phoneticFts]
 				);
-				for (const [word, pos, freq] of phoneticRows) {
+				for (const [id, word, pos, freq] of phoneticRows) {
 					const key = `${word}:${pos}`;
 					if (!seen.has(key)) {
 						seen.set(key, {
@@ -310,7 +306,8 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 							pos: pos as string,
 							matched: word as string,
 							quality: 2,
-							freq: freq as number
+							freq: freq as number,
+							id: id as number
 						});
 					}
 				}
@@ -325,13 +322,13 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 		try {
 			const fuzzyRows = execQuery(
 				db,
-				`SELECT e.word, e.pos, e.freq
+				`SELECT e.id, e.word, e.pos, e.freq
 				FROM entries e
 				JOIN (SELECT rowid FROM fuzzy WHERE fuzzy MATCH ?) AS t ON e.id = t.rowid
 				LIMIT 50`,
 				[sanitized]
 			);
-			for (const [word, pos, freq] of fuzzyRows) {
+			for (const [id, word, pos, freq] of fuzzyRows) {
 				const key = `${word}:${pos}`;
 				if (!seen.has(key)) {
 					seen.set(key, {
@@ -339,7 +336,8 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 						pos: pos as string,
 						matched: word as string,
 						quality: 4,
-						freq: freq as number
+						freq: freq as number,
+						id: id as number
 					});
 				}
 			}
@@ -349,7 +347,7 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 	}
 
 	// Deduplicate by word (collapse POS), sort by quality then freq
-	const byWord = new Map<string, SearchResult>();
+	const byWord = new Map<string, InternalResult>();
 	for (const r of seen.values()) {
 		const existing = byWord.get(r.word);
 		if (
@@ -363,7 +361,7 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 
 	const isUpperCase = (w: string) => w[0] !== w[0].toLowerCase();
 
-	return [...byWord.values()]
+	const top = [...byWord.values()]
 		.sort(
 			(a, b) =>
 				a.quality - b.quality ||
@@ -373,6 +371,72 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 				a.word.length - b.word.length
 		)
 		.slice(0, 50);
+
+	// Bulk-fetch senses in one query after dedup+sort+slice, rather than
+	// parsing senses inline during each search path. This is both simpler
+	// (one code path) and faster (one query for ≤50 rows vs per-entry parsing).
+	if (top.length === 0) return [];
+
+	const ids = top.map((r) => r.id);
+	const placeholders = ids.map(() => '?').join(',');
+	const sensesMap = new Map<number, string[]>();
+	try {
+		const sensesRows = execQuery(
+			db,
+			`SELECT id, senses FROM entries WHERE id IN (${placeholders})`,
+			ids
+		);
+		for (const [id, senses] of sensesRows) {
+			try {
+				const parsed = JSON.parse(senses as string);
+				const glosses: string[] = [];
+				for (const s of parsed) {
+					if (s.gloss) glosses.push(s.gloss as string);
+				}
+				sensesMap.set(id as number, glosses);
+			} catch {
+				// skip unparseable
+			}
+		}
+	} catch {
+		// best-effort — return results without glosses
+	}
+
+	return top.map((r): SearchResult => {
+		const allGlosses = sensesMap.get(r.id) ?? [];
+		let glosses: string[];
+		let matchedGlossIdx: number | undefined;
+
+		if (r.quality === 3 && allGlosses.length > 0) {
+			// For gloss-match results, ensure the matched gloss is visible in the
+			// top 3 so the user can see *why* this result appeared. If the matched
+			// gloss is already in the top 3, keep natural order; otherwise prepend
+			// it and take 2 more from the top (still 3 total).
+			const matchIdx = allGlosses.findIndex((g) => g.toLowerCase().includes(trimmed));
+			const top3 = allGlosses.slice(0, 3);
+			if (matchIdx >= 0 && matchIdx < 3) {
+				glosses = top3;
+				matchedGlossIdx = matchIdx;
+			} else if (matchIdx >= 0) {
+				glosses = [allGlosses[matchIdx], ...allGlosses.slice(0, 2)];
+				matchedGlossIdx = 0;
+			} else {
+				glosses = top3;
+			}
+		} else {
+			glosses = allGlosses.slice(0, 3);
+		}
+
+		return {
+			word: r.word,
+			pos: r.pos,
+			matched: r.matched,
+			quality: r.quality,
+			freq: r.freq,
+			glosses,
+			matchedGlossIdx
+		};
+	});
 }
 
 async function getWord(lang: string, word: string): Promise<unknown[]> {

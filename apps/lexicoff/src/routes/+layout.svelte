@@ -112,6 +112,47 @@
 		}
 	}
 
+	// Split a gloss string into segments with bold markers for the matched search term.
+	// Tries the full phrase first (e.g. "small bird"), then falls back to per-token
+	// highlighting for scattered matches (e.g. "a **small** yellow **bird**").
+	// Returns segments suitable for rendering with conditional <b> — no {@html} needed.
+	function highlightGloss(gloss: string, term: string): { text: string; bold: boolean }[] {
+		const lower = gloss.toLowerCase();
+		const termLower = term.toLowerCase();
+
+		// Try full phrase match first
+		const idx = lower.indexOf(termLower);
+		if (idx >= 0) {
+			return [
+				...(idx > 0 ? [{ text: gloss.slice(0, idx), bold: false }] : []),
+				{ text: gloss.slice(idx, idx + term.length), bold: true },
+				...(idx + term.length < gloss.length
+					? [{ text: gloss.slice(idx + term.length), bold: false }]
+					: [])
+			];
+		}
+
+		// Fall back to per-token highlighting
+		const tokens = termLower.split(/\s+/).filter(Boolean);
+		const segments: { text: string; bold: boolean }[] = [];
+		let pos = 0;
+		// Find all token positions, sort by position
+		const matches: { start: number; end: number }[] = [];
+		for (const token of tokens) {
+			const ti = lower.indexOf(token, 0);
+			if (ti >= 0) matches.push({ start: ti, end: ti + token.length });
+		}
+		matches.sort((a, b) => a.start - b.start);
+		for (const m of matches) {
+			if (m.start < pos) continue; // overlapping
+			if (m.start > pos) segments.push({ text: gloss.slice(pos, m.start), bold: false });
+			segments.push({ text: gloss.slice(m.start, m.end), bold: true });
+			pos = m.end;
+		}
+		if (pos < gloss.length) segments.push({ text: gloss.slice(pos), bold: false });
+		return segments.length > 0 ? segments : [{ text: gloss, bold: false }];
+	}
+
 	$effect(() => {
 		const ready = searchLangState.indexReady;
 
@@ -193,14 +234,27 @@
 							onmousedown={(e) => e.preventDefault()}
 							class="result-link"
 						>
-							{#if item.quality === 3}
-								{item.word}
-								<span class="gloss-hint">{item.matched}</span>
-							{:else if item.matched !== item.word}
+							{#if item.matched !== item.word}
 								{item.matched}
 								<span class="root-hint">({item.word})</span>
 							{:else}
 								{item.word}
+							{/if}
+							{#if item.glosses.length > 0}
+								<span class="result-glosses">
+									{#each item.glosses as gloss, i (i)}
+										{#if i > 0}
+											&middot;
+										{/if}
+										{#if i === item.matchedGlossIdx}
+											{#each highlightGloss(gloss, searchTerm.trim()) as seg, j (j)}
+												{#if seg.bold}<b>{seg.text}</b>{:else}{seg.text}{/if}
+											{/each}
+										{:else}
+											{gloss}
+										{/if}
+									{/each}
+								</span>
 							{/if}
 						</a>
 					</li>
@@ -343,10 +397,13 @@
 		outline: none;
 	}
 
-	.gloss-hint {
-		font-style: italic;
+	.result-glosses {
+		display: block;
+		font-size: 0.78em;
 		color: #858585;
-		font-size: 0.85em;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 
 	.root-hint {
