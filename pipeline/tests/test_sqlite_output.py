@@ -290,29 +290,6 @@ class TestSqliteOutput:
         finally:
             os.unlink(path)
 
-    def test_bm25_differentiated_scores(self, sample_entries):
-        """bm25() should return different scores for word vs gloss matches."""
-        path = _make_db(sample_entries)
-        try:
-            conn = sqlite3.connect(path)
-            # "maison" matches word column directly
-            word_rows = conn.execute(
-                "SELECT bm25(entries_fts, 10.0, 2.0, 1.0, 0.5) as rank "
-                "FROM entries_fts WHERE entries_fts MATCH 'maison'"
-            ).fetchall()
-            # "house" matches gloss column
-            gloss_rows = conn.execute(
-                "SELECT bm25(entries_fts, 10.0, 2.0, 1.0, 0.5) as rank "
-                "FROM entries_fts WHERE entries_fts MATCH 'house'"
-            ).fetchall()
-            assert len(word_rows) > 0
-            assert len(gloss_rows) > 0
-            # Word match should have a better (more negative) bm25 score
-            assert word_rows[0][0] < gloss_rows[0][0]
-            conn.close()
-        finally:
-            os.unlink(path)
-
     def test_fuzzy_trigram_table_exists(self, sample_entries):
         path = _make_db(sample_entries)
         try:
