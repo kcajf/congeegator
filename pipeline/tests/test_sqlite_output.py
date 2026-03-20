@@ -169,7 +169,7 @@ class TestSqliteOutput:
             os.unlink(path)
 
     def test_fts5_hyphenated_word(self, sample_entries):
-        """Hyphenated words must be searchable — both per-token and phrase queries work with detail='full'."""
+        """Hyphenated words must be searchable via per-token AND queries (detail='column' does not support phrase queries)."""
         entries = sample_entries + [
             {"word": "self-service", "pos": "noun", "senses": [{"gloss": "serve yourself"}], "freq": 3.0},
         ]
@@ -178,9 +178,6 @@ class TestSqliteOutput:
             conn = sqlite3.connect(path)
             # Per-token AND with prefix
             rows = conn.execute(FTS_WORD_QUERY.format(col="word"), ('"self" "serv"*',)).fetchall()
-            assert any(r[0] == "self-service" for r in rows)
-            # Phrase queries now work with detail='full'
-            rows = conn.execute(FTS_WORD_QUERY.format(col="word"), ('"self service"*',)).fetchall()
             assert any(r[0] == "self-service" for r in rows)
             conn.close()
         finally:
@@ -267,14 +264,14 @@ class TestSqliteOutput:
         finally:
             os.unlink(path)
 
-    def test_fts_detail_full(self, sample_entries):
+    def test_fts_detail_column(self, sample_entries):
         path = _make_db(sample_entries)
         try:
             conn = sqlite3.connect(path)
             sql = conn.execute(
                 "SELECT sql FROM sqlite_master WHERE name = 'entries_fts'"
             ).fetchone()[0]
-            assert "detail='full'" in sql
+            assert "detail='column'" in sql
             conn.close()
         finally:
             os.unlink(path)
