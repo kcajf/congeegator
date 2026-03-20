@@ -171,8 +171,9 @@
 			sqliteClient
 				.search(currentLang, originalQuery, phoneticQuery)
 				.then((results) => {
-					// Verify query hasn't changed while waiting
+					// Verify query or language hasn't changed while waiting
 					if (originalQuery !== searchTerm.toLowerCase().trim()) return;
+					if (currentLang !== searchLangState.lang) return;
 					searchResults = results;
 				})
 				.catch((err: unknown) => {
