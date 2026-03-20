@@ -127,8 +127,8 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 	// \p{L} = unicode letters, \p{N} = numbers — replace everything else with spaces
 	// so e.g. "self-service" → "self service" (matching the FTS5 unicode61 tokenizer)
 	const sanitized = trimmed
-		.replace(/[^\p{L}\p{N}\s]/gu, ' ')
-		.replace(/\s+/g, ' ')
+		.replace(/[^\p{L}\p{N}\s]/gu, ' ') // strip non-letter/number chars
+		.replace(/\s+/g, ' ') // collapse duplicate spaces
 		.trim();
 	if (!sanitized) return [];
 
@@ -185,8 +185,8 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 	// Phonetic search (quality 2) — only if phoneticQuery differs from query
 	if (phoneticQuery && phoneticQuery !== trimmed) {
 		const phonetic = phoneticQuery
-			.replace(/[^\p{L}\p{N}\s]/gu, ' ')
-			.replace(/\s+/g, ' ')
+			.replace(/[^\p{L}\p{N}\s]/gu, ' ') // strip non-letter/number chars
+			.replace(/\s+/g, ' ') // collapse duplicate spaces
 			.trim();
 		const phoneticFts =
 			phonetic
