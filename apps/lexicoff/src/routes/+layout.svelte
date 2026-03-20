@@ -41,10 +41,16 @@
 				immediate: true,
 				onRegisteredSW(_url: string, registration: ServiceWorkerRegistration | undefined) {
 					const TAP_TO_UPDATE = 'New app version available. Tap to reload.';
+
+					async function handleAppUpdate() {
+						await sqliteClient.terminate();
+						updateSW(true);
+					}
+
 					if (registration?.waiting) {
 						toasts.add(TAP_TO_UPDATE, {
 							dismissAfter: 0,
-							onclick: () => updateSW(true)
+							onclick: () => handleAppUpdate()
 						});
 					}
 
@@ -57,7 +63,7 @@
 							if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
 								toasts.add(TAP_TO_UPDATE, {
 									dismissAfter: 0,
-									onclick: () => updateSW(true)
+									onclick: () => handleAppUpdate()
 								});
 							}
 						});
