@@ -45,6 +45,6 @@
 	},
 	"dependencies": {
 		"@sqlite.org/sqlite-wasm": "^3.51.2-build8",
-		"fzstd": "^0.1.1"
+		"zstddec": "^0.2.0"
 	}
 }

@@ -75,6 +75,13 @@ if (browser) {
 			};
 		}
 
+		if (type === 'BENCHMARK') {
+			console.log(`[benchmark] ${lang} download pipeline:`);
+			console.table(e.data.benchmark);
+			// Store for programmatic access
+			(globalThis as Record<string, unknown>).__lastBenchmark = e.data.benchmark;
+		}
+
 		if (type === 'DELETED') {
 			// Map already updated optimistically in deleteLang()
 		}
