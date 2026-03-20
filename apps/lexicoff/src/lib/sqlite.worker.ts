@@ -209,26 +209,49 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 	];
 
 	let wordMatchCount = 0;
+	const t0 = performance.now();
 
 	for (const [col, quality] of colQueries) {
 		try {
+			const tq = performance.now();
+			const isGloss = quality === 3;
 			const rows = execQuery(
 				db,
-				`SELECT e.word, e.pos, e.freq
+				`SELECT e.word, e.pos, e.freq${isGloss ? ', e.senses' : ''}
 				FROM entries e
 				JOIN (SELECT rowid FROM entries_fts WHERE ${col} MATCH ?) AS fts ON e.id = fts.rowid
 				LIMIT 50`,
 				[ftsPrefix]
 			);
-			for (const [word, pos, freq] of rows) {
+			console.log(
+				`[search] FTS ${col}: ${(performance.now() - tq).toFixed(1)}ms (${rows.length} rows)`
+			);
+			for (const row of rows) {
+				const [word, pos, freq] = row;
 				const key = `${word}:${pos}`;
 				if (quality === 0) wordMatchCount++;
 				const existing = seen.get(key);
 				if (!existing || quality < existing.quality) {
+					let matched = word as string;
+					if (isGloss) {
+						try {
+							const senses = JSON.parse(row[3] as string);
+							matched = '';
+							for (const s of senses) {
+								if (s.gloss && s.gloss.toLowerCase().includes(trimmed)) {
+									matched = s.gloss;
+									break;
+								}
+							}
+							if (!matched) matched = senses[0]?.gloss ?? (word as string);
+						} catch {
+							matched = word as string;
+						}
+					}
 					seen.set(key, {
 						word: word as string,
 						pos: pos as string,
-						matched: quality === 3 ? '' : (word as string),
+						matched,
 						quality,
 						freq: freq as number
 					});
@@ -238,6 +261,7 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 			console.error(`FTS5 ${col} search failed for MATCH ${ftsPrefix}`, e);
 		}
 	}
+	console.log(`[search] FTS columns total: ${(performance.now() - t0).toFixed(1)}ms`);
 
 	// Phonetic search (quality 2) — only if phoneticQuery differs from query
 	if (phoneticQuery && phoneticQuery !== trimmed) {
@@ -252,6 +276,7 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 				.join(' ') + '*';
 		if (phonetic) {
 			try {
+				const tp = performance.now();
 				const phoneticRows = execQuery(
 					db,
 					`SELECT e.word, e.pos, e.freq
@@ -259,6 +284,9 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 					JOIN (SELECT rowid FROM entries_fts WHERE phonetic MATCH ?) AS fts ON e.id = fts.rowid
 					LIMIT 100`,
 					[phoneticFts]
+				);
+				console.log(
+					`[search] phonetic: ${(performance.now() - tp).toFixed(1)}ms (${phoneticRows.length} rows)`
 				);
 				for (const [word, pos, freq] of phoneticRows) {
 					const key = `${word}:${pos}`;
@@ -281,6 +309,7 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 	// Fuzzy search (quality 4) — trigram fallback when few word matches
 	if (wordMatchCount < 5 && sanitized.length >= 3) {
 		try {
+			const tf = performance.now();
 			const fuzzyRows = execQuery(
 				db,
 				`SELECT e.word, e.pos, e.freq
@@ -288,6 +317,9 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 				JOIN (SELECT rowid FROM fuzzy WHERE fuzzy MATCH ?) AS t ON e.id = t.rowid
 				LIMIT 50`,
 				[sanitized]
+			);
+			console.log(
+				`[search] fuzzy: ${(performance.now() - tf).toFixed(1)}ms (${fuzzyRows.length} rows)`
 			);
 			for (const [word, pos, freq] of fuzzyRows) {
 				const key = `${word}:${pos}`;
@@ -306,30 +338,7 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 		}
 	}
 
-	// Fill in gloss text for gloss matches
-	for (const r of seen.values()) {
-		if (r.quality === 3 && r.matched === '') {
-			try {
-				const glossRows = execQuery(
-					db,
-					'SELECT senses FROM entries WHERE word = ? AND pos = ? LIMIT 1',
-					[r.word, r.pos]
-				);
-				if (glossRows.length > 0) {
-					const senses = JSON.parse(glossRows[0][0] as string);
-					for (const s of senses) {
-						if (s.gloss && s.gloss.toLowerCase().includes(trimmed)) {
-							r.matched = s.gloss;
-							break;
-						}
-					}
-					if (!r.matched) r.matched = senses[0]?.gloss ?? r.word;
-				}
-			} catch {
-				r.matched = r.word;
-			}
-		}
-	}
+	console.log(`[search] TOTAL: ${(performance.now() - t0).toFixed(1)}ms for "${sanitized}"`);
 
 	// Deduplicate by word (collapse POS), sort by quality then freq
 	const byWord = new Map<string, SearchResult>();
