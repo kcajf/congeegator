@@ -194,14 +194,38 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 		.trim();
 	if (!sanitized) return [];
 
-	// Quote tokens to prevent FTS5 keyword interpretation, prefix-match last token
-	const ftsPrefix =
-		sanitized
-			.split(' ')
-			.map((t) => `"${t}"`)
-			.join(' ') + '*';
+	// Quote tokens to prevent FTS5 keyword interpretation, prefix-match last token.
+	// Drop 1-char trailing tokens in multi-word queries — the user is mid-keystroke
+	// and the short prefix (e.g. "s"*) causes expensive FTS5 index traversal.
+	const tokens = sanitized.split(' ');
+	if (tokens.length > 1 && tokens[tokens.length - 1].length < 2) {
+		tokens.pop();
+	}
+	const ftsPrefix = tokens.map((t) => `"${t}"`).join(' ') + '*';
 
-	// Per-column queries with bm25 ordering (highlight() doesn't work with content='')
+	// Exact-match lookup — O(1) via idx_word index, guarantees the word itself
+	// is never pushed out by LIMIT on the FTS5 queries.
+	try {
+		const exactRows = execQuery(
+			db,
+			`SELECT id, word, pos, freq FROM entries WHERE word = ? COLLATE NOCASE LIMIT 5`,
+			[trimmed]
+		);
+		for (const [, word, pos, freq] of exactRows) {
+			const key = `${word}:${pos}`;
+			seen.set(key, {
+				word: word as string,
+				pos: pos as string,
+				matched: word as string,
+				quality: 0,
+				freq: freq as number
+			});
+		}
+	} catch {
+		// best-effort
+	}
+
+	// Per-column FTS5 queries (highlight() doesn't work with content='')
 	const colQueries: [string, number][] = [
 		['word', 0],
 		['forms_text', 1],
@@ -209,11 +233,9 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 	];
 
 	let wordMatchCount = 0;
-	const t0 = performance.now();
 
 	for (const [col, quality] of colQueries) {
 		try {
-			const tq = performance.now();
 			const isGloss = quality === 3;
 			const rows = execQuery(
 				db,
@@ -222,9 +244,6 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 				JOIN (SELECT rowid FROM entries_fts WHERE ${col} MATCH ?) AS fts ON e.id = fts.rowid
 				LIMIT 50`,
 				[ftsPrefix]
-			);
-			console.log(
-				`[search] FTS ${col}: ${(performance.now() - tq).toFixed(1)}ms (${rows.length} rows)`
 			);
 			for (const row of rows) {
 				const [word, pos, freq] = row;
@@ -261,7 +280,6 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 			console.error(`FTS5 ${col} search failed for MATCH ${ftsPrefix}`, e);
 		}
 	}
-	console.log(`[search] FTS columns total: ${(performance.now() - t0).toFixed(1)}ms`);
 
 	// Phonetic search (quality 2) — only if phoneticQuery differs from query
 	if (phoneticQuery && phoneticQuery !== trimmed) {
@@ -276,17 +294,13 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 				.join(' ') + '*';
 		if (phonetic) {
 			try {
-				const tp = performance.now();
 				const phoneticRows = execQuery(
 					db,
 					`SELECT e.word, e.pos, e.freq
 					FROM entries e
 					JOIN (SELECT rowid FROM entries_fts WHERE phonetic MATCH ?) AS fts ON e.id = fts.rowid
-					LIMIT 100`,
+					LIMIT 50`,
 					[phoneticFts]
-				);
-				console.log(
-					`[search] phonetic: ${(performance.now() - tp).toFixed(1)}ms (${phoneticRows.length} rows)`
 				);
 				for (const [word, pos, freq] of phoneticRows) {
 					const key = `${word}:${pos}`;
@@ -309,7 +323,6 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 	// Fuzzy search (quality 4) — trigram fallback when few word matches
 	if (wordMatchCount < 5 && sanitized.length >= 3) {
 		try {
-			const tf = performance.now();
 			const fuzzyRows = execQuery(
 				db,
 				`SELECT e.word, e.pos, e.freq
@@ -317,9 +330,6 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 				JOIN (SELECT rowid FROM fuzzy WHERE fuzzy MATCH ?) AS t ON e.id = t.rowid
 				LIMIT 50`,
 				[sanitized]
-			);
-			console.log(
-				`[search] fuzzy: ${(performance.now() - tf).toFixed(1)}ms (${fuzzyRows.length} rows)`
 			);
 			for (const [word, pos, freq] of fuzzyRows) {
 				const key = `${word}:${pos}`;
@@ -337,8 +347,6 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 			console.error(`Fuzzy search failed for "${sanitized}"`, e);
 		}
 	}
-
-	console.log(`[search] TOTAL: ${(performance.now() - t0).toFixed(1)}ms for "${sanitized}"`);
 
 	// Deduplicate by word (collapse POS), sort by quality then freq
 	const byWord = new Map<string, SearchResult>();
