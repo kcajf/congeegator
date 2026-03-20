@@ -11,7 +11,7 @@ interface SearchResult {
 	word: string;
 	pos: string;
 	matched: string;
-	quality: number;
+	quality: number; // 0=word, 1=form, 2=phonetic, 3=gloss, 4=fuzzy
 	freq: number;
 }
 
@@ -119,7 +119,6 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 	const db = openDbs.get(lang);
 	if (!db) return [];
 
-	const results: SearchResult[] = [];
 	const seen = new Map<string, SearchResult>();
 
 	const trimmed = query.trim().toLowerCase();
@@ -128,45 +127,52 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 	// \p{L} = unicode letters, \p{N} = numbers — replace everything else with spaces
 	// so e.g. "self-service" → "self service" (matching the FTS5 unicode61 tokenizer)
 	const sanitized = trimmed
-		.replace(/[^\p{L}\p{N}\s]/gu, ' ') // strip non-letter/number chars
-		.replace(/\s+/g, ' ') // collapse duplicate spaces
+		.replace(/[^\p{L}\p{N}\s]/gu, ' ')
+		.replace(/\s+/g, ' ')
 		.trim();
 	if (!sanitized) return [];
-	// Quote tokens to prevent FTS5 keyword interpretation, prefix-match last token.
-	// No phrase queries — FTS5 table uses detail='column' (no position data).
+
+	// Quote tokens to prevent FTS5 keyword interpretation, prefix-match last token
 	const ftsPrefix =
 		sanitized
 			.split(' ')
 			.map((t) => `"${t}"`)
 			.join(' ') + '*';
 
-	// Search word and forms (quality 0/1 via diacritics), gloss (quality 3)
+	// Single bm25-weighted query with highlight() for match source detection
 	const sql = `
-		SELECT e.word, e.pos, e.freq, 'word' as match_type
-		FROM entries e
-		JOIN (SELECT rowid FROM entries_fts WHERE word MATCH ?) AS fts ON e.id = fts.rowid
-		UNION ALL
-		SELECT e.word, e.pos, e.freq, 'form' as match_type
-		FROM entries e
-		JOIN (SELECT rowid FROM entries_fts WHERE forms_text MATCH ?) AS fts ON e.id = fts.rowid
-		UNION ALL
-		SELECT e.word, e.pos, e.freq, 'gloss' as match_type
-		FROM entries e
-		JOIN (SELECT rowid FROM entries_fts WHERE gloss_text MATCH ?) AS fts ON e.id = fts.rowid
+		SELECT e.word, e.pos, e.freq,
+		       highlight(entries_fts, 0, '<b>', '</b>') as h_word,
+		       highlight(entries_fts, 1, '<b>', '</b>') as h_forms,
+		       highlight(entries_fts, 2, '<b>', '</b>') as h_gloss
+		FROM entries_fts
+		JOIN entries e ON e.id = entries_fts.rowid
+		WHERE entries_fts MATCH ?
+		ORDER BY bm25(entries_fts, 10.0, 2.0, 1.0, 0.5)
 		LIMIT 200
 	`;
 
+	let wordMatchCount = 0;
+
 	try {
-		const rows = execQuery(db, sql, [ftsPrefix, ftsPrefix, ftsPrefix]);
-		for (const [word, pos, freq, matchType] of rows) {
+		const rows = execQuery(db, sql, [ftsPrefix]);
+		for (const [word, pos, freq, hWord, hForms, hGloss] of rows) {
 			const key = `${word}:${pos}`;
-			const quality = matchType === 'word' ? 0 : matchType === 'form' ? 1 : 3;
+			const wordHit = (hWord as string).includes('<b>');
+			const quality = wordHit ? 0 : (hForms as string).includes('<b>') ? 1 : 3;
+
+			if (wordHit) wordMatchCount++;
+
 			const existing = seen.get(key);
 			if (!existing || quality < existing.quality) {
+				const matched =
+					quality === 3
+						? (hGloss as string).replace(/<\/?b>/g, '') || (word as string)
+						: (word as string);
 				seen.set(key, {
 					word: word as string,
 					pos: pos as string,
-					matched: matchType === 'gloss' ? '' : (word as string),
+					matched,
 					quality,
 					freq: freq as number
 				});
@@ -179,8 +185,8 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 	// Phonetic search (quality 2) — only if phoneticQuery differs from query
 	if (phoneticQuery && phoneticQuery !== trimmed) {
 		const phonetic = phoneticQuery
-			.replace(/[^\p{L}\p{N}\s]/gu, ' ') // strip non-letter/number chars
-			.replace(/\s+/g, ' ') // collapse duplicate spaces
+			.replace(/[^\p{L}\p{N}\s]/gu, ' ')
+			.replace(/\s+/g, ' ')
 			.trim();
 		const phoneticFts =
 			phonetic
@@ -215,36 +221,37 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 		}
 	}
 
-	// Fill in gloss text for gloss matches
-	for (const r of seen.values()) {
-		if (r.quality === 3 && r.matched === '') {
-			try {
-				const glossRows = execQuery(
-					db,
-					'SELECT senses FROM entries WHERE word = ? AND pos = ? LIMIT 1',
-					[r.word, r.pos]
-				);
-				if (glossRows.length > 0) {
-					const senses = JSON.parse(glossRows[0][0] as string);
-					const queryLower = trimmed;
-					for (const s of senses) {
-						if (s.gloss && s.gloss.toLowerCase().includes(queryLower)) {
-							r.matched = s.gloss;
-							break;
-						}
-					}
-					if (!r.matched) r.matched = senses[0]?.gloss ?? r.word;
+	// Fuzzy search (quality 4) — trigram fallback when few word matches
+	if (wordMatchCount < 5 && sanitized.length >= 3) {
+		try {
+			const fuzzyRows = execQuery(
+				db,
+				`SELECT e.word, e.pos, e.freq
+				FROM entries e
+				JOIN (SELECT rowid FROM fuzzy WHERE fuzzy MATCH ?) AS t ON e.id = t.rowid
+				LIMIT 50`,
+				[sanitized]
+			);
+			for (const [word, pos, freq] of fuzzyRows) {
+				const key = `${word}:${pos}`;
+				if (!seen.has(key)) {
+					seen.set(key, {
+						word: word as string,
+						pos: pos as string,
+						matched: word as string,
+						quality: 4,
+						freq: freq as number
+					});
 				}
-			} catch {
-				r.matched = r.word;
 			}
+		} catch (e) {
+			console.error(`Fuzzy search failed for "${sanitized}"`, e);
 		}
-		results.push(r);
 	}
 
-	// Deduplicate by word (collapse POS), sort by quality then freq
+	// Deduplicate by word (collapse POS), sort by quality then rank/freq
 	const byWord = new Map<string, SearchResult>();
-	for (const r of results) {
+	for (const r of seen.values()) {
 		const existing = byWord.get(r.word);
 		if (
 			!existing ||

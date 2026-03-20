@@ -101,11 +101,12 @@ def generate_data_for_lang(
     # Build dictionary output
     if dict_config is not None and dict_entries:
         log.info(f"{lang_code} has {len(dict_entries)} dictionary entries")
-        dict_entries = sorted(dict_entries, key=lambda x: strip_diacritics(x["word"]))
 
         with log_timing(f"{lang_code} dict word frequencies"):
             for entry in dict_entries:
                 entry["freq"] = round(zipf_frequency(entry["word"], lang_code), 2)
+
+        dict_entries = sorted(dict_entries, key=lambda x: -x["freq"])
 
         dict_data = {
             "entries": dict_entries,
