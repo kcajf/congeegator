@@ -81,12 +81,17 @@ async function send(type: string, data: Record<string, unknown> = {}): Promise<u
 	});
 }
 
+let searchVersion = 0;
+
 export async function search(
 	lang: string,
 	query: string,
 	phoneticQuery?: string
 ): Promise<SearchResult[]> {
-	return (await send('search', { lang, query, phoneticQuery })) as SearchResult[];
+	const version = ++searchVersion;
+	const results = (await send('search', { lang, query, phoneticQuery })) as SearchResult[];
+	if (version !== searchVersion) return [];
+	return results;
 }
 
 export async function getWord(lang: string, word: string): Promise<DictRecord[]> {

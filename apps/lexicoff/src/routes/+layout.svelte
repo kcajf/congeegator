@@ -125,17 +125,21 @@
 		const stripped = stripDiacritics(originalQuery);
 		const phoneticQuery = toPhonetic(currentLang, stripped);
 
-		sqliteClient
-			.search(currentLang, originalQuery, phoneticQuery)
-			.then((results) => {
-				// Verify query hasn't changed while waiting
-				if (originalQuery !== searchTerm.toLowerCase().trim()) return;
-				searchResults = results;
-			})
-			.catch((err: unknown) => {
-				console.error('Search failed:', err);
-				searchResults = [];
-			});
+		const timer = setTimeout(() => {
+			sqliteClient
+				.search(currentLang, originalQuery, phoneticQuery)
+				.then((results) => {
+					// Verify query hasn't changed while waiting
+					if (originalQuery !== searchTerm.toLowerCase().trim()) return;
+					searchResults = results;
+				})
+				.catch((err: unknown) => {
+					console.error('Search failed:', err);
+					searchResults = [];
+				});
+		}, 25);
+
+		return () => clearTimeout(timer);
 	});
 </script>
 
