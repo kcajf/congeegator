@@ -23,29 +23,91 @@ const openDbs = new Map<string, any>();
 
 async function init() {
 	sqlite3 = await sqlite3InitModule({ print: console.log, printErr: console.error });
-	const opts = { name: 'lexicoff-pool', directory: '/lexicoff-sahpool', initialCapacity: 6 };
-	try {
-		poolUtil = await sqlite3.installOpfsSAHPoolVfs(opts);
-	} catch {
-		// Corrupted pool state — wipe and retry from scratch
-		const root = await navigator.storage.getDirectory();
-		// removeEntry({ recursive }) not supported on iOS Safari — delete children manually
-		const sahDir = await root.getDirectoryHandle('lexicoff-sahpool').catch(() => null);
-		if (sahDir) {
-			// @ts-expect-error — entries() not in all TS libs
-			for await (const [name] of sahDir.entries()) await sahDir.removeEntry(name as string);
-			await root.removeEntry('lexicoff-sahpool');
-		}
+
+	const vfsOpts = { name: 'lexicoff-pool', directory: '/lexicoff-sahpool', initialCapacity: 6 };
+
+	// Layer 2: Retry with exponential backoff for handle-lock errors.
+	// After a deploy, old worker's SyncAccessHandles may not be released yet.
+	const RETRY_DELAYS = [100, 200, 400, 800];
+	for (let attempt = 0; attempt <= RETRY_DELAYS.length; attempt++) {
 		try {
 			poolUtil = await sqlite3.installOpfsSAHPoolVfs({
-				...opts,
-				forceReinitIfPreviouslyFailed: true
+				...vfsOpts,
+				...(attempt > 0 ? { forceReinitIfPreviouslyFailed: true } : {})
 			});
-		} catch (e) {
-			console.warn('SAH Pool VFS unavailable:', e);
+			break; // success
+		} catch (err) {
+			const isHandleLock = err instanceof DOMException && err.name === 'NoModificationAllowedError';
+			if (isHandleLock && attempt < RETRY_DELAYS.length) {
+				console.warn(`SAH Pool VFS locked (attempt ${attempt + 1}), retrying...`);
+				await new Promise((r) => setTimeout(r, RETRY_DELAYS[attempt]));
+				continue;
+			}
+
+			// Non-lock error or exhausted retries — try nuking the pool directory
+			console.warn('SAH Pool VFS init failed, attempting nuke recovery:', err);
+			try {
+				await nukePoolDirectory();
+				poolUtil = await sqlite3.installOpfsSAHPoolVfs({
+					...vfsOpts,
+					forceReinitIfPreviouslyFailed: true
+				});
+				break;
+			} catch (nukeErr) {
+				console.warn('SAH Pool VFS unavailable after nuke:', nukeErr);
+			}
 		}
 	}
+
 	self.postMessage({ type: 'READY', sahPoolAvailable: !!poolUtil });
+}
+
+/** Layer 3: iOS-compatible directory nuke — no recursive: true. */
+async function nukePoolDirectory() {
+	const root = await navigator.storage.getDirectory();
+	let dir: FileSystemDirectoryHandle;
+	try {
+		dir = await root.getDirectoryHandle('lexicoff-sahpool');
+	} catch {
+		return; // directory doesn't exist
+	}
+	// @ts-expect-error — entries() not in all TS libs
+	for await (const [name, handle] of dir.entries()) {
+		try {
+			if (handle.kind === 'file') {
+				await dir.removeEntry(name as string);
+			} else {
+				// Subdirectories shouldn't exist, but handle gracefully
+				await dir.removeEntry(name as string, { recursive: true });
+			}
+		} catch {
+			// skip locked files
+		}
+	}
+	try {
+		await root.removeEntry('lexicoff-sahpool');
+	} catch {
+		// may still have locked files
+	}
+}
+
+async function shutdown() {
+	for (const [lang, db] of openDbs) {
+		try {
+			db.close();
+		} catch {
+			// best-effort
+		}
+		openDbs.delete(lang);
+	}
+	if (poolUtil) {
+		try {
+			await poolUtil.removeVfs();
+		} catch {
+			// best-effort
+		}
+		poolUtil = null;
+	}
 }
 
 async function openDb(lang: string, hash: string): Promise<boolean> {
@@ -354,6 +416,10 @@ self.onmessage = async (e: MessageEvent) => {
 				break;
 			case 'deleteFromPool':
 				deleteFromPool(lang, hash);
+				result = true;
+				break;
+			case 'shutdown':
+				await shutdown();
 				result = true;
 				break;
 		}

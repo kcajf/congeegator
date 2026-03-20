@@ -137,3 +137,26 @@ export async function deleteFromPool(lang: string, hash: string): Promise<void> 
 export async function listOpfsFiles(): Promise<[string, string][]> {
 	return (await send('list')) as [string, string][];
 }
+
+/** Gracefully shut down the SQLite worker before a page reload (e.g. SW update). */
+export async function terminate(): Promise<void> {
+	if (!worker) return;
+
+	const TIMEOUT = 2000;
+	try {
+		await Promise.race([
+			send('shutdown'),
+			new Promise((_, reject) => setTimeout(() => reject(new Error('shutdown timeout')), TIMEOUT))
+		]);
+	} catch {
+		// best-effort — proceed to terminate even if shutdown times out
+	}
+
+	worker.terminate();
+	worker = undefined;
+
+	for (const [, p] of pending) {
+		p.reject(new Error('Worker terminated'));
+	}
+	pending.clear();
+}
