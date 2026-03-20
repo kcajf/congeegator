@@ -155,7 +155,7 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 				`SELECT e.word, e.pos, e.freq
 				FROM entries e
 				JOIN (SELECT rowid FROM entries_fts WHERE ${col} MATCH ?) AS fts ON e.id = fts.rowid
-				LIMIT 200`,
+				LIMIT 50`,
 				[ftsPrefix]
 			);
 			for (const [word, pos, freq] of rows) {
