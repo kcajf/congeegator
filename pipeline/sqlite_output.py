@@ -36,7 +36,15 @@ CREATE VIRTUAL TABLE entries_fts USING fts5(
     content='',
     content_rowid='id',
     tokenize='unicode61 remove_diacritics 2',
-    detail='column'
+    detail='full'
+);
+
+CREATE VIRTUAL TABLE fuzzy USING fts5(
+    word,
+    phonetic,
+    content='',
+    content_rowid='id',
+    tokenize='trigram'
 );
 
 CREATE TABLE metadata (
@@ -68,6 +76,7 @@ def write_sqlite_database(
         # Insert entries in batches
         entry_rows = []
         fts_rows = []
+        fuzzy_rows = []
 
         for i, entry in enumerate(entries):
             senses_json = orjson.dumps(entry["senses"]).decode()
@@ -99,15 +108,17 @@ def write_sqlite_database(
                 phonetic = " ".join(parts)
 
             fts_rows.append((i, entry["word"], forms_text, gloss_text, phonetic))
+            fuzzy_rows.append((i, entry["word"], phonetic))
 
             if len(entry_rows) >= BATCH_SIZE:
-                _flush_batch(conn, entry_rows, fts_rows)
+                _flush_batch(conn, entry_rows, fts_rows, fuzzy_rows)
                 entry_rows = []
                 fts_rows = []
+                fuzzy_rows = []
 
         # Flush remaining
         if entry_rows:
-            _flush_batch(conn, entry_rows, fts_rows)
+            _flush_batch(conn, entry_rows, fts_rows, fuzzy_rows)
 
         # Insert metadata
         conn.execute("INSERT INTO metadata (key, value) VALUES (?, ?)", ("lang", lang_code))
@@ -117,6 +128,7 @@ def write_sqlite_database(
 
         # Merge all FTS5 b-tree segments into one
         conn.execute("INSERT INTO entries_fts(entries_fts) VALUES('optimize')")
+        conn.execute("INSERT INTO fuzzy(fuzzy) VALUES('optimize')")
         conn.commit()
 
         conn.execute("VACUUM")
@@ -131,6 +143,7 @@ def _flush_batch(
     conn: sqlite3.Connection,
     entry_rows: list[tuple],
     fts_rows: list[tuple],
+    fuzzy_rows: list[tuple],
 ) -> None:
     conn.executemany(
         "INSERT INTO entries (id, word, pos, senses, freq, gender, forms, pronunciation, etymology) "
@@ -141,5 +154,10 @@ def _flush_batch(
         "INSERT INTO entries_fts (rowid, word, forms_text, gloss_text, phonetic) "
         "VALUES (?, ?, ?, ?, ?)",
         fts_rows,
+    )
+    conn.executemany(
+        "INSERT INTO fuzzy (rowid, word, phonetic) "
+        "VALUES (?, ?, ?)",
+        fuzzy_rows,
     )
     conn.commit()

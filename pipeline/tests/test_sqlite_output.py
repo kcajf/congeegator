@@ -169,19 +169,19 @@ class TestSqliteOutput:
             os.unlink(path)
 
     def test_fts5_hyphenated_word(self, sample_entries):
-        """Hyphenated words must be searchable with per-token quoting (detail='column')."""
+        """Hyphenated words must be searchable — both per-token and phrase queries work with detail='full'."""
         entries = sample_entries + [
             {"word": "self-service", "pos": "noun", "senses": [{"gloss": "serve yourself"}], "freq": 3.0},
         ]
         path = _make_db(entries)
         try:
             conn = sqlite3.connect(path)
-            # Per-token AND with prefix — the pattern used by the frontend
+            # Per-token AND with prefix
             rows = conn.execute(FTS_WORD_QUERY.format(col="word"), ('"self" "serv"*',)).fetchall()
             assert any(r[0] == "self-service" for r in rows)
-            # Phrase queries must NOT be used (detail='column' doesn't support them)
-            with pytest.raises(sqlite3.OperationalError, match="phrase queries are not supported"):
-                conn.execute(FTS_WORD_QUERY.format(col="word"), ('"self service"*',)).fetchall()
+            # Phrase queries now work with detail='full'
+            rows = conn.execute(FTS_WORD_QUERY.format(col="word"), ('"self service"*',)).fetchall()
+            assert any(r[0] == "self-service" for r in rows)
             conn.close()
         finally:
             os.unlink(path)
@@ -267,14 +267,14 @@ class TestSqliteOutput:
         finally:
             os.unlink(path)
 
-    def test_fts_detail_column(self, sample_entries):
+    def test_fts_detail_full(self, sample_entries):
         path = _make_db(sample_entries)
         try:
             conn = sqlite3.connect(path)
             sql = conn.execute(
                 "SELECT sql FROM sqlite_master WHERE name = 'entries_fts'"
             ).fetchone()[0]
-            assert "detail='column'" in sql
+            assert "detail='full'" in sql
             conn.close()
         finally:
             os.unlink(path)
@@ -286,6 +286,73 @@ class TestSqliteOutput:
             assert conn.execute("PRAGMA integrity_check").fetchone()[0] == "ok"
             rows = conn.execute(FTS_WORD_QUERY.format(col="word"), ("par*",)).fetchall()
             assert "parler" in {r[0] for r in rows}
+            conn.close()
+        finally:
+            os.unlink(path)
+
+    def test_bm25_differentiated_scores(self, sample_entries):
+        """bm25() should return different scores for word vs gloss matches."""
+        path = _make_db(sample_entries)
+        try:
+            conn = sqlite3.connect(path)
+            # "maison" matches word column directly
+            word_rows = conn.execute(
+                "SELECT bm25(entries_fts, 10.0, 2.0, 1.0, 0.5) as rank "
+                "FROM entries_fts WHERE entries_fts MATCH 'maison'"
+            ).fetchall()
+            # "house" matches gloss column
+            gloss_rows = conn.execute(
+                "SELECT bm25(entries_fts, 10.0, 2.0, 1.0, 0.5) as rank "
+                "FROM entries_fts WHERE entries_fts MATCH 'house'"
+            ).fetchall()
+            assert len(word_rows) > 0
+            assert len(gloss_rows) > 0
+            # Word match should have a better (more negative) bm25 score
+            assert word_rows[0][0] < gloss_rows[0][0]
+            conn.close()
+        finally:
+            os.unlink(path)
+
+    def test_fuzzy_trigram_table_exists(self, sample_entries):
+        path = _make_db(sample_entries)
+        try:
+            conn = sqlite3.connect(path)
+            tables = {r[0] for r in conn.execute(
+                "SELECT name FROM sqlite_master WHERE type='table'"
+            ).fetchall()}
+            assert "fuzzy" in tables
+            conn.close()
+        finally:
+            os.unlink(path)
+
+    def test_fuzzy_trigram_search(self, sample_entries):
+        """Trigram table should match substring/fuzzy queries."""
+        path = _make_db(sample_entries)
+        try:
+            conn = sqlite3.connect(path)
+            rows = conn.execute(
+                "SELECT e.word FROM entries e "
+                "JOIN (SELECT rowid FROM fuzzy WHERE fuzzy MATCH ?) AS t ON e.id = t.rowid",
+                ("mais",)
+            ).fetchall()
+            words = {r[0] for r in rows}
+            assert "maison" in words
+            conn.close()
+        finally:
+            os.unlink(path)
+
+    def test_fuzzy_trigram_phonetic(self, greek_entries):
+        """Trigram table phonetic column should match romanized Greek."""
+        path = _make_db(greek_entries, lang_code="el", phonetic_fn=to_phonetic_el)
+        try:
+            conn = sqlite3.connect(path)
+            rows = conn.execute(
+                "SELECT e.word FROM entries e "
+                "JOIN (SELECT rowid FROM fuzzy WHERE fuzzy MATCH ?) AS t ON e.id = t.rowid",
+                ("spit",)
+            ).fetchall()
+            words = {r[0] for r in rows}
+            assert "σπίτι" in words
             conn.close()
         finally:
             os.unlink(path)
