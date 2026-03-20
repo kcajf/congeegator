@@ -14,6 +14,8 @@ export type SearchResult = {
 	matched: string;
 	quality: number; // 0 = exact, 1 = form, 2 = phonetic, 3 = gloss
 	freq: number;
+	glosses: string[];
+	matchedGlossIdx?: number;
 };
 
 let worker: Worker | undefined;
