@@ -32,6 +32,10 @@ let poolUtil: any;
 const openDbs = new Map<string, any>();
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
+// Serialize openDb calls so concurrent importDb() calls can't race for the
+// same free pool slot, which would put one language's data under another's name.
+let openDbQueue: Promise<unknown> = Promise.resolve();
+
 async function init() {
 	sqlite3 = await sqlite3InitModule({ print: console.log, printErr: console.error });
 
@@ -515,7 +519,7 @@ self.onmessage = async (e: MessageEvent) => {
 				result = [...openDbs.keys()];
 				break;
 			case 'open':
-				result = await openDb(lang, query);
+				result = await (openDbQueue = openDbQueue.then(() => openDb(lang, query)));
 				break;
 			case 'close':
 				await closeDb(lang);
