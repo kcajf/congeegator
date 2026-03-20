@@ -139,47 +139,42 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 			.map((t) => `"${t}"`)
 			.join(' ') + '*';
 
-	// Single bm25-weighted query with highlight() for match source detection
-	const sql = `
-		SELECT e.word, e.pos, e.freq,
-		       highlight(entries_fts, 0, '<b>', '</b>') as h_word,
-		       highlight(entries_fts, 1, '<b>', '</b>') as h_forms,
-		       highlight(entries_fts, 2, '<b>', '</b>') as h_gloss
-		FROM entries_fts
-		JOIN entries e ON e.id = entries_fts.rowid
-		WHERE entries_fts MATCH ?
-		ORDER BY bm25(entries_fts, 10.0, 2.0, 1.0, 0.5)
-		LIMIT 200
-	`;
+	// Per-column queries with bm25 ordering (highlight() doesn't work with content='')
+	const colQueries: [string, number][] = [
+		['word', 0],
+		['forms_text', 1],
+		['gloss_text', 3]
+	];
 
 	let wordMatchCount = 0;
 
-	try {
-		const rows = execQuery(db, sql, [ftsPrefix]);
-		for (const [word, pos, freq, hWord, hForms, hGloss] of rows) {
-			const key = `${word}:${pos}`;
-			const wordHit = (hWord as string).includes('<b>');
-			const quality = wordHit ? 0 : (hForms as string).includes('<b>') ? 1 : 3;
-
-			if (wordHit) wordMatchCount++;
-
-			const existing = seen.get(key);
-			if (!existing || quality < existing.quality) {
-				const matched =
-					quality === 3
-						? (hGloss as string).replace(/<\/?b>/g, '') || (word as string)
-						: (word as string);
-				seen.set(key, {
-					word: word as string,
-					pos: pos as string,
-					matched,
-					quality,
-					freq: freq as number
-				});
+	for (const [col, quality] of colQueries) {
+		try {
+			const rows = execQuery(
+				db,
+				`SELECT e.word, e.pos, e.freq
+				FROM entries e
+				JOIN (SELECT rowid FROM entries_fts WHERE ${col} MATCH ?) AS fts ON e.id = fts.rowid
+				LIMIT 200`,
+				[ftsPrefix]
+			);
+			for (const [word, pos, freq] of rows) {
+				const key = `${word}:${pos}`;
+				if (quality === 0) wordMatchCount++;
+				const existing = seen.get(key);
+				if (!existing || quality < existing.quality) {
+					seen.set(key, {
+						word: word as string,
+						pos: pos as string,
+						matched: quality === 3 ? '' : (word as string),
+						quality,
+						freq: freq as number
+					});
+				}
 			}
+		} catch (e) {
+			console.error(`FTS5 ${col} search failed for MATCH ${ftsPrefix}`, e);
 		}
-	} catch (e) {
-		console.error(`FTS5 search failed for MATCH ${ftsPrefix}`, e);
 	}
 
 	// Phonetic search (quality 2) — only if phoneticQuery differs from query
@@ -249,7 +244,32 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 		}
 	}
 
-	// Deduplicate by word (collapse POS), sort by quality then rank/freq
+	// Fill in gloss text for gloss matches
+	for (const r of seen.values()) {
+		if (r.quality === 3 && r.matched === '') {
+			try {
+				const glossRows = execQuery(
+					db,
+					'SELECT senses FROM entries WHERE word = ? AND pos = ? LIMIT 1',
+					[r.word, r.pos]
+				);
+				if (glossRows.length > 0) {
+					const senses = JSON.parse(glossRows[0][0] as string);
+					for (const s of senses) {
+						if (s.gloss && s.gloss.toLowerCase().includes(trimmed)) {
+							r.matched = s.gloss;
+							break;
+						}
+					}
+					if (!r.matched) r.matched = senses[0]?.gloss ?? r.word;
+				}
+			} catch {
+				r.matched = r.word;
+			}
+		}
+	}
+
+	// Deduplicate by word (collapse POS), sort by quality then freq
 	const byWord = new Map<string, SearchResult>();
 	for (const r of seen.values()) {
 		const existing = byWord.get(r.word);
