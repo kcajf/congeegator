@@ -359,8 +359,17 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 		}
 	}
 
+	const isUpperCase = (w: string) => w[0] !== w[0].toLowerCase();
+
 	const top = [...byWord.values()]
-		.sort((a, b) => a.quality - b.quality || b.freq - a.freq || a.word.length - b.word.length)
+		.sort(
+			(a, b) =>
+				a.quality - b.quality ||
+				(a.pos === 'name' ? 1 : 0) - (b.pos === 'name' ? 1 : 0) ||
+				(isUpperCase(a.word) ? 1 : 0) - (isUpperCase(b.word) ? 1 : 0) ||
+				b.freq - a.freq ||
+				a.word.length - b.word.length
+		)
 		.slice(0, 50);
 
 	// Bulk-fetch senses in one query after dedup+sort+slice, rather than
