@@ -69,7 +69,7 @@
 			</h2>
 
 			<ol class="senses">
-				{#each entry.senses as sense (sense.gloss)}
+				{#each entry.senses as sense, i (i)}
 					<li>
 						{#if sense.tags && sense.tags.length > 0}
 							<span class="tags">{sense.tags.join(', ')}</span>
@@ -77,7 +77,7 @@
 						<span class="gloss">{sense.gloss}</span>
 						{#if sense.examples}
 							<ul class="examples">
-								{#each sense.examples as example (example)}
+								{#each sense.examples as example, j (j)}
 									<li class="example">{example}</li>
 								{/each}
 							</ul>
