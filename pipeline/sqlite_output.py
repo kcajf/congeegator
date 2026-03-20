@@ -36,7 +36,7 @@ CREATE VIRTUAL TABLE entries_fts USING fts5(
     content='',
     content_rowid='id',
     tokenize='unicode61 remove_diacritics 2',
-    detail='full'
+    detail='column'
 );
 
 CREATE VIRTUAL TABLE fuzzy USING fts5(
