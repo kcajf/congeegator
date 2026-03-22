@@ -201,6 +201,10 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 	const trimmed = query.trim().toLowerCase();
 	if (!trimmed) return [];
 
+	// When the query uses the target language's script, phonetic matches should rank highly.
+	// When it's purely Latin (e.g. "angry"), demote phonetic coincidences below gloss matches.
+	const isLatinOnly = /^[\p{Script=Latin}\p{N}\s]+$/u.test(trimmed);
+
 	// \p{L} = unicode letters, \p{N} = numbers — replace everything else with spaces
 	// so e.g. "self-service" → "self service" (matching the FTS5 unicode61 tokenizer)
 	const sanitized = trimmed
@@ -309,7 +313,9 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 							word: word as string,
 							pos: pos as string,
 							matched: word as string,
-							quality: 2,
+							// For Latin-only queries (e.g. "angry"), phonetic coincidences should
+							// rank below genuine English gloss matches, not above them.
+							quality: isLatinOnly ? 3 : 2,
 							freq: freq as number,
 							id: id as number
 						});
@@ -363,12 +369,38 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 		}
 	}
 
+	// Pre-sort: fetch senses for quality=3 entries so we can rank by matched gloss position.
+	// Words where "angry" is gloss #0 should rank above those where it's gloss #5.
+	// Phonetic-from-Latin matches (also quality=3 but no gloss match) get a high index → rank last.
+	const preGlossMatchIdx = new Map<number, number>();
+	const glossEntries = [...byWord.values()].filter((r) => r.quality === 3);
+	if (glossEntries.length > 0) {
+		const prePH = glossEntries.map(() => '?').join(',');
+		const preRows = execQuery(
+			db,
+			`SELECT id, senses FROM entries WHERE id IN (${prePH})`,
+			glossEntries.map((r) => r.id)
+		);
+		for (const [id, senses] of preRows) {
+			const parsed = JSON.parse(senses as string);
+			const glosses: string[] = [];
+			for (const s of parsed) {
+				if (s.gloss) glosses.push(s.gloss as string);
+			}
+			const matchIdx = glosses.findIndex((g) => g.toLowerCase().includes(trimmed));
+			preGlossMatchIdx.set(id as number, matchIdx >= 0 ? matchIdx : 9999);
+		}
+	}
+
 	const isUpperCase = (w: string) => w[0] !== w[0].toLowerCase();
 
 	const top = [...byWord.values()]
 		.sort(
 			(a, b) =>
 				a.quality - b.quality ||
+				(a.quality === 3
+					? (preGlossMatchIdx.get(a.id) ?? 9999) - (preGlossMatchIdx.get(b.id) ?? 9999)
+					: 0) ||
 				(a.pos === 'name' ? 1 : 0) - (b.pos === 'name' ? 1 : 0) ||
 				(isUpperCase(a.word) ? 1 : 0) - (isUpperCase(b.word) ? 1 : 0) ||
 				b.freq - a.freq ||
