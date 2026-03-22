@@ -69,6 +69,13 @@ def extract_senses(entry: Entry) -> list[dict[str, Any]]:
             continue
         gloss = re.sub(r"\s*\(.*?\)", "", raw_gloss).strip()
         gloss = re.sub(r"\s*\[.*?\]", "", gloss).strip()
+        # If stripping qualifiers left an empty or single-word gloss (e.g. for loanwords
+        # like "Leberkäse (a dish similar to meat loaf...)"), fall back to using the
+        # content of the first long parenthetical as the definition.
+        if not gloss or " " not in gloss:
+            m = re.search(r"\(([^)]{20,})\)", raw_gloss)
+            if m:
+                gloss = m.group(1).strip()
         if not gloss:
             continue
         sense_dict: dict[str, Any] = {"gloss": gloss}

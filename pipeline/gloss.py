@@ -45,8 +45,16 @@ def extract_gloss(entry: Entry) -> Optional[str]:
         raw_gloss = sense.glosses[-1][0].lower() + sense.glosses[-1][1:]
         if _is_junk_gloss(raw_gloss):
             continue
-        raw_gloss = re.sub(r"\s*\(.*?\)", "", raw_gloss).strip()
-        raw_gloss = re.sub(r"\s*\[.*?\]", "", raw_gloss).strip()
+        stripped = re.sub(r"\s*\(.*?\)", "", raw_gloss).strip()
+        stripped = re.sub(r"\s*\[.*?\]", "", stripped).strip()
+        # If stripping qualifiers left an empty or single-word gloss (e.g. for loanwords
+        # like "Leberkäse (a dish similar to meat loaf...)"), fall back to using the
+        # content of the first long parenthetical as the definition.
+        if not stripped or " " not in stripped:
+            m = re.search(r"\(([^)]{20,})\)", raw_gloss)
+            if m:
+                stripped = m.group(1).strip()
+        raw_gloss = stripped
         parts = [p.strip().rstrip(".") for p in raw_gloss.split(";")]
         for part in parts:
             if not part or _is_junk_gloss(part):
