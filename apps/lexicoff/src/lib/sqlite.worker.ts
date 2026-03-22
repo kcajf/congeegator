@@ -364,6 +364,9 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 	}
 
 	const isUpperCase = (w: string) => w[0] !== w[0].toLowerCase();
+	// A word whose length equals the query length is a full-word match (not just a prefix).
+	// This ensures "Einbahn" ranks above "Einbahnstraße" when the user types "einbahn".
+	const isExact = (w: string) => w.length === trimmed.length;
 
 	const top = [...byWord.values()]
 		.sort(
@@ -371,6 +374,7 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 				a.quality - b.quality ||
 				(a.pos === 'name' ? 1 : 0) - (b.pos === 'name' ? 1 : 0) ||
 				(isUpperCase(a.word) ? 1 : 0) - (isUpperCase(b.word) ? 1 : 0) ||
+				(isExact(b.word) ? 1 : 0) - (isExact(a.word) ? 1 : 0) ||
 				b.freq - a.freq ||
 				a.word.length - b.word.length
 		)
