@@ -60,7 +60,7 @@ def extract_senses(entry: Entry) -> list[dict[str, Any]]:
     """Extract structured senses with glosses, examples, and tags."""
     senses: list[dict[str, Any]] = []
     for sense in entry.senses:
-        if sense.form_of or sense.alt_of:
+        if sense.alt_of:
             continue
         if not sense.glosses:
             continue
@@ -146,7 +146,7 @@ def entry_is_valid(entry: Entry) -> bool:
     if not entry.word or not entry.word[0].isalpha():
         return False
     if entry.senses and all(
-        "form-of" in s.tags or "alt-of" in s.tags for s in entry.senses
+        "alt-of" in s.tags for s in entry.senses
     ):
         return False
     BAD_CATEGORIES = {
