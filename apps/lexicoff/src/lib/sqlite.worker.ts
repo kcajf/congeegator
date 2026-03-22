@@ -321,32 +321,42 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 		}
 	}
 
-	// Fuzzy search (quality 4) — trigram fallback when few word matches
+	// Fuzzy search (quality 4) — trigram fallback when few word matches.
+	// SQLite's trigram FTS does substring matching (requires ALL query trigrams in the document),
+	// so it can't handle mid-word transpositions like "langasm" → "langsam". Fix: try
+	// progressively shorter prefixes until we get a hit — "lang" IS a substring of "langsam".
+	// Allow up to 3 characters of shortening, with a floor of 4 characters.
 	if (wordMatchCount < 5 && sanitized.length >= 3) {
-		try {
-			const fuzzyRows = execQuery(
-				db,
-				`SELECT e.id, e.word, e.pos, e.freq
-				FROM entries e
-				JOIN (SELECT rowid FROM fuzzy WHERE fuzzy MATCH ?) AS t ON e.id = t.rowid
-				LIMIT 50`,
-				[sanitized]
-			);
-			for (const [id, word, pos, freq] of fuzzyRows) {
-				const key = `${word}:${pos}`;
-				if (!seen.has(key)) {
-					seen.set(key, {
-						word: word as string,
-						pos: pos as string,
-						matched: word as string,
-						quality: 4,
-						freq: freq as number,
-						id: id as number
-					});
+		const minLen = Math.max(4, sanitized.length - 3);
+		for (let len = sanitized.length; len >= minLen; len--) {
+			const fuzzyQuery = sanitized.slice(0, len);
+			try {
+				const fuzzyRows = execQuery(
+					db,
+					`SELECT e.id, e.word, e.pos, e.freq
+					FROM entries e
+					JOIN (SELECT rowid FROM fuzzy WHERE fuzzy MATCH ?) AS t ON e.id = t.rowid
+					LIMIT 50`,
+					[fuzzyQuery]
+				);
+				for (const [id, word, pos, freq] of fuzzyRows) {
+					const key = `${word}:${pos}`;
+					if (!seen.has(key)) {
+						seen.set(key, {
+							word: word as string,
+							pos: pos as string,
+							matched: word as string,
+							quality: 4,
+							freq: freq as number,
+							id: id as number
+						});
+					}
 				}
+				if (fuzzyRows.length > 0) break;
+			} catch (e) {
+				console.error(`Fuzzy search failed for "${fuzzyQuery}"`, e);
+				break;
 			}
-		} catch (e) {
-			console.error(`Fuzzy search failed for "${sanitized}"`, e);
 		}
 	}
 
