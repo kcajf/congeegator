@@ -60,12 +60,11 @@ def extract_senses(entry: Entry) -> list[dict[str, Any]]:
     """Extract structured senses with glosses, examples, and tags."""
     senses: list[dict[str, Any]] = []
     for sense in entry.senses:
-        if sense.form_of or sense.alt_of:
-            continue
         if not sense.glosses:
             continue
         raw_gloss = sense.glosses[-1]
-        if _is_junk_gloss(raw_gloss.lower()):
+        # Allow form-of and alt-of senses through regardless of junk check
+        if not (sense.form_of or sense.alt_of) and _is_junk_gloss(raw_gloss.lower()):
             continue
         gloss = re.sub(r"\s*\(.*?\)", "", raw_gloss).strip()
         gloss = re.sub(r"\s*\[.*?\]", "", gloss).strip()
@@ -144,10 +143,6 @@ def entry_is_valid(entry: Entry) -> bool:
     if entry.pos not in INCLUDED_POS:
         return False
     if not entry.word or not entry.word[0].isalpha():
-        return False
-    if entry.senses and all(
-        "form-of" in s.tags or "alt-of" in s.tags for s in entry.senses
-    ):
         return False
     BAD_CATEGORIES = {
         f"{entry.lang} multiword forms",
