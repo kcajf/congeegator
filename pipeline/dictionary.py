@@ -21,22 +21,6 @@ EXCLUDED_POS = frozenset({
     "punct", "abbrev",
 })
 
-# Junk gloss prefixes (superset of conjugation one, includes more form-of patterns)
-_JUNK_GLOSS_PREFIXES = (
-    "used to form", "used for forming", "used as a", "used as an",
-    "used with", "forms composite", "forms the",
-    "synonym of", "alternative form of", "compound of",
-    "see the full list", "post-1990",
-    "alternative spelling of", "obsolete spelling of",
-    "eye dialect of", "misspelling of", "dated form of",
-    "rare form of", "archaic form of", "clipping of",
-    "abbreviation of", "initialism of", "acronym of",
-)
-
-def _is_junk_gloss(gloss: str) -> bool:
-    lower = gloss.lower()
-    return any(lower.startswith(p) for p in _JUNK_GLOSS_PREFIXES)
-
 
 class DictLanguageConfig(msgspec.Struct, frozen=True):
     code: str
@@ -59,13 +43,9 @@ def extract_senses(entry: Entry) -> list[dict[str, Any]]:
     """Extract structured senses with glosses, examples, and tags."""
     senses: list[dict[str, Any]] = []
     for sense in entry.senses:
-        if sense.form_of or sense.alt_of:
-            continue
         if not sense.glosses:
             continue
         raw_gloss = sense.glosses[-1]
-        if _is_junk_gloss(raw_gloss.lower()):
-            continue
         gloss = raw_gloss.strip()
         if not gloss:
             continue
@@ -141,11 +121,7 @@ def entry_is_valid(entry: Entry) -> bool:
         return False
     if entry.pos not in INCLUDED_POS:
         return False
-    if not entry.word or not entry.word[0].isalpha():
-        return False
-    if entry.senses and all(
-        "form-of" in s.tags or "alt-of" in s.tags for s in entry.senses
-    ):
+    if not entry.word:
         return False
     BAD_CATEGORIES = {
         f"{entry.lang} multiword forms",
