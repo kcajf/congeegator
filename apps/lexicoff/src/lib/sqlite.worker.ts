@@ -395,6 +395,9 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 
 	const isUpperCase = (w: string) => w[0] !== w[0].toLowerCase();
 
+	// Within gloss-tier (quality=3), sort by matched gloss position so that
+	// words where the query matches gloss #0 rank above those where it's gloss #5.
+	// Phonetic-from-Latin matches (no gloss match) get 9999 → rank last in tier.
 	const top = allEntries
 		.sort(
 			(a, b) =>
