@@ -11,9 +11,10 @@ interface InternalResult {
 	word: string;
 	pos: string;
 	matched: string;
-	quality: number; // 0=word, 1=form, 2=phonetic, 3=gloss, 4=fuzzy
+	quality: number; // 0=word, 1=form, 2=phonetic(greek), 3=gloss/phonetic-from-latin, 4=fuzzy
 	freq: number;
 	id: number;
+	matchedGlossIdx?: number; // index of the gloss that matched the query (quality=3 only)
 }
 
 interface SearchResult {
@@ -201,6 +202,11 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 	const trimmed = query.trim().toLowerCase();
 	if (!trimmed) return [];
 
+	// When the query contains no Greek characters it's likely an English gloss search
+	// (or a Latin phonetic approximation). In either case, phonetic matches should not
+	// outrank genuine English gloss matches, so we use quality=3 instead of quality=2.
+	const isLatinQuery = !/[\u0370-\u03ff\u1f00-\u1fff]/u.test(trimmed);
+
 	// \p{L} = unicode letters, \p{N} = numbers — replace everything else with spaces
 	// so e.g. "self-service" → "self service" (matching the FTS5 unicode61 tokenizer)
 	const sanitized = trimmed
@@ -281,7 +287,11 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 		}
 	}
 
-	// Phonetic search (quality 2) — only if phoneticQuery differs from query
+	// Phonetic search — only if phoneticQuery differs from query.
+	// For Latin queries (e.g. "angry"), phonetic matches use quality=3 so they don't
+	// outrank genuine English gloss matches (also quality=3). For Greek input, phonetic
+	// matches use quality=2 (higher priority than gloss) since the user is likely trying
+	// to look up a Greek word by its pronunciation.
 	if (phoneticQuery && phoneticQuery !== trimmed) {
 		const phonetic = phoneticQuery
 			.replace(/[^\p{L}\p{N}\s]/gu, ' ') // strip non-letter/number chars
@@ -309,7 +319,7 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 							word: word as string,
 							pos: pos as string,
 							matched: word as string,
-							quality: 2,
+							quality: isLatinQuery ? 3 : 2,
 							freq: freq as number,
 							id: id as number
 						});
@@ -363,32 +373,19 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 		}
 	}
 
-	const isUpperCase = (w: string) => w[0] !== w[0].toLowerCase();
+	// Bulk-fetch senses for all deduped results. Done before sorting so that
+	// matchedGlossIdx can be used as a sort key for quality-3 results.
+	const byWordArr = [...byWord.values()];
+	if (byWordArr.length === 0) return [];
 
-	const top = [...byWord.values()]
-		.sort(
-			(a, b) =>
-				a.quality - b.quality ||
-				(a.pos === 'name' ? 1 : 0) - (b.pos === 'name' ? 1 : 0) ||
-				(isUpperCase(a.word) ? 1 : 0) - (isUpperCase(b.word) ? 1 : 0) ||
-				b.freq - a.freq ||
-				a.word.length - b.word.length
-		)
-		.slice(0, 50);
-
-	// Bulk-fetch senses in one query after dedup+sort+slice, rather than
-	// parsing senses inline during each search path. This is both simpler
-	// (one code path) and faster (one query for ≤50 rows vs per-entry parsing).
-	if (top.length === 0) return [];
-
-	const ids = top.map((r) => r.id);
-	const placeholders = ids.map(() => '?').join(',');
+	const allIds = byWordArr.map((r) => r.id);
+	const allPlaceholders = allIds.map(() => '?').join(',');
 	const sensesMap = new Map<number, string[]>();
 	try {
 		const sensesRows = execQuery(
 			db,
-			`SELECT id, senses FROM entries WHERE id IN (${placeholders})`,
-			ids
+			`SELECT id, senses FROM entries WHERE id IN (${allPlaceholders})`,
+			allIds
 		);
 		for (const [id, senses] of sensesRows) {
 			try {
@@ -403,8 +400,34 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 			}
 		}
 	} catch {
-		// best-effort — return results without glosses
+		// best-effort — sort and display without gloss index
 	}
+
+	// Pre-compute matchedGlossIdx for quality-3 entries so it can be used as a sort key.
+	// Words where the query matches an earlier gloss rank higher than those where it
+	// matches a later one. Phonetic-from-Latin entries (also quality=3) have no matched
+	// gloss, so matchedGlossIdx stays undefined and sorts after genuine gloss matches.
+	for (const r of byWordArr) {
+		if (r.quality === 3) {
+			const allGlosses = sensesMap.get(r.id) ?? [];
+			const matchIdx = allGlosses.findIndex((g) => g.toLowerCase().includes(trimmed));
+			if (matchIdx >= 0) r.matchedGlossIdx = matchIdx;
+		}
+	}
+
+	const isUpperCase = (w: string) => w[0] !== w[0].toLowerCase();
+
+	const top = byWordArr
+		.sort(
+			(a, b) =>
+				a.quality - b.quality ||
+				(a.pos === 'name' ? 1 : 0) - (b.pos === 'name' ? 1 : 0) ||
+				(isUpperCase(a.word) ? 1 : 0) - (isUpperCase(b.word) ? 1 : 0) ||
+				(a.matchedGlossIdx ?? Infinity) - (b.matchedGlossIdx ?? Infinity) ||
+				b.freq - a.freq ||
+				a.word.length - b.word.length
+		)
+		.slice(0, 50);
 
 	return top.map((r): SearchResult => {
 		const allGlosses = sensesMap.get(r.id) ?? [];
@@ -416,7 +439,7 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 			// top 3 so the user can see *why* this result appeared. If the matched
 			// gloss is already in the top 3, keep natural order; otherwise prepend
 			// it and take 2 more from the top (still 3 total).
-			const matchIdx = allGlosses.findIndex((g) => g.toLowerCase().includes(trimmed));
+			const matchIdx = r.matchedGlossIdx ?? -1;
 			const top3 = allGlosses.slice(0, 3);
 			if (matchIdx >= 0 && matchIdx < 3) {
 				glosses = top3;
