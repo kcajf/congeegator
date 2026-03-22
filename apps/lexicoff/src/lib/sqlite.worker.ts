@@ -201,6 +201,10 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 	const trimmed = query.trim().toLowerCase();
 	if (!trimmed) return [];
 
+	// When the query uses the target language's script, phonetic matches should rank highly.
+	// When it's purely Latin (e.g. "angry"), demote phonetic coincidences below gloss matches.
+	const isLatinOnly = /^[\p{Script=Latin}\p{N}\s]+$/u.test(trimmed);
+
 	// \p{L} = unicode letters, \p{N} = numbers — replace everything else with spaces
 	// so e.g. "self-service" → "self service" (matching the FTS5 unicode61 tokenizer)
 	const sanitized = trimmed
@@ -309,7 +313,9 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 							word: word as string,
 							pos: pos as string,
 							matched: word as string,
-							quality: 2,
+							// For Latin-only queries (e.g. "angry"), phonetic coincidences should
+							// rank below genuine English gloss matches, not above them.
+							quality: isLatinOnly ? 3 : 2,
 							freq: freq as number,
 							id: id as number
 						});
@@ -363,12 +369,42 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 		}
 	}
 
+	// Bulk-fetch senses before sorting — needed both for gloss-position ranking
+	// and for returning glosses in the final results.
+	const allEntries = [...byWord.values()];
+	const sensesMap = new Map<number, string[]>();
+	const glossMatchIdx = new Map<number, number>();
+	if (allEntries.length > 0) {
+		const placeholders = allEntries.map(() => '?').join(',');
+		const sensesRows = execQuery(
+			db,
+			`SELECT id, senses FROM entries WHERE id IN (${placeholders})`,
+			allEntries.map((r) => r.id)
+		);
+		for (const [id, senses] of sensesRows) {
+			const parsed = JSON.parse(senses as string);
+			const glosses: string[] = [];
+			for (const s of parsed) {
+				if (s.gloss) glosses.push(s.gloss as string);
+			}
+			sensesMap.set(id as number, glosses);
+			const matchIdx = glosses.findIndex((g) => g.toLowerCase().includes(trimmed));
+			glossMatchIdx.set(id as number, matchIdx >= 0 ? matchIdx : 9999);
+		}
+	}
+
 	const isUpperCase = (w: string) => w[0] !== w[0].toLowerCase();
 
-	const top = [...byWord.values()]
+	// Within gloss-tier (quality=3), sort by matched gloss position so that
+	// words where the query matches gloss #0 rank above those where it's gloss #5.
+	// Phonetic-from-Latin matches (no gloss match) get 9999 → rank last in tier.
+	const top = allEntries
 		.sort(
 			(a, b) =>
 				a.quality - b.quality ||
+				(a.quality === 3
+					? (glossMatchIdx.get(a.id) ?? 9999) - (glossMatchIdx.get(b.id) ?? 9999)
+					: 0) ||
 				(a.pos === 'name' ? 1 : 0) - (b.pos === 'name' ? 1 : 0) ||
 				(isUpperCase(a.word) ? 1 : 0) - (isUpperCase(b.word) ? 1 : 0) ||
 				b.freq - a.freq ||
@@ -376,35 +412,7 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 		)
 		.slice(0, 50);
 
-	// Bulk-fetch senses in one query after dedup+sort+slice, rather than
-	// parsing senses inline during each search path. This is both simpler
-	// (one code path) and faster (one query for ≤50 rows vs per-entry parsing).
 	if (top.length === 0) return [];
-
-	const ids = top.map((r) => r.id);
-	const placeholders = ids.map(() => '?').join(',');
-	const sensesMap = new Map<number, string[]>();
-	try {
-		const sensesRows = execQuery(
-			db,
-			`SELECT id, senses FROM entries WHERE id IN (${placeholders})`,
-			ids
-		);
-		for (const [id, senses] of sensesRows) {
-			try {
-				const parsed = JSON.parse(senses as string);
-				const glosses: string[] = [];
-				for (const s of parsed) {
-					if (s.gloss) glosses.push(s.gloss as string);
-				}
-				sensesMap.set(id as number, glosses);
-			} catch {
-				// skip unparseable
-			}
-		}
-	} catch {
-		// best-effort — return results without glosses
-	}
 
 	return top.map((r): SearchResult => {
 		const allGlosses = sensesMap.get(r.id) ?? [];
