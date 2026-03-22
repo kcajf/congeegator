@@ -1,5 +1,4 @@
 import logging
-import re
 from typing import Any, Callable, Optional
 
 import msgspec
@@ -67,8 +66,7 @@ def extract_senses(entry: Entry) -> list[dict[str, Any]]:
         raw_gloss = sense.glosses[-1]
         if _is_junk_gloss(raw_gloss.lower()):
             continue
-        gloss = re.sub(r"\s*\(.*?\)", "", raw_gloss).strip()
-        gloss = re.sub(r"\s*\[.*?\]", "", gloss).strip()
+        gloss = raw_gloss.strip()
         if not gloss:
             continue
         sense_dict: dict[str, Any] = {"gloss": gloss}
