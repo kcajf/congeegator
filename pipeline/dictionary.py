@@ -121,7 +121,7 @@ def entry_is_valid(entry: Entry) -> bool:
         return False
     if entry.pos not in INCLUDED_POS:
         return False
-    if not entry.word or not entry.word[0].isalpha():
+    if not entry.word:
         return False
     BAD_CATEGORIES = {
         f"{entry.lang} multiword forms",
