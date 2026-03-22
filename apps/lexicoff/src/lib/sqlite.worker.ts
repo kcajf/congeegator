@@ -11,7 +11,7 @@ interface InternalResult {
 	word: string;
 	pos: string;
 	matched: string;
-	quality: number; // 0=word, 1=form, 2=phonetic, 3=gloss, 4=fuzzy
+	quality: number; // 0=exact, 10=word, 20=form, 30=phonetic, 40=gloss, 50=fuzzy
 	freq: number;
 	id: number;
 }
@@ -247,9 +247,9 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 
 	// Per-column FTS5 queries (highlight() doesn't work with content='')
 	const colQueries: [string, number][] = [
-		['word', 0],
-		['forms_text', 1],
-		['gloss_text', 3]
+		['word', 10],
+		['forms_text', 20],
+		['gloss_text', 40]
 	];
 
 	let wordMatchCount = 0;
@@ -267,7 +267,7 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 			for (const row of rows) {
 				const [id, word, pos, freq] = row;
 				const key = `${word}:${pos}`;
-				if (quality === 0) wordMatchCount++;
+				if (quality === 10) wordMatchCount++;
 				const existing = seen.get(key);
 				if (!existing || quality < existing.quality) {
 					seen.set(key, {
@@ -285,7 +285,7 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 		}
 	}
 
-	// Phonetic search (quality 2) — only if phoneticQuery differs from query
+	// Phonetic search (quality 30) — only if phoneticQuery differs from query
 	if (phoneticQuery && phoneticQuery !== trimmed) {
 		const phonetic = phoneticQuery
 			.replace(/[^\p{L}\p{N}\s]/gu, ' ') // strip non-letter/number chars
@@ -315,7 +315,7 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 							matched: word as string,
 							// For Latin-only queries (e.g. "angry"), phonetic coincidences should
 							// rank below genuine English gloss matches, not above them.
-							quality: isLatinOnly ? 3 : 2,
+							quality: isLatinOnly ? 40 : 30,
 							freq: freq as number,
 							id: id as number
 						});
@@ -327,7 +327,7 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 		}
 	}
 
-	// Fuzzy search (quality 4) — trigram fallback when few word matches
+	// Fuzzy search (quality 50) — trigram fallback when few word matches
 	if (wordMatchCount < 5 && sanitized.length >= 3) {
 		try {
 			const fuzzyRows = execQuery(
@@ -345,7 +345,7 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 						word: word as string,
 						pos: pos as string,
 						matched: word as string,
-						quality: 4,
+						quality: 50,
 						freq: freq as number,
 						id: id as number
 					});
@@ -395,14 +395,14 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 
 	const isUpperCase = (w: string) => w[0] !== w[0].toLowerCase();
 
-	// Within gloss-tier (quality=3), sort by matched gloss position so that
+	// Within gloss-tier (quality=40), sort by matched gloss position so that
 	// words where the query matches gloss #0 rank above those where it's gloss #5.
 	// Phonetic-from-Latin matches (no gloss match) get 9999 → rank last in tier.
 	const top = allEntries
 		.sort(
 			(a, b) =>
 				a.quality - b.quality ||
-				(a.quality === 3
+				(a.quality === 40
 					? (glossMatchIdx.get(a.id) ?? 9999) - (glossMatchIdx.get(b.id) ?? 9999)
 					: 0) ||
 				(a.pos === 'name' ? 1 : 0) - (b.pos === 'name' ? 1 : 0) ||
@@ -419,7 +419,7 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 		let glosses: string[];
 		let matchedGlossIdx: number | undefined;
 
-		if (r.quality === 3 && allGlosses.length > 0) {
+		if (r.quality === 40 && allGlosses.length > 0) {
 			// For gloss-match results, ensure the matched gloss is visible in the
 			// top 3 so the user can see *why* this result appeared. If the matched
 			// gloss is already in the top 3, keep natural order; otherwise prepend
