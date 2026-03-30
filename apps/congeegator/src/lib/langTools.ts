@@ -183,6 +183,10 @@ export function formatForm(form: string): string {
 	return result + suffix;
 }
 
+export function stripFormMarkers(raw: string): string {
+	return raw.replace(/[([{}\])]/g, '');
+}
+
 export function parseAndFormatForm(raw: string): FormSegment[] {
 	// Fast path: no marker characters
 	if (!/[([{}\])]/.test(raw)) {

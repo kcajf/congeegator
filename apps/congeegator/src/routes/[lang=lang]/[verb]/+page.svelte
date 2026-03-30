@@ -7,7 +7,12 @@
 	import { langWiktionaryName, manifest } from '$lib/dataUtils';
 	import { appTitle, siteUrl } from '$lib/defs';
 	import { tenseSettings } from '$lib/i18n.svelte';
-	import { formatPronoun, getExternalLinks, parseAndFormatForm } from '$lib/langTools';
+	import {
+		formatPronoun,
+		getExternalLinks,
+		parseAndFormatForm,
+		stripFormMarkers
+	} from '$lib/langTools';
 	import { searchLangState } from '$lib/searchLang.svelte';
 	import { getTenseWikiLink } from '$lib/tenseWikiLinks';
 	import { tick } from 'svelte';
@@ -24,13 +29,12 @@
 	const highlightForm = $derived.by(() => {
 		const hash = page.url.hash;
 		if (!hash) return '';
-		return decodeURIComponent(hash.slice(1)).toLowerCase();
+		return stripFormMarkers(decodeURIComponent(hash.slice(1))).toLowerCase();
 	});
 
 	function isHighlighted(form: string): boolean {
 		if (highlightForm === '') return false;
-		const stripped = form.replace(/[([{}\])]/g, '');
-		return stripped.toLowerCase() === highlightForm;
+		return stripFormMarkers(form).toLowerCase() === highlightForm;
 	}
 
 	$effect(() => {
