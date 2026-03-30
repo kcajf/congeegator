@@ -36,6 +36,7 @@ self.onmessage = async (e: MessageEvent<{ lang: string }>) => {
 
 				const url = `${getLangDataUrl(lang)}/data.json`;
 				const response = await fetch(url);
+				if (!response.ok) throw new Error(`HTTP ${response.status}`);
 				const totalBytes = remote.dataSize ?? null;
 				let receivedBytes = 0;
 				const chunks: Uint8Array[] = [];

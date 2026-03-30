@@ -200,6 +200,7 @@ export function findMatches(
 	for (const entry of verb.conjugation) {
 		const forms = Array.isArray(entry) ? entry : [entry];
 		for (const form of forms) {
+			if (!form) continue;
 			considerConjugation(form);
 		}
 	}

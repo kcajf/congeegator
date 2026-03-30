@@ -1,5 +1,5 @@
 import { browser } from '$app/environment';
-import { langName } from './dataUtils';
+import { langName, manifest } from './dataUtils';
 import { db } from './db';
 import { searchLangState } from './searchLang.svelte';
 import { storageEstimate } from './storageEstimate.svelte';
@@ -56,6 +56,9 @@ if (browser) {
 		}
 
 		if (type === 'COMPLETE') {
+			const hash = manifest.languages[lang]?.dataHash ?? '';
+			globalSync.update(lang, hash, 'ready');
+
 			const id = syncToastIds[lang];
 			const showReady = () => {
 				if (id) {
