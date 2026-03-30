@@ -145,6 +145,7 @@
 			.bulkGet(dbKeys)
 			.then((data) => {
 				if (
+					currentLang !== searchLangState.lang ||
 					currentQuery !==
 						toPhonetic(currentLang, stripDiacritics(searchTerm.toLowerCase().trim())) ||
 					requireExactWord !== /\S\s+$/.test(searchTerm)

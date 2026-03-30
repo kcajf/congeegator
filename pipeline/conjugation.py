@@ -1,7 +1,7 @@
 import logging
 import re
 import typing
-from typing import Any, Callable, Optional
+from typing import Any, Callable
 
 import msgspec
 
@@ -832,40 +832,6 @@ def count_conjs(thing) -> int:
     return n
 
 
-def _orjson_dump(obj: Any, pretty: bool = False) -> bytes:
-    opts = orjson.OPT_NON_STR_KEYS
-    if pretty:
-        opts |= orjson.OPT_INDENT_2
-    return orjson.dumps(obj, option=opts)
-
-
-def write_language_data(data: dict[str, Any], lang_dir: str, pretty: bool = False):
-    os.makedirs(lang_dir, exist_ok=True)
-
-    # full data file
-    out_path = os.path.join(lang_dir, "data.json")
-    with open(out_path, "wb") as f:
-        f.write(_orjson_dump(data, pretty))
-    log.info(f"Wrote {out_path}")
-
-    # chunked verb files (grouped by first letter, lowercased)
-    chunks_dir = os.path.join(lang_dir, "chunks")
-    os.makedirs(chunks_dir)
-    chunks: dict[str, dict[str, Any]] = {}
-    for verb_data in data["verbs"]:
-        key = verb_data["name"].lower()
-        letter = key[0]
-        chunks.setdefault(letter, {})[key] = verb_data
-    for letter, chunk_data in chunks.items():
-        with open(os.path.join(chunks_dir, f"{letter}.json"), "wb") as f:
-            f.write(_orjson_dump(chunk_data, pretty))
-
-    # index file
-    with open(os.path.join(lang_dir, "index.json"), "wb") as f:
-        names = [x["name"] for x in data["verbs"]]
-        f.write(_orjson_dump(names, pretty))
-
-
 def make_language_static_metadata(config: LanguageConfig):
     tense_names: list[str] = []
     tense_pronouns: list[list[str] | None] = []
@@ -891,42 +857,6 @@ def make_language_static_metadata(config: LanguageConfig):
         "tensePronouns": tense_pronouns,
         "tenseGroups": tense_groups,
     }
-
-
-def write_data_manifest(data_dir: str):
-    language_hashes = {}
-    for config in CONFIG:
-        data_path = os.path.join(data_dir, config.code, "data.json")
-        if not os.path.exists(data_path):
-            continue
-
-        data_size = os.path.getsize(data_path)
-
-        with open(data_path, "rb") as f:
-            h = hashlib.file_digest(f, "md5").hexdigest()[:8]
-
-        hashed_data_dir = os.path.join(data_dir, f"{config.code}-{h}")
-        os.rename(os.path.join(data_dir, config.code), hashed_data_dir)
-
-        log.info(f"{config.code}: dataHash={h} dataSize={data_size}")
-
-        language_hashes[config.code] = {
-            "dataHash": h,
-            "dataSize": data_size,
-            **make_language_static_metadata(config),
-        }
-
-    path = os.path.join("src", "lib", "data-manifest.json")
-    log.info(f"Writing {path}")
-    with open(path, "w") as f:
-        json.dump(
-            {
-                "languages": language_hashes,
-            },
-            f,
-            indent=2,
-            ensure_ascii=False,
-        )
 
 
 def entry_is_clean_verb_root(entry: Entry) -> bool:
@@ -980,87 +910,6 @@ def entry_is_clean_verb_root(entry: Entry) -> bool:
     return True
 
 
-_JUNK_GLOSS_PREFIXES = (
-    "used to form",
-    "used for forming",
-    "used as a",
-    "used as an",
-    "used with",
-    "forms composite",
-    "forms the",
-    "synonym of",
-    "alternative form of",
-    "compound of",
-    "see the full list",
-    "post-1990",
-)
-
-
-def _is_junk_gloss(gloss: str) -> bool:
-    """Return True if a gloss is a meta-description rather than a definition."""
-    lower = gloss.lower()
-    return any(lower.startswith(p) for p in _JUNK_GLOSS_PREFIXES)
-
-
-def extract_gloss(entry: Entry) -> Optional[str]:
-    """Extract up to 3 diverse English glosses from an entry's senses.
-
-    Uses glosses[-1] (the specific definition) rather than glosses[0] (often a
-    category header like "As an auxiliary verb:"). Deduplicates by category header
-    to get diverse meanings across sense groups. Appends "..." when more senses exist.
-
-    Filters out meta-glosses (grammar notes, "synonym of", etc.) and strips
-    bracketed context ([with dative 'to someone']) from definitions.
-    """
-    valid_senses = [
-        s for s in entry.senses if not s.form_of and not s.alt_of and s.glosses
-    ]
-    if not valid_senses:
-        return None
-
-    # Deduplicate by category header (glosses[0]) to pick one sense per group,
-    # e.g. one from "As an auxiliary verb:", one from "As a copulative verb:", etc.
-    seen_headers: set[str] = set()
-    glosses: list[str] = []
-    has_more = False
-    for sense in valid_senses:
-        header = sense.glosses[0] if len(sense.glosses) > 1 else ""
-        if header in seen_headers:
-            continue
-        if header:
-            seen_headers.add(header)
-        # Use glosses[-1] — the specific definition, not glosses[0] which is
-        # often a category header like "As an auxiliary verb:"
-        raw_gloss = sense.glosses[-1][0].lower() + sense.glosses[-1][1:]
-        # Skip meta-glosses (grammar notes, "synonym of", etc.)
-        if _is_junk_gloss(raw_gloss):
-            continue
-        # Strip parenthetical clarifications for brevity
-        raw_gloss = re.sub(r"\s*\(.*?\)", "", raw_gloss).strip()
-        # Strip bracketed context (grammar notes like [with dative 'to someone'])
-        raw_gloss = re.sub(r"\s*\[.*?\]", "", raw_gloss).strip()
-        # Split on semicolons and treat each part as a candidate
-        parts = [p.strip().rstrip(".") for p in raw_gloss.split(";")]
-        for part in parts:
-            if not part or _is_junk_gloss(part):
-                continue
-            if part not in glosses:
-                if len(glosses) >= 3:
-                    has_more = True
-                    break
-                glosses.append(part)
-        if has_more:
-            break
-
-    if not glosses:
-        return None
-
-    result = "; ".join(glosses)
-    if has_more:
-        result += "; ..."
-    return result
-
-
 def fr_is_aspirated(entry: Entry) -> bool:
     cat = "French terms with aspirated h"
     if cat in _cat_names(entry.categories):
@@ -1069,152 +918,6 @@ def fr_is_aspirated(entry: Entry) -> bool:
         if cat in _cat_names(s.categories):
             return True
     return False
-
-
-# Stop words for gloss search index: standard English function words (3+ chars)
-# plus gloss-specific noise words that appear in many definitions.
-GLOSS_STOP_WORDS = frozenset(
-    {
-        # Standard English function words (3+ chars)
-        "the",
-        "and",
-        "for",
-        "not",
-        "out",
-        "off",
-        "has",
-        "are",
-        "was",
-        "but",
-        "can",
-        "may",
-        "all",
-        "any",
-        "its",
-        "also",
-        "been",
-        "into",
-        "from",
-        "with",
-        "that",
-        "this",
-        "than",
-        "when",
-        "very",
-        "more",
-        "most",
-        "such",
-        "other",
-        # Gloss-specific noise
-        "something",
-        "someone",
-        "oneself",
-        "one's",
-        "etc",
-        "e.g",
-        "e.g.",
-        "especially",
-        "synonym",
-        "spelling",
-        "chiefly",
-        "usually",
-        "often",
-        "sometimes",
-    }
-)
-
-MIN_GLOSS_WORD_LENGTH = 3
-
-
-def build_search_index(
-    verbs: list[dict[str, Any]],
-    phonetic_fn: Callable[[str], str] | None = None,
-) -> dict[str, list[int]]:
-    log.info("generating search index")
-    searchable_words = defaultdict[str, set[int]](lambda: set())
-
-    GERMAN_AUXILIARY_INFINITIVES = {"haben", "sein"}
-
-    def add_to_index(s: str, idx: int):
-        if s == "" or s == "-":
-            return
-        for ss in s.split("/"):
-            if ' ' in ss:
-                words = ss.split(' ')
-                if len(words) >= 3 and words[-1] in GERMAN_AUXILIARY_INFINITIVES:
-                    ss = words[-2]
-                else:
-                    ss = words[-1]
-            searchable_words[ss].add(idx)
-            searchable_words[strip_diacritics(ss)].add(idx)
-            if phonetic_fn:
-                phonetic = phonetic_fn(ss)
-                if phonetic != ss and phonetic != strip_diacritics(ss):
-                    searchable_words[phonetic].add(idx)
-
-    for i, v in enumerate(verbs):
-        searchable_words[v["name"]].add(i)
-        searchable_words[strip_diacritics(v["name"])].add(i)
-        if phonetic_fn:
-            phonetic = phonetic_fn(v["name"])
-            if phonetic != v["name"] and phonetic != strip_diacritics(v["name"]):
-                searchable_words[phonetic].add(i)
-        for c in v["conjugation"]:
-            if isinstance(c, str):
-                add_to_index(c, i)
-            else:
-                for cc in c:
-                    add_to_index(cc, i)
-
-    # Collect gloss words (English definitions) with prefix range 3-6
-    gloss_words = defaultdict[str, set[int]](lambda: set())
-    for i, v in enumerate(verbs):
-        gloss = v.get("gloss", "")
-        if not gloss:
-            continue
-        for clause in gloss.split("; "):
-            if clause == "...":
-                continue
-            if _is_junk_gloss(clause):
-                continue
-            clause = re.sub(r"\s*\[.*?\]", "", clause)
-            for token in re.split(r"[\s,;]+", clause.lower()):
-                word = token.strip("().[]'\"")
-                if len(word) >= MIN_GLOSS_WORD_LENGTH and word not in GLOSS_STOP_WORDS:
-                    gloss_words[word].add(i)
-
-    index = defaultdict[str, set[int]](lambda: set())
-
-    MIN_PREFIX = 1
-    MAX_PREFIX = 4
-    MAX_PREFIX_IDS = 200
-
-    for word, indices in searchable_words.items():
-        for prefix_len in range(MIN_PREFIX, MAX_PREFIX + 1):
-            word_prefix = word[:prefix_len].lower()
-            for i in indices:
-                index[word_prefix].add(i)
-
-    # Gloss words use prefix range 3-6
-    MIN_GLOSS_PREFIX = 3
-    MAX_GLOSS_PREFIX = 6
-    for word, ids in gloss_words.items():
-        for prefix_len in range(MIN_GLOSS_PREFIX, MAX_GLOSS_PREFIX + 1):
-            prefix = word[:prefix_len].lower()
-            index[prefix].update(ids)
-
-    ret = {k: sorted(v)[:MAX_PREFIX_IDS] for k, v in index.items()}
-
-    max_hits = 0
-    max_key = None
-    for k, v in ret.items():
-        if len(v) > max_hits:
-            max_hits = len(v)
-            max_key = k
-
-    log.info(f"Longest index entry: '{max_key}', {max_hits} hits")
-
-    return ret
 
 
 def process_entry(config: LanguageConfig, entry: Entry) -> dict[str, Any] | None:

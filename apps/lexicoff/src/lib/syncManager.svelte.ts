@@ -104,6 +104,7 @@ export async function deleteLang(lang: string) {
 		return;
 	}
 	await workerReady;
+	if (!globalSync.map[lang]) return;
 	// Close the SQLite database and clean up pool entry
 	const langHash = globalSync.map[lang].hash;
 	await sqliteClient.closeDb(lang);

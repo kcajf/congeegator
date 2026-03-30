@@ -67,14 +67,17 @@ def extract_senses(entry: Entry) -> list[dict[str, Any]]:
     return senses
 
 
+VALID_GENDERS = {"m", "f", "n", "m-f", "mf", "m-p", "f-p", "n-p"}
+
+
 def extract_gender(entry: Entry) -> Optional[str]:
     for ht in entry.head_templates:
         g = ht.args.get("g", "") or ht.args.get("1", "")
-        if g in ("m", "f", "n", "m-f", "mf", "m-p", "f-p", "n-p"):
+        if g in VALID_GENDERS:
+            g2 = ht.args.get("g2", "")
+            if g2 and g2 in VALID_GENDERS:
+                return f"{g}-{g2}"
             return g
-        g2 = ht.args.get("g2", "")
-        if g and g2:
-            return f"{g}-{g2}"
     return None
 
 

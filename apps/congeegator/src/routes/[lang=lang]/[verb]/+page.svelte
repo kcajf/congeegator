@@ -126,7 +126,7 @@
 		<a
 			target="_blank"
 			rel="noopener noreferrer"
-			href="https://en.wiktionary.com/wiki/{data.verb.name}#{langWiktionaryName(data.verb.lang)}"
+			href="https://en.wiktionary.org/wiki/{data.verb.name}#{langWiktionaryName(data.verb.lang)}"
 			class="ref-link ref-link-icon"
 		>
 			<span class="inline-icon" role="img" aria-label="wiktionary">

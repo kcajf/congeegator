@@ -42,6 +42,8 @@ def extract_gloss(entry: Entry) -> Optional[str]:
             continue
         if header:
             seen_headers.add(header)
+        if not sense.glosses[-1]:
+            continue
         raw_gloss = sense.glosses[-1][0].lower() + sense.glosses[-1][1:]
         if _is_junk_gloss(raw_gloss):
             continue
