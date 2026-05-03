@@ -10,6 +10,7 @@
 	import { db } from '$lib/db';
 	import { appTitle, myPurple } from '$lib/defs';
 	import { tenseSettings } from '$lib/i18n.svelte';
+	import { stripFormMarkers } from '$lib/langTools';
 	import {
 		findGlossMatch,
 		findMatches,
@@ -92,7 +93,8 @@
 			lang: searchLangState.lang,
 			verb: item.root
 		});
-		const hash = item.matched !== item.root ? `#${encodeURIComponent(item.matched)}` : '';
+		const normalizedMatch = stripFormMarkers(item.matched);
+		const hash = item.matched !== item.root ? `#${encodeURIComponent(normalizedMatch)}` : '';
 		// eslint-disable-next-line svelte/no-navigation-without-resolve -- base is already resolved above
 		await goto(base + hash);
 

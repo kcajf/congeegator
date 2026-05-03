@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatForm, parseAndFormatForm } from './langTools';
+import { formatForm, parseAndFormatForm, stripFormMarkers } from './langTools';
 
 describe('formatForm', () => {
 	it('returns single form as-is', () => {
@@ -167,5 +167,19 @@ describe('parseAndFormatForm', () => {
 			{ text: 'seiest', markers: ['formal'], separator: '/' },
 			{ text: ' abgeartet', markers: [] }
 		]);
+	});
+});
+
+describe('stripFormMarkers', () => {
+	it('removes marker delimiters while preserving the underlying form text', () => {
+		expect(stripFormMarkers('[{ελέχθην}]')).toBe('ελέχθην');
+		expect(stripFormMarkers('(-ιόσαστε)')).toBe('-ιόσαστε');
+	});
+
+	it('normalizes marker-bearing forms the same way they appear in highlighted URLs', () => {
+		const matched = '[{ελέχθην}]';
+		const hash = encodeURIComponent(stripFormMarkers(matched));
+		expect(decodeURIComponent(hash)).toBe('ελέχθην');
+		expect(stripFormMarkers(matched).toLowerCase()).toBe(decodeURIComponent(hash).toLowerCase());
 	});
 });
