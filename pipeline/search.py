@@ -85,8 +85,12 @@ def build_search_index(
 
     index = defaultdict[str, set[int]](lambda: set())
 
+    # Native and gloss share MAX_PREFIX so neither can populate keys the other
+    # can't reach — otherwise prefixLookup walks longest-first and gets shadowed
+    # by a bucket that has only one source's IDs.
     MIN_PREFIX = 1
-    MAX_PREFIX = 4
+    MIN_GLOSS_PREFIX = 3
+    MAX_PREFIX = 6
     MAX_PREFIX_IDS = 200
 
     for word, indices in searchable_words.items():
@@ -95,11 +99,8 @@ def build_search_index(
             for i in indices:
                 index[word_prefix].add(i)
 
-    # Gloss words use prefix range 3-6
-    MIN_GLOSS_PREFIX = 3
-    MAX_GLOSS_PREFIX = 6
     for word, ids in gloss_words.items():
-        for prefix_len in range(MIN_GLOSS_PREFIX, MAX_GLOSS_PREFIX + 1):
+        for prefix_len in range(MIN_GLOSS_PREFIX, MAX_PREFIX + 1):
             prefix = word[:prefix_len].lower()
             index[prefix].update(ids)
 
