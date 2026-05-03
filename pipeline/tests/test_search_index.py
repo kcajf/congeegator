@@ -124,6 +124,15 @@ class TestSpanishSearchIndex:
         assert idx in self.index["hab"]
         assert idx in self.index["habl"]
 
+    def test_native_form_reachable_at_max_prefix(self):
+        # Regression: gloss words used to populate keys at lengths 5-6 that
+        # native forms didn't reach, so prefixLookup (longest-first) landed
+        # on a gloss-only bucket and missed the native verb. The 6-char native
+        # 'hablar' must be reachable at every prefix length up to its full length.
+        idx = _idx(self.names, "hablar")
+        assert idx in self.index.get("habla", []), "hablar missing at 5-char prefix"
+        assert idx in self.index.get("hablar", []), "hablar missing at 6-char prefix"
+
     def test_hacer_conjugation_overlap(self):
         """'hacer' and 'hablar' should both appear under 'ha'."""
         hacer_idx = _idx(self.names, "hacer")
