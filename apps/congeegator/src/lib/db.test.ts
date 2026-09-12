@@ -3,7 +3,6 @@ import { Dexie } from 'dexie';
 import { afterEach, expect, it } from 'vitest';
 import { ConjugationDatabase } from './db';
 import { manifest } from './dataUtils';
-import { datasetKey } from './datasets';
 const databases: Dexie[] = [];
 afterEach(async () => {
 	for (const db of databases.splice(0)) {
@@ -31,21 +30,27 @@ async function legacy(hash: string, valid = true, schema = 3) {
 	old.close();
 	const db = new ConjugationDatabase(name);
 	databases.push(db);
+	db.versionVerbs.hook('creating', () => {
+		throw new DOMException('No space for a second copy', 'QuotaExceededError');
+	});
 	await db.open();
 	return db;
 }
-it.each([2, 3])('preserves usable offline caches from schema v%i', async (schema) => {
-	const hash = manifest.languages.fr.dataHash;
-	const db = await legacy(hash, true, schema);
-	const key = datasetKey('fr', hash);
-	expect(await db.versions.get(key)).toMatchObject({
-		hash,
-		entryCount: 1,
-		tenses: { tenseNames: manifest.languages.fr.tenseNames }
-	});
-	expect(await db.versionVerbs.get([key, 0])).toMatchObject({ name: 'manger' });
-	expect(await db.versionIndices.get(key)).toMatchObject({ searchIndex: { m: [0] } });
-});
+it.each([2, 3])(
+	'preserves schema v%i offline caches without copying verb records',
+	async (schema) => {
+		const hash = manifest.languages.fr.dataHash;
+		const db = await legacy(hash, true, schema);
+		const key = 'fr';
+		expect(await db.versions.get(key)).toMatchObject({
+			hash,
+			entryCount: 1,
+			tenses: { tenseNames: manifest.languages.fr.tenseNames }
+		});
+		expect(await db.versionVerbs.get([key, 0])).toMatchObject({ name: 'manger' });
+		expect(await db.versionIndices.get(key)).toMatchObject({ searchIndex: { m: [0] } });
+	}
+);
 it('does not attach new tense definitions to an unknown legacy version', async () => {
 	expect(await (await legacy('old-hash')).versions.count()).toBe(0);
 });

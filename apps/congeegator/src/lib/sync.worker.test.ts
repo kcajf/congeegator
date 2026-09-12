@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import { db } from './db';
+import { db, recordsFor } from './db';
 import { manifest } from './dataUtils';
 import { datasetKey } from './datasets';
 const worker = {
@@ -75,7 +75,7 @@ it('rolls back failed installation and retains the previous version', async () =
 	await sync();
 	expect(worker.postMessage).toHaveBeenLastCalledWith(expect.objectContaining({ type: 'ERROR' }));
 	expect(await db.versions.get(key())).toBeUndefined();
-	expect(await db.versionVerbs.where('key').equals(key()).count()).toBe(0);
+	expect(await recordsFor(key()).count()).toBe(0);
 	expect(await db.versionVerbs.get([previousKey, 0])).toBeDefined();
 });
 it('repairs a same-version cache whose search index is missing', async () => {

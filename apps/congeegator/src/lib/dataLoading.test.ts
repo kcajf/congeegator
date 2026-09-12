@@ -6,7 +6,11 @@ vi.mock('./dataUtils', () => ({
 }));
 const { get, where } = vi.hoisted(() => ({ get: vi.fn(), where: vi.fn() }));
 vi.mock('./db', () => ({
-	db: { versionVerbs: { get, where } },
+	db: {
+		versionVerbs: { get, where },
+		transaction: (_mode: unknown, _tables: unknown, run: () => Promise<unknown>) => run()
+	},
+	recordsFor: () => where(),
 	getInstalledVersion: async () => ({ key: 'fr-current', tenses: {} })
 }));
 import { loadSingleVerb, loadVerbIndex } from './dataLoading';

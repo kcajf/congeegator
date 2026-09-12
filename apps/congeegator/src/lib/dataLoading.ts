@@ -1,6 +1,6 @@
 import { browser } from '$app/environment';
 import { error } from '@sveltejs/kit';
-import { db, getInstalledVersion } from './db';
+import { db, getInstalledVersion, recordsFor } from './db';
 import type { VerbRecord } from './types';
 import { getLangDataUrl, manifest } from './dataUtils';
 
@@ -16,11 +16,13 @@ export async function loadSingleVerb(
 	// 1. Check IndexedDB first (Browser only)
 	if (browser) {
 		try {
-			const version = await getInstalledVersion(lang);
-			if (version) {
-				const cached = await db.versionVerbs.get({ key: version.key, name: verb.toLowerCase() });
-				if (cached) return { ...cached, tenses: version.tenses };
-			}
+			const cached = await db.transaction('r', [db.versions, db.versionVerbs], async () => {
+				const version = await getInstalledVersion(lang);
+				if (!version) return undefined;
+				const record = await db.versionVerbs.get({ lang: version.key, name: verb.toLowerCase() });
+				return record ? { ...record, lang, tenses: version.tenses } : undefined;
+			});
+			if (cached) return cached;
 		} catch (err) {
 			console.warn('Could not read cached verb; trying the network:', err);
 		}
@@ -52,11 +54,12 @@ export async function loadVerbIndex(lang: string, fetcher: typeof fetch): Promis
 
 	if (browser) {
 		try {
-			const version = await getInstalledVersion(lang);
-			if (version) {
-				const verbs = await db.versionVerbs.where('key').equals(version.key).limit(25).toArray();
-				if (verbs.length) return verbs.map((verb) => verb.name);
-			}
+			const names = await db.transaction('r', [db.versions, db.versionVerbs], async () => {
+				const version = await getInstalledVersion(lang);
+				if (!version) return [];
+				return (await recordsFor(version.key).limit(25).toArray()).map((verb) => verb.name);
+			});
+			if (names.length) return names;
 		} catch (err) {
 			console.warn('Could not read cached index; trying the network:', err);
 		}

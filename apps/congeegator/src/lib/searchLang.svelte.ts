@@ -1,3 +1,4 @@
+import { retainAppVersions } from './cacheRetention';
 import { browser } from '$app/environment';
 import { liveQuery, type Subscription } from 'dexie';
 import { db, getInstalledVersion } from './db';
@@ -19,10 +20,12 @@ class SearchLangState {
 	private subscription?: Subscription;
 
 	start() {
+		const releaseVersions = retainAppVersions();
 		this.onChanged();
 		const reconnect = () => this.retry();
 		window.addEventListener('online', reconnect);
 		return () => {
+			releaseVersions();
 			this.subscription?.unsubscribe();
 			window.removeEventListener('online', reconnect);
 		};
