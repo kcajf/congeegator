@@ -21,9 +21,10 @@ beforeEach(async () => {
 	});
 	for (const key of ['old', 'current']) {
 		await db.versions.put(version(key));
-		await db.versionIndices.put({ lang: key, searchIndex: { m: [0] } });
-		await db.versionVerbs.put({
-			lang: key,
+		await db.indices.put({ key, searchIndex: { m: [0] } });
+		await db.verbs.put({
+			lang: 'fr',
+			version: key,
 			id: 0,
 			name: 'manger',
 			nameNoDiacritics: 'manger',
@@ -40,15 +41,15 @@ afterEach(async () => {
 it('reclaims obsolete records and indices without clearing the current dictionary', async () => {
 	await pruneVersions(version('current'));
 	expect(await db.versions.get('old')).toBeUndefined();
-	expect(await db.versionVerbs.get(['old', 0])).toBeUndefined();
-	expect(await db.versionIndices.get('old')).toBeUndefined();
-	expect(await db.versionVerbs.get(['current', 0])).toBeDefined();
+	expect(await db.verbs.get(['old', 0])).toBeUndefined();
+	expect(await db.indices.get('old')).toBeUndefined();
+	expect(await db.verbs.get(['current', 0])).toBeDefined();
 });
 it('retains versions protected by an open tab, then reclaims them after that tab closes', async () => {
 	held.add('congeegator-cache-fr-old');
 	await pruneVersions(version('current'));
-	expect(await db.versionVerbs.get(['old', 0])).toBeDefined();
+	expect(await db.verbs.get(['old', 0])).toBeDefined();
 	held.clear();
 	await pruneVersions(version('current'));
-	expect(await db.versionVerbs.get(['old', 0])).toBeUndefined();
+	expect(await db.verbs.get(['old', 0])).toBeUndefined();
 });

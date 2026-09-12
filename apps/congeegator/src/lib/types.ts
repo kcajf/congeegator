@@ -49,5 +49,5 @@ export interface DatasetVersion {
 	tenses: TenseMetadata;
 }
 
-export type CachedVerb = VerbRecord;
-export type VersionIndex = { lang: string; searchIndex: SearchIndexStorage };
+export type CachedVerb = VerbRecord & { version: string };
+export type VersionIndex = { key: string; searchIndex: SearchIndexStorage };

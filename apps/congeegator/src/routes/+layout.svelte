@@ -145,7 +145,7 @@
 
 		const dbKeys = prefixIds.map((id) => [snapshot!.key, id]);
 
-		db.versionVerbs
+		db.verbs
 			.bulkGet(dbKeys)
 			.then((data) => {
 				if (

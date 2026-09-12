@@ -46,8 +46,8 @@ it('commits verbs, index, and their tense layout together', async () => {
 		entryCount: 1,
 		tenses: { tenseNames: manifest.languages.fr.tenseNames }
 	});
-	expect(await db.versionIndices.get(key())).toMatchObject({ searchIndex: { m: [0] } });
-	expect(await db.versionVerbs.get([key(), 0])).toMatchObject({ name: 'manger' });
+	expect(await db.indices.get(key())).toMatchObject({ searchIndex: { m: [0] } });
+	expect(await db.verbs.get([key(), 0])).toMatchObject({ name: 'manger' });
 });
 it('does not overwrite newer data when an older app downloads its version', async () => {
 	await sync();
@@ -55,35 +55,43 @@ it('does not overwrite newer data when an older app downloads its version', asyn
 	manifest.languages.fr.dataHash = 'older-build';
 	await sync();
 	expect(await db.versions.count()).toBe(2);
-	expect(await db.versionVerbs.get([newerKey, 0])).toMatchObject({ name: 'manger' });
-	expect(await db.versionIndices.get(newerKey)).toMatchObject({ searchIndex: { m: [0] } });
+	expect(await db.verbs.get([newerKey, 0])).toMatchObject({ name: 'manger' });
+	expect(await db.indices.get(newerKey)).toMatchObject({ searchIndex: { m: [0] } });
 });
 it('rejects malformed downloads without marking them installed', async () => {
 	fetcher.mockResolvedValueOnce(Response.json({ verbs: payload().verbs }));
 	await sync();
 	expect(worker.postMessage).toHaveBeenLastCalledWith(expect.objectContaining({ type: 'ERROR' }));
 	expect(await db.versions.count()).toBe(0);
-	expect(await db.versionVerbs.count()).toBe(0);
+	expect(await db.verbs.count()).toBe(0);
 });
 it('rolls back failed installation and retains the previous version', async () => {
 	await sync();
 	const previousKey = key();
 	manifest.languages.fr.dataHash = 'new-version';
-	vi.spyOn(db.versionIndices, 'put').mockRejectedValueOnce(
+	vi.spyOn(db.indices, 'put').mockRejectedValueOnce(
 		new DOMException('Quota full', 'QuotaExceededError')
 	);
 	await sync();
 	expect(worker.postMessage).toHaveBeenLastCalledWith(expect.objectContaining({ type: 'ERROR' }));
 	expect(await db.versions.get(key())).toBeUndefined();
 	expect(await recordsFor(key()).count()).toBe(0);
-	expect(await db.versionVerbs.get([previousKey, 0])).toBeDefined();
+	expect(await db.verbs.get([previousKey, 0])).toBeDefined();
 });
-it('repairs a same-version cache whose search index is missing', async () => {
+it('reports success even if obsolete-version cleanup fails', async () => {
+	const request = vi.fn(async (_name, ...args) => {
+		if (args.length === 1) return args[0]();
+		throw new Error('Cleanup unavailable');
+	});
+	vi.stubGlobal('navigator', { onLine: true, locks: { request } });
 	await sync();
-	await db.versionIndices.delete(key());
+	manifest.languages.fr.dataHash = 'new-version';
+	await sync();
+	expect(worker.postMessage).toHaveBeenLastCalledWith({ type: 'COMPLETE', lang: 'fr' });
+	expect(await db.verbs.get([key(), 0])).toBeDefined();
 	await sync();
 	expect(fetcher).toHaveBeenCalledTimes(2);
-	expect(await db.versionIndices.get(key())).toBeDefined();
+	expect(worker.postMessage).toHaveBeenLastCalledWith({ type: 'COMPLETE', lang: 'fr' });
 });
 it('reuses a complete installation without network access', async () => {
 	await sync();

@@ -54,7 +54,7 @@ class SearchLangState {
 		this.subscription = liveQuery(async () => {
 			const version = await getInstalledVersion(lang);
 			if (!version) return undefined;
-			const data = await db.versionIndices.get(version.key);
+			const data = await db.indices.get(version.key);
 			return data
 				? { key: version.key, index: new Map(Object.entries(data.searchIndex)) }
 				: undefined;

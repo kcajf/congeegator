@@ -16,10 +16,10 @@ export async function loadSingleVerb(
 	// 1. Check IndexedDB first (Browser only)
 	if (browser) {
 		try {
-			const cached = await db.transaction('r', [db.versions, db.versionVerbs], async () => {
+			const cached = await db.transaction('r', [db.versions, db.verbs], async () => {
 				const version = await getInstalledVersion(lang);
 				if (!version) return undefined;
-				const record = await db.versionVerbs.get({ lang: version.key, name: verb.toLowerCase() });
+				const record = await db.verbs.get({ version: version.key, name: verb.toLowerCase() });
 				return record ? { ...record, lang, tenses: version.tenses } : undefined;
 			});
 			if (cached) return cached;
@@ -54,7 +54,7 @@ export async function loadVerbIndex(lang: string, fetcher: typeof fetch): Promis
 
 	if (browser) {
 		try {
-			const names = await db.transaction('r', [db.versions, db.versionVerbs], async () => {
+			const names = await db.transaction('r', [db.versions, db.verbs], async () => {
 				const version = await getInstalledVersion(lang);
 				if (!version) return [];
 				return (await recordsFor(version.key).limit(25).toArray()).map((verb) => verb.name);

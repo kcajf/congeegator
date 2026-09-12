@@ -1,19 +1,15 @@
 import { pruneVersions } from './cacheRetention';
 import { getLangDataUrl, manifest } from './dataUtils';
-import { db, getInstalledVersion, recordsFor } from './db';
+import { db, recordsFor } from './db';
 import { datasetKey, validateDownload } from './datasets';
 
 async function syncLanguage(lang: string) {
 	const remote = manifest.languages[lang];
 	if (!remote) throw new Error(`Unknown language ${lang}`);
 	const key = datasetKey(lang, remote.dataHash);
-	const local = await getInstalledVersion(lang);
-	if (
-		local?.hash === remote.dataHash &&
-		(await db.versionIndices.get(local.key)) &&
-		(await recordsFor(local.key).count()) === local.entryCount
-	) {
-		await pruneVersions(local);
+	const local = await db.versions.get(key);
+	if (local) {
+		await pruneVersions(local).catch(console.warn);
 		return;
 	}
 	if (!navigator.onLine) throw new Error('Offline. Reconnect to download this language.');
@@ -24,13 +20,22 @@ async function syncLanguage(lang: string) {
 	// The JSON parser rejects interrupted responses before any stored data changes.
 	const raw: unknown = await response.json();
 	validateDownload(raw, remote);
-	const records = raw.verbs.map((verb, id) => ({ ...verb, id, lang: key }));
+	const records = raw.verbs.map((verb, id) => ({ ...verb, id, lang, version: key }));
+
+	const version = {
+		key,
+		lang,
+		hash: remote.dataHash,
+		entryCount: records.length,
+		installedAt: Date.now(),
+		tenses: remote
+	};
 
 	// Commit the replacement before reclaiming any previous version.
-	await db.transaction('rw', [db.versionVerbs, db.versions, db.versionIndices], async () => {
+	await db.transaction('rw', [db.verbs, db.versions, db.indices], async () => {
 		await recordsFor(key).delete();
 		for (let i = 0; i < records.length; i += 500) {
-			await db.versionVerbs.bulkPut(records.slice(i, i + 500));
+			await db.verbs.bulkPut(records.slice(i, i + 500));
 			self.postMessage({
 				type: 'PROGRESS',
 				lang,
@@ -38,17 +43,11 @@ async function syncLanguage(lang: string) {
 				percent: Math.min(100, Math.round(((i + 500) / records.length) * 100))
 			});
 		}
-		await db.versionIndices.put({ lang: key, searchIndex: raw.searchIndex });
-		await db.versions.put({
-			key,
-			lang,
-			hash: remote.dataHash,
-			entryCount: records.length,
-			installedAt: Date.now(),
-			tenses: remote
-		});
+		await db.indices.put({ key, searchIndex: raw.searchIndex });
+		await db.versions.put(version);
 	});
-	await pruneVersions((await db.versions.get(key))!);
+	// Cleanup is optional; an installed dictionary remains usable if it fails.
+	await pruneVersions(version).catch(console.warn);
 }
 
 self.onmessage = async (event: MessageEvent<{ lang: string }>) => {

@@ -38,9 +38,9 @@ export async function pruneVersions(keep: DatasetVersion) {
 			{ ifAvailable: true },
 			async (lock) => {
 				if (!lock) return;
-				await db.transaction('rw', [db.versionVerbs, db.versionIndices, db.versions], async () => {
+				await db.transaction('rw', [db.verbs, db.indices, db.versions], async () => {
 					await recordsFor(version.key).delete();
-					await db.versionIndices.delete(version.key);
+					await db.indices.delete(version.key);
 					await db.versions.delete(version.key);
 				});
 			}

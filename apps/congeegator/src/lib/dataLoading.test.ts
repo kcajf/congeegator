@@ -7,7 +7,7 @@ vi.mock('./dataUtils', () => ({
 const { get, where } = vi.hoisted(() => ({ get: vi.fn(), where: vi.fn() }));
 vi.mock('./db', () => ({
 	db: {
-		versionVerbs: { get, where },
+		verbs: { get, where },
 		transaction: (_mode: unknown, _tables: unknown, run: () => Promise<unknown>) => run()
 	},
 	recordsFor: () => where(),
