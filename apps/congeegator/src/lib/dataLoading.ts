@@ -16,10 +16,11 @@ export async function loadSingleVerb(
 
 	// 1. Check IndexedDB first (Browser only)
 	if (browser) {
-		const cached = await db.verbs.get({ lang, name: verb.toLowerCase() });
-		if (cached) {
-			console.log('Serving from IndexedDB');
-			return cached;
+		try {
+			const cached = await db.verbs.get({ lang, name: verb.toLowerCase() });
+			if (cached) return cached;
+		} catch (err) {
+			console.warn('Could not read cached verb; trying the network:', err);
 		}
 	}
 
@@ -48,18 +49,22 @@ export async function loadVerbIndex(lang: string, fetcher: typeof fetch): Promis
 	}
 
 	if (browser) {
-		const names: string[] = [];
-		await db.verbs
-			.where('[lang+id]')
-			.between([lang, Dexie.minKey], [lang, Dexie.maxKey])
-			.limit(25)
-			.each((verb) => {
-				names.push(verb.name);
-			});
+		try {
+			const names: string[] = [];
+			await db.verbs
+				.where('[lang+id]')
+				.between([lang, Dexie.minKey], [lang, Dexie.maxKey])
+				.limit(25)
+				.each((verb) => {
+					names.push(verb.name);
+				});
 
-		if (names.length > 0) {
-			console.log('Serving from IndexedDB');
-			return names;
+			if (names.length > 0) {
+				console.log('Serving from IndexedDB');
+				return names;
+			}
+		} catch (err) {
+			console.warn('Could not read cached index; trying the network:', err);
 		}
 	}
 
