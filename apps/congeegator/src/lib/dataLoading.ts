@@ -1,7 +1,6 @@
 import { browser } from '$app/environment';
 import { error } from '@sveltejs/kit';
-import Dexie from 'dexie';
-import { db } from './db';
+import { db, getInstalledVersion } from './db';
 import type { VerbRecord } from './types';
 import { getLangDataUrl, manifest } from './dataUtils';
 
@@ -17,8 +16,11 @@ export async function loadSingleVerb(
 	// 1. Check IndexedDB first (Browser only)
 	if (browser) {
 		try {
-			const cached = await db.verbs.get({ lang, name: verb.toLowerCase() });
-			if (cached) return cached;
+			const version = await getInstalledVersion(lang);
+			if (version) {
+				const cached = await db.versionVerbs.get({ key: version.key, name: verb.toLowerCase() });
+				if (cached) return { ...cached, tenses: version.tenses };
+			}
 		} catch (err) {
 			console.warn('Could not read cached verb; trying the network:', err);
 		}
@@ -40,7 +42,7 @@ export async function loadSingleVerb(
 		error(404, { message: `Verb ${verb} not found` });
 	}
 
-	return { ...raw, lang } as VerbRecord;
+	return { ...raw, lang, tenses: manifest.languages[lang] } as VerbRecord;
 }
 
 export async function loadVerbIndex(lang: string, fetcher: typeof fetch): Promise<string[]> {
@@ -50,18 +52,10 @@ export async function loadVerbIndex(lang: string, fetcher: typeof fetch): Promis
 
 	if (browser) {
 		try {
-			const names: string[] = [];
-			await db.verbs
-				.where('[lang+id]')
-				.between([lang, Dexie.minKey], [lang, Dexie.maxKey])
-				.limit(25)
-				.each((verb) => {
-					names.push(verb.name);
-				});
-
-			if (names.length > 0) {
-				console.log('Serving from IndexedDB');
-				return names;
+			const version = await getInstalledVersion(lang);
+			if (version) {
+				const verbs = await db.versionVerbs.where('key').equals(version.key).limit(25).toArray();
+				if (verbs.length) return verbs.map((verb) => verb.name);
 			}
 		} catch (err) {
 			console.warn('Could not read cached index; trying the network:', err);

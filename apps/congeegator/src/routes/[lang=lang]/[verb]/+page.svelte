@@ -54,7 +54,7 @@
 		});
 	});
 
-	const langManifest = $derived(manifest.languages[data.verb.lang]);
+	const langManifest = $derived(data.verb.tenses ?? manifest.languages[data.verb.lang]);
 	const tenseNames = $derived(langManifest.tenseNames);
 	const tensePronouns = $derived(langManifest.tensePronouns);
 	const tenseGroups = $derived(langManifest.tenseGroups);
