@@ -46,6 +46,7 @@ export function validateDownload(
 	for (const ids of Object.values(searchIndex)) {
 		if (
 			!Array.isArray(ids) ||
+			ids.length === 0 ||
 			!ids.every((id) => Number.isInteger(id) && id >= 0 && id < verbs.length)
 		)
 			throw new Error('Download has invalid search references');

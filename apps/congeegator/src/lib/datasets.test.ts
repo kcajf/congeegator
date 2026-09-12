@@ -20,6 +20,7 @@ describe('download validation', () => {
 		['empty verbs', { verbs: [], searchIndex: { m: [0] } }],
 		['missing index', { verbs: payload().verbs }],
 		['out-of-range reference', { ...payload(), searchIndex: { m: [1] } }],
+		['empty references', { ...payload(), searchIndex: { m: [] } }],
 		['negative reference', { ...payload(), searchIndex: { m: [-1] } }],
 		['wrong tense layout', { ...payload(), verbs: [{ ...payload().verbs[0], conjugation: [] }] }],
 		[
