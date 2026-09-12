@@ -1,6 +1,6 @@
 # SQLite startup preservation
 
-`@sqlite.org/sqlite-wasm` 3.51.2-build8 calls `removeVfs()` when its storage pool fails to initialize. That deletes persisted dictionary files, even when the failure was a transient inability to open a handle.
+`@sqlite.org/sqlite-wasm` 3.53.4-build1 calls `removeVfs()` when its storage pool fails to initialize. That deletes persisted dictionary files, even when the failure was a transient inability to open a handle.
 
 The patch waits for all concurrent handle acquisitions to settle, closes acquired handles on failure, and pauses the VFS instead of deleting its files. Waiting matters: otherwise a late acquisition can retain a handle after cleanup.
 

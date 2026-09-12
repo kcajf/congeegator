@@ -46,7 +46,7 @@
 		"vitest": "^4.1.0"
 	},
 	"dependencies": {
-		"@sqlite.org/sqlite-wasm": "3.51.2-build8",
+		"@sqlite.org/sqlite-wasm": "3.53.4-build1",
 		"zstddec": "^0.2.0"
 	}
 }
