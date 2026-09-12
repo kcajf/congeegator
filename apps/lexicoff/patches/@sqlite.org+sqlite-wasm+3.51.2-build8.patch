@@ -1,0 +1,38 @@
+diff --git a/node_modules/@sqlite.org/sqlite-wasm/dist/index.mjs b/node_modules/@sqlite.org/sqlite-wasm/dist/index.mjs
+index 17ae70c..2e1e365 100644
+--- a/node_modules/@sqlite.org/sqlite-wasm/dist/index.mjs
++++ b/node_modules/@sqlite.org/sqlite-wasm/dist/index.mjs
+@@ -14809,7 +14809,7 @@ async function sqlite3InitModule(moduleArg = {}) {
+ 				async acquireAccessHandles(clearFiles = false) {
+ 					const files = [];
+ 					for await (const [name, h] of this.#dhOpaque) if ("file" === h.kind) files.push([name, h]);
+-					return Promise.all(files.map(async ([name, h]) => {
++					const acquired = await Promise.allSettled(files.map(async ([name, h]) => {
+ 						try {
+ 							const ah = await h.createSyncAccessHandle();
+ 							this.#mapSAHToName.set(ah, name);
+@@ -14823,10 +14823,14 @@ async function sqlite3InitModule(moduleArg = {}) {
+ 							}
+ 						} catch (e) {
+ 							this.storeErr(e);
+-							this.releaseAccessHandles();
+ 							throw e;
+ 						}
+ 					}));
++					const failed = acquired.find((result) => result.status === "rejected");
++					if (failed) {
++						this.releaseAccessHandles();
++						throw failed.reason;
++					}
+ 				}
+ 				/**
+ 				Given an SAH, returns the client-specified name of
+@@ -15536,7 +15540,7 @@ async function sqlite3InitModule(moduleArg = {}) {
+ 						thePool.log("VFS initialized.");
+ 						return poolUtil;
+ 					}).catch(async (e) => {
+-						await thePool.removeVfs().catch(() => {});
++						thePool.pauseVfs();
+ 						throw e;
+ 					});
+ 				}).catch((err) => {
