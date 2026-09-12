@@ -19,7 +19,8 @@
 		"deploy:staging": "cd ../.. && pixi run generate && cd apps/lexicoff && npm run r2-upload:staging && npm run build:staging && npx wrangler deploy --env=staging",
 		"deploy:prod": "cd ../.. && pixi run generate && cd apps/lexicoff && npm run r2-upload:prod && npm run build:prod && npx wrangler deploy --env=production",
 		"test": "vitest run",
-		"test:watch": "vitest"
+		"test:watch": "vitest",
+		"postinstall": "patch-package --error-on-fail"
 	},
 	"devDependencies": {
 		"@cloudflare/vite-plugin": "^1.21.0",
@@ -34,6 +35,7 @@
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.13.1",
 		"globals": "^16.5.0",
+		"patch-package": "^8.0.1",
 		"prettier": "^3.7.4",
 		"prettier-plugin-svelte": "^3.4.0",
 		"svelte": "^5.45.6",
@@ -44,7 +46,7 @@
 		"vitest": "^4.1.0"
 	},
 	"dependencies": {
-		"@sqlite.org/sqlite-wasm": "^3.51.2-build8",
+		"@sqlite.org/sqlite-wasm": "3.53.4-build1",
 		"zstddec": "^0.2.0"
 	}
 }
