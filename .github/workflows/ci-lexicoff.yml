@@ -22,6 +22,8 @@ jobs:
         working-directory: apps/lexicoff
       - run: npm run lint
         working-directory: apps/lexicoff
+      - run: npm test
+        working-directory: apps/lexicoff
       - run: npm run check
         working-directory: apps/lexicoff
       - run: npm run build:staging
