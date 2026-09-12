@@ -1,0 +1,207 @@
+{
+  "name": "gaudeo",
+  "nameNoDiacritics": "gaudeo",
+  "conjugation": [
+    [
+      "gaudeō",
+      "gaudēs",
+      "gaudet",
+      "gaudēmus",
+      "gaudētis",
+      "gaudent"
+    ],
+    [
+      "gaudēbam",
+      "gaudēbās",
+      "gaudēbat",
+      "gaudēbāmus",
+      "gaudēbātis",
+      "gaudēbant"
+    ],
+    [
+      "gaudēbō",
+      "gaudēbis",
+      "gaudēbit",
+      "gaudēbimus",
+      "gaudēbitis",
+      "gaudēbunt"
+    ],
+    [
+      "gāvīsus sum (masculine)/gāvīsa sum (feminine)/gāvīsum sum (neuter)",
+      "gāvīsus es (masculine)/gāvīsa es (feminine)/gāvīsum es (neuter)",
+      "gāvīsus est (masculine)/gāvīsa est (feminine)/gāvīsum est (neuter)",
+      "gāvīsī sumus (masculine)/gāvīsae sumus (feminine)/gāvīsa sumus (neuter)",
+      "gāvīsī estis (masculine)/gāvīsae estis (feminine)/gāvīsa estis (neuter)",
+      "gāvīsī sunt (masculine)/gāvīsae sunt (feminine)/gāvīsa sunt (neuter)"
+    ],
+    [
+      "gāvīsus eram (masculine)/gāvīsa eram (feminine)/gāvīsum eram (neuter)",
+      "gāvīsus erās (masculine)/gāvīsa erās (feminine)/gāvīsum erās (neuter)",
+      "gāvīsus erat (masculine)/gāvīsa erat (feminine)/gāvīsum erat (neuter)",
+      "gāvīsī erāmus (masculine)/gāvīsae erāmus (feminine)/gāvīsa erāmus (neuter)",
+      "gāvīsī erātis (masculine)/gāvīsae erātis (feminine)/gāvīsa erātis (neuter)",
+      "gāvīsī erant (masculine)/gāvīsae erant (feminine)/gāvīsa erant (neuter)"
+    ],
+    [
+      "gāvīsus erō (masculine)/gāvīsa erō (feminine)/gāvīsum erō (neuter)",
+      "gāvīsus eris (masculine)/gāvīsa eris (feminine)/gāvīsum eris (neuter)",
+      "gāvīsus erit (masculine)/gāvīsa erit (feminine)/gāvīsum erit (neuter)",
+      "gāvīsī erimus (masculine)/gāvīsae erimus (feminine)/gāvīsa erimus (neuter)",
+      "gāvīsī eritis (masculine)/gāvīsae eritis (feminine)/gāvīsa eritis (neuter)",
+      "gāvīsī erunt (masculine)/gāvīsae erunt (feminine)/gāvīsa erunt (neuter)"
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "gaudeam",
+      "gaudeās",
+      "gaudeat",
+      "gaudeāmus",
+      "gaudeātis",
+      "gaudeant"
+    ],
+    [
+      "gaudērem",
+      "gaudērēs",
+      "gaudēret",
+      "gaudērēmus",
+      "gaudērētis",
+      "gaudērent"
+    ],
+    [
+      "gāvīsus sim (masculine)/gāvīsa sim (feminine)/gāvīsum sim (neuter)",
+      "gāvīsus sīs (masculine)/gāvīsa sīs (feminine)/gāvīsum sīs (neuter)",
+      "gāvīsus sit (masculine)/gāvīsa sit (feminine)/gāvīsum sit (neuter)",
+      "gāvīsī sīmus (masculine)/gāvīsae sīmus (feminine)/gāvīsa sīmus (neuter)",
+      "gāvīsī sītis (masculine)/gāvīsae sītis (feminine)/gāvīsa sītis (neuter)",
+      "gāvīsī sint (masculine)/gāvīsae sint (feminine)/gāvīsa sint (neuter)"
+    ],
+    [
+      "gāvīsus essem (masculine)/gāvīsa essem (feminine)/gāvīsum essem (neuter)",
+      "gāvīsus essēs (masculine)/gāvīsa essēs (feminine)/gāvīsum essēs (neuter)",
+      "gāvīsus esset (masculine)/gāvīsa esset (feminine)/gāvīsum esset (neuter)",
+      "gāvīsī essēmus (masculine)/gāvīsae essēmus (feminine)/gāvīsa essēmus (neuter)",
+      "gāvīsī essētis (masculine)/gāvīsae essētis (feminine)/gāvīsa essētis (neuter)",
+      "gāvīsī essent (masculine)/gāvīsae essent (feminine)/gāvīsa essent (neuter)"
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "gaudē",
+      "gaudēte"
+    ],
+    [
+      "gaudētō",
+      "gaudētō",
+      "gaudētōte",
+      "gaudentō"
+    ],
+    [
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      ""
+    ],
+    "gaudēre",
+    "gāvīsum esse",
+    "gāvīsūrum esse",
+    "",
+    "",
+    "",
+    "gaudēns",
+    "gāvīsus",
+    "",
+    "gāvīsūrus",
+    "gaudendus",
+    [
+      "gaudendī",
+      "gaudendō",
+      "gaudendum",
+      "gaudendō"
+    ],
+    [
+      "gāvīsum",
+      "gāvīsū"
+    ]
+  ],
+  "gloss": "to rejoice, make merry; to take pleasure in, be pleased with, delight in, enjoy"
+}

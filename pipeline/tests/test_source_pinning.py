@@ -34,7 +34,7 @@ def read_filtered(path):
 def test_language_catalogue():
     existing = {"en", "fr", "de", "el", "es", "it"}
     additions = {"pt", "ca", "ro", "gl", "nl", "sv", "da", "nb", "pl", "ru", "uk", "cs", "fi", "hu", "tr", "id", "vi", "eo", "la"}
-    assert {c.code for c in CONFIG} == existing
+    assert {c.code for c in CONFIG} == existing | {"pt", "ca", "nl", "sv", "la", "fi"}
     assert len(DICT_CONFIGS) == 25
     assert {c.code for c in DICT_CONFIGS} == existing | additions
     assert set(pin.configured_languages()) == existing | additions

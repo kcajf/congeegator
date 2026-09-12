@@ -1,0 +1,170 @@
+{
+  "name": "syödä",
+  "nameNoDiacritics": "syoda",
+  "conjugation": [
+    [
+      "syön",
+      "syöt",
+      "syö",
+      "syömme",
+      "syötte",
+      "syövät",
+      "syödään"
+    ],
+    [
+      "en syö",
+      "et syö",
+      "ei syö",
+      "emme syö",
+      "ette syö",
+      "eivät syö",
+      "ei syödä"
+    ],
+    [
+      "söin",
+      "söit",
+      "söi",
+      "söimme",
+      "söitte",
+      "söivät",
+      "syötiin"
+    ],
+    [
+      "en syönyt",
+      "et syönyt",
+      "ei syönyt",
+      "emme syöneet",
+      "ette syöneet",
+      "eivät syöneet",
+      "ei syöty"
+    ],
+    [
+      "olen syönyt",
+      "olet syönyt",
+      "on syönyt",
+      "olemme syöneet",
+      "olette syöneet",
+      "ovat syöneet",
+      "on syöty"
+    ],
+    [
+      "en ole syönyt",
+      "et ole syönyt",
+      "ei ole syönyt",
+      "emme ole syöneet",
+      "ette ole syöneet",
+      "eivät ole syöneet",
+      "ei ole syöty"
+    ],
+    [
+      "olin syönyt",
+      "olit syönyt",
+      "oli syönyt",
+      "olimme syöneet",
+      "olitte syöneet",
+      "olivat syöneet",
+      "oli syöty"
+    ],
+    [
+      "en ollut syönyt",
+      "et ollut syönyt",
+      "ei ollut syönyt",
+      "emme olleet syöneet",
+      "ette olleet syöneet",
+      "eivät olleet syöneet",
+      "ei ollut syöty"
+    ],
+    [
+      "söisin",
+      "söisit",
+      "söisi",
+      "söisimme",
+      "söisitte",
+      "söisivät",
+      "syötäisiin"
+    ],
+    [
+      "en söisi",
+      "et söisi",
+      "ei söisi",
+      "emme söisi",
+      "ette söisi",
+      "eivät söisi",
+      "ei syötäisi"
+    ],
+    [
+      "olisin syönyt",
+      "olisit syönyt",
+      "olisi syönyt",
+      "olisimme syöneet",
+      "olisitte syöneet",
+      "olisivat syöneet",
+      "olisi syöty"
+    ],
+    [
+      "en olisi syönyt",
+      "et olisi syönyt",
+      "ei olisi syönyt",
+      "emme olisi syöneet",
+      "ette olisi syöneet",
+      "eivät olisi syöneet",
+      "ei olisi syöty"
+    ],
+    [
+      "syönen",
+      "syönet",
+      "syönee",
+      "syönemme",
+      "syönette",
+      "syönevät",
+      "syötäneen"
+    ],
+    [
+      "en syöne",
+      "et syöne",
+      "ei syöne",
+      "emme syöne",
+      "ette syöne",
+      "eivät syöne",
+      "ei syötäne"
+    ],
+    [
+      "lienen syönyt",
+      "lienet syönyt",
+      "lienee syönyt",
+      "lienemme syöneet",
+      "lienette syöneet",
+      "lienevät syöneet",
+      "lienee syöty"
+    ],
+    [
+      "en liene syönyt",
+      "et liene syönyt",
+      "ei liene syönyt",
+      "emme liene syöneet",
+      "ette liene syöneet",
+      "eivät liene syöneet",
+      "ei liene syöty"
+    ],
+    [
+      "syö",
+      "syököön",
+      "syökäämme",
+      "syökää",
+      "syökööt",
+      "syötäköön"
+    ],
+    [
+      "älä syö",
+      "älköön syökö",
+      "älkäämme syökö",
+      "älkää syökö",
+      "älkööt syökö",
+      "älköön syötäkö"
+    ],
+    "syödä",
+    "syövä",
+    "syötävä"
+  ],
+  "gloss": "to eat; to wear out, tire, strain; to erode; ..."
+}

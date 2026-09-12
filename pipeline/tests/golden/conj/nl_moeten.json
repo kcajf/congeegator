@@ -1,0 +1,25 @@
+{
+  "name": "moeten",
+  "nameNoDiacritics": "moeten",
+  "conjugation": [
+    [
+      "moet",
+      "moet",
+      "moet",
+      "moet",
+      "moeten"
+    ],
+    [
+      "moest",
+      "moest",
+      "moest",
+      "moest",
+      "moesten"
+    ],
+    "moet",
+    "moeten",
+    "moetend",
+    "gemoeten"
+  ],
+  "gloss": "to be necessary, to be required; to have to, must; should, be meant to, be supposed to; ..."
+}

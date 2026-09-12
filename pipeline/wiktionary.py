@@ -47,6 +47,7 @@ class Entry(msgspec.Struct, frozen=True):
     forms: tuple[Form, ...] = ()
     senses: tuple[Sense, ...] = ()
     head_templates: tuple[HeadTemplate, ...] = ()
+    inflection_templates: tuple[HeadTemplate, ...] = ()
     etymology_templates: tuple[EtymologyTemplate, ...] = ()
     categories: tuple[Any, ...] = ()
     sounds: tuple[Any, ...] = ()

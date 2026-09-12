@@ -1,0 +1,170 @@
+{
+  "name": "lämmetä",
+  "nameNoDiacritics": "lammeta",
+  "conjugation": [
+    [
+      "lämpenen",
+      "lämpenet",
+      "lämpenee",
+      "lämpenemme",
+      "lämpenette",
+      "lämpenevät",
+      "lämmetään"
+    ],
+    [
+      "en lämpene",
+      "et lämpene",
+      "ei lämpene",
+      "emme lämpene",
+      "ette lämpene",
+      "eivät lämpene",
+      "ei lämmetä"
+    ],
+    [
+      "lämpenin",
+      "lämpenit",
+      "lämpeni",
+      "lämpenimme",
+      "lämpenitte",
+      "lämpenivät",
+      "lämmettiin"
+    ],
+    [
+      "en lämmennyt",
+      "et lämmennyt",
+      "ei lämmennyt",
+      "emme lämmenneet",
+      "ette lämmenneet",
+      "eivät lämmenneet",
+      "ei lämmetty"
+    ],
+    [
+      "olen lämmennyt",
+      "olet lämmennyt",
+      "on lämmennyt",
+      "olemme lämmenneet",
+      "olette lämmenneet",
+      "ovat lämmenneet",
+      "on lämmetty"
+    ],
+    [
+      "en ole lämmennyt",
+      "et ole lämmennyt",
+      "ei ole lämmennyt",
+      "emme ole lämmenneet",
+      "ette ole lämmenneet",
+      "eivät ole lämmenneet",
+      "ei ole lämmetty"
+    ],
+    [
+      "olin lämmennyt",
+      "olit lämmennyt",
+      "oli lämmennyt",
+      "olimme lämmenneet",
+      "olitte lämmenneet",
+      "olivat lämmenneet",
+      "oli lämmetty"
+    ],
+    [
+      "en ollut lämmennyt",
+      "et ollut lämmennyt",
+      "ei ollut lämmennyt",
+      "emme olleet lämmenneet",
+      "ette olleet lämmenneet",
+      "eivät olleet lämmenneet",
+      "ei ollut lämmetty"
+    ],
+    [
+      "lämpenisin",
+      "lämpenisit",
+      "lämpenisi",
+      "lämpenisimme",
+      "lämpenisitte",
+      "lämpenisivät",
+      "lämmettäisiin"
+    ],
+    [
+      "en lämpenisi",
+      "et lämpenisi",
+      "ei lämpenisi",
+      "emme lämpenisi",
+      "ette lämpenisi",
+      "eivät lämpenisi",
+      "ei lämmettäisi"
+    ],
+    [
+      "olisin lämmennyt",
+      "olisit lämmennyt",
+      "olisi lämmennyt",
+      "olisimme lämmenneet",
+      "olisitte lämmenneet",
+      "olisivat lämmenneet",
+      "olisi lämmetty"
+    ],
+    [
+      "en olisi lämmennyt",
+      "et olisi lämmennyt",
+      "ei olisi lämmennyt",
+      "emme olisi lämmenneet",
+      "ette olisi lämmenneet",
+      "eivät olisi lämmenneet",
+      "ei olisi lämmetty"
+    ],
+    [
+      "lämmennen",
+      "lämmennet",
+      "lämmennee",
+      "lämmennemme",
+      "lämmennette",
+      "lämmennevät",
+      "lämmettäneen"
+    ],
+    [
+      "en lämmenne",
+      "et lämmenne",
+      "ei lämmenne",
+      "emme lämmenne",
+      "ette lämmenne",
+      "eivät lämmenne",
+      "ei lämmettäne"
+    ],
+    [
+      "lienen lämmennyt",
+      "lienet lämmennyt",
+      "lienee lämmennyt",
+      "lienemme lämmenneet",
+      "lienette lämmenneet",
+      "lienevät lämmenneet",
+      "lienee lämmetty"
+    ],
+    [
+      "en liene lämmennyt",
+      "et liene lämmennyt",
+      "ei liene lämmennyt",
+      "emme liene lämmenneet",
+      "ette liene lämmenneet",
+      "eivät liene lämmenneet",
+      "ei liene lämmetty"
+    ],
+    [
+      "lämpene",
+      "lämmetköön",
+      "lämmetkäämme",
+      "lämmetkää",
+      "lämmetkööt",
+      "lämmettäköön"
+    ],
+    [
+      "älä lämpene",
+      "älköön lämmetkö",
+      "älkäämme lämmetkö",
+      "älkää lämmetkö",
+      "älkööt lämmetkö",
+      "älköön lämmettäkö"
+    ],
+    "lämmetä",
+    "lämpenevä",
+    "lämmettävä"
+  ],
+  "gloss": "to warm up; to warm; to get warmer"
+}

@@ -1,0 +1,170 @@
+{
+  "name": "tarvita",
+  "nameNoDiacritics": "tarvita",
+  "conjugation": [
+    [
+      "tarvitsen",
+      "tarvitset",
+      "tarvitsee",
+      "tarvitsemme",
+      "tarvitsette",
+      "tarvitsevat",
+      "tarvitaan"
+    ],
+    [
+      "en tarvitse",
+      "et tarvitse",
+      "ei tarvitse",
+      "emme tarvitse",
+      "ette tarvitse",
+      "eivät tarvitse",
+      "ei tarvita"
+    ],
+    [
+      "tarvitsin",
+      "tarvitsit",
+      "tarvitsi",
+      "tarvitsimme",
+      "tarvitsitte",
+      "tarvitsivat",
+      "tarvittiin"
+    ],
+    [
+      "en tarvinnut",
+      "et tarvinnut",
+      "ei tarvinnut",
+      "emme tarvinneet",
+      "ette tarvinneet",
+      "eivät tarvinneet",
+      "ei tarvittu"
+    ],
+    [
+      "olen tarvinnut",
+      "olet tarvinnut",
+      "on tarvinnut",
+      "olemme tarvinneet",
+      "olette tarvinneet",
+      "ovat tarvinneet",
+      "on tarvittu"
+    ],
+    [
+      "en ole tarvinnut",
+      "et ole tarvinnut",
+      "ei ole tarvinnut",
+      "emme ole tarvinneet",
+      "ette ole tarvinneet",
+      "eivät ole tarvinneet",
+      "ei ole tarvittu"
+    ],
+    [
+      "olin tarvinnut",
+      "olit tarvinnut",
+      "oli tarvinnut",
+      "olimme tarvinneet",
+      "olitte tarvinneet",
+      "olivat tarvinneet",
+      "oli tarvittu"
+    ],
+    [
+      "en ollut tarvinnut",
+      "et ollut tarvinnut",
+      "ei ollut tarvinnut",
+      "emme olleet tarvinneet",
+      "ette olleet tarvinneet",
+      "eivät olleet tarvinneet",
+      "ei ollut tarvittu"
+    ],
+    [
+      "tarvitsisin",
+      "tarvitsisit",
+      "tarvitsisi",
+      "tarvitsisimme",
+      "tarvitsisitte",
+      "tarvitsisivat",
+      "tarvittaisiin"
+    ],
+    [
+      "en tarvitsisi",
+      "et tarvitsisi",
+      "ei tarvitsisi",
+      "emme tarvitsisi",
+      "ette tarvitsisi",
+      "eivät tarvitsisi",
+      "ei tarvittaisi"
+    ],
+    [
+      "olisin tarvinnut",
+      "olisit tarvinnut",
+      "olisi tarvinnut",
+      "olisimme tarvinneet",
+      "olisitte tarvinneet",
+      "olisivat tarvinneet",
+      "olisi tarvittu"
+    ],
+    [
+      "en olisi tarvinnut",
+      "et olisi tarvinnut",
+      "ei olisi tarvinnut",
+      "emme olisi tarvinneet",
+      "ette olisi tarvinneet",
+      "eivät olisi tarvinneet",
+      "ei olisi tarvittu"
+    ],
+    [
+      "tarvinnen",
+      "tarvinnet",
+      "tarvinnee",
+      "tarvinnemme",
+      "tarvinnette",
+      "tarvinnevat",
+      "tarvittaneen"
+    ],
+    [
+      "en tarvinne",
+      "et tarvinne",
+      "ei tarvinne",
+      "emme tarvinne",
+      "ette tarvinne",
+      "eivät tarvinne",
+      "ei tarvittane"
+    ],
+    [
+      "lienen tarvinnut",
+      "lienet tarvinnut",
+      "lienee tarvinnut",
+      "lienemme tarvinneet",
+      "lienette tarvinneet",
+      "lienevät tarvinneet",
+      "lienee tarvittu"
+    ],
+    [
+      "en liene tarvinnut",
+      "et liene tarvinnut",
+      "ei liene tarvinnut",
+      "emme liene tarvinneet",
+      "ette liene tarvinneet",
+      "eivät liene tarvinneet",
+      "ei liene tarvittu"
+    ],
+    [
+      "tarvitse",
+      "tarvitkoon",
+      "tarvitkaamme",
+      "tarvitkaa",
+      "tarvitkoot",
+      "tarvittakoon"
+    ],
+    [
+      "älä tarvitse",
+      "älköön tarvitko",
+      "älkäämme tarvitko",
+      "älkää tarvitko",
+      "älkööt tarvitko",
+      "älköön tarvittako"
+    ],
+    "tarvita",
+    "tarvitseva",
+    "tarvittava"
+  ],
+  "gloss": "to need, require; to come in handy; to need to, have to"
+}

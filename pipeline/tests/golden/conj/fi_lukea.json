@@ -1,0 +1,170 @@
+{
+  "name": "lukea",
+  "nameNoDiacritics": "lukea",
+  "conjugation": [
+    [
+      "luen",
+      "luet",
+      "lukee",
+      "luemme",
+      "luette",
+      "lukevat",
+      "luetaan"
+    ],
+    [
+      "en lue",
+      "et lue",
+      "ei lue",
+      "emme lue",
+      "ette lue",
+      "eivät lue",
+      "ei lueta"
+    ],
+    [
+      "luin",
+      "luit",
+      "luki",
+      "luimme",
+      "luitte",
+      "lukivat",
+      "luettiin"
+    ],
+    [
+      "en lukenut",
+      "et lukenut",
+      "ei lukenut",
+      "emme lukeneet",
+      "ette lukeneet",
+      "eivät lukeneet",
+      "ei luettu"
+    ],
+    [
+      "olen lukenut",
+      "olet lukenut",
+      "on lukenut",
+      "olemme lukeneet",
+      "olette lukeneet",
+      "ovat lukeneet",
+      "on luettu"
+    ],
+    [
+      "en ole lukenut",
+      "et ole lukenut",
+      "ei ole lukenut",
+      "emme ole lukeneet",
+      "ette ole lukeneet",
+      "eivät ole lukeneet",
+      "ei ole luettu"
+    ],
+    [
+      "olin lukenut",
+      "olit lukenut",
+      "oli lukenut",
+      "olimme lukeneet",
+      "olitte lukeneet",
+      "olivat lukeneet",
+      "oli luettu"
+    ],
+    [
+      "en ollut lukenut",
+      "et ollut lukenut",
+      "ei ollut lukenut",
+      "emme olleet lukeneet",
+      "ette olleet lukeneet",
+      "eivät olleet lukeneet",
+      "ei ollut luettu"
+    ],
+    [
+      "lukisin",
+      "lukisit",
+      "lukisi",
+      "lukisimme",
+      "lukisitte",
+      "lukisivat",
+      "luettaisiin"
+    ],
+    [
+      "en lukisi",
+      "et lukisi",
+      "ei lukisi",
+      "emme lukisi",
+      "ette lukisi",
+      "eivät lukisi",
+      "ei luettaisi"
+    ],
+    [
+      "olisin lukenut",
+      "olisit lukenut",
+      "olisi lukenut",
+      "olisimme lukeneet",
+      "olisitte lukeneet",
+      "olisivat lukeneet",
+      "olisi luettu"
+    ],
+    [
+      "en olisi lukenut",
+      "et olisi lukenut",
+      "ei olisi lukenut",
+      "emme olisi lukeneet",
+      "ette olisi lukeneet",
+      "eivät olisi lukeneet",
+      "ei olisi luettu"
+    ],
+    [
+      "lukenen",
+      "lukenet",
+      "lukenee",
+      "lukenemme",
+      "lukenette",
+      "lukenevat",
+      "luettaneen"
+    ],
+    [
+      "en lukene",
+      "et lukene",
+      "ei lukene",
+      "emme lukene",
+      "ette lukene",
+      "eivät lukene",
+      "ei luettane"
+    ],
+    [
+      "lienen lukenut",
+      "lienet lukenut",
+      "lienee lukenut",
+      "lienemme lukeneet",
+      "lienette lukeneet",
+      "lienevät lukeneet",
+      "lienee luettu"
+    ],
+    [
+      "en liene lukenut",
+      "et liene lukenut",
+      "ei liene lukenut",
+      "emme liene lukeneet",
+      "ette liene lukeneet",
+      "eivät liene lukeneet",
+      "ei liene luettu"
+    ],
+    [
+      "lue",
+      "lukekoon",
+      "lukekaamme",
+      "lukekaa",
+      "lukekoot",
+      "luettakoon"
+    ],
+    [
+      "älä lue",
+      "älköön lukeko",
+      "älkäämme lukeko",
+      "älkää lukeko",
+      "älkööt lukeko",
+      "älköön luettako"
+    ],
+    "lukea",
+    "lukeva",
+    "luettava"
+  ],
+  "gloss": "to read; to read, say; to study, read; ..."
+}

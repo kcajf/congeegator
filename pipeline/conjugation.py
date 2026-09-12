@@ -1,9 +1,8 @@
 import logging
 import re
 import typing
-from typing import Any, Callable
+from typing import Any
 
-import msgspec
 
 from .gloss import extract_gloss
 from .utils import _cat_names, strip_diacritics, to_phonetic_el
@@ -24,113 +23,10 @@ IPA_DIACRITICS = "".join(chr(c) for c in range(0x0300, 0x0370))
 IPA_ALL = IPA_EXTENSIONS + IPA_SPACING_MODIFIERS + IPA_DIACRITICS
 
 
-PERSONS = ("first-person", "second-person", "third-person")
-NUMBERS = ("singular", "plural")
-PERSONS_NUMBERS = tuple((person, number) for number in NUMBERS for person in PERSONS)
-
-LANG_PRONOUNS = {
-    "fr": ("je", "tu", "il/elle", "nous", "vous", "ils/elles"),
-    "el": ("εγώ", "εσύ", "αυτ(ος/ή/ό)", "εμείς", "εσείς", "αυτ(οί/ές/ά)"),
-    "de": ("ich", "du", "er/sie/es", "wir", "ihr", "sie/Sie"),
-    "es": ("yo", "tú", "él/ella/usted", "nosotros/-as", "vosotros/-as", "ellos/-as/ustedes"),
-    "it": ("io", "tu", "lui/lei", "noi", "voi", "loro"),
-    "en": ("I", "you", "he/she/it", "we", "you", "they"),
-}
-
-FR_SUBJ_PRONOUNS = ("que je", "que tu", "qu'il/elle", "que nous", "que vous", "qu'ils/elles")
-
-
-class FormMatcher(msgspec.Struct, frozen=True):
-    tags: tuple[str, ...]
-    formatter: str = "{}"
-    pronoun: str | None = None
-    exclude_tags: tuple[str, ...] = ()
-    max_forms: int | None = None
-
-    def matches(self, form: Form) -> bool:
-        for t in self.tags:
-            if t not in form.tags:
-                return False
-        for t in self.exclude_tags:
-            if t in form.tags:
-                return False
-        return True
-
-    def format(self, form: Form) -> str:
-        return self.formatter.format(form.form)
-
-
-class TenseConfig(msgspec.Struct, frozen=True):
-    name: str
-    form_matchers: FormMatcher | tuple[FormMatcher, ...]
-
-
-class TenseGroup(msgspec.Struct, frozen=True):
-    name: str
-    pattern: re.Pattern
-
-
-class LanguageConfig(msgspec.Struct, frozen=True):
-    code: str
-    name: str
-    english_wiktionary_name: str
-    tenses: tuple[TenseConfig, ...]
-    tense_groups: list[TenseGroup]
-    phonetic_fn: Callable[[str], str] | None = None
-    max_conj_tables: int | None = None
-    rare_tags: tuple[str, ...] = ()
-    exclude_tags: tuple[str, ...] = ()
-
-
-def full_tense(
-    lang: str,
-    name: str,
-    tags: tuple[str, ...],
-    auxiliaries: tuple[str, ...] | None = None,
-    exclude_tags: tuple[str, ...] = (),
-    pronouns: tuple[str, ...] | None = None,
-):
-    lang_pronouns = pronouns if pronouns is not None else LANG_PRONOUNS[lang]
-    if auxiliaries is not None:
-        assert len(auxiliaries) == len(PERSONS_NUMBERS)
-        matchers = tuple(
-            FormMatcher(
-                (*PERSONS_NUMBERS[i], *tags),
-                pronoun=lang_pronouns[i],
-                formatter=auxiliaries[i] + "{}",
-                exclude_tags=exclude_tags,
-            )
-            for i in range(len(PERSONS_NUMBERS))
-        )
-    else:
-        matchers = tuple(
-            FormMatcher(
-                (*PERSONS_NUMBERS[i], *tags),
-                pronoun=lang_pronouns[i],
-                exclude_tags=exclude_tags,
-            )
-            for i in range(len(PERSONS_NUMBERS))
-        )
-
-    return TenseConfig(name, matchers)
-
-
-def repeated_tense(
-    lang: str, name: str, tags: tuple[str, ...], auxiliaries: tuple[str, ...],
-    exclude_tags: tuple[str, ...] = (),
-):
-    assert len(auxiliaries) == len(PERSONS_NUMBERS)
-    matchers = tuple(
-        FormMatcher(
-            tags,
-            pronoun=LANG_PRONOUNS[lang][i],
-            formatter=auxiliaries[i] + " {}",
-            exclude_tags=exclude_tags,
-        )
-        for i in range(len(PERSONS_NUMBERS))
-    )
-
-    return TenseConfig(name, matchers)
+from .conjugation_types import (
+    PERSONS, NUMBERS, PERSONS_NUMBERS, LANG_PRONOUNS, FR_SUBJ_PRONOUNS,
+    FormMatcher, TenseConfig, TenseGroup, LanguageConfig, full_tense, repeated_tense,
+)
 
 
 EL_THA = ("θα ", "θα ", "θα ", "θα ", "θα ", "θα ")
@@ -484,6 +380,10 @@ EN_CONFIG = LanguageConfig(
     ],
 )
 
+from .conjugation_romance import PT_CONFIG, CA_CONFIG
+from .conjugation_germanic import NL_CONFIG, SV_CONFIG
+from .conjugation_extended import LA_CONFIG, FI_CONFIG
+
 CONFIG: list[LanguageConfig] = [
     FR_CONFIG,
     EL_CONFIG,
@@ -491,6 +391,12 @@ CONFIG: list[LanguageConfig] = [
     ES_CONFIG,
     IT_CONFIG,
     EN_CONFIG,
+    PT_CONFIG,
+    CA_CONFIG,
+    NL_CONFIG,
+    SV_CONFIG,
+    LA_CONFIG,
+    FI_CONFIG,
 ]
 
 def structure_map(f, s):
@@ -592,6 +498,22 @@ def preprocess_el_forms(forms: list[Form]) -> list[Form]:
         # Normalize non-breaking hyphens and strip superscript digits
         text = text.replace("\u2011", "-")
         text = text.translate(_SUPERSCRIPT_DIGITS)
+
+        # The rendered αρνούμαι-class table has a duplicated opening bracket
+        # in this exact 2pl imperfect cell. Expand its two explicit suffix
+        # abbreviations, preserving the source's rare/optional usage markers.
+        malformed = re.fullmatch(
+            r"\[(?P<stem>[α-ωάέήίόύώϊϋΐΰ]+)ούσασταν, \[-ούσαστε\] - "
+            r"(?P=stem)ιόσασταν, \(-ιόσαστε\)", text
+        )
+        if malformed and {"imperfect", "plural", "second-person"} <= form.tags:
+            stem = malformed.group("stem")
+            for expanded in (
+                f"[{stem}ούσασταν]", f"[{stem}ούσαστε]",
+                f"{stem}ιόσασταν", f"({stem}ιόσαστε)",
+            ):
+                result.append(Form(form=expanded, tags=form.tags, source=form.source))
+            continue
 
         # Strip trailing parenthesized annotations (cross-refs, variant notes)
         text = re.sub(r'\s*\([^)]*\)\s*$', '', text).strip()
@@ -715,7 +637,7 @@ def clean_up_matched_forms(
 
 
 def filter_forms_by_table(
-    all_forms: list[Form], max_tables: int
+    all_forms: list[Form], max_tables: int, form_filter=None
 ) -> list[Form]:
     """Filter forms to only include those from the first `max_tables` conjugation tables.
 
@@ -730,7 +652,7 @@ def filter_forms_by_table(
             continue
         if table_num > max_tables:
             continue
-        if form_is_clean_conjugation(form):
+        if (form_filter or form_is_clean_conjugation)(form):
             result.append(form)
     return result
 
@@ -781,6 +703,10 @@ def form_is_clean_conjugation(form: Form) -> bool:
     if form.source != "conjugation":
         return False
     if form.form is None:
+        return False
+    # IPA can contain only ordinary Latin letters (asseoir: /a.swa.je/),
+    # so testing for IPA-specific characters alone does not exclude it.
+    if len(form.form) > 2 and form.form.startswith("/") and form.form.endswith("/"):
         return False
     if form.form in {
         "-",
@@ -898,6 +824,19 @@ def entry_is_clean_verb_root(entry: Entry) -> bool:
         f"{entry.lang} terms in nonstandard scripts",
     }
 
+    # Homographs can inherit the page's verb-form category despite a lexical
+    # verb head (Latin licet/odi/fio; Finnish haluta). Sense-level form-of records
+    # have already been excluded above; the head is positive lemma evidence.
+    lexical_head = any(h.name == f"{entry.lang_code}-verb" for h in entry.head_templates)
+    if entry.lang_code == "sv":
+        lexical_head = lexical_head or any(
+            h.name in {"sv-verb-reg", "sv-verb-irreg"}
+            or (h.name == "head" and h.args.get("1") == "sv" and h.args.get("2") in {"verb", "verbs"})
+            for h in entry.head_templates
+        )
+    if entry.lang_code in {"la", "fi", "sv"} and lexical_head:
+        BAD_CATEGORIES.discard(f"{entry.lang} verb forms")
+
     for c in _cat_names(entry.categories):
         if c in BAD_CATEGORIES:
             return False
@@ -929,22 +868,26 @@ def process_entry(config: LanguageConfig, entry: Entry) -> dict[str, Any] | None
     if not entry_is_clean_verb_root(entry):
         return None
 
-    if not any(x.source == "conjugation" for x in entry.forms):
+    forms_to_filter = config.preprocess_forms(entry) if config.preprocess_forms else entry.forms
+    if not any(x.source == "conjugation" for x in forms_to_filter):
         return None
 
+    form_filter = config.form_filter or form_is_clean_conjugation
     if config.max_conj_tables is not None:
-        filtered_forms = filter_forms_by_table(entry.forms, config.max_conj_tables)
+        filtered_forms = filter_forms_by_table(forms_to_filter, config.max_conj_tables, form_filter)
     else:
-        forms_to_filter = entry.forms
         if config.code == "el":
             # Preprocess Greek forms before filtering so that annotation
             # stripping runs before the space filter in form_is_clean_conjugation.
             forms_to_filter = preprocess_el_forms(forms_to_filter)
-        filtered_forms = [f for f in forms_to_filter if form_is_clean_conjugation(f)]
+        filtered_forms = [f for f in forms_to_filter if form_filter(f)]
     try:
         conj = extract_conjugations_from_forms(config, filtered_forms, entry)
     except Exception as e:
         log.error(f"Failed to process {entry.lang_code} {entry.word}", exc_info=e)
+        return None
+
+    if not count_conjs(conj):
         return None
 
     processed: dict[str, Any] = dict(

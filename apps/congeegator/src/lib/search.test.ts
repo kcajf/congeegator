@@ -4,6 +4,7 @@ import {
 	findMatches,
 	includesWholeWord,
 	prefixLookup,
+	rankSearchResults,
 	stripDiacritics,
 	toPhoneticEl
 } from './search';
@@ -451,5 +452,60 @@ describe('findGlossMatch', () => {
 	it('matches prefix of word in multi-sense gloss', () => {
 		const verb = makeVerb({ name: 'avoir', gloss: 'to have; to possess; ...' });
 		expect(findGlossMatch(verb, 'poss')).not.toBeNull();
+	});
+});
+
+describe('added-language compound and regional forms', () => {
+	it.each([
+		['nl', 'opbellen', 'belde op', 'belde'],
+		['la', 'amo', 'amātus sum', 'amatus'],
+		['fi', 'muistaa', 'en muista', 'en muista'],
+		['pt', 'falar', 'falámos (Portugal)/falamos (Brazil)', 'falámos']
+	])('finds %s conjugations without discarding the lexical word', (lang, name, form, query) => {
+		const result = findMatches(makeVerb({ name, lang, conjugation: [form] }), query, query, lang);
+		expect(result.some((r) => r.root === name)).toBe(true);
+		expect(
+			result.every((r) => !r.matched.includes('Portugal') && !r.matched.includes('Brazil'))
+		).toBe(true);
+	});
+});
+
+describe('expanded language candidate and result ranking', () => {
+	it('reaches lexical tokens beyond a capped auxiliary phrase prefix', () => {
+		const crowded = Array.from({ length: 200 }, (_, i) => i);
+		const index: SearchIndex = new Map([
+			['hade s', crowded],
+			['hade', crowded],
+			['skrivi', [900]]
+		]);
+		expect(prefixLookup(index, 'hade skrivit', 'sv')[0]).toBe(900);
+		expect(prefixLookup(index, 'hade skrivit', 'sv')).toHaveLength(200);
+		expect(prefixLookup(index, 'hade skrivit', 'fr')).toEqual(crowded);
+	});
+	it('supports either lexical position in Dutch and Catalan compounds', () => {
+		const index: SearchIndex = new Map([
+			['belde', [1]],
+			['op', [2, 3]],
+			['vares', [4, 5]],
+			['cantar', [6]]
+		]);
+		expect(prefixLookup(index, 'belde op', 'nl')[0]).toBe(1);
+		expect(prefixLookup(index, 'vares cantar', 'ca')[0]).toBe(6);
+	});
+	it('puts an exact native surface before frequent substring matches', () => {
+		const results = [
+			{ root: 'começar', matched: 'começar', quality: 0, freq: 6 },
+			{ root: 'comer', matched: 'come', quality: 0, freq: 4 }
+		];
+		expect(rankSearchResults([...results], 'come', 'pt')[0].root).toBe('comer');
+		expect(rankSearchResults([...results], 'come', 'fr')[0].root).toBe('começar');
+	});
+	it('prefers an exact accented surface over stripped or substring matches', () => {
+		const results = [
+			{ root: 'estar', matched: 'está', quality: 0, freq: 7 },
+			{ root: 'ser', matched: 'é', quality: 0, freq: 6 },
+			{ root: 'test', matched: 'e', quality: 1, freq: 8 }
+		];
+		expect(rankSearchResults(results, 'é', 'pt')[0].root).toBe('ser');
 	});
 });

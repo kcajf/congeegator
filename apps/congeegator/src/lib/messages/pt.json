@@ -1,0 +1,21 @@
+{
+	"pt_indic": "Indicativo",
+	"pt_subj": "Conjuntivo / Subjuntivo",
+	"pt_cond": "Condicional",
+	"pt_imper": "Imperativo afirmativo",
+	"pt_inf": "Infinitivo pessoal",
+	"pt_impers": "Formas nominais",
+	"pt_impers_inf": "Infinitivo impessoal",
+	"pt_impers_gerund": "Gerúndio",
+	"pt_impers_partic": "Particípio (masculino singular)",
+	"pt_inf_personal": "Infinitivo pessoal",
+	"pt_indic_pres": "Presente",
+	"pt_indic_pret": "Pretérito perfeito simples",
+	"pt_indic_imperf": "Pretérito imperfeito",
+	"pt_indic_pluperf": "Pretérito mais-que-perfeito simples",
+	"pt_indic_fut": "Futuro",
+	"pt_cond_pres": "Condicional / Futuro do pretérito",
+	"pt_subj_pres": "Presente",
+	"pt_subj_imperf": "Pretérito imperfeito",
+	"pt_subj_fut": "Futuro"
+}

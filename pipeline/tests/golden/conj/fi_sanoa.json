@@ -1,0 +1,170 @@
+{
+  "name": "sanoa",
+  "nameNoDiacritics": "sanoa",
+  "conjugation": [
+    [
+      "sanon",
+      "sanot",
+      "sanoo",
+      "sanomme",
+      "sanotte",
+      "sanovat",
+      "sanotaan"
+    ],
+    [
+      "en sano",
+      "et sano",
+      "ei sano",
+      "emme sano",
+      "ette sano",
+      "eivät sano",
+      "ei sanota"
+    ],
+    [
+      "sanoin",
+      "sanoit",
+      "sanoi",
+      "sanoimme",
+      "sanoitte",
+      "sanoivat",
+      "sanottiin"
+    ],
+    [
+      "en sanonut",
+      "et sanonut",
+      "ei sanonut",
+      "emme sanoneet",
+      "ette sanoneet",
+      "eivät sanoneet",
+      "ei sanottu"
+    ],
+    [
+      "olen sanonut",
+      "olet sanonut",
+      "on sanonut",
+      "olemme sanoneet",
+      "olette sanoneet",
+      "ovat sanoneet",
+      "on sanottu"
+    ],
+    [
+      "en ole sanonut",
+      "et ole sanonut",
+      "ei ole sanonut",
+      "emme ole sanoneet",
+      "ette ole sanoneet",
+      "eivät ole sanoneet",
+      "ei ole sanottu"
+    ],
+    [
+      "olin sanonut",
+      "olit sanonut",
+      "oli sanonut",
+      "olimme sanoneet",
+      "olitte sanoneet",
+      "olivat sanoneet",
+      "oli sanottu"
+    ],
+    [
+      "en ollut sanonut",
+      "et ollut sanonut",
+      "ei ollut sanonut",
+      "emme olleet sanoneet",
+      "ette olleet sanoneet",
+      "eivät olleet sanoneet",
+      "ei ollut sanottu"
+    ],
+    [
+      "sanoisin",
+      "sanoisit",
+      "sanoisi",
+      "sanoisimme",
+      "sanoisitte",
+      "sanoisivat",
+      "sanottaisiin"
+    ],
+    [
+      "en sanoisi",
+      "et sanoisi",
+      "ei sanoisi",
+      "emme sanoisi",
+      "ette sanoisi",
+      "eivät sanoisi",
+      "ei sanottaisi"
+    ],
+    [
+      "olisin sanonut",
+      "olisit sanonut",
+      "olisi sanonut",
+      "olisimme sanoneet",
+      "olisitte sanoneet",
+      "olisivat sanoneet",
+      "olisi sanottu"
+    ],
+    [
+      "en olisi sanonut",
+      "et olisi sanonut",
+      "ei olisi sanonut",
+      "emme olisi sanoneet",
+      "ette olisi sanoneet",
+      "eivät olisi sanoneet",
+      "ei olisi sanottu"
+    ],
+    [
+      "sanonen",
+      "sanonet",
+      "sanonee",
+      "sanonemme",
+      "sanonette",
+      "sanonevat",
+      "sanottaneen"
+    ],
+    [
+      "en sanone",
+      "et sanone",
+      "ei sanone",
+      "emme sanone",
+      "ette sanone",
+      "eivät sanone",
+      "ei sanottane"
+    ],
+    [
+      "lienen sanonut",
+      "lienet sanonut",
+      "lienee sanonut",
+      "lienemme sanoneet",
+      "lienette sanoneet",
+      "lienevät sanoneet",
+      "lienee sanottu"
+    ],
+    [
+      "en liene sanonut",
+      "et liene sanonut",
+      "ei liene sanonut",
+      "emme liene sanoneet",
+      "ette liene sanoneet",
+      "eivät liene sanoneet",
+      "ei liene sanottu"
+    ],
+    [
+      "sano",
+      "sanokoon",
+      "sanokaamme",
+      "sanokaa",
+      "sanokoot",
+      "sanottakoon"
+    ],
+    [
+      "älä sano",
+      "älköön sanoko",
+      "älkäämme sanoko",
+      "älkää sanoko",
+      "älkööt sanoko",
+      "älköön sanottako"
+    ],
+    "sanoa",
+    "sanova",
+    "sanottava"
+  ],
+  "gloss": "to say, tell; to call, name, dub; go by"
+}

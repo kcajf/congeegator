@@ -1,0 +1,207 @@
+{
+  "name": "patior",
+  "nameNoDiacritics": "patior",
+  "conjugation": [
+    [
+      "patior",
+      "pateris/patere",
+      "patitur",
+      "patimur",
+      "patiminī",
+      "patiuntur"
+    ],
+    [
+      "patiēbar",
+      "patiēbāris/patiēbāre",
+      "patiēbātur",
+      "patiēbāmur",
+      "patiēbāminī",
+      "patiēbantur"
+    ],
+    [
+      "patiar",
+      "patiēris/patiēre",
+      "patiētur",
+      "patiēmur",
+      "patiēminī",
+      "patientur"
+    ],
+    [
+      "passus sum (masculine)/passa sum (feminine)/passum sum (neuter)",
+      "passus es (masculine)/passa es (feminine)/passum es (neuter)",
+      "passus est (masculine)/passa est (feminine)/passum est (neuter)",
+      "passī sumus (masculine)/passae sumus (feminine)/passa sumus (neuter)",
+      "passī estis (masculine)/passae estis (feminine)/passa estis (neuter)",
+      "passī sunt (masculine)/passae sunt (feminine)/passa sunt (neuter)"
+    ],
+    [
+      "passus eram (masculine)/passa eram (feminine)/passum eram (neuter)",
+      "passus erās (masculine)/passa erās (feminine)/passum erās (neuter)",
+      "passus erat (masculine)/passa erat (feminine)/passum erat (neuter)",
+      "passī erāmus (masculine)/passae erāmus (feminine)/passa erāmus (neuter)",
+      "passī erātis (masculine)/passae erātis (feminine)/passa erātis (neuter)",
+      "passī erant (masculine)/passae erant (feminine)/passa erant (neuter)"
+    ],
+    [
+      "passus erō (masculine)/passa erō (feminine)/passum erō (neuter)",
+      "passus eris (masculine)/passa eris (feminine)/passum eris (neuter)",
+      "passus erit (masculine)/passa erit (feminine)/passum erit (neuter)",
+      "passī erimus (masculine)/passae erimus (feminine)/passa erimus (neuter)",
+      "passī eritis (masculine)/passae eritis (feminine)/passa eritis (neuter)",
+      "passī erunt (masculine)/passae erunt (feminine)/passa erunt (neuter)"
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "patiar",
+      "patiāris/patiāre",
+      "patiātur",
+      "patiāmur",
+      "patiāminī",
+      "patiantur"
+    ],
+    [
+      "paterer",
+      "paterēris/paterēre",
+      "paterētur",
+      "paterēmur",
+      "paterēminī",
+      "paterentur"
+    ],
+    [
+      "passus sim (masculine)/passa sim (feminine)/passum sim (neuter)",
+      "passus sīs (masculine)/passa sīs (feminine)/passum sīs (neuter)",
+      "passus sit (masculine)/passa sit (feminine)/passum sit (neuter)",
+      "passī sīmus (masculine)/passae sīmus (feminine)/passa sīmus (neuter)",
+      "passī sītis (masculine)/passae sītis (feminine)/passa sītis (neuter)",
+      "passī sint (masculine)/passae sint (feminine)/passa sint (neuter)"
+    ],
+    [
+      "passus essem (masculine)/passa essem (feminine)/passum essem (neuter)",
+      "passus essēs (masculine)/passa essēs (feminine)/passum essēs (neuter)",
+      "passus esset (masculine)/passa esset (feminine)/passum esset (neuter)",
+      "passī essēmus (masculine)/passae essēmus (feminine)/passa essēmus (neuter)",
+      "passī essētis (masculine)/passae essētis (feminine)/passa essētis (neuter)",
+      "passī essent (masculine)/passae essent (feminine)/passa essent (neuter)"
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "patere",
+      "patiminī"
+    ],
+    [
+      "patitor",
+      "patitor",
+      "",
+      "patiuntor"
+    ],
+    [
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      ""
+    ],
+    "patī",
+    "passum esse",
+    "passūrum esse",
+    "",
+    "",
+    "",
+    "patiēns",
+    "passus",
+    "",
+    "passūrus",
+    "patiendus/patiundus",
+    [
+      "patiendī",
+      "patiendō",
+      "patiendum",
+      "patiendō"
+    ],
+    [
+      "passum",
+      "passū"
+    ]
+  ],
+  "gloss": "to suffer, endure, tolerate; to allow, acquiesce, permit, submit; to exist, live"
+}

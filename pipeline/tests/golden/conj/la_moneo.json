@@ -1,0 +1,207 @@
+{
+  "name": "moneo",
+  "nameNoDiacritics": "moneo",
+  "conjugation": [
+    [
+      "moneō",
+      "monēs",
+      "monet",
+      "monēmus",
+      "monētis",
+      "monent"
+    ],
+    [
+      "monēbam",
+      "monēbās",
+      "monēbat",
+      "monēbāmus",
+      "monēbātis",
+      "monēbant"
+    ],
+    [
+      "monēbō",
+      "monēbis",
+      "monēbit",
+      "monēbimus",
+      "monēbitis",
+      "monēbunt"
+    ],
+    [
+      "monuī",
+      "monuistī",
+      "monuit",
+      "monuimus",
+      "monuistis",
+      "monuērunt/monuēre"
+    ],
+    [
+      "monueram",
+      "monuerās",
+      "monuerat",
+      "monuerāmus",
+      "monuerātis",
+      "monuerant"
+    ],
+    [
+      "monuerō",
+      "monueris",
+      "monuerit",
+      "monuerimus",
+      "monueritis",
+      "monuerint"
+    ],
+    [
+      "moneor",
+      "monēris/monēre",
+      "monētur",
+      "monēmur",
+      "monēminī",
+      "monentur"
+    ],
+    [
+      "monēbar",
+      "monēbāris/monēbāre",
+      "monēbātur",
+      "monēbāmur",
+      "monēbāminī",
+      "monēbantur"
+    ],
+    [
+      "monēbor",
+      "monēberis/monēbere",
+      "monēbitur",
+      "monēbimur",
+      "monēbiminī",
+      "monēbuntur"
+    ],
+    [
+      "monitus sum (masculine)/monita sum (feminine)/monitum sum (neuter)",
+      "monitus es (masculine)/monita es (feminine)/monitum es (neuter)",
+      "monitus est (masculine)/monita est (feminine)/monitum est (neuter)",
+      "monitī sumus (masculine)/monitae sumus (feminine)/monita sumus (neuter)",
+      "monitī estis (masculine)/monitae estis (feminine)/monita estis (neuter)",
+      "monitī sunt (masculine)/monitae sunt (feminine)/monita sunt (neuter)"
+    ],
+    [
+      "monitus eram (masculine)/monita eram (feminine)/monitum eram (neuter)",
+      "monitus erās (masculine)/monita erās (feminine)/monitum erās (neuter)",
+      "monitus erat (masculine)/monita erat (feminine)/monitum erat (neuter)",
+      "monitī erāmus (masculine)/monitae erāmus (feminine)/monita erāmus (neuter)",
+      "monitī erātis (masculine)/monitae erātis (feminine)/monita erātis (neuter)",
+      "monitī erant (masculine)/monitae erant (feminine)/monita erant (neuter)"
+    ],
+    [
+      "monitus erō (masculine)/monita erō (feminine)/monitum erō (neuter)",
+      "monitus eris (masculine)/monita eris (feminine)/monitum eris (neuter)",
+      "monitus erit (masculine)/monita erit (feminine)/monitum erit (neuter)",
+      "monitī erimus (masculine)/monitae erimus (feminine)/monita erimus (neuter)",
+      "monitī eritis (masculine)/monitae eritis (feminine)/monita eritis (neuter)",
+      "monitī erunt (masculine)/monitae erunt (feminine)/monita erunt (neuter)"
+    ],
+    [
+      "moneam",
+      "moneās",
+      "moneat",
+      "moneāmus",
+      "moneātis",
+      "moneant"
+    ],
+    [
+      "monērem",
+      "monērēs",
+      "monēret",
+      "monērēmus",
+      "monērētis",
+      "monērent"
+    ],
+    [
+      "monuerim",
+      "monuerīs",
+      "monuerit",
+      "monuerīmus",
+      "monuerītis",
+      "monuerint"
+    ],
+    [
+      "monuissem",
+      "monuissēs",
+      "monuisset",
+      "monuissēmus",
+      "monuissētis",
+      "monuissent"
+    ],
+    [
+      "monear",
+      "moneāris/moneāre",
+      "moneātur",
+      "moneāmur",
+      "moneāminī",
+      "moneantur"
+    ],
+    [
+      "monērer",
+      "monērēris/monērēre",
+      "monērētur",
+      "monērēmur",
+      "monērēminī",
+      "monērentur"
+    ],
+    [
+      "monitus sim (masculine)/monita sim (feminine)/monitum sim (neuter)",
+      "monitus sīs (masculine)/monita sīs (feminine)/monitum sīs (neuter)",
+      "monitus sit (masculine)/monita sit (feminine)/monitum sit (neuter)",
+      "monitī sīmus (masculine)/monitae sīmus (feminine)/monita sīmus (neuter)",
+      "monitī sītis (masculine)/monitae sītis (feminine)/monita sītis (neuter)",
+      "monitī sint (masculine)/monitae sint (feminine)/monita sint (neuter)"
+    ],
+    [
+      "monitus essem (masculine)/monita essem (feminine)/monitum essem (neuter)",
+      "monitus essēs (masculine)/monita essēs (feminine)/monitum essēs (neuter)",
+      "monitus esset (masculine)/monita esset (feminine)/monitum esset (neuter)",
+      "monitī essēmus (masculine)/monitae essēmus (feminine)/monita essēmus (neuter)",
+      "monitī essētis (masculine)/monitae essētis (feminine)/monita essētis (neuter)",
+      "monitī essent (masculine)/monitae essent (feminine)/monita essent (neuter)"
+    ],
+    [
+      "monē",
+      "monēte"
+    ],
+    [
+      "monētō",
+      "monētō",
+      "monētōte",
+      "monentō"
+    ],
+    [
+      "monēre",
+      "monēminī"
+    ],
+    [
+      "monētor",
+      "monētor",
+      "monentor"
+    ],
+    "monēre",
+    "monuisse",
+    "monitūrum esse",
+    "monērī/monērier",
+    "monitum esse",
+    "monitum īrī",
+    "monēns",
+    "",
+    "monitus",
+    "monitūrus",
+    "monendus",
+    [
+      "monendī",
+      "monendō",
+      "monendum",
+      "monendō"
+    ],
+    [
+      "monitum",
+      "monitū"
+    ]
+  ],
+  "gloss": "to warn, to advise; to remind; to exhort, advise, recommend; ..."
+}

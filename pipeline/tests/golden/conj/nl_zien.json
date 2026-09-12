@@ -1,0 +1,25 @@
+{
+  "name": "zien",
+  "nameNoDiacritics": "zien",
+  "conjugation": [
+    [
+      "zie",
+      "ziet/zie",
+      "ziet",
+      "ziet",
+      "zien"
+    ],
+    [
+      "zag",
+      "zag",
+      "zag",
+      "zag",
+      "zagen"
+    ],
+    "zie",
+    "zien",
+    "ziend",
+    "gezien"
+  ],
+  "gloss": "to see"
+}

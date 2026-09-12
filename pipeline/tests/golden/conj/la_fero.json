@@ -1,0 +1,207 @@
+{
+  "name": "fero",
+  "nameNoDiacritics": "fero",
+  "conjugation": [
+    [
+      "ferō",
+      "fers",
+      "fert",
+      "ferimus",
+      "fertis",
+      "ferunt"
+    ],
+    [
+      "ferēbam",
+      "ferēbās",
+      "ferēbat",
+      "ferēbāmus",
+      "ferēbātis",
+      "ferēbant"
+    ],
+    [
+      "feram",
+      "ferēs",
+      "feret",
+      "ferēmus",
+      "ferētis",
+      "ferent"
+    ],
+    [
+      "tulī/tetulī",
+      "tulistī/tetulistī",
+      "tulit/tetulit",
+      "tulimus/tetulimus",
+      "tulistis/tetulistis",
+      "tulērunt/tulēre/tetulērunt/tetulēre"
+    ],
+    [
+      "tuleram/tetuleram",
+      "tulerās/tetulerās",
+      "tulerat/tetulerat",
+      "tulerāmus/tetulerāmus",
+      "tulerātis/tetulerātis",
+      "tulerant/tetulerant"
+    ],
+    [
+      "tulerō/tetulerō",
+      "tuleris/tetuleris",
+      "tulerit/tetulerit",
+      "tulerimus/tetulerimus",
+      "tuleritis/tetuleritis",
+      "tulerint/tetulerint"
+    ],
+    [
+      "feror",
+      "ferris/ferre",
+      "fertur",
+      "ferimur",
+      "feriminī",
+      "feruntur"
+    ],
+    [
+      "ferēbar",
+      "ferēbāris/ferēbāre",
+      "ferēbātur",
+      "ferēbāmur",
+      "ferēbāminī",
+      "ferēbantur"
+    ],
+    [
+      "ferar",
+      "ferēris/ferēre",
+      "ferētur",
+      "ferēmur",
+      "ferēminī",
+      "ferentur"
+    ],
+    [
+      "lātus sum (masculine)/lāta sum (feminine)/lātum sum (neuter)",
+      "lātus es (masculine)/lāta es (feminine)/lātum es (neuter)",
+      "lātus est (masculine)/lāta est (feminine)/lātum est (neuter)",
+      "lātī sumus (masculine)/lātae sumus (feminine)/lāta sumus (neuter)",
+      "lātī estis (masculine)/lātae estis (feminine)/lāta estis (neuter)",
+      "lātī sunt (masculine)/lātae sunt (feminine)/lāta sunt (neuter)"
+    ],
+    [
+      "lātus eram (masculine)/lāta eram (feminine)/lātum eram (neuter)",
+      "lātus erās (masculine)/lāta erās (feminine)/lātum erās (neuter)",
+      "lātus erat (masculine)/lāta erat (feminine)/lātum erat (neuter)",
+      "lātī erāmus (masculine)/lātae erāmus (feminine)/lāta erāmus (neuter)",
+      "lātī erātis (masculine)/lātae erātis (feminine)/lāta erātis (neuter)",
+      "lātī erant (masculine)/lātae erant (feminine)/lāta erant (neuter)"
+    ],
+    [
+      "lātus erō (masculine)/lāta erō (feminine)/lātum erō (neuter)",
+      "lātus eris (masculine)/lāta eris (feminine)/lātum eris (neuter)",
+      "lātus erit (masculine)/lāta erit (feminine)/lātum erit (neuter)",
+      "lātī erimus (masculine)/lātae erimus (feminine)/lāta erimus (neuter)",
+      "lātī eritis (masculine)/lātae eritis (feminine)/lāta eritis (neuter)",
+      "lātī erunt (masculine)/lātae erunt (feminine)/lāta erunt (neuter)"
+    ],
+    [
+      "feram",
+      "ferās",
+      "ferat",
+      "ferāmus",
+      "ferātis",
+      "ferant"
+    ],
+    [
+      "ferrem",
+      "ferrēs",
+      "ferret",
+      "ferrēmus",
+      "ferrētis",
+      "ferrent"
+    ],
+    [
+      "tulerim/tetulerim",
+      "tulerīs/tetulerīs",
+      "tulerit/tetulerit",
+      "tulerīmus/tetulerīmus",
+      "tulerītis/tetulerītis",
+      "tulerint/tetulerint"
+    ],
+    [
+      "tulissem/tetulissem",
+      "tulissēs/tetulissēs",
+      "tulisset/tetulisset",
+      "tulissēmus/tetulissēmus",
+      "tulissētis/tetulissētis",
+      "tulissent/tetulissent"
+    ],
+    [
+      "ferar",
+      "ferāris/ferāre",
+      "ferātur",
+      "ferāmur",
+      "ferāminī",
+      "ferantur"
+    ],
+    [
+      "ferrer",
+      "ferrēris/ferrēre",
+      "ferrētur",
+      "ferrēmur",
+      "ferrēminī",
+      "ferrentur"
+    ],
+    [
+      "lātus sim (masculine)/lāta sim (feminine)/lātum sim (neuter)",
+      "lātus sīs (masculine)/lāta sīs (feminine)/lātum sīs (neuter)",
+      "lātus sit (masculine)/lāta sit (feminine)/lātum sit (neuter)",
+      "lātī sīmus (masculine)/lātae sīmus (feminine)/lāta sīmus (neuter)",
+      "lātī sītis (masculine)/lātae sītis (feminine)/lāta sītis (neuter)",
+      "lātī sint (masculine)/lātae sint (feminine)/lāta sint (neuter)"
+    ],
+    [
+      "lātus essem (masculine)/lāta essem (feminine)/lātum essem (neuter)",
+      "lātus essēs (masculine)/lāta essēs (feminine)/lātum essēs (neuter)",
+      "lātus esset (masculine)/lāta esset (feminine)/lātum esset (neuter)",
+      "lātī essēmus (masculine)/lātae essēmus (feminine)/lāta essēmus (neuter)",
+      "lātī essētis (masculine)/lātae essētis (feminine)/lāta essētis (neuter)",
+      "lātī essent (masculine)/lātae essent (feminine)/lāta essent (neuter)"
+    ],
+    [
+      "fer",
+      "ferte"
+    ],
+    [
+      "fertō",
+      "fertō",
+      "fertōte",
+      "feruntō"
+    ],
+    [
+      "ferre",
+      "feriminī"
+    ],
+    [
+      "fertor",
+      "fertor",
+      "feruntor"
+    ],
+    "ferre",
+    "tulisse/tetulisse",
+    "lātūrum esse",
+    "ferrī",
+    "lātum esse",
+    "lātum īrī",
+    "ferēns",
+    "",
+    "lātus",
+    "lātūrus",
+    "ferendus/ferundus",
+    [
+      "ferendī",
+      "ferendō",
+      "ferendum",
+      "ferendō"
+    ],
+    [
+      "lātum",
+      "lātū"
+    ]
+  ],
+  "gloss": "to bear; to carry; to support, hold up; ..."
+}
