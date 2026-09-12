@@ -1,6 +1,16 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import DownloadManager from '$lib/components/DownloadManager.svelte';
 	import { appTitle, siteUrl } from '$lib/defs';
+
+	const ua = browser ? navigator.userAgent : '';
+	const isIOS = /iPhone|iPad|iPod/.test(ua);
+	const isAndroid = /Android/.test(ua);
+	const safariStandalone =
+		browser && (navigator as Navigator & { standalone?: boolean }).standalone === true;
+	const isStandalone = browser
+		? window.matchMedia('(display-mode: standalone)').matches || safariStandalone
+		: false;
 </script>
 
 <svelte:head>
@@ -21,6 +31,17 @@
 			{appTitle} is an offline-first dictionary app. Search for words in any supported language, view
 			definitions, examples, and inflected forms. Download languages for offline use.
 		</p>
+		{#if !isStandalone}
+			<p>
+				{#if isIOS}
+					To install: tap the Share icon, then "Add to Home Screen".
+				{:else if isAndroid}
+					To install: tap ⋮, then "Add to Home Screen" or "Install app".
+				{:else}
+					Install as an app from your browser menu for the best experience.
+				{/if}
+			</p>
+		{/if}
 		<p>
 			Data sourced from <a href="https://en.wiktionary.org" target="_blank" rel="noopener"
 				>English Wiktionary</a
