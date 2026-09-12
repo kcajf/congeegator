@@ -39,15 +39,13 @@ class SearchLangState {
 
 		if (completedLang && completedLang !== lang) return;
 
-		if (!completedLang) {
-			this.indexReady = false;
-		}
+		this.indexReady = false;
 
-		sqliteClient
+		return sqliteClient
 			.isInstalled(lang)
 			.then((installed) => {
-				if (this.lang === lang && installed) {
-					this.indexReady = true;
+				if (this.lang === lang) {
+					this.indexReady = installed;
 				}
 			})
 			.catch((err) => {

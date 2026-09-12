@@ -1,11 +1,10 @@
 import { browser } from '$app/environment';
 import * as sqliteClient from './sqliteClient';
-import { resolveDbsReady, isSahPoolAvailable, sqliteReady } from './sqliteClient';
+import { dbsReady, resolveDbsReady, isSahPoolAvailable, sqliteReady } from './sqliteClient';
 import { manifest } from './dataUtils';
 import { searchLangState } from './searchLang.svelte';
 
 let worker: Worker | undefined;
-let workerReady: Promise<void> | undefined;
 
 export interface LangSyncInfo {
 	hash: string;
@@ -16,104 +15,84 @@ export interface LangSyncInfo {
 	errorMessage?: string;
 }
 
-if (browser) {
-	worker = new Worker(new URL('./download.worker.ts', import.meta.url), {
-		type: 'module'
-	});
-
-	workerReady = new Promise<void>((resolve) => {
-		const onFirstMessage = () => {
-			resolve();
-			worker!.removeEventListener('message', onFirstMessage);
-		};
-		worker!.addEventListener('message', onFirstMessage);
-		setTimeout(resolve, 500);
-	});
-
-	worker.onmessage = (e) => {
-		const { type, lang, error, percent, receivedBytes, totalBytes, hash } = e.data;
-		if (type === 'READY') return;
-
-		if (type === 'PROGRESS') {
-			const existing = globalSync.map[lang];
-			globalSync.map[lang] = {
-				hash: existing?.hash ?? '',
-				status: 'syncing',
-				receivedBytes,
-				totalBytes,
-				percent
-			};
+// Workers queue messages while loading; no startup timer or READY handshake is
+// needed. Each language has at most one operation, with one completion promise.
+function runDownloadWorker(lang: string, type: 'download' | 'delete'): Promise<string> {
+	worker ??= new Worker(new URL('./download.worker.ts', import.meta.url), { type: 'module' });
+	const currentWorker = worker;
+	return new Promise((resolve, reject) => {
+		function cleanup() {
+			currentWorker.removeEventListener('message', onMessage);
+			currentWorker.removeEventListener('error', onError);
 		}
-
-		if (type === 'COMPLETE') {
-			const dataHash = hash || manifest.languages[lang]?.dataHash || '';
-			// Open the downloaded database in the SQLite worker
-			sqliteClient.openDb(lang, dataHash).then((ok) => {
-				if (ok) {
-					globalSync.map[lang] = { hash: dataHash, status: 'ready' };
-					searchLangState.checkReady(lang);
-				} else {
-					globalSync.map[lang] = {
-						hash: dataHash,
-						status: 'error',
-						errorMessage: 'Failed to open database'
-					};
-				}
-			});
+		function onError() {
+			cleanup();
+			currentWorker.terminate();
+			if (worker === currentWorker) worker = undefined;
+			reject(new Error('Download worker failed. Please retry.'));
 		}
-
-		if (type === 'ERROR') {
-			console.error(`${lang} sync error:`, error);
-			const existing = globalSync.map[lang];
-			if (existing?.status === 'ready') {
-				return;
+		function onMessage(event: MessageEvent) {
+			const message = event.data;
+			if (message.lang !== lang) return;
+			if (message.type === 'PROGRESS') {
+				globalSync.map[lang] = {
+					...globalSync.map[lang],
+					receivedBytes: message.receivedBytes,
+					totalBytes: message.totalBytes,
+					percent: message.percent
+				};
+			} else if (message.type === 'COMPLETE' || message.type === 'DELETED') {
+				cleanup();
+				resolve(message.hash ?? '');
+			} else if (message.type === 'ERROR') {
+				cleanup();
+				reject(new Error(message.error === 'offline' ? 'Offline' : message.error));
 			}
-			globalSync.map[lang] = {
-				hash: existing?.hash ?? '',
-				status: 'error',
-				errorMessage: error === 'offline' ? 'Offline' : (error ?? 'Unknown error')
-			};
 		}
-
-		if (type === 'BENCHMARK') {
-			console.log(`[benchmark] ${lang} download pipeline:`);
-			console.table(e.data.benchmark);
-			// Store for programmatic access
-			(globalThis as Record<string, unknown>).__lastBenchmark = e.data.benchmark;
-		}
-
-		if (type === 'DELETED') {
-			// Map already updated optimistically in deleteLang()
-		}
-	};
+		currentWorker.addEventListener('message', onMessage);
+		currentWorker.addEventListener('error', onError);
+		currentWorker.postMessage({ lang, type });
+	});
 }
 
-export async function triggerLangSync(lang: string) {
-	if (!worker || !workerReady) {
-		console.warn('Worker not initialized. Are you on the server?');
-		return;
+async function changeLanguage(lang: string, remove: boolean) {
+	if (!browser || !manifest.languages[lang]) return;
+	await dbsReady;
+	if (!isSahPoolAvailable() || globalSync.map[lang]?.status === 'syncing') return;
+
+	const previous = globalSync.map[lang];
+	globalSync.map[lang] = { hash: previous?.hash ?? '', status: 'syncing' };
+	try {
+		if (remove) {
+			await sqliteClient.closeDb(lang);
+			await searchLangState.checkReady(lang);
+			await sqliteClient.deleteFromPool(lang, previous?.hash ?? '');
+			await runDownloadWorker(lang, 'delete');
+			delete globalSync.map[lang];
+		} else {
+			const hash = await runDownloadWorker(lang, 'download');
+			const dataHash = hash || manifest.languages[lang].dataHash;
+			if (!(await sqliteClient.openDb(lang, dataHash))) throw new Error('Failed to open database');
+			globalSync.map[lang] = { hash: dataHash, status: 'ready' };
+		}
+	} catch (error) {
+		const installed = await sqliteClient.isInstalled(lang).catch(() => false);
+		globalSync.map[lang] = {
+			hash: previous?.hash ?? '',
+			status: installed ? 'ready' : 'error',
+			errorMessage: error instanceof Error ? error.message : String(error)
+		};
+	} finally {
+		await searchLangState.checkReady(lang);
 	}
-	await workerReady;
-	console.log('Trigger language sync ' + lang);
-	worker.postMessage({ lang });
 }
 
-export async function deleteLang(lang: string) {
-	if (!worker || !workerReady) {
-		console.warn('Worker not initialized. Are you on the server?');
-		return;
-	}
-	await workerReady;
-	if (!globalSync.map[lang]) return;
-	// Close the SQLite database and clean up pool entry
-	const langHash = globalSync.map[lang].hash;
-	await sqliteClient.closeDb(lang);
-	await sqliteClient.deleteFromPool(lang, langHash);
-	// Optimistic UI: remove from map immediately
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const { [lang]: _removed, ...rest } = globalSync.map;
-	globalSync.map = rest;
-	worker.postMessage({ lang, type: 'delete' });
+export function triggerLangSync(lang: string) {
+	return changeLanguage(lang, false);
+}
+
+export function deleteLang(lang: string) {
+	return changeLanguage(lang, true);
 }
 
 class GlobalSyncRegistry {
@@ -121,41 +100,43 @@ class GlobalSyncRegistry {
 	initialized = $state(false);
 
 	constructor() {
-		if (browser) {
-			this.init();
-		}
+		if (browser) void this.init();
 	}
 
 	private async init() {
-		await sqliteReady;
-
-		if (!isSahPoolAvailable()) {
-			this.initialized = true;
-			resolveDbsReady();
-			return;
-		}
-
-		// Discover installed databases from OPFS and open them
 		try {
+			await sqliteReady;
+			if (!isSahPoolAvailable()) return;
 			const files = await sqliteClient.listOpfsFiles();
-			const initialMap: Record<string, LangSyncInfo> = {};
-
-			for (const [lang, hash] of files) {
-				const opened = await sqliteClient.openDb(lang, hash);
-				if (opened) {
-					initialMap[lang] = { hash, status: 'ready' };
+			for (const lang of new Set(files.map(([lang]) => lang))) {
+				// Prefer the current version, but keep an older working download
+				// available if a replacement was interrupted or damaged.
+				const currentHash = manifest.languages[lang]?.dataHash;
+				const candidates = files
+					.filter(([code]) => code === lang)
+					.sort((a, b) => Number(b[1] === currentHash) - Number(a[1] === currentHash));
+				for (const [, hash] of candidates) {
+					try {
+						if (!(await sqliteClient.openDb(lang, hash)))
+							throw new Error('Failed to open database');
+						this.map[lang] = { hash, status: 'ready' };
+						break;
+					} catch (error) {
+						this.map[lang] = {
+							hash,
+							status: 'error',
+							errorMessage: error instanceof Error ? error.message : String(error)
+						};
+					}
 				}
 			}
-
-			this.map = initialMap;
-		} catch (err) {
-			console.error('Failed to discover OPFS databases:', err);
+		} catch (error) {
+			console.error('Failed to discover dictionaries:', error);
+		} finally {
+			this.initialized = true;
+			resolveDbsReady();
+			await searchLangState.checkReady();
 		}
-
-		this.initialized = true;
-		resolveDbsReady();
-		// Notify search that installed languages are ready
-		searchLangState.checkReady();
 	}
 }
 

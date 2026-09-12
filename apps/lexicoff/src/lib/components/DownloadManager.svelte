@@ -23,10 +23,13 @@
 
 <div class="download-manager">
 	<h2>Languages</h2>
-	{#if !sahAvailable}
+	{#if !globalSync.initialized}
 		<p class="unavailable-notice">
-			Offline downloads are not supported in this browser. Try the latest version of Chrome, Edge,
-			or Firefox.
+			Opening dictionaries… If Lexicoff is open in another tab or window, close it to continue.
+		</p>
+	{:else if !sahAvailable}
+		<p class="unavailable-notice">
+			Dictionary storage could not be opened. Close other Lexicoff tabs and reload to try again.
 		</p>
 	{/if}
 	<div class="lang-list">
@@ -43,6 +46,9 @@
 				</div>
 
 				<div class="lang-status">
+					{#if info?.errorMessage}
+						<span class="error-text">{info.errorMessage}</span>
+					{/if}
 					{#if isSyncing}
 						<div class="progress-area">
 							<span class="progress-text">
@@ -57,10 +63,10 @@
 							</div>
 						</div>
 					{:else if isError}
-						<span class="error-text">{info.errorMessage ?? 'Error'}</span>
 						<button class="btn btn-install" onclick={() => triggerLangSync(lang.code)}>
 							Retry
 						</button>
+						<button class="btn btn-remove" onclick={() => deleteLang(lang.code)}>Remove</button>
 					{:else if isReady && !hasUpdate}
 						<span class="status-installed">Installed</span>
 						<button class="btn btn-remove" onclick={() => deleteLang(lang.code)}> Remove </button>
@@ -73,7 +79,7 @@
 						<button
 							class="btn btn-install"
 							onclick={() => triggerLangSync(lang.code)}
-							disabled={!sahAvailable}
+							disabled={!globalSync.initialized || !sahAvailable}
 						>
 							Install
 						</button>
