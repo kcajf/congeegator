@@ -1,176 +1,176 @@
 {
   "languages": {
     "fr": {
-      "dataHash": "b797d9a5",
-      "dataSize": 30847583,
+      "dataHash": "f341ae44",
+      "dataSize": 39433415,
       "code": "fr",
       "name": "français",
       "englishWiktionaryName": "French"
     },
     "el": {
-      "dataHash": "82313ff7",
-      "dataSize": 14179540,
+      "dataHash": "1d8989be",
+      "dataSize": 18334700,
       "code": "el",
       "name": "ελληνικά",
       "englishWiktionaryName": "Greek"
     },
     "de": {
-      "dataHash": "04d06aa4",
-      "dataSize": 37627787,
+      "dataHash": "c9b5f4dc",
+      "dataSize": 56227852,
       "code": "de",
       "name": "Deutsch",
       "englishWiktionaryName": "German"
     },
     "es": {
-      "dataHash": "4b19148c",
-      "dataSize": 56404000,
+      "dataHash": "2a7c293a",
+      "dataSize": 71005389,
       "code": "es",
       "name": "español",
       "englishWiktionaryName": "Spanish"
     },
     "it": {
-      "dataHash": "7be04a55",
-      "dataSize": 44532821,
+      "dataHash": "45cad447",
+      "dataSize": 56724207,
       "code": "it",
       "name": "italiano",
       "englishWiktionaryName": "Italian"
     },
     "en": {
-      "dataHash": "a4e06412",
-      "dataSize": 171469251,
+      "dataHash": "c0c521f5",
+      "dataSize": 281441689,
       "code": "en",
       "name": "English",
       "englishWiktionaryName": "English"
     },
     "pt": {
-      "dataHash": "d46a6c51",
-      "dataSize": 32340138,
+      "dataHash": "b6345891",
+      "dataSize": 40762148,
       "code": "pt",
       "name": "português",
       "englishWiktionaryName": "Portuguese"
     },
     "ca": {
-      "dataHash": "5a3b93d7",
-      "dataSize": 12743385,
+      "dataHash": "066cd04d",
+      "dataSize": 16435834,
       "code": "ca",
       "name": "català",
       "englishWiktionaryName": "Catalan"
     },
     "ro": {
-      "dataHash": "c9a872c7",
-      "dataSize": 13916438,
+      "dataHash": "68b4243d",
+      "dataSize": 21824955,
       "code": "ro",
       "name": "română",
       "englishWiktionaryName": "Romanian"
     },
     "gl": {
-      "dataHash": "e35cbed2",
-      "dataSize": 11333987,
+      "dataHash": "2b6da7ec",
+      "dataSize": 14788249,
       "code": "gl",
       "name": "galego",
       "englishWiktionaryName": "Galician"
     },
     "nl": {
-      "dataHash": "4097b747",
-      "dataSize": 13433357,
+      "dataHash": "76655a10",
+      "dataSize": 20174670,
       "code": "nl",
       "name": "Nederlands",
       "englishWiktionaryName": "Dutch"
     },
     "sv": {
-      "dataHash": "bbdb9910",
-      "dataSize": 24004381,
+      "dataHash": "5e53f10c",
+      "dataSize": 31938382,
       "code": "sv",
       "name": "svenska",
       "englishWiktionaryName": "Swedish"
     },
     "da": {
-      "dataHash": "c4003b6a",
-      "dataSize": 4869887,
+      "dataHash": "1038c494",
+      "dataSize": 7497673,
       "code": "da",
       "name": "dansk",
       "englishWiktionaryName": "Danish"
     },
     "nb": {
-      "dataHash": "d7464047",
-      "dataSize": 6383480,
+      "dataHash": "59421dbd",
+      "dataSize": 9020549,
       "code": "nb",
       "name": "norsk bokmål",
       "englishWiktionaryName": "Norwegian Bokmål"
     },
     "pl": {
-      "dataHash": "66a9058c",
-      "dataSize": 21556192,
+      "dataHash": "752dfcfe",
+      "dataSize": 32549688,
       "code": "pl",
       "name": "polski",
       "englishWiktionaryName": "Polish"
     },
     "ru": {
-      "dataHash": "a3d42432",
-      "dataSize": 47576935,
+      "dataHash": "c84322e9",
+      "dataSize": 68055096,
       "code": "ru",
       "name": "русский",
       "englishWiktionaryName": "Russian"
     },
     "uk": {
-      "dataHash": "8e238365",
-      "dataSize": 9447488,
+      "dataHash": "7dbf4451",
+      "dataSize": 15635478,
       "code": "uk",
       "name": "українська",
       "englishWiktionaryName": "Ukrainian"
     },
     "cs": {
-      "dataHash": "ead1b783",
-      "dataSize": 9086553,
+      "dataHash": "b16f1ee4",
+      "dataSize": 14021889,
       "code": "cs",
       "name": "čeština",
       "englishWiktionaryName": "Czech"
     },
     "fi": {
-      "dataHash": "c9aa96b5",
-      "dataSize": 132756626,
+      "dataHash": "64b8cf7e",
+      "dataSize": 261308269,
       "code": "fi",
       "name": "suomi",
       "englishWiktionaryName": "Finnish"
     },
     "hu": {
-      "dataHash": "a4fa4755",
-      "dataSize": 18775679,
+      "dataHash": "63c90087",
+      "dataSize": 34110358,
       "code": "hu",
       "name": "magyar",
       "englishWiktionaryName": "Hungarian"
     },
     "tr": {
-      "dataHash": "2cfc0aea",
-      "dataSize": 16284302,
+      "dataHash": "2c177d23",
+      "dataSize": 32759542,
       "code": "tr",
       "name": "Türkçe",
       "englishWiktionaryName": "Turkish"
     },
     "id": {
-      "dataHash": "98223a11",
-      "dataSize": 4412811,
+      "dataHash": "8c2fa11a",
+      "dataSize": 7068036,
       "code": "id",
       "name": "Bahasa Indonesia",
       "englishWiktionaryName": "Indonesian"
     },
     "vi": {
-      "dataHash": "3f8ba6b5",
-      "dataSize": 4009439,
+      "dataHash": "ec120c14",
+      "dataSize": 6640826,
       "code": "vi",
       "name": "Tiếng Việt",
       "englishWiktionaryName": "Vietnamese"
     },
     "eo": {
-      "dataHash": "c8f60547",
-      "dataSize": 7450978,
+      "dataHash": "fe556a4b",
+      "dataSize": 10009813,
       "code": "eo",
       "name": "Esperanto",
       "englishWiktionaryName": "Esperanto"
     },
     "la": {
-      "dataHash": "6799ff58",
-      "dataSize": 54695647,
+      "dataHash": "a805ace8",
+      "dataSize": 72908078,
       "code": "la",
       "name": "Latina",
       "englishWiktionaryName": "Latin"

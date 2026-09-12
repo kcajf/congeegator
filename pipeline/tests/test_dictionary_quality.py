@@ -35,7 +35,7 @@ def test_dirty_optional_fields_do_not_drop_good_entry():
     )
     result = process_dict_entry(DictLanguageConfig("pt", "português", "Portuguese"), value)
     assert result["forms"] == ["casas"]
-    assert result["senses"][0]["examples"] == ["a casa"]
+    assert result["senses"][0]["examples"] == [{"text": "a casa"}]
     assert result["pronunciation"] == "/ˈkazɐ/"
 
 
@@ -85,3 +85,13 @@ def test_historical_usage_labels_survive():
 ])
 def test_known_source_header_and_label_artifacts(code, text, tags, expected):
     assert extract_forms(entry(lang_code=code, forms=(Form(text, tags),))) == expected
+
+
+@pytest.mark.parametrize('code,text,tags', [
+    ('de','haben',{'auxiliary'}), ('it','avére',{'auxiliary'}),
+    ('fr','present indicative of avoir + past participle',{'present','perfect'}),
+    ('uk','Future conjugation of бути + infinitive',{'future'}),
+    ('cs','When the verb is used in perfective aspect, it does not have present tense and the present forms are used to express future only.',set()),
+])
+def test_paradigm_instructions_and_auxiliaries_are_not_searchable_forms(code,text,tags):
+    assert extract_forms(entry(lang_code=code,forms=(Form(text,tags),)))==[]

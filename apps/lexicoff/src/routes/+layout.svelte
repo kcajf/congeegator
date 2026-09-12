@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { afterNavigate, goto } from '$app/navigation';
+	import { page } from '$app/state';
+	import { manifest } from '$lib/dataUtils';
 	import { resolve } from '$app/paths';
 
 	import { dev } from '$app/environment';
@@ -82,7 +84,9 @@
 	let searchResults = $state<SearchResult[]>([]);
 
 	afterNavigate(() => {
-		searchTerm = '';
+		const lang = page.params.lang || page.url.searchParams.get('lang');
+		if (lang && lang in manifest.languages) searchLangState.set(lang);
+		searchTerm = page.url.searchParams.get('q') || '';
 	});
 
 	async function selectResult(item: SearchResult) {

@@ -90,3 +90,14 @@ def test_read_source_preserves_unicode_and_final_unterminated_line(tmp_path):
     path = tmp_path / "pt.jsonl.zst"
     path.write_bytes(zstandard.ZstdCompressor().compress(b"\n".join(lines)))
     assert [line.rstrip(b"\n") for line in read_source(path)] == lines
+
+
+def test_audit_tracks_linked_senses_and_structured_examples():
+    result=audit_source([_line('casa',[{'glosses':['house'],'links':[['house','house']],
+        'examples':[{'text':'a casa','translation':'the house','bold_text_offsets':[[2,6]]}]}],
+        derived=[{'word':'casinha'}])],CONFIG)
+    assert result['counts']['senses_with_links']==1
+    assert result['counts']['translated_examples']==1
+    assert result['counts']['emphasized_examples']==1
+    assert result['counts']['records_with_derived']==1
+    assert result['review_flags']=={}

@@ -14,12 +14,6 @@ export const load: PageLoad = async ({ params }) => {
 
 	const entries = await sqliteClient.getWord(lang, word);
 
-	if (entries.length === 0) {
-		error(404, {
-			message: `Word "${word}" not found. Is ${manifest.languages[lang].name} installed?`
-		});
-	}
-
 	return {
 		lang,
 		word,

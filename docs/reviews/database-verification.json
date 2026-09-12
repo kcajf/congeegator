@@ -1,0 +1,3927 @@
+{
+  "ca": {
+    "artifact": "ca.sqlite.zst",
+    "download_bytes": 16435834,
+    "data_hash": "066cd04d",
+    "sqlite_bytes": 84606976,
+    "integrity_check": [
+      "ok"
+    ],
+    "fts_integrity": {
+      "entries_fts": "ok",
+      "fuzzy": "ok"
+    },
+    "fts_records": {
+      "entries_fts": 198377,
+      "fuzzy": 198377
+    },
+    "form_lookup_records": 246027,
+    "form_lookup_orphans": 0,
+    "language": "ca",
+    "records": 198377,
+    "unique_headwords": 189528,
+    "zero_frequency_records": 121985,
+    "frequency_range": [
+      0.0,
+      7.78
+    ],
+    "invalid_frequency_records": 0,
+    "highest_frequency": [
+      {
+        "word": "de",
+        "pos": "noun",
+        "freq": 7.78
+      },
+      {
+        "word": "de",
+        "pos": "prep",
+        "freq": 7.78
+      },
+      {
+        "word": "de",
+        "pos": "verb",
+        "freq": 7.78
+      },
+      {
+        "word": "de-",
+        "pos": "prefix",
+        "freq": 7.78
+      },
+      {
+        "word": "la",
+        "pos": "article",
+        "freq": 7.61
+      },
+      {
+        "word": "la",
+        "pos": "pron",
+        "freq": 7.61
+      },
+      {
+        "word": "la",
+        "pos": "noun",
+        "freq": 7.61
+      },
+      {
+        "word": "-a",
+        "pos": "suffix",
+        "freq": 7.5
+      },
+      {
+        "word": "-a",
+        "pos": "suffix",
+        "freq": 7.5
+      },
+      {
+        "word": "-a",
+        "pos": "suffix",
+        "freq": 7.5
+      },
+      {
+        "word": "-a",
+        "pos": "suffix",
+        "freq": 7.5
+      },
+      {
+        "word": "a",
+        "pos": "prep",
+        "freq": 7.5
+      },
+      {
+        "word": "a-",
+        "pos": "prefix",
+        "freq": 7.5
+      },
+      {
+        "word": "a-",
+        "pos": "prefix",
+        "freq": 7.5
+      },
+      {
+        "word": "-i",
+        "pos": "suffix",
+        "freq": 7.47
+      },
+      {
+        "word": "-i",
+        "pos": "suffix",
+        "freq": 7.47
+      },
+      {
+        "word": "que",
+        "pos": "pron",
+        "freq": 7.44
+      },
+      {
+        "word": "que",
+        "pos": "conj",
+        "freq": 7.44
+      },
+      {
+        "word": "que",
+        "pos": "adv",
+        "freq": 7.44
+      },
+      {
+        "word": "el",
+        "pos": "article",
+        "freq": 7.43
+      }
+    ],
+    "search_probes": [
+      {
+        "word": "casa",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "aigua",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "ésser",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "menjar",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "bo",
+        "present": true,
+        "fts_matches_all_records": true
+      }
+    ]
+  },
+  "cs": {
+    "artifact": "cs.sqlite.zst",
+    "download_bytes": 14021889,
+    "data_hash": "b16f1ee4",
+    "sqlite_bytes": 50933760,
+    "integrity_check": [
+      "ok"
+    ],
+    "fts_integrity": {
+      "entries_fts": "ok",
+      "fuzzy": "ok"
+    },
+    "fts_records": {
+      "entries_fts": 72124,
+      "fuzzy": 72124
+    },
+    "form_lookup_records": 477228,
+    "form_lookup_orphans": 0,
+    "language": "cs",
+    "records": 72124,
+    "unique_headwords": 69807,
+    "zero_frequency_records": 14118,
+    "frequency_range": [
+      0.0,
+      7.51
+    ],
+    "invalid_frequency_records": 0,
+    "highest_frequency": [
+      {
+        "word": "-a",
+        "pos": "suffix",
+        "freq": 7.51
+      },
+      {
+        "word": "-a",
+        "pos": "suffix",
+        "freq": 7.51
+      },
+      {
+        "word": "a",
+        "pos": "conj",
+        "freq": 7.51
+      },
+      {
+        "word": "se",
+        "pos": "pron",
+        "freq": 7.38
+      },
+      {
+        "word": "se",
+        "pos": "prep",
+        "freq": 7.38
+      },
+      {
+        "word": "se-",
+        "pos": "prefix",
+        "freq": 7.38
+      },
+      {
+        "word": "v",
+        "pos": "prep",
+        "freq": 7.35
+      },
+      {
+        "word": "v-",
+        "pos": "prefix",
+        "freq": 7.35
+      },
+      {
+        "word": "-na",
+        "pos": "suffix",
+        "freq": 7.31
+      },
+      {
+        "word": "na",
+        "pos": "prep",
+        "freq": 7.31
+      },
+      {
+        "word": "na-",
+        "pos": "prefix",
+        "freq": 7.31
+      },
+      {
+        "word": "je",
+        "pos": "pron",
+        "freq": 7.2
+      },
+      {
+        "word": "je",
+        "pos": "verb",
+        "freq": 7.2
+      },
+      {
+        "word": "-to-",
+        "pos": "interfix",
+        "freq": 7.16
+      },
+      {
+        "word": "to",
+        "pos": "pron",
+        "freq": 7.16
+      },
+      {
+        "word": "že",
+        "pos": "conj",
+        "freq": 7.01
+      },
+      {
+        "word": "že",
+        "pos": "intj",
+        "freq": 7.01
+      },
+      {
+        "word": "-s",
+        "pos": "particle",
+        "freq": 6.92
+      },
+      {
+        "word": "s",
+        "pos": "prep",
+        "freq": 6.92
+      },
+      {
+        "word": "s-",
+        "pos": "prefix",
+        "freq": 6.92
+      }
+    ],
+    "search_probes": [
+      {
+        "word": "dům",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "voda",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "být",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "jíst",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "dobrý",
+        "present": true,
+        "fts_matches_all_records": true
+      }
+    ]
+  },
+  "da": {
+    "artifact": "da.sqlite.zst",
+    "download_bytes": 7497673,
+    "data_hash": "1038c494",
+    "sqlite_bytes": 30744576,
+    "integrity_check": [
+      "ok"
+    ],
+    "fts_integrity": {
+      "entries_fts": "ok",
+      "fuzzy": "ok"
+    },
+    "fts_records": {
+      "entries_fts": 58323,
+      "fuzzy": 58323
+    },
+    "form_lookup_records": 120142,
+    "form_lookup_orphans": 0,
+    "language": "da",
+    "records": 58323,
+    "unique_headwords": 54509,
+    "zero_frequency_records": 39658,
+    "frequency_range": [
+      0.0,
+      7.49
+    ],
+    "invalid_frequency_records": 0,
+    "highest_frequency": [
+      {
+        "word": "I",
+        "pos": "pron",
+        "freq": 7.49
+      },
+      {
+        "word": "og",
+        "pos": "conj",
+        "freq": 7.46
+      },
+      {
+        "word": "og",
+        "pos": "adv",
+        "freq": 7.46
+      },
+      {
+        "word": "og",
+        "pos": "particle",
+        "freq": 7.46
+      },
+      {
+        "word": "-er",
+        "pos": "suffix",
+        "freq": 7.45
+      },
+      {
+        "word": "er",
+        "pos": "verb",
+        "freq": 7.45
+      },
+      {
+        "word": "af",
+        "pos": "prep",
+        "freq": 7.36
+      },
+      {
+        "word": "af",
+        "pos": "adv",
+        "freq": 7.36
+      },
+      {
+        "word": "af-",
+        "pos": "prefix",
+        "freq": 7.36
+      },
+      {
+        "word": "det",
+        "pos": "article",
+        "freq": 7.35
+      },
+      {
+        "word": "det",
+        "pos": "pron",
+        "freq": 7.35
+      },
+      {
+        "word": "det'",
+        "pos": "contraction",
+        "freq": 7.35
+      },
+      {
+        "word": "-at",
+        "pos": "suffix",
+        "freq": 7.29
+      },
+      {
+        "word": "-en",
+        "pos": "suffix",
+        "freq": 7.29
+      },
+      {
+        "word": "at",
+        "pos": "conj",
+        "freq": 7.29
+      },
+      {
+        "word": "at",
+        "pos": "particle",
+        "freq": 7.29
+      },
+      {
+        "word": "en",
+        "pos": "article",
+        "freq": 7.29
+      },
+      {
+        "word": "en",
+        "pos": "num",
+        "freq": 7.29
+      },
+      {
+        "word": "en",
+        "pos": "pron",
+        "freq": 7.29
+      },
+      {
+        "word": "til",
+        "pos": "prep",
+        "freq": 7.2
+      }
+    ],
+    "search_probes": [
+      {
+        "word": "hus",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "vand",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "være",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "spise",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "god",
+        "present": true,
+        "fts_matches_all_records": true
+      }
+    ]
+  },
+  "de": {
+    "artifact": "de.sqlite.zst",
+    "download_bytes": 56227852,
+    "data_hash": "c9b5f4dc",
+    "sqlite_bytes": 291459072,
+    "integrity_check": [
+      "ok"
+    ],
+    "fts_integrity": {
+      "entries_fts": "ok",
+      "fuzzy": "ok"
+    },
+    "fts_records": {
+      "entries_fts": 369879,
+      "fuzzy": 369879
+    },
+    "form_lookup_records": 1393369,
+    "form_lookup_orphans": 0,
+    "language": "de",
+    "records": 369879,
+    "unique_headwords": 351283,
+    "zero_frequency_records": 177121,
+    "frequency_range": [
+      0.0,
+      7.48
+    ],
+    "invalid_frequency_records": 0,
+    "highest_frequency": [
+      {
+        "word": "die",
+        "pos": "article",
+        "freq": 7.48
+      },
+      {
+        "word": "die",
+        "pos": "pron",
+        "freq": 7.48
+      },
+      {
+        "word": "der",
+        "pos": "article",
+        "freq": 7.46
+      },
+      {
+        "word": "der",
+        "pos": "article",
+        "freq": 7.46
+      },
+      {
+        "word": "der",
+        "pos": "pron",
+        "freq": 7.46
+      },
+      {
+        "word": "der",
+        "pos": "pron",
+        "freq": 7.46
+      },
+      {
+        "word": "der",
+        "pos": "pron",
+        "freq": 7.46
+      },
+      {
+        "word": "der",
+        "pos": "pron",
+        "freq": 7.46
+      },
+      {
+        "word": "und",
+        "pos": "conj",
+        "freq": 7.42
+      },
+      {
+        "word": "und",
+        "pos": "intj",
+        "freq": 7.42
+      },
+      {
+        "word": "-in",
+        "pos": "suffix",
+        "freq": 7.24
+      },
+      {
+        "word": "-in",
+        "pos": "suffix",
+        "freq": 7.24
+      },
+      {
+        "word": "-in",
+        "pos": "suffix",
+        "freq": 7.24
+      },
+      {
+        "word": "in",
+        "pos": "prep",
+        "freq": 7.24
+      },
+      {
+        "word": "in",
+        "pos": "contraction",
+        "freq": 7.24
+      },
+      {
+        "word": "in",
+        "pos": "adj",
+        "freq": 7.24
+      },
+      {
+        "word": "in-",
+        "pos": "prefix",
+        "freq": 7.24
+      },
+      {
+        "word": "in-",
+        "pos": "prefix",
+        "freq": 7.24
+      },
+      {
+        "word": "in-",
+        "pos": "prefix",
+        "freq": 7.24
+      },
+      {
+        "word": "das",
+        "pos": "article",
+        "freq": 7.16
+      }
+    ],
+    "search_probes": [
+      {
+        "word": "Haus",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "Wasser",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "sein",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "essen",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "gut",
+        "present": true,
+        "fts_matches_all_records": true
+      }
+    ]
+  },
+  "el": {
+    "artifact": "el.sqlite.zst",
+    "download_bytes": 18334700,
+    "data_hash": "1d8989be",
+    "sqlite_bytes": 79679488,
+    "integrity_check": [
+      "ok"
+    ],
+    "fts_integrity": {
+      "entries_fts": "ok",
+      "fuzzy": "ok"
+    },
+    "fts_records": {
+      "entries_fts": 85148,
+      "fuzzy": 85148
+    },
+    "form_lookup_records": 266289,
+    "form_lookup_orphans": 0,
+    "language": "el",
+    "records": 85148,
+    "unique_headwords": 81707,
+    "zero_frequency_records": 62501,
+    "frequency_range": [
+      0.0,
+      7.51
+    ],
+    "invalid_frequency_records": 0,
+    "highest_frequency": [
+      {
+        "word": "και",
+        "pos": "conj",
+        "freq": 7.51
+      },
+      {
+        "word": "το",
+        "pos": "article",
+        "freq": 7.48
+      },
+      {
+        "word": "το",
+        "pos": "pron",
+        "freq": 7.48
+      },
+      {
+        "word": "ΝΑ",
+        "pos": "noun",
+        "freq": 7.44
+      },
+      {
+        "word": "να",
+        "pos": "particle",
+        "freq": 7.44
+      },
+      {
+        "word": "να",
+        "pos": "particle",
+        "freq": 7.44
+      },
+      {
+        "word": "του",
+        "pos": "article",
+        "freq": 7.28
+      },
+      {
+        "word": "του",
+        "pos": "pron",
+        "freq": 7.28
+      },
+      {
+        "word": ",η",
+        "pos": "num",
+        "freq": 7.24
+      },
+      {
+        "word": "͵Η",
+        "pos": "num",
+        "freq": 7.24
+      },
+      {
+        "word": "͵η",
+        "pos": "num",
+        "freq": 7.24
+      },
+      {
+        "word": "Η",
+        "pos": "num",
+        "freq": 7.24
+      },
+      {
+        "word": "Η",
+        "pos": "article",
+        "freq": 7.24
+      },
+      {
+        "word": "Η΄",
+        "pos": "num",
+        "freq": 7.24
+      },
+      {
+        "word": "η",
+        "pos": "article",
+        "freq": 7.24
+      },
+      {
+        "word": "η΄",
+        "pos": "num",
+        "freq": 7.24
+      },
+      {
+        "word": "με",
+        "pos": "prep",
+        "freq": 7.22
+      },
+      {
+        "word": "με",
+        "pos": "pron",
+        "freq": 7.22
+      },
+      {
+        "word": "την",
+        "pos": "article",
+        "freq": 7.21
+      },
+      {
+        "word": "την",
+        "pos": "pron",
+        "freq": 7.21
+      }
+    ],
+    "search_probes": [
+      {
+        "word": "σπίτι",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "νερό",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "είμαι",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "τρώω",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "καλός",
+        "present": true,
+        "fts_matches_all_records": true
+      }
+    ]
+  },
+  "en": {
+    "artifact": "en.sqlite.zst",
+    "download_bytes": 281441689,
+    "data_hash": "c0c521f5",
+    "sqlite_bytes": 1069924352,
+    "integrity_check": [
+      "ok"
+    ],
+    "fts_integrity": {
+      "entries_fts": "ok",
+      "fuzzy": "ok"
+    },
+    "fts_records": {
+      "entries_fts": 1490762,
+      "fuzzy": 1490762
+    },
+    "form_lookup_records": 898282,
+    "form_lookup_orphans": 0,
+    "language": "en",
+    "records": 1490762,
+    "unique_headwords": 1389113,
+    "zero_frequency_records": 846799,
+    "frequency_range": [
+      0.0,
+      7.73
+    ],
+    "invalid_frequency_records": 0,
+    "highest_frequency": [
+      {
+        "word": "the",
+        "pos": "article",
+        "freq": 7.73
+      },
+      {
+        "word": "the",
+        "pos": "adv",
+        "freq": 7.73
+      },
+      {
+        "word": "the",
+        "pos": "prep",
+        "freq": 7.73
+      },
+      {
+        "word": "the",
+        "pos": "pron",
+        "freq": 7.73
+      },
+      {
+        "word": "the-",
+        "pos": "prefix",
+        "freq": 7.73
+      },
+      {
+        "word": "TO",
+        "pos": "name",
+        "freq": 7.43
+      },
+      {
+        "word": "TO",
+        "pos": "noun",
+        "freq": 7.43
+      },
+      {
+        "word": "TO",
+        "pos": "verb",
+        "freq": 7.43
+      },
+      {
+        "word": "To",
+        "pos": "name",
+        "freq": 7.43
+      },
+      {
+        "word": "to",
+        "pos": "particle",
+        "freq": 7.43
+      },
+      {
+        "word": "to",
+        "pos": "conj",
+        "freq": 7.43
+      },
+      {
+        "word": "to",
+        "pos": "prep",
+        "freq": 7.43
+      },
+      {
+        "word": "to",
+        "pos": "adv",
+        "freq": 7.43
+      },
+      {
+        "word": "to",
+        "pos": "particle",
+        "freq": 7.43
+      },
+      {
+        "word": "to-",
+        "pos": "prefix",
+        "freq": 7.43
+      },
+      {
+        "word": "to-",
+        "pos": "prefix",
+        "freq": 7.43
+      },
+      {
+        "word": "-and",
+        "pos": "suffix",
+        "freq": 7.41
+      },
+      {
+        "word": "-and",
+        "pos": "suffix",
+        "freq": 7.41
+      },
+      {
+        "word": "AND",
+        "pos": "noun",
+        "freq": 7.41
+      },
+      {
+        "word": "AND",
+        "pos": "verb",
+        "freq": 7.41
+      }
+    ],
+    "search_probes": [
+      {
+        "word": "house",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "water",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "be",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "eat",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "good",
+        "present": true,
+        "fts_matches_all_records": true
+      }
+    ]
+  },
+  "eo": {
+    "artifact": "eo.sqlite.zst",
+    "download_bytes": 10009813,
+    "data_hash": "fe556a4b",
+    "sqlite_bytes": 55283712,
+    "integrity_check": [
+      "ok"
+    ],
+    "fts_integrity": {
+      "entries_fts": "ok",
+      "fuzzy": "ok"
+    },
+    "fts_records": {
+      "entries_fts": 135043,
+      "fuzzy": 135043
+    },
+    "form_lookup_records": 228435,
+    "form_lookup_orphans": 0,
+    "language": "eo",
+    "records": 135043,
+    "unique_headwords": 134811,
+    "zero_frequency_records": 135043,
+    "frequency_range": [
+      0.0,
+      0.0
+    ],
+    "invalid_frequency_records": 0,
+    "highest_frequency": [
+      {
+        "word": "&",
+        "pos": "conj",
+        "freq": 0.0
+      },
+      {
+        "word": "-a",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-acoj",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-acx-",
+        "pos": "interfix",
+        "freq": 0.0
+      },
+      {
+        "word": "-ad-",
+        "pos": "interfix",
+        "freq": 0.0
+      },
+      {
+        "word": "-ada",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-adi",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-ado",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-ajho",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-ajxo",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-al",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-alo",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-am",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-an-",
+        "pos": "interfix",
+        "freq": 0.0
+      },
+      {
+        "word": "-ano",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-ant-",
+        "pos": "interfix",
+        "freq": 0.0
+      },
+      {
+        "word": "-anta",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-ante",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-anto",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-ar-",
+        "pos": "interfix",
+        "freq": 0.0
+      }
+    ],
+    "search_probes": [
+      {
+        "word": "domo",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "akvo",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "esti",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "manĝi",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "bona",
+        "present": true,
+        "fts_matches_all_records": true
+      }
+    ]
+  },
+  "es": {
+    "artifact": "es.sqlite.zst",
+    "download_bytes": 71005389,
+    "data_hash": "2a7c293a",
+    "sqlite_bytes": 356364288,
+    "integrity_check": [
+      "ok"
+    ],
+    "fts_integrity": {
+      "entries_fts": "ok",
+      "fuzzy": "ok"
+    },
+    "fts_records": {
+      "entries_fts": 809350,
+      "fuzzy": 809350
+    },
+    "form_lookup_records": 1205056,
+    "form_lookup_orphans": 0,
+    "language": "es",
+    "records": 809350,
+    "unique_headwords": 771088,
+    "zero_frequency_records": 580489,
+    "frequency_range": [
+      0.0,
+      7.81
+    ],
+    "invalid_frequency_records": 0,
+    "highest_frequency": [
+      {
+        "word": "de",
+        "pos": "noun",
+        "freq": 7.81
+      },
+      {
+        "word": "de",
+        "pos": "prep",
+        "freq": 7.81
+      },
+      {
+        "word": "de-",
+        "pos": "prefix",
+        "freq": 7.81
+      },
+      {
+        "word": "la",
+        "pos": "article",
+        "freq": 7.56
+      },
+      {
+        "word": "la",
+        "pos": "pron",
+        "freq": 7.56
+      },
+      {
+        "word": "la",
+        "pos": "noun",
+        "freq": 7.56
+      },
+      {
+        "word": "que",
+        "pos": "conj",
+        "freq": 7.52
+      },
+      {
+        "word": "que",
+        "pos": "pron",
+        "freq": 7.52
+      },
+      {
+        "word": "-en",
+        "pos": "suffix",
+        "freq": 7.45
+      },
+      {
+        "word": "el",
+        "pos": "article",
+        "freq": 7.45
+      },
+      {
+        "word": "el",
+        "pos": "article",
+        "freq": 7.45
+      },
+      {
+        "word": "en",
+        "pos": "prep",
+        "freq": 7.45
+      },
+      {
+        "word": "en-",
+        "pos": "prefix",
+        "freq": 7.45
+      },
+      {
+        "word": "y",
+        "pos": "conj",
+        "freq": 7.44
+      },
+      {
+        "word": "de la",
+        "pos": "article",
+        "freq": 7.37
+      },
+      {
+        "word": "-(a)",
+        "pos": "suffix",
+        "freq": 7.36
+      },
+      {
+        "word": "-a",
+        "pos": "suffix",
+        "freq": 7.36
+      },
+      {
+        "word": "-a",
+        "pos": "suffix",
+        "freq": 7.36
+      },
+      {
+        "word": "-a",
+        "pos": "suffix",
+        "freq": 7.36
+      },
+      {
+        "word": "-a",
+        "pos": "suffix",
+        "freq": 7.36
+      }
+    ],
+    "search_probes": [
+      {
+        "word": "casa",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "agua",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "ser",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "comer",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "bueno",
+        "present": true,
+        "fts_matches_all_records": true
+      }
+    ]
+  },
+  "fi": {
+    "artifact": "fi.sqlite.zst",
+    "download_bytes": 261308269,
+    "data_hash": "64b8cf7e",
+    "sqlite_bytes": 1802424320,
+    "integrity_check": [
+      "ok"
+    ],
+    "fts_integrity": {
+      "entries_fts": "ok",
+      "fuzzy": "ok"
+    },
+    "fts_records": {
+      "entries_fts": 266050,
+      "fuzzy": 266050
+    },
+    "form_lookup_records": 27717066,
+    "form_lookup_orphans": 0,
+    "language": "fi",
+    "records": 266050,
+    "unique_headwords": 251968,
+    "zero_frequency_records": 127825,
+    "frequency_range": [
+      0.0,
+      7.56
+    ],
+    "invalid_frequency_records": 0,
+    "highest_frequency": [
+      {
+        "word": "-ja",
+        "pos": "suffix",
+        "freq": 7.56
+      },
+      {
+        "word": "ja",
+        "pos": "conj",
+        "freq": 7.56
+      },
+      {
+        "word": "ja",
+        "pos": "adv",
+        "freq": 7.56
+      },
+      {
+        "word": "ja",
+        "pos": "noun",
+        "freq": 7.56
+      },
+      {
+        "word": "ja.",
+        "pos": "noun",
+        "freq": 7.56
+      },
+      {
+        "word": "-on",
+        "pos": "suffix",
+        "freq": 7.5
+      },
+      {
+        "word": "on",
+        "pos": "verb",
+        "freq": 7.5
+      },
+      {
+        "word": "ei",
+        "pos": "verb",
+        "freq": 7.16
+      },
+      {
+        "word": "ei",
+        "pos": "intj",
+        "freq": 7.16
+      },
+      {
+        "word": "ei",
+        "pos": "noun",
+        "freq": 7.16
+      },
+      {
+        "word": "ei-",
+        "pos": "verb",
+        "freq": 7.16
+      },
+      {
+        "word": "että",
+        "pos": "conj",
+        "freq": 6.99
+      },
+      {
+        "word": "se",
+        "pos": "pron",
+        "freq": 6.89
+      },
+      {
+        "word": "se",
+        "pos": "det",
+        "freq": 6.89
+      },
+      {
+        "word": "se",
+        "pos": "intj",
+        "freq": 6.89
+      },
+      {
+        "word": "oli",
+        "pos": "verb",
+        "freq": 6.81
+      },
+      {
+        "word": "se on",
+        "pos": "conj",
+        "freq": 6.79
+      },
+      {
+        "word": "Mutta",
+        "pos": "name",
+        "freq": 6.76
+      },
+      {
+        "word": "mutta",
+        "pos": "conj",
+        "freq": 6.76
+      },
+      {
+        "word": "mutta",
+        "pos": "noun",
+        "freq": 6.76
+      }
+    ],
+    "search_probes": [
+      {
+        "word": "talo",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "vesi",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "olla",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "syödä",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "hyvä",
+        "present": true,
+        "fts_matches_all_records": true
+      }
+    ]
+  },
+  "fr": {
+    "artifact": "fr.sqlite.zst",
+    "download_bytes": 39433415,
+    "data_hash": "f341ae44",
+    "sqlite_bytes": 177295360,
+    "integrity_check": [
+      "ok"
+    ],
+    "fts_integrity": {
+      "entries_fts": "ok",
+      "fuzzy": "ok"
+    },
+    "fts_records": {
+      "entries_fts": 402072,
+      "fuzzy": 402072
+    },
+    "form_lookup_records": 389760,
+    "form_lookup_orphans": 0,
+    "language": "fr",
+    "records": 402072,
+    "unique_headwords": 389537,
+    "zero_frequency_records": 241160,
+    "frequency_range": [
+      0.0,
+      7.68
+    ],
+    "invalid_frequency_records": 0,
+    "highest_frequency": [
+      {
+        "word": "de",
+        "pos": "prep",
+        "freq": 7.68
+      },
+      {
+        "word": "de",
+        "pos": "article",
+        "freq": 7.68
+      },
+      {
+        "word": "de",
+        "pos": "noun",
+        "freq": 7.68
+      },
+      {
+        "word": "la",
+        "pos": "article",
+        "freq": 7.43
+      },
+      {
+        "word": "la",
+        "pos": "pron",
+        "freq": 7.43
+      },
+      {
+        "word": "la",
+        "pos": "noun",
+        "freq": 7.43
+      },
+      {
+        "word": "LE",
+        "pos": "noun",
+        "freq": 7.35
+      },
+      {
+        "word": "Le",
+        "pos": "name",
+        "freq": 7.35
+      },
+      {
+        "word": "le",
+        "pos": "article",
+        "freq": 7.35
+      },
+      {
+        "word": "le",
+        "pos": "pron",
+        "freq": 7.35
+      },
+      {
+        "word": "-et",
+        "pos": "suffix",
+        "freq": 7.31
+      },
+      {
+        "word": "et",
+        "pos": "conj",
+        "freq": 7.31
+      },
+      {
+        "word": "-l-",
+        "pos": "interfix",
+        "freq": 7.26
+      },
+      {
+        "word": "l'",
+        "pos": "article",
+        "freq": 7.26
+      },
+      {
+        "word": "l'",
+        "pos": "pron",
+        "freq": 7.26
+      },
+      {
+        "word": "à",
+        "pos": "prep",
+        "freq": 7.26
+      },
+      {
+        "word": "à +",
+        "pos": "intj",
+        "freq": 7.26
+      },
+      {
+        "word": "les",
+        "pos": "article",
+        "freq": 7.25
+      },
+      {
+        "word": "les",
+        "pos": "pron",
+        "freq": 7.25
+      },
+      {
+        "word": "de la",
+        "pos": "article",
+        "freq": 7.24
+      }
+    ],
+    "search_probes": [
+      {
+        "word": "maison",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "eau",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "être",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "manger",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "bon",
+        "present": true,
+        "fts_matches_all_records": true
+      }
+    ]
+  },
+  "gl": {
+    "artifact": "gl.sqlite.zst",
+    "download_bytes": 14788249,
+    "data_hash": "2b6da7ec",
+    "sqlite_bytes": 94478336,
+    "integrity_check": [
+      "ok"
+    ],
+    "fts_integrity": {
+      "entries_fts": "ok",
+      "fuzzy": "ok"
+    },
+    "fts_records": {
+      "entries_fts": 212893,
+      "fuzzy": 212893
+    },
+    "form_lookup_records": 263889,
+    "form_lookup_orphans": 0,
+    "language": "gl",
+    "records": 212893,
+    "unique_headwords": 208374,
+    "zero_frequency_records": 212893,
+    "frequency_range": [
+      0.0,
+      0.0
+    ],
+    "invalid_frequency_records": 0,
+    "highest_frequency": [
+      {
+        "word": "-able",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-aches",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-ación",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-ada",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-ada",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-ais",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-al",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-al",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-ança",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-ar",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-ar",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-aría",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-aría",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-axe",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-azo",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-bilidade",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-bre",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-cida",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-cida",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-cidio",
+        "pos": "suffix",
+        "freq": 0.0
+      }
+    ],
+    "search_probes": [
+      {
+        "word": "casa",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "auga",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "ser",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "comer",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "bo",
+        "present": true,
+        "fts_matches_all_records": true
+      }
+    ]
+  },
+  "hu": {
+    "artifact": "hu.sqlite.zst",
+    "download_bytes": 34110358,
+    "data_hash": "63c90087",
+    "sqlite_bytes": 166952960,
+    "integrity_check": [
+      "ok"
+    ],
+    "fts_integrity": {
+      "entries_fts": "ok",
+      "fuzzy": "ok"
+    },
+    "fts_records": {
+      "entries_fts": 78716,
+      "fuzzy": 78716
+    },
+    "form_lookup_records": 2181426,
+    "form_lookup_orphans": 0,
+    "language": "hu",
+    "records": 78716,
+    "unique_headwords": 72775,
+    "zero_frequency_records": 50502,
+    "frequency_range": [
+      0.0,
+      7.97
+    ],
+    "invalid_frequency_records": 0,
+    "highest_frequency": [
+      {
+        "word": "-a",
+        "pos": "suffix",
+        "freq": 7.97
+      },
+      {
+        "word": "-a",
+        "pos": "suffix",
+        "freq": 7.97
+      },
+      {
+        "word": "-a",
+        "pos": "suffix",
+        "freq": 7.97
+      },
+      {
+        "word": "-a",
+        "pos": "suffix",
+        "freq": 7.97
+      },
+      {
+        "word": "-a-",
+        "pos": "interfix",
+        "freq": 7.97
+      },
+      {
+        "word": "a",
+        "pos": "article",
+        "freq": 7.97
+      },
+      {
+        "word": "a",
+        "pos": "pron",
+        "freq": 7.97
+      },
+      {
+        "word": "a",
+        "pos": "det",
+        "freq": 7.97
+      },
+      {
+        "word": "-az",
+        "pos": "suffix",
+        "freq": 7.5
+      },
+      {
+        "word": "az",
+        "pos": "article",
+        "freq": 7.5
+      },
+      {
+        "word": "az",
+        "pos": "pron",
+        "freq": 7.5
+      },
+      {
+        "word": "az",
+        "pos": "det",
+        "freq": 7.5
+      },
+      {
+        "word": "-és",
+        "pos": "suffix",
+        "freq": 7.35
+      },
+      {
+        "word": "és",
+        "pos": "conj",
+        "freq": 7.35
+      },
+      {
+        "word": "-nem",
+        "pos": "suffix",
+        "freq": 7.23
+      },
+      {
+        "word": "nem",
+        "pos": "adv",
+        "freq": 7.23
+      },
+      {
+        "word": "nem",
+        "pos": "intj",
+        "freq": 7.23
+      },
+      {
+        "word": "nem",
+        "pos": "noun",
+        "freq": 7.23
+      },
+      {
+        "word": "nem",
+        "pos": "noun",
+        "freq": 7.23
+      },
+      {
+        "word": "hogy",
+        "pos": "adv",
+        "freq": 7.18
+      }
+    ],
+    "search_probes": [
+      {
+        "word": "ház",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "víz",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "van",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "eszik",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "jó",
+        "present": true,
+        "fts_matches_all_records": true
+      }
+    ]
+  },
+  "id": {
+    "artifact": "id.sqlite.zst",
+    "download_bytes": 7068036,
+    "data_hash": "8c2fa11a",
+    "sqlite_bytes": 28647424,
+    "integrity_check": [
+      "ok"
+    ],
+    "fts_integrity": {
+      "entries_fts": "ok",
+      "fuzzy": "ok"
+    },
+    "fts_records": {
+      "entries_fts": 39938,
+      "fuzzy": 39938
+    },
+    "form_lookup_records": 43569,
+    "form_lookup_orphans": 0,
+    "language": "id",
+    "records": 39938,
+    "unique_headwords": 34781,
+    "zero_frequency_records": 18261,
+    "frequency_range": [
+      0.0,
+      7.47
+    ],
+    "invalid_frequency_records": 0,
+    "highest_frequency": [
+      {
+        "word": "yang",
+        "pos": "conj",
+        "freq": 7.47
+      },
+      {
+        "word": "yang",
+        "pos": "pron",
+        "freq": 7.47
+      },
+      {
+        "word": "yang",
+        "pos": "noun",
+        "freq": 7.47
+      },
+      {
+        "word": "yang",
+        "pos": "noun",
+        "freq": 7.47
+      },
+      {
+        "word": "yang",
+        "pos": "noun",
+        "freq": 7.47
+      },
+      {
+        "word": "dan",
+        "pos": "conj",
+        "freq": 7.38
+      },
+      {
+        "word": "dan",
+        "pos": "noun",
+        "freq": 7.38
+      },
+      {
+        "word": "di",
+        "pos": "prep",
+        "freq": 7.27
+      },
+      {
+        "word": "di-",
+        "pos": "prefix",
+        "freq": 7.27
+      },
+      {
+        "word": "ini",
+        "pos": "adv",
+        "freq": 7.18
+      },
+      {
+        "word": "ini",
+        "pos": "det",
+        "freq": 7.18
+      },
+      {
+        "word": "ini",
+        "pos": "pron",
+        "freq": 7.18
+      },
+      {
+        "word": "ini",
+        "pos": "noun",
+        "freq": 7.18
+      },
+      {
+        "word": "yang-yang",
+        "pos": "noun",
+        "freq": 7.17
+      },
+      {
+        "word": "dari",
+        "pos": "prep",
+        "freq": 7.03
+      },
+      {
+        "word": "untuk",
+        "pos": "prep",
+        "freq": 7.02
+      },
+      {
+        "word": "untuk",
+        "pos": "particle",
+        "freq": 7.02
+      },
+      {
+        "word": "untuk",
+        "pos": "prep",
+        "freq": 7.02
+      },
+      {
+        "word": "dengan",
+        "pos": "prep",
+        "freq": 6.99
+      },
+      {
+        "word": "itu",
+        "pos": "det",
+        "freq": 6.97
+      }
+    ],
+    "search_probes": [
+      {
+        "word": "rumah",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "air",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "ada",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "makan",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "baik",
+        "present": true,
+        "fts_matches_all_records": true
+      }
+    ]
+  },
+  "it": {
+    "artifact": "it.sqlite.zst",
+    "download_bytes": 56724207,
+    "data_hash": "45cad447",
+    "sqlite_bytes": 271806464,
+    "integrity_check": [
+      "ok"
+    ],
+    "fts_integrity": {
+      "entries_fts": "ok",
+      "fuzzy": "ok"
+    },
+    "fts_records": {
+      "entries_fts": 623265,
+      "fuzzy": 623265
+    },
+    "form_lookup_records": 768576,
+    "form_lookup_orphans": 0,
+    "language": "it",
+    "records": 623265,
+    "unique_headwords": 589097,
+    "zero_frequency_records": 420270,
+    "frequency_range": [
+      0.0,
+      7.59
+    ],
+    "invalid_frequency_records": 0,
+    "highest_frequency": [
+      {
+        "word": "di",
+        "pos": "prep",
+        "freq": 7.59
+      },
+      {
+        "word": "di",
+        "pos": "noun",
+        "freq": 7.59
+      },
+      {
+        "word": "di'",
+        "pos": "verb",
+        "freq": 7.59
+      },
+      {
+        "word": "di-",
+        "pos": "prefix",
+        "freq": 7.59
+      },
+      {
+        "word": "di-",
+        "pos": "prefix",
+        "freq": 7.59
+      },
+      {
+        "word": "-e",
+        "pos": "suffix",
+        "freq": 7.46
+      },
+      {
+        "word": "-e",
+        "pos": "suffix",
+        "freq": 7.46
+      },
+      {
+        "word": "-e",
+        "pos": "suffix",
+        "freq": 7.46
+      },
+      {
+        "word": "E",
+        "pos": "noun",
+        "freq": 7.46
+      },
+      {
+        "word": "e",
+        "pos": "noun",
+        "freq": 7.46
+      },
+      {
+        "word": "e",
+        "pos": "conj",
+        "freq": 7.46
+      },
+      {
+        "word": "e",
+        "pos": "verb",
+        "freq": 7.46
+      },
+      {
+        "word": "e'",
+        "pos": "verb",
+        "freq": 7.46
+      },
+      {
+        "word": "e'",
+        "pos": "pron",
+        "freq": 7.46
+      },
+      {
+        "word": "e'",
+        "pos": "pron",
+        "freq": 7.46
+      },
+      {
+        "word": "che",
+        "pos": "pron",
+        "freq": 7.36
+      },
+      {
+        "word": "che",
+        "pos": "conj",
+        "freq": 7.36
+      },
+      {
+        "word": "che",
+        "pos": "det",
+        "freq": 7.36
+      },
+      {
+        "word": "che",
+        "pos": "conj",
+        "freq": 7.36
+      },
+      {
+        "word": "il",
+        "pos": "article",
+        "freq": 7.32
+      }
+    ],
+    "search_probes": [
+      {
+        "word": "casa",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "acqua",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "essere",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "mangiare",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "buono",
+        "present": true,
+        "fts_matches_all_records": true
+      }
+    ]
+  },
+  "la": {
+    "artifact": "la.sqlite.zst",
+    "download_bytes": 72908078,
+    "data_hash": "a805ace8",
+    "sqlite_bytes": 454684672,
+    "integrity_check": [
+      "ok"
+    ],
+    "fts_integrity": {
+      "entries_fts": "ok",
+      "fuzzy": "ok"
+    },
+    "fts_records": {
+      "entries_fts": 886587,
+      "fuzzy": 886587
+    },
+    "form_lookup_records": 1830173,
+    "form_lookup_orphans": 0,
+    "language": "la",
+    "records": 886587,
+    "unique_headwords": 836753,
+    "zero_frequency_records": 886587,
+    "frequency_range": [
+      0.0,
+      0.0
+    ],
+    "invalid_frequency_records": 0,
+    "highest_frequency": [
+      {
+        "word": "&",
+        "pos": "conj",
+        "freq": 0.0
+      },
+      {
+        "word": "&̄",
+        "pos": "conj",
+        "freq": 0.0
+      },
+      {
+        "word": "'s",
+        "pos": "verb",
+        "freq": 0.0
+      },
+      {
+        "word": "-&",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-a",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-a",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-a",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-a",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-a",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-a",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-abam",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-abamini",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-abamur",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-abamus",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-abant",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-abantur",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-abar",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-abare",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-abaris",
+        "pos": "suffix",
+        "freq": 0.0
+      },
+      {
+        "word": "-abas",
+        "pos": "suffix",
+        "freq": 0.0
+      }
+    ],
+    "search_probes": [
+      {
+        "word": "domus",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "aqua",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "sum",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "edo",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "bonus",
+        "present": true,
+        "fts_matches_all_records": true
+      }
+    ]
+  },
+  "nb": {
+    "artifact": "nb.sqlite.zst",
+    "download_bytes": 9020549,
+    "data_hash": "59421dbd",
+    "sqlite_bytes": 37343232,
+    "integrity_check": [
+      "ok"
+    ],
+    "fts_integrity": {
+      "entries_fts": "ok",
+      "fuzzy": "ok"
+    },
+    "fts_records": {
+      "entries_fts": 79310,
+      "fuzzy": 79310
+    },
+    "form_lookup_records": 88589,
+    "form_lookup_orphans": 0,
+    "language": "nb",
+    "records": 79310,
+    "unique_headwords": 74829,
+    "zero_frequency_records": 21250,
+    "frequency_range": [
+      0.0,
+      7.48
+    ],
+    "invalid_frequency_records": 0,
+    "highest_frequency": [
+      {
+        "word": "I",
+        "pos": "noun",
+        "freq": 7.48
+      },
+      {
+        "word": "I",
+        "pos": "pron",
+        "freq": 7.48
+      },
+      {
+        "word": "og",
+        "pos": "conj",
+        "freq": 7.46
+      },
+      {
+        "word": "-er",
+        "pos": "suffix",
+        "freq": 7.45
+      },
+      {
+        "word": "-er",
+        "pos": "suffix",
+        "freq": 7.45
+      },
+      {
+        "word": "-er",
+        "pos": "suffix",
+        "freq": 7.45
+      },
+      {
+        "word": "er",
+        "pos": "verb",
+        "freq": 7.45
+      },
+      {
+        "word": "det",
+        "pos": "pron",
+        "freq": 7.43
+      },
+      {
+        "word": "det",
+        "pos": "pron",
+        "freq": 7.43
+      },
+      {
+        "word": "det",
+        "pos": "article",
+        "freq": 7.43
+      },
+      {
+        "word": "Å",
+        "pos": "noun",
+        "freq": 7.32
+      },
+      {
+        "word": "Å",
+        "pos": "name",
+        "freq": 7.32
+      },
+      {
+        "word": "å",
+        "pos": "noun",
+        "freq": 7.32
+      },
+      {
+        "word": "å",
+        "pos": "noun",
+        "freq": 7.32
+      },
+      {
+        "word": "å",
+        "pos": "particle",
+        "freq": 7.32
+      },
+      {
+        "word": "å",
+        "pos": "intj",
+        "freq": 7.32
+      },
+      {
+        "word": "å",
+        "pos": "pron",
+        "freq": 7.32
+      },
+      {
+        "word": "å",
+        "pos": "adv",
+        "freq": 7.32
+      },
+      {
+        "word": "å",
+        "pos": "prep",
+        "freq": 7.32
+      },
+      {
+        "word": "på",
+        "pos": "prep",
+        "freq": 7.24
+      }
+    ],
+    "search_probes": [
+      {
+        "word": "hus",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "vann",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "være",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "spise",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "god",
+        "present": true,
+        "fts_matches_all_records": true
+      }
+    ]
+  },
+  "nl": {
+    "artifact": "nl.sqlite.zst",
+    "download_bytes": 20174670,
+    "data_hash": "76655a10",
+    "sqlite_bytes": 83841024,
+    "integrity_check": [
+      "ok"
+    ],
+    "fts_integrity": {
+      "entries_fts": "ok",
+      "fuzzy": "ok"
+    },
+    "fts_records": {
+      "entries_fts": 146408,
+      "fuzzy": 146408
+    },
+    "form_lookup_records": 197591,
+    "form_lookup_orphans": 0,
+    "language": "nl",
+    "records": 146408,
+    "unique_headwords": 138624,
+    "zero_frequency_records": 52948,
+    "frequency_range": [
+      0.0,
+      7.73
+    ],
+    "invalid_frequency_records": 0,
+    "highest_frequency": [
+      {
+        "word": "-de",
+        "pos": "suffix",
+        "freq": 7.73
+      },
+      {
+        "word": "-de",
+        "pos": "suffix",
+        "freq": 7.73
+      },
+      {
+        "word": "-de",
+        "pos": "suffix",
+        "freq": 7.73
+      },
+      {
+        "word": "de",
+        "pos": "article",
+        "freq": 7.73
+      },
+      {
+        "word": "de",
+        "pos": "prep",
+        "freq": 7.73
+      },
+      {
+        "word": "de-",
+        "pos": "prefix",
+        "freq": 7.73
+      },
+      {
+        "word": "van",
+        "pos": "prep",
+        "freq": 7.51
+      },
+      {
+        "word": "van",
+        "pos": "adv",
+        "freq": 7.51
+      },
+      {
+        "word": "van",
+        "pos": "noun",
+        "freq": 7.51
+      },
+      {
+        "word": "het",
+        "pos": "article",
+        "freq": 7.49
+      },
+      {
+        "word": "het",
+        "pos": "pron",
+        "freq": 7.49
+      },
+      {
+        "word": "-een",
+        "pos": "suffix",
+        "freq": 7.41
+      },
+      {
+        "word": "Een",
+        "pos": "name",
+        "freq": 7.41
+      },
+      {
+        "word": "een",
+        "pos": "article",
+        "freq": 7.41
+      },
+      {
+        "word": "een",
+        "pos": "num",
+        "freq": 7.41
+      },
+      {
+        "word": "een",
+        "pos": "noun",
+        "freq": 7.41
+      },
+      {
+        "word": "een'",
+        "pos": "article",
+        "freq": 7.41
+      },
+      {
+        "word": "-en",
+        "pos": "suffix",
+        "freq": 7.4
+      },
+      {
+        "word": "-en",
+        "pos": "suffix",
+        "freq": 7.4
+      },
+      {
+        "word": "-en",
+        "pos": "suffix",
+        "freq": 7.4
+      }
+    ],
+    "search_probes": [
+      {
+        "word": "huis",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "water",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "zijn",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "eten",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "goed",
+        "present": true,
+        "fts_matches_all_records": true
+      }
+    ]
+  },
+  "pl": {
+    "artifact": "pl.sqlite.zst",
+    "download_bytes": 32549688,
+    "data_hash": "752dfcfe",
+    "sqlite_bytes": 140300288,
+    "integrity_check": [
+      "ok"
+    ],
+    "fts_integrity": {
+      "entries_fts": "ok",
+      "fuzzy": "ok"
+    },
+    "fts_records": {
+      "entries_fts": 199136,
+      "fuzzy": 199136
+    },
+    "form_lookup_records": 674841,
+    "form_lookup_orphans": 0,
+    "language": "pl",
+    "records": 199136,
+    "unique_headwords": 175830,
+    "zero_frequency_records": 85970,
+    "frequency_range": [
+      0.0,
+      7.55
+    ],
+    "invalid_frequency_records": 0,
+    "highest_frequency": [
+      {
+        "word": "w",
+        "pos": "prep",
+        "freq": 7.55
+      },
+      {
+        "word": "w-",
+        "pos": "prefix",
+        "freq": 7.55
+      },
+      {
+        "word": "-i",
+        "pos": "suffix",
+        "freq": 7.42
+      },
+      {
+        "word": "-i-",
+        "pos": "interfix",
+        "freq": 7.42
+      },
+      {
+        "word": "nie",
+        "pos": "particle",
+        "freq": 7.37
+      },
+      {
+        "word": "nie",
+        "pos": "verb",
+        "freq": 7.37
+      },
+      {
+        "word": "nie",
+        "pos": "pron",
+        "freq": 7.37
+      },
+      {
+        "word": "nie-",
+        "pos": "prefix",
+        "freq": 7.37
+      },
+      {
+        "word": "nie-",
+        "pos": "prefix",
+        "freq": 7.37
+      },
+      {
+        "word": "-na",
+        "pos": "suffix",
+        "freq": 7.34
+      },
+      {
+        "word": "na",
+        "pos": "prep",
+        "freq": 7.34
+      },
+      {
+        "word": "na",
+        "pos": "adj",
+        "freq": 7.34
+      },
+      {
+        "word": "na",
+        "pos": "intj",
+        "freq": 7.34
+      },
+      {
+        "word": "na-",
+        "pos": "prefix",
+        "freq": 7.34
+      },
+      {
+        "word": "się",
+        "pos": "pron",
+        "freq": 7.3
+      },
+      {
+        "word": "się",
+        "pos": "particle",
+        "freq": 7.3
+      },
+      {
+        "word": "to",
+        "pos": "conj",
+        "freq": 7.29
+      },
+      {
+        "word": "to",
+        "pos": "particle",
+        "freq": 7.29
+      },
+      {
+        "word": "to",
+        "pos": "pron",
+        "freq": 7.29
+      },
+      {
+        "word": "z",
+        "pos": "prep",
+        "freq": 7.29
+      }
+    ],
+    "search_probes": [
+      {
+        "word": "dom",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "woda",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "być",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "jeść",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "dobry",
+        "present": true,
+        "fts_matches_all_records": true
+      }
+    ]
+  },
+  "pt": {
+    "artifact": "pt.sqlite.zst",
+    "download_bytes": 40762148,
+    "data_hash": "b6345891",
+    "sqlite_bytes": 197091328,
+    "integrity_check": [
+      "ok"
+    ],
+    "fts_integrity": {
+      "entries_fts": "ok",
+      "fuzzy": "ok"
+    },
+    "fts_records": {
+      "entries_fts": 445852,
+      "fuzzy": 445852
+    },
+    "form_lookup_records": 496676,
+    "form_lookup_orphans": 0,
+    "language": "pt",
+    "records": 445852,
+    "unique_headwords": 424916,
+    "zero_frequency_records": 297275,
+    "frequency_range": [
+      0.0,
+      7.68
+    ],
+    "invalid_frequency_records": 0,
+    "highest_frequency": [
+      {
+        "word": "de",
+        "pos": "prep",
+        "freq": 7.68
+      },
+      {
+        "word": "de-",
+        "pos": "prefix",
+        "freq": 7.68
+      },
+      {
+        "word": "-a",
+        "pos": "suffix",
+        "freq": 7.52
+      },
+      {
+        "word": "-a",
+        "pos": "suffix",
+        "freq": 7.52
+      },
+      {
+        "word": "-a",
+        "pos": "suffix",
+        "freq": 7.52
+      },
+      {
+        "word": "-a",
+        "pos": "suffix",
+        "freq": 7.52
+      },
+      {
+        "word": "-a",
+        "pos": "suffix",
+        "freq": 7.52
+      },
+      {
+        "word": "-a",
+        "pos": "suffix",
+        "freq": 7.52
+      },
+      {
+        "word": "A",
+        "pos": "noun",
+        "freq": 7.52
+      },
+      {
+        "word": "a",
+        "pos": "noun",
+        "freq": 7.52
+      },
+      {
+        "word": "a",
+        "pos": "article",
+        "freq": 7.52
+      },
+      {
+        "word": "a",
+        "pos": "pron",
+        "freq": 7.52
+      },
+      {
+        "word": "a",
+        "pos": "prep",
+        "freq": 7.52
+      },
+      {
+        "word": "a",
+        "pos": "intj",
+        "freq": 7.52
+      },
+      {
+        "word": "a",
+        "pos": "verb",
+        "freq": 7.52
+      },
+      {
+        "word": "a",
+        "pos": "contraction",
+        "freq": 7.52
+      },
+      {
+        "word": "a-",
+        "pos": "prefix",
+        "freq": 7.52
+      },
+      {
+        "word": "a-",
+        "pos": "prefix",
+        "freq": 7.52
+      },
+      {
+        "word": "-o",
+        "pos": "suffix",
+        "freq": 7.47
+      },
+      {
+        "word": "-o",
+        "pos": "suffix",
+        "freq": 7.47
+      }
+    ],
+    "search_probes": [
+      {
+        "word": "casa",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "água",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "ser",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "comer",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "bom",
+        "present": true,
+        "fts_matches_all_records": true
+      }
+    ]
+  },
+  "ro": {
+    "artifact": "ro.sqlite.zst",
+    "download_bytes": 21824955,
+    "data_hash": "68b4243d",
+    "sqlite_bytes": 84815872,
+    "integrity_check": [
+      "ok"
+    ],
+    "fts_integrity": {
+      "entries_fts": "ok",
+      "fuzzy": "ok"
+    },
+    "fts_records": {
+      "entries_fts": 130299,
+      "fuzzy": 130299
+    },
+    "form_lookup_records": 748847,
+    "form_lookup_orphans": 0,
+    "language": "ro",
+    "records": 130299,
+    "unique_headwords": 125082,
+    "zero_frequency_records": 104476,
+    "frequency_range": [
+      0.0,
+      7.72
+    ],
+    "invalid_frequency_records": 0,
+    "highest_frequency": [
+      {
+        "word": "de",
+        "pos": "conj",
+        "freq": 7.72
+      },
+      {
+        "word": "de",
+        "pos": "prep",
+        "freq": 7.72
+      },
+      {
+        "word": "de",
+        "pos": "pron",
+        "freq": 7.72
+      },
+      {
+        "word": "în",
+        "pos": "prep",
+        "freq": 7.47
+      },
+      {
+        "word": "în-",
+        "pos": "prefix",
+        "freq": 7.47
+      },
+      {
+        "word": "și",
+        "pos": "conj",
+        "freq": 7.46
+      },
+      {
+        "word": "și",
+        "pos": "adv",
+        "freq": 7.46
+      },
+      {
+        "word": "și",
+        "pos": "pron",
+        "freq": 7.46
+      },
+      {
+        "word": "-a",
+        "pos": "suffix",
+        "freq": 7.45
+      },
+      {
+        "word": "-a",
+        "pos": "suffix",
+        "freq": 7.45
+      },
+      {
+        "word": "a",
+        "pos": "article",
+        "freq": 7.45
+      },
+      {
+        "word": "a",
+        "pos": "prep",
+        "freq": 7.45
+      },
+      {
+        "word": "a",
+        "pos": "verb",
+        "freq": 7.45
+      },
+      {
+        "word": "de-și",
+        "pos": "contraction",
+        "freq": 7.27
+      },
+      {
+        "word": "de-a",
+        "pos": "contraction",
+        "freq": 7.26
+      },
+      {
+        "word": "la",
+        "pos": "prep",
+        "freq": 7.21
+      },
+      {
+        "word": "la",
+        "pos": "verb",
+        "freq": 7.21
+      },
+      {
+        "word": "a-și",
+        "pos": "contraction",
+        "freq": 7.16
+      },
+      {
+        "word": "și-a",
+        "pos": "contraction",
+        "freq": 7.16
+      },
+      {
+        "word": "și-și",
+        "pos": "contraction",
+        "freq": 7.16
+      }
+    ],
+    "search_probes": [
+      {
+        "word": "casă",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "apă",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "fi",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "mânca",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "bun",
+        "present": true,
+        "fts_matches_all_records": true
+      }
+    ]
+  },
+  "ru": {
+    "artifact": "ru.sqlite.zst",
+    "download_bytes": 68055096,
+    "data_hash": "c84322e9",
+    "sqlite_bytes": 362938368,
+    "integrity_check": [
+      "ok"
+    ],
+    "fts_integrity": {
+      "entries_fts": "ok",
+      "fuzzy": "ok"
+    },
+    "fts_records": {
+      "entries_fts": 442326,
+      "fuzzy": 442326
+    },
+    "form_lookup_records": 1474363,
+    "form_lookup_orphans": 0,
+    "language": "ru",
+    "records": 442326,
+    "unique_headwords": 427517,
+    "zero_frequency_records": 193724,
+    "frequency_range": [
+      0.0,
+      7.63
+    ],
+    "invalid_frequency_records": 0,
+    "highest_frequency": [
+      {
+        "word": "В",
+        "pos": "noun",
+        "freq": 7.63
+      },
+      {
+        "word": "В.",
+        "pos": "noun",
+        "freq": 7.63
+      },
+      {
+        "word": "в",
+        "pos": "prep",
+        "freq": 7.63
+      },
+      {
+        "word": "в",
+        "pos": "noun",
+        "freq": 7.63
+      },
+      {
+        "word": "в-",
+        "pos": "prefix",
+        "freq": 7.63
+      },
+      {
+        "word": "в.",
+        "pos": "noun",
+        "freq": 7.63
+      },
+      {
+        "word": "-и-",
+        "pos": "interfix",
+        "freq": 7.47
+      },
+      {
+        "word": "И",
+        "pos": "noun",
+        "freq": 7.47
+      },
+      {
+        "word": "и",
+        "pos": "noun",
+        "freq": 7.47
+      },
+      {
+        "word": "и",
+        "pos": "conj",
+        "freq": 7.47
+      },
+      {
+        "word": "и",
+        "pos": "particle",
+        "freq": 7.47
+      },
+      {
+        "word": "и",
+        "pos": "noun",
+        "freq": 7.47
+      },
+      {
+        "word": "на",
+        "pos": "prep",
+        "freq": 7.25
+      },
+      {
+        "word": "на",
+        "pos": "intj",
+        "freq": 7.25
+      },
+      {
+        "word": "на-",
+        "pos": "prefix",
+        "freq": 7.25
+      },
+      {
+        "word": "не",
+        "pos": "particle",
+        "freq": 7.2
+      },
+      {
+        "word": "не",
+        "pos": "intj",
+        "freq": 7.2
+      },
+      {
+        "word": "не-",
+        "pos": "prefix",
+        "freq": 7.2
+      },
+      {
+        "word": "-с",
+        "pos": "suffix",
+        "freq": 7.14
+      },
+      {
+        "word": "С",
+        "pos": "noun",
+        "freq": 7.14
+      }
+    ],
+    "search_probes": [
+      {
+        "word": "дом",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "вода",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "быть",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "есть",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "хороший",
+        "present": true,
+        "fts_matches_all_records": true
+      }
+    ]
+  },
+  "sv": {
+    "artifact": "sv.sqlite.zst",
+    "download_bytes": 31938382,
+    "data_hash": "5e53f10c",
+    "sqlite_bytes": 137809920,
+    "integrity_check": [
+      "ok"
+    ],
+    "fts_integrity": {
+      "entries_fts": "ok",
+      "fuzzy": "ok"
+    },
+    "fts_records": {
+      "entries_fts": 313174,
+      "fuzzy": 313174
+    },
+    "form_lookup_records": 281920,
+    "form_lookup_orphans": 0,
+    "language": "sv",
+    "records": 313174,
+    "unique_headwords": 303463,
+    "zero_frequency_records": 178244,
+    "frequency_range": [
+      0.0,
+      7.52
+    ],
+    "invalid_frequency_records": 0,
+    "highest_frequency": [
+      {
+        "word": "-är",
+        "pos": "suffix",
+        "freq": 7.52
+      },
+      {
+        "word": "är",
+        "pos": "verb",
+        "freq": 7.52
+      },
+      {
+        "word": "det",
+        "pos": "pron",
+        "freq": 7.45
+      },
+      {
+        "word": "det",
+        "pos": "pron",
+        "freq": 7.45
+      },
+      {
+        "word": "det",
+        "pos": "noun",
+        "freq": 7.45
+      },
+      {
+        "word": "det",
+        "pos": "article",
+        "freq": 7.45
+      },
+      {
+        "word": "att",
+        "pos": "particle",
+        "freq": 7.42
+      },
+      {
+        "word": "att",
+        "pos": "conj",
+        "freq": 7.42
+      },
+      {
+        "word": "och",
+        "pos": "conj",
+        "freq": 7.42
+      },
+      {
+        "word": "och",
+        "pos": "intj",
+        "freq": 7.42
+      },
+      {
+        "word": "och",
+        "pos": "particle",
+        "freq": 7.42
+      },
+      {
+        "word": "-i",
+        "pos": "suffix",
+        "freq": 7.38
+      },
+      {
+        "word": "I",
+        "pos": "pron",
+        "freq": 7.38
+      },
+      {
+        "word": "jag",
+        "pos": "pron",
+        "freq": 7.28
+      },
+      {
+        "word": "jag",
+        "pos": "noun",
+        "freq": 7.28
+      },
+      {
+        "word": "på",
+        "pos": "prep",
+        "freq": 7.26
+      },
+      {
+        "word": "på",
+        "pos": "adj",
+        "freq": 7.26
+      },
+      {
+        "word": "-en",
+        "pos": "suffix",
+        "freq": 7.25
+      },
+      {
+        "word": "-en",
+        "pos": "suffix",
+        "freq": 7.25
+      },
+      {
+        "word": "-en",
+        "pos": "suffix",
+        "freq": 7.25
+      }
+    ],
+    "search_probes": [
+      {
+        "word": "hus",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "vatten",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "vara",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "äta",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "bra",
+        "present": true,
+        "fts_matches_all_records": true
+      }
+    ]
+  },
+  "tr": {
+    "artifact": "tr.sqlite.zst",
+    "download_bytes": 32759542,
+    "data_hash": "2c177d23",
+    "sqlite_bytes": 184344576,
+    "integrity_check": [
+      "ok"
+    ],
+    "fts_integrity": {
+      "entries_fts": "ok",
+      "fuzzy": "ok"
+    },
+    "fts_records": {
+      "entries_fts": 45833,
+      "fuzzy": 45833
+    },
+    "form_lookup_records": 2866756,
+    "form_lookup_orphans": 0,
+    "language": "tr",
+    "records": 45833,
+    "unique_headwords": 42072,
+    "zero_frequency_records": 22991,
+    "frequency_range": [
+      0.0,
+      7.37
+    ],
+    "invalid_frequency_records": 0,
+    "highest_frequency": [
+      {
+        "word": "ve",
+        "pos": "noun",
+        "freq": 7.37
+      },
+      {
+        "word": "ve",
+        "pos": "conj",
+        "freq": 7.37
+      },
+      {
+        "word": "bir",
+        "pos": "num",
+        "freq": 7.34
+      },
+      {
+        "word": "bir",
+        "pos": "adj",
+        "freq": 7.34
+      },
+      {
+        "word": "bir",
+        "pos": "adv",
+        "freq": 7.34
+      },
+      {
+        "word": "bir",
+        "pos": "det",
+        "freq": 7.34
+      },
+      {
+        "word": "bir",
+        "pos": "pron",
+        "freq": 7.34
+      },
+      {
+        "word": "bir",
+        "pos": "noun",
+        "freq": 7.34
+      },
+      {
+        "word": "bu",
+        "pos": "pron",
+        "freq": 7.11
+      },
+      {
+        "word": "bu",
+        "pos": "det",
+        "freq": 7.11
+      },
+      {
+        "word": "için",
+        "pos": "postp",
+        "freq": 6.9
+      },
+      {
+        "word": "için",
+        "pos": "noun",
+        "freq": 6.9
+      },
+      {
+        "word": "için",
+        "pos": "verb",
+        "freq": 6.9
+      },
+      {
+        "word": "-de",
+        "pos": "suffix",
+        "freq": 6.87
+      },
+      {
+        "word": "de",
+        "pos": "conj",
+        "freq": 6.87
+      },
+      {
+        "word": "de",
+        "pos": "verb",
+        "freq": 6.87
+      },
+      {
+        "word": "de",
+        "pos": "noun",
+        "freq": 6.87
+      },
+      {
+        "word": "-da",
+        "pos": "suffix",
+        "freq": 6.81
+      },
+      {
+        "word": "-da",
+        "pos": "suffix",
+        "freq": 6.81
+      },
+      {
+        "word": "-da",
+        "pos": "suffix",
+        "freq": 6.81
+      }
+    ],
+    "search_probes": [
+      {
+        "word": "ev",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "su",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "olmak",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "yemek",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "iyi",
+        "present": true,
+        "fts_matches_all_records": true
+      }
+    ]
+  },
+  "uk": {
+    "artifact": "uk.sqlite.zst",
+    "download_bytes": 15635478,
+    "data_hash": "7dbf4451",
+    "sqlite_bytes": 76083200,
+    "integrity_check": [
+      "ok"
+    ],
+    "fts_integrity": {
+      "entries_fts": "ok",
+      "fuzzy": "ok"
+    },
+    "fts_records": {
+      "entries_fts": 59693,
+      "fuzzy": 59693
+    },
+    "form_lookup_records": 465940,
+    "form_lookup_orphans": 0,
+    "language": "uk",
+    "records": 59693,
+    "unique_headwords": 55447,
+    "zero_frequency_records": 10813,
+    "frequency_range": [
+      0.0,
+      7.4
+    ],
+    "invalid_frequency_records": 0,
+    "highest_frequency": [
+      {
+        "word": "-в",
+        "pos": "suffix",
+        "freq": 7.4
+      },
+      {
+        "word": "в",
+        "pos": "prep",
+        "freq": 7.4
+      },
+      {
+        "word": "в-",
+        "pos": "prefix",
+        "freq": 7.4
+      },
+      {
+        "word": "в-",
+        "pos": "prefix",
+        "freq": 7.4
+      },
+      {
+        "word": "-на",
+        "pos": "suffix",
+        "freq": 7.36
+      },
+      {
+        "word": "-на",
+        "pos": "suffix",
+        "freq": 7.36
+      },
+      {
+        "word": "-на",
+        "pos": "suffix",
+        "freq": 7.36
+      },
+      {
+        "word": "на",
+        "pos": "prep",
+        "freq": 7.36
+      },
+      {
+        "word": "на",
+        "pos": "intj",
+        "freq": 7.36
+      },
+      {
+        "word": "на-",
+        "pos": "prefix",
+        "freq": 7.36
+      },
+      {
+        "word": "-не",
+        "pos": "suffix",
+        "freq": 7.35
+      },
+      {
+        "word": "-не",
+        "pos": "suffix",
+        "freq": 7.35
+      },
+      {
+        "word": "-не",
+        "pos": "suffix",
+        "freq": 7.35
+      },
+      {
+        "word": "не",
+        "pos": "adv",
+        "freq": 7.35
+      },
+      {
+        "word": "не-",
+        "pos": "prefix",
+        "freq": 7.35
+      },
+      {
+        "word": "-і",
+        "pos": "suffix",
+        "freq": 7.31
+      },
+      {
+        "word": "-і",
+        "pos": "suffix",
+        "freq": 7.31
+      },
+      {
+        "word": "-і",
+        "pos": "suffix",
+        "freq": 7.31
+      },
+      {
+        "word": "-і",
+        "pos": "suffix",
+        "freq": 7.31
+      },
+      {
+        "word": "-і",
+        "pos": "suffix",
+        "freq": 7.31
+      }
+    ],
+    "search_probes": [
+      {
+        "word": "дім",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "вода",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "бути",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "їсти",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "добрий",
+        "present": true,
+        "fts_matches_all_records": true
+      }
+    ]
+  },
+  "vi": {
+    "artifact": "vi.sqlite.zst",
+    "download_bytes": 6640826,
+    "data_hash": "ec120c14",
+    "sqlite_bytes": 26910720,
+    "integrity_check": [
+      "ok"
+    ],
+    "fts_integrity": {
+      "entries_fts": "ok",
+      "fuzzy": "ok"
+    },
+    "fts_records": {
+      "entries_fts": 42049,
+      "fuzzy": 42049
+    },
+    "form_lookup_records": 17875,
+    "form_lookup_orphans": 0,
+    "language": "vi",
+    "records": 42049,
+    "unique_headwords": 36386,
+    "zero_frequency_records": 9941,
+    "frequency_range": [
+      0.0,
+      7.26
+    ],
+    "invalid_frequency_records": 0,
+    "highest_frequency": [
+      {
+        "word": "là",
+        "pos": "noun",
+        "freq": 7.26
+      },
+      {
+        "word": "là",
+        "pos": "verb",
+        "freq": 7.26
+      },
+      {
+        "word": "là",
+        "pos": "conj",
+        "freq": 7.26
+      },
+      {
+        "word": "là",
+        "pos": "particle",
+        "freq": 7.26
+      },
+      {
+        "word": "là",
+        "pos": "verb",
+        "freq": 7.26
+      },
+      {
+        "word": "là",
+        "pos": "verb",
+        "freq": 7.26
+      },
+      {
+        "word": "là",
+        "pos": "verb",
+        "freq": 7.26
+      },
+      {
+        "word": "là",
+        "pos": "combining_form",
+        "freq": 7.26
+      },
+      {
+        "word": "và",
+        "pos": "conj",
+        "freq": 7.17
+      },
+      {
+        "word": "và",
+        "pos": "verb",
+        "freq": 7.17
+      },
+      {
+        "word": "và",
+        "pos": "det",
+        "freq": 7.17
+      },
+      {
+        "word": "có",
+        "pos": "verb",
+        "freq": 7.13
+      },
+      {
+        "word": "có",
+        "pos": "noun",
+        "freq": 7.13
+      },
+      {
+        "word": "có",
+        "pos": "adj",
+        "freq": 7.13
+      },
+      {
+        "word": "có",
+        "pos": "adv",
+        "freq": 7.13
+      },
+      {
+        "word": "có",
+        "pos": "intj",
+        "freq": 7.13
+      },
+      {
+        "word": "có",
+        "pos": "combining_form",
+        "freq": 7.13
+      },
+      {
+        "word": "của",
+        "pos": "noun",
+        "freq": 7.1
+      },
+      {
+        "word": "của",
+        "pos": "prep",
+        "freq": 7.1
+      },
+      {
+        "word": "Được",
+        "pos": "name",
+        "freq": 7.01
+      }
+    ],
+    "search_probes": [
+      {
+        "word": "nhà",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "nước",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "là",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "ăn",
+        "present": true,
+        "fts_matches_all_records": true
+      },
+      {
+        "word": "tốt",
+        "present": true,
+        "fts_matches_all_records": true
+      }
+    ]
+  }
+}

@@ -24,8 +24,16 @@ CREATE TABLE entries (
     gender      TEXT,
     forms       TEXT,
     pronunciation TEXT,
-    etymology   TEXT
+    etymology   TEXT,
+    details     TEXT
 );
+
+-- Exact reverse lookup avoids scanning JSON paradigms or broad FTS matches.
+CREATE TABLE form_lookup (
+    form_key TEXT NOT NULL,
+    entry_id INTEGER NOT NULL REFERENCES entries(id),
+    PRIMARY KEY (form_key, entry_id)
+) WITHOUT ROWID;
 
 CREATE INDEX idx_word ON entries(word COLLATE NOCASE);
 CREATE INDEX idx_word_key ON entries(word_key);
@@ -109,7 +117,13 @@ def write_sqlite_database(
                 forms_json,
                 entry.get("pronunciation"),
                 entry.get("etymology"),
+                orjson.dumps(entry["details"]).decode() if entry.get("details") else None,
             ))
+
+            conn.executemany(
+                "INSERT OR IGNORE INTO form_lookup (form_key, entry_id) VALUES (?, ?)",
+                ((dictionary_word_key(form, lang_code), i) for form in forms or []),
+            )
 
             # FTS columns
             forms_text = " ".join(forms) if forms else ""
@@ -166,8 +180,8 @@ def _flush_batch(
     fuzzy_rows: list[tuple],
 ) -> None:
     conn.executemany(
-        "INSERT INTO entries (id, word, word_key, pos, senses, freq, gender, forms, pronunciation, etymology) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO entries (id, word, word_key, pos, senses, freq, gender, forms, pronunciation, etymology, details) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         entry_rows,
     )
     conn.executemany(
