@@ -1,33 +1,35 @@
 import { Dexie, type Table } from 'dexie';
-import type { MetaEntry, VerbRecord, SearchIndexEntry } from './types';
+import type { CachedVerb, DatasetVersion, VersionIndex } from './types';
+import { manifest } from './dataUtils';
 
+// A fresh cache schema. Downloads from before versioned installs are not migrated.
 export class ConjugationDatabase extends Dexie {
-	verbs!: Table<VerbRecord>;
-	metadata!: Table<MetaEntry>;
-	searchIndices!: Table<SearchIndexEntry>;
+	verbs!: Table<CachedVerb>;
+	versions!: Table<DatasetVersion>;
+	indices!: Table<VersionIndex>;
 
-	constructor() {
-		super('ConjugationDB');
-		this.version(2).stores({
-			verbs: '[lang+id], [lang+name]',
-			metadata: 'lang'
+	constructor(name = 'ConjugationCache') {
+		super(name);
+		this.version(1).stores({
+			verbs: '[version+id], [version+name]',
+			versions: 'key, lang',
+			indices: 'key'
 		});
-		this.version(3)
-			.stores({
-				verbs: '[lang+id], [lang+name]',
-				metadata: 'lang',
-				searchIndices: 'lang'
-			})
-			.upgrade(async (tx) => {
-				const oldMeta = await tx.table('metadata').toArray();
-				for (const row of oldMeta) {
-					if (row.searchIndex) {
-						await tx.table('searchIndices').put({ lang: row.lang, searchIndex: row.searchIndex });
-						await tx.table('metadata').put({ lang: row.lang, hash: row.hash });
-					}
-				}
-			});
 	}
 }
 
 export const db = new ConjugationDatabase();
+
+export async function getInstalledVersion(lang: string): Promise<DatasetVersion | undefined> {
+	const hash = manifest.languages[lang]?.dataHash;
+	if (!hash) return undefined;
+	const versions = await db.versions.where('lang').equals(lang).toArray();
+	return (
+		versions.find((version) => version.hash === hash) ??
+		versions.sort((a, b) => b.installedAt - a.installedAt)[0]
+	);
+}
+
+export function recordsFor(key: string) {
+	return db.verbs.where('[version+id]').between([key, 0], [key, Infinity]);
+}

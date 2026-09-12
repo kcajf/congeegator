@@ -1,7 +1,6 @@
 import { browser } from '$app/environment';
 import { error } from '@sveltejs/kit';
-import Dexie from 'dexie';
-import { db } from './db';
+import { db, getInstalledVersion, recordsFor } from './db';
 import type { VerbRecord } from './types';
 import { getLangDataUrl, manifest } from './dataUtils';
 
@@ -17,7 +16,12 @@ export async function loadSingleVerb(
 	// 1. Check IndexedDB first (Browser only)
 	if (browser) {
 		try {
-			const cached = await db.verbs.get({ lang, name: verb.toLowerCase() });
+			const cached = await db.transaction('r', [db.versions, db.verbs], async () => {
+				const version = await getInstalledVersion(lang);
+				if (!version) return undefined;
+				const record = await db.verbs.get({ version: version.key, name: verb.toLowerCase() });
+				return record ? { ...record, lang, tenses: version.tenses } : undefined;
+			});
 			if (cached) return cached;
 		} catch (err) {
 			console.warn('Could not read cached verb; trying the network:', err);
@@ -40,7 +44,7 @@ export async function loadSingleVerb(
 		error(404, { message: `Verb ${verb} not found` });
 	}
 
-	return { ...raw, lang } as VerbRecord;
+	return { ...raw, lang, tenses: manifest.languages[lang] } as VerbRecord;
 }
 
 export async function loadVerbIndex(lang: string, fetcher: typeof fetch): Promise<string[]> {
@@ -50,19 +54,12 @@ export async function loadVerbIndex(lang: string, fetcher: typeof fetch): Promis
 
 	if (browser) {
 		try {
-			const names: string[] = [];
-			await db.verbs
-				.where('[lang+id]')
-				.between([lang, Dexie.minKey], [lang, Dexie.maxKey])
-				.limit(25)
-				.each((verb) => {
-					names.push(verb.name);
-				});
-
-			if (names.length > 0) {
-				console.log('Serving from IndexedDB');
-				return names;
-			}
+			const names = await db.transaction('r', [db.versions, db.verbs], async () => {
+				const version = await getInstalledVersion(lang);
+				if (!version) return [];
+				return (await recordsFor(version.key).limit(25).toArray()).map((verb) => verb.name);
+			});
+			if (names.length) return names;
 		} catch (err) {
 			console.warn('Could not read cached index; trying the network:', err);
 		}

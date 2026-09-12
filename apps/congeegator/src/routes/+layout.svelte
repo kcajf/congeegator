@@ -22,8 +22,8 @@
 		type SearchResult
 	} from '$lib/search';
 	import { searchLangState } from '$lib/searchLang.svelte';
+	import { globalSync } from '$lib/syncManager.svelte';
 	import { toasts } from '$lib/toasts.svelte';
-	import type { VerbRecord } from '$lib/types';
 	import { onMount, tick } from 'svelte';
 	import { pwaInfo } from 'virtual:pwa-info';
 	import type { LayoutProps } from './$types';
@@ -39,6 +39,7 @@
 	let { children }: LayoutProps = $props();
 
 	tenseSettings.init();
+	onMount(() => searchLangState.start());
 
 	const webManifestLink = $derived(pwaInfo?.webManifest?.linkTag ?? '');
 
@@ -121,7 +122,8 @@
 	}
 
 	$effect(() => {
-		const index = searchLangState.indexData;
+		const snapshot = searchLangState.snapshot;
+		const index = snapshot?.index;
 
 		const currentLang = searchLangState.lang;
 		const requireExactWord = /\S\s+$/.test(searchTerm);
@@ -141,12 +143,13 @@
 			return;
 		}
 
-		const dbKeys = prefixIds.map((id) => [currentLang, id]);
+		const dbKeys = prefixIds.map((id) => [snapshot!.key, id]);
 
 		db.verbs
 			.bulkGet(dbKeys)
 			.then((data) => {
 				if (
+					snapshot !== searchLangState.snapshot ||
 					currentLang !== searchLangState.lang ||
 					currentQuery !==
 						toPhonetic(currentLang, stripDiacritics(searchTerm.toLowerCase().trim())) ||
@@ -154,7 +157,7 @@
 				)
 					return;
 
-				const verbs = data.filter((v): v is VerbRecord => !!v);
+				const verbs = data.filter((v) => !!v);
 
 				const nativeResults = verbs.flatMap((v) =>
 					findMatches(v, originalQuery, currentQuery, currentLang, requireExactWord)
@@ -222,6 +225,13 @@
 		<LanguagePicker onSelect={() => searchInput?.focus()} />
 	</nav>
 
+	{#if globalSync.map[searchLangState.lang]?.status === 'error' || searchLangState.error}
+		<div class="no-results sync-error" role="status">
+			{globalSync.map[searchLangState.lang]?.error ?? searchLangState.error}
+			<button onclick={() => searchLangState.retry()}>Retry download</button>
+		</div>
+	{/if}
+
 	<div class="content">
 		{#if searchResults.length > 0}
 			<ul class="results-list">
@@ -251,8 +261,10 @@
 				{/each}
 			</ul>
 		{:else if searchTerm.trim().length >= 1}
-			{#if !searchLangState.indexData}
-				<div class="no-results">Loading...</div>
+			{#if !searchLangState.snapshot}
+				<div class="no-results">
+					{#if !globalSync.map[searchLangState.lang]?.error && !searchLangState.error}Loading...{/if}
+				</div>
 			{:else}
 				<div class="no-results">No matches found</div>
 			{/if}
@@ -363,6 +375,10 @@
 		padding: 1rem 0;
 		color: #666;
 		font-size: 0.9rem;
+	}
+
+	.sync-error {
+		padding: 0.75rem;
 	}
 
 	.results-list li + li {

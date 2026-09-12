@@ -5,7 +5,14 @@ vi.mock('./dataUtils', () => ({
 	getLangDataUrl: () => '/data/fr'
 }));
 const { get, where } = vi.hoisted(() => ({ get: vi.fn(), where: vi.fn() }));
-vi.mock('./db', () => ({ db: { verbs: { get, where } } }));
+vi.mock('./db', () => ({
+	db: {
+		verbs: { get, where },
+		transaction: (_mode: unknown, _tables: unknown, run: () => Promise<unknown>) => run()
+	},
+	recordsFor: () => where(),
+	getInstalledVersion: async () => ({ key: 'fr-current', tenses: {} })
+}));
 import { loadSingleVerb, loadVerbIndex } from './dataLoading';
 afterEach(() => vi.restoreAllMocks());
 

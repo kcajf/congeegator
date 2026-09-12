@@ -1,64 +1,75 @@
+import { retainAppVersions } from './cacheRetention';
 import { browser } from '$app/environment';
-import { db } from './db';
+import { liveQuery, type Subscription } from 'dexie';
+import { db, getInstalledVersion } from './db';
 import { manifest } from './dataUtils';
 import { triggerLangSync } from './syncManager.svelte';
 import type { SearchIndex } from './types';
 
 export const defaultConjLang = 'fr';
-
 function getInitialLang(): string {
 	if (!browser) return defaultConjLang;
 	const stored = localStorage.getItem('searchLang');
-	if (stored && stored in manifest.languages) return stored;
-	return defaultConjLang;
+	return stored && stored in manifest.languages ? stored : defaultConjLang;
 }
 
 class SearchLangState {
 	lang = $state(getInitialLang());
+	snapshot = $state.raw<{ key: string; index: SearchIndex } | undefined>(undefined);
+	error = $state<string | undefined>(undefined);
+	private subscription?: Subscription;
 
-	indexData = $state.raw<SearchIndex | undefined>(undefined);
-
-	constructor() {
+	start() {
+		const releaseVersions = retainAppVersions();
 		this.onChanged();
+		const reconnect = () => this.retry();
+		window.addEventListener('online', reconnect);
+		return () => {
+			releaseVersions();
+			this.subscription?.unsubscribe();
+			window.removeEventListener('online', reconnect);
+		};
 	}
 
 	set(code: string) {
-		if (code != this.lang && code in manifest.languages) {
+		if (code !== this.lang && code in manifest.languages) {
 			this.lang = code;
 			this.onChanged();
 		}
 	}
 
-	onChanged() {
-		if (browser) {
-			localStorage.setItem('searchLang', this.lang);
-			this.reloadIndex();
-			triggerLangSync(this.lang);
-		}
+	retry() {
+		this.onChanged(false);
 	}
 
-	reloadIndex(completedLang?: string) {
+	private onChanged(clear = true) {
+		if (!browser) return;
 		const lang = this.lang;
-
-		// If a specific language completed sync but doesn't match current, skip.
-		if (completedLang && completedLang !== lang) return;
-
-		// Only clear indexData on language switch (called from onChanged with no arg).
-		// On sync reload, keep old index visible until new one is ready.
-		if (!completedLang) {
-			this.indexData = undefined;
-		}
-
-		db.searchIndices
-			.get(lang)
-			.then((data) => {
-				if (this.lang === lang && data?.searchIndex) {
-					this.indexData = new Map(Object.entries(data.searchIndex));
+		localStorage.setItem('searchLang', lang);
+		this.subscription?.unsubscribe();
+		if (clear) this.snapshot = undefined;
+		this.error = undefined;
+		// Dexie observes committed changes from workers and other tabs. Keep
+		// the index paired with the immutable dataset its numeric IDs refer to.
+		this.subscription = liveQuery(async () => {
+			const version = await getInstalledVersion(lang);
+			if (!version) return undefined;
+			const data = await db.indices.get(version.key);
+			return data
+				? { key: version.key, index: new Map(Object.entries(data.searchIndex)) }
+				: undefined;
+		}).subscribe({
+			next: (snapshot) => {
+				if (this.lang === lang) {
+					this.snapshot = snapshot;
+					this.error = undefined;
 				}
-			})
-			.catch((err) => {
-				console.error(`Failed to load search index for ${lang}:`, err);
-			});
+			},
+			error: (error) => {
+				if (this.lang === lang) this.error = String(error);
+			}
+		});
+		void triggerLangSync(lang);
 	}
 }
 

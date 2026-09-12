@@ -1,154 +1,78 @@
 import { browser } from '$app/environment';
-import { langName, manifest } from './dataUtils';
-import { db } from './db';
-import { searchLangState } from './searchLang.svelte';
+import { langName } from './dataUtils';
 import { storageEstimate } from './storageEstimate.svelte';
 import { toasts } from './toasts.svelte';
 
+export const globalSync = $state<{
+	map: Record<string, { status: 'syncing' | 'ready' | 'error'; error?: string }>;
+}>({ map: {} });
 let worker: Worker | undefined;
-let workerReady: Promise<void> | undefined;
+// eslint-disable-next-line svelte/prefer-svelte-reactivity -- Internal request deduplication, never read by the UI.
+const pending = new Map<string, Promise<void>>();
 
-const syncToastIds: Record<string, string> = {};
-const syncToastCreatedAt: Record<string, number> = {};
-const MIN_TOAST_MS = 800;
-
-if (browser) {
-	// The 'new URL' syntax is recognized by Vite to bundle the worker file separately
-	worker = new Worker(new URL('./sync.worker.ts', import.meta.url), {
-		type: 'module'
+function download(lang: string): Promise<void> {
+	worker ??= new Worker(new URL('./sync.worker.ts', import.meta.url), { type: 'module' });
+	const currentWorker = worker;
+	const name = langName(lang);
+	let toastId: string | undefined;
+	return new Promise((resolve, reject) => {
+		function cleanup() {
+			currentWorker.removeEventListener('message', onMessage);
+			currentWorker.removeEventListener('error', onError);
+		}
+		function fail(message: string) {
+			cleanup();
+			if (toastId) toasts.update(toastId, message, { dismissAfter: 6000 });
+			reject(new Error(message));
+		}
+		function onError() {
+			currentWorker.terminate();
+			if (worker === currentWorker) worker = undefined;
+			fail('Download worker failed. Please retry.');
+		}
+		function onMessage(event: MessageEvent) {
+			const message = event.data;
+			if (message.lang !== lang) return;
+			if (message.type === 'PROGRESS') {
+				const action = message.phase === 'installing' ? 'Installing' : 'Downloading';
+				const percent = message.percent == null ? '' : ` ${message.percent}%`;
+				const text = `${action} ${name}${percent}`;
+				if (toastId) toasts.update(toastId, text, { dismissAfter: 0 });
+				else toastId = toasts.add(text, { dismissAfter: 0 });
+			} else if (message.type === 'COMPLETE') {
+				cleanup();
+				if (toastId) toasts.update(toastId, `${name} ready for offline`);
+				resolve();
+			} else if (message.type === 'ERROR') fail(message.error ?? 'Download failed');
+		}
+		currentWorker.addEventListener('message', onMessage);
+		currentWorker.addEventListener('error', onError);
+		try {
+			currentWorker.postMessage({ lang });
+		} catch (error) {
+			fail(error instanceof Error ? error.message : String(error));
+		}
 	});
+}
 
-	// Wait for the worker to signal it's ready, with a timeout fallback
-	workerReady = new Promise<void>((resolve) => {
-		const onFirstMessage = () => {
-			resolve();
-			worker!.removeEventListener('message', onFirstMessage);
-		};
-		worker!.addEventListener('message', onFirstMessage);
-		// Fallback: assume ready after a short delay if no READY message
-		setTimeout(resolve, 500);
-	});
-
-	worker.onmessage = (e) => {
-		const { type, lang, error, phase, percent } = e.data;
-		if (type === 'READY') return;
-		const name = langName(lang);
-
-		if (type === 'PROGRESS') {
-			const isUpdate = !!globalSync.map[lang];
-			const verb = phase === 'installing' ? 'Installing' : isUpdate ? 'Updating' : 'Downloading';
-			const pctStr = percent != null ? ` ${percent}%` : '';
-			const message = `${verb} ${name}${pctStr}`;
-			const showEllipsis = percent == null;
-
-			if (!syncToastIds[lang]) {
-				syncToastIds[lang] = toasts.add(message, {
-					dismissAfter: 0,
-					showEllipsis
-				});
-				syncToastCreatedAt[lang] = Date.now();
-			} else {
-				toasts.update(syncToastIds[lang], message, {
-					dismissAfter: 0,
-					showEllipsis
-				});
-			}
-		}
-
-		if (type === 'COMPLETE') {
-			const hash = manifest.languages[lang]?.dataHash ?? '';
-			globalSync.update(lang, hash, 'ready');
-
-			const id = syncToastIds[lang];
-			const showReady = () => {
-				if (id) {
-					toasts.update(id, `${name} ready for offline`);
-					delete syncToastIds[lang];
-				}
-				delete syncToastCreatedAt[lang];
-				searchLangState.reloadIndex(lang);
-				storageEstimate.refresh();
+export function triggerLangSync(lang: string): Promise<void> {
+	if (!browser) return Promise.resolve();
+	const active = pending.get(lang);
+	if (active) return active;
+	globalSync.map[lang] = { status: 'syncing' };
+	const operation = Promise.resolve()
+		.then(() => download(lang))
+		.then(() => {
+			globalSync.map[lang] = { status: 'ready' };
+			void storageEstimate.refresh();
+		})
+		.catch((error: unknown) => {
+			globalSync.map[lang] = {
+				status: 'error',
+				error: error instanceof Error ? error.message : String(error)
 			};
-
-			const elapsed = Date.now() - (syncToastCreatedAt[lang] ?? 0);
-			if (elapsed < MIN_TOAST_MS) {
-				setTimeout(showReady, MIN_TOAST_MS - elapsed);
-			} else {
-				showReady();
-			}
-		}
-
-		if (type === 'SKIPPED') {
-			console.log(`${lang} loading: skipped (already in progress)`);
-		}
-
-		if (type === 'ERROR') {
-			console.error(`${lang} sync error:`, error);
-			const reason = error === 'offline' ? ': offline' : '';
-			const message = `Failed to sync ${name}${reason}`;
-			const id = syncToastIds[lang];
-			if (id) {
-				toasts.update(id, message, { dismissAfter: 6000 });
-				delete syncToastIds[lang];
-			} else {
-				toasts.add(message, { dismissAfter: 6000 });
-			}
-		}
-	};
+		})
+		.finally(() => pending.delete(lang));
+	pending.set(lang, operation);
+	return operation;
 }
-
-// // pre-start the worker on the main thread
-// if (typeof window !== 'undefined') {
-//     getWorker();
-// }
-
-export async function triggerLangSync(lang: string) {
-	if (!worker || !workerReady) {
-		console.warn('Worker not initialized. Are you on the server?');
-		return;
-	}
-	await workerReady;
-	console.log('Trigger language sync ' + lang);
-	worker.postMessage({ lang });
-}
-
-interface LangSyncInfo {
-	hash: string;
-	status: 'idle' | 'syncing' | 'ready';
-}
-
-class GlobalSyncRegistry {
-	// Key is lang code, value is the versioning info
-	map = $state<Record<string, LangSyncInfo>>({});
-	initialized = $state(false);
-
-	constructor() {
-		if (browser) {
-			this.init();
-		}
-	}
-
-	private async init() {
-		// Load your metadata table from IndexedDB
-		const metadata = await db.metadata.toArray();
-
-		const initialMap: Record<string, LangSyncInfo> = {};
-		for (const entry of metadata) {
-			initialMap[entry.lang] = {
-				hash: entry.hash,
-				status: 'ready'
-			};
-		}
-
-		this.map = initialMap;
-		this.initialized = true;
-	}
-
-	update(lang: string, hash: string, status: LangSyncInfo['status']) {
-		console.log(`SyncRegistry update ${lang}`);
-		this.map[lang] = { hash, status };
-		// Persist back to IDB metadata table here if needed
-	}
-}
-
-export const globalSync = new GlobalSyncRegistry();
