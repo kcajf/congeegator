@@ -116,10 +116,6 @@ async function openDb(lang: string, hash: string): Promise<boolean> {
 		if (db.selectValue("SELECT value FROM metadata WHERE key = 'lang'") !== lang) {
 			throw new Error('Dictionary language does not match');
 		}
-		// Scan a new import once, not every dictionary on every app launch.
-		if (file && db.selectValue('PRAGMA quick_check') !== 'ok') {
-			throw new Error('Dictionary is damaged');
-		}
 		// Opening a SQLite file alone does not verify the dictionary schema.
 		db.exec(
 			'SELECT id, word, pos, senses, freq, gender, forms, pronunciation, etymology FROM entries LIMIT 0'

@@ -185,7 +185,7 @@ it('does not scan an already-installed dictionary on startup', async () => {
 	expect(query).not.toHaveBeenCalledWith('PRAGMA quick_check');
 });
 
-it('reimports and scans an interrupted installation even when its pool name exists', async () => {
+it('reimports an interrupted installation without a full-database scan', async () => {
 	const s = setup();
 	s.files.add('/fr-aaaaaaaa.sqlite');
 	s.raw.set('fr-aaaaaaaa.sqlite', new Blob(['complete source']));
@@ -193,6 +193,6 @@ it('reimports and scans an interrupted installation even when its pool name exis
 	await s.start();
 	expect((await s.send('open')).result).toBe(true);
 	expect(s.pool.importDb).toHaveBeenCalledOnce();
-	expect(query).toHaveBeenCalledWith('PRAGMA quick_check');
+	expect(query).not.toHaveBeenCalledWith('PRAGMA quick_check');
 	expect(s.raw.has('fr-aaaaaaaa.sqlite')).toBe(false);
 });
