@@ -32,77 +32,32 @@ let poolUtil: any;
 const openDbs = new Map<string, any>();
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
-// Serialize openDb calls so concurrent importDb() calls can't race for the
-// same free pool slot, which would put one language's data under another's name.
-let openDbQueue: Promise<unknown> = Promise.resolve();
+// Keep imports, queries, deletion and shutdown in order. A failed request must
+// never prevent the next request from running.
+let requestQueue: Promise<void> = Promise.resolve();
 
 async function init() {
-	sqlite3 = await sqlite3InitModule({ print: console.log, printErr: console.error });
-
-	const vfsOpts = { name: 'lexicoff-pool', directory: '/lexicoff-sahpool', initialCapacity: 6 };
-
-	// Layer 2: Retry with exponential backoff for handle-lock errors.
-	// After a deploy, old worker's SyncAccessHandles may not be released yet.
-	const RETRY_DELAYS = [100, 200, 400, 800];
-	for (let attempt = 0; attempt <= RETRY_DELAYS.length; attempt++) {
-		try {
-			poolUtil = await sqlite3.installOpfsSAHPoolVfs({
-				...vfsOpts,
-				...(attempt > 0 ? { forceReinitIfPreviouslyFailed: true } : {})
-			});
-			break; // success
-		} catch (err) {
-			const isHandleLock = err instanceof DOMException && err.name === 'NoModificationAllowedError';
-			if (isHandleLock && attempt < RETRY_DELAYS.length) {
-				console.warn(`SAH Pool VFS locked (attempt ${attempt + 1}), retrying...`);
-				await new Promise((r) => setTimeout(r, RETRY_DELAYS[attempt]));
-				continue;
-			}
-
-			// Non-lock error or exhausted retries — try nuking the pool directory
-			console.warn('SAH Pool VFS init failed, attempting nuke recovery:', err);
+	try {
+		// One tab owns the pool at a time. Waiting tabs acquire it automatically
+		// when the owner closes; terminating the worker releases this Web Lock.
+		await navigator.locks.request('lexicoff-storage', async () => {
 			try {
-				await nukePoolDirectory();
+				sqlite3 = await sqlite3InitModule({ print: console.log, printErr: console.error });
 				poolUtil = await sqlite3.installOpfsSAHPoolVfs({
-					...vfsOpts,
-					forceReinitIfPreviouslyFailed: true
+					name: 'lexicoff-pool',
+					directory: '/lexicoff-sahpool',
+					initialCapacity: 6
 				});
-				break;
-			} catch (nukeErr) {
-				console.warn('SAH Pool VFS unavailable after nuke:', nukeErr);
+				self.postMessage({ type: 'READY', sahPoolAvailable: true });
+				await new Promise(() => {});
+			} catch (error) {
+				console.error('SQLite initialization failed:', error);
+				self.postMessage({ type: 'READY', sahPoolAvailable: false });
 			}
-		}
-	}
-
-	self.postMessage({ type: 'READY', sahPoolAvailable: !!poolUtil });
-}
-
-/** Layer 3: iOS-compatible directory nuke — no recursive: true. */
-async function nukePoolDirectory() {
-	const root = await navigator.storage.getDirectory();
-	let dir: FileSystemDirectoryHandle;
-	try {
-		dir = await root.getDirectoryHandle('lexicoff-sahpool');
-	} catch {
-		return; // directory doesn't exist
-	}
-	// @ts-expect-error — entries() not in all TS libs
-	for await (const [name, handle] of dir.entries()) {
-		try {
-			if (handle.kind === 'file') {
-				await dir.removeEntry(name as string);
-			} else {
-				// Subdirectories shouldn't exist, but handle gracefully
-				await dir.removeEntry(name as string, { recursive: true });
-			}
-		} catch {
-			// skip locked files
-		}
-	}
-	try {
-		await root.removeEntry('lexicoff-sahpool');
-	} catch {
-		// may still have locked files
+		});
+	} catch (error) {
+		console.error('Could not acquire dictionary storage:', error);
+		self.postMessage({ type: 'READY', sahPoolAvailable: false });
 	}
 }
 
@@ -115,54 +70,74 @@ async function shutdown() {
 		}
 		openDbs.delete(lang);
 	}
-	if (poolUtil) {
-		try {
-			await poolUtil.removeVfs();
-		} catch {
-			// best-effort
-		}
-		poolUtil = null;
-	}
+	// Do not call removeVfs(): it deletes every installed dictionary. Worker
+	// termination releases the OPFS handles and the ownership lock instead.
 }
 
 async function openDb(lang: string, hash: string): Promise<boolean> {
 	if (!poolUtil) return false;
 
-	if (openDbs.has(lang)) {
-		openDbs.get(lang).close();
-		openDbs.delete(lang);
-	}
-
 	const fname = `/${lang}-${hash}.sqlite`;
-	const existingFiles = poolUtil.getFileNames() as string[];
+	const previous = openDbs.get(lang);
+	if (previous?.filename === fname) return true;
 
-	if (!existingFiles.includes(fname)) {
-		// Clean up old versions of this lang
-		for (const f of existingFiles) {
-			if (f.startsWith(`/${lang}-`) && f.endsWith('.sqlite')) poolUtil.unlink(f);
+	let db;
+	try {
+		if (!poolUtil.getFileNames().includes(fname)) {
+			await poolUtil.reserveMinimumCapacity(poolUtil.getFileCount() + 3);
+			const root = await navigator.storage.getDirectory();
+			const dir = await root.getDirectoryHandle('lexicoff');
+			const file = await (await dir.getFileHandle(`${lang}-${hash}.sqlite`)).getFile();
+			let offset = 0;
+			await poolUtil.importDb(fname, async (): Promise<Uint8Array | undefined> => {
+				if (offset >= file.size) return undefined;
+				const end = Math.min(offset + 65536, file.size);
+				const chunk = new Uint8Array(await file.slice(offset, end).arrayBuffer());
+				offset = end;
+				return chunk;
+			});
 		}
 
-		await poolUtil.reserveMinimumCapacity(poolUtil.getFileCount() + 3);
-
-		// Stream-import from raw OPFS into pool in 64KB chunks
-		const root = await navigator.storage.getDirectory();
-		const dir = await root.getDirectoryHandle('lexicoff');
-		const file = await (await dir.getFileHandle(`${lang}-${hash}.sqlite`)).getFile();
-		let offset = 0;
-		await poolUtil.importDb(fname, async (): Promise<Uint8Array | undefined> => {
-			if (offset >= file.size) return undefined;
-			const end = Math.min(offset + 65536, file.size);
-			const chunk = new Uint8Array(await file.slice(offset, end).arrayBuffer());
-			offset = end;
-			return chunk;
-		});
-
-		// Raw OPFS file is now in the pool — delete it
-		await dir.removeEntry(`${lang}-${hash}.sqlite`);
+		db = new poolUtil.OpfsSAHPoolDb(fname, 'r');
+		if (db.selectValue("SELECT value FROM metadata WHERE key = 'lang'") !== lang) {
+			throw new Error('Dictionary language does not match');
+		}
+		// A worker may have stopped midway through importing a previous attempt.
+		if (db.selectValue('PRAGMA quick_check') !== 'ok') throw new Error('Dictionary is damaged');
+		// Opening a SQLite file alone does not verify the dictionary schema.
+		db.exec(
+			'SELECT id, word, pos, senses, freq, gender, forms, pronunciation, etymology FROM entries LIMIT 0'
+		);
+		db.exec('SELECT rowid FROM entries_fts LIMIT 0');
+		db.exec('SELECT rowid FROM fuzzy LIMIT 0');
+	} catch (error) {
+		db?.close();
+		// Discard the failed candidate, keeping the working database and raw
+		// download so that a retry can import again.
+		poolUtil.unlink(fname);
+		throw error;
 	}
 
-	const db = new poolUtil.OpfsSAHPoolDb(fname, 'r');
+	previous?.close();
 	openDbs.set(lang, db);
+
+	// Cleanup is best-effort after the replacement is usable. Failure here
+	// must not turn a successful installation into a failed one.
+	try {
+		for (const name of poolUtil.getFileNames() as string[]) {
+			if (name.startsWith(`/${lang}-`) && name.endsWith('.sqlite') && name !== fname) {
+				poolUtil.unlink(name);
+			}
+		}
+		const root = await navigator.storage.getDirectory();
+		const dir = await root.getDirectoryHandle('lexicoff');
+		// @ts-expect-error — entries() not in all TS libs
+		for await (const [name] of dir.entries()) {
+			if (name.startsWith(`${lang}-`) && name.endsWith('.sqlite')) await dir.removeEntry(name);
+		}
+	} catch {
+		// A later startup can retry cleanup.
+	}
 	return true;
 }
 
@@ -498,6 +473,13 @@ async function listOpfsFiles(): Promise<[string, string][]> {
 			const n = name as string;
 			const match = n.match(/^([a-z]{2})-([a-f0-9]{8})\.sqlite$/);
 			if (match && !seen.has(`${match[1]}-${match[2]}`)) {
+				const file = await (await dir.getFileHandle(n)).getFile();
+				// createWritable() commits on close. An interrupted first write
+				// leaves an empty handle, not an installed database.
+				if (file.size === 0) {
+					await dir.removeEntry(n);
+					continue;
+				}
 				results.push([match[1], match[2]]);
 			}
 		}
@@ -507,7 +489,7 @@ async function listOpfsFiles(): Promise<[string, string][]> {
 	return results;
 }
 
-self.onmessage = async (e: MessageEvent) => {
+async function handleMessage(e: MessageEvent) {
 	const { id, type, lang, query, word, phoneticQuery, hash } = e.data;
 
 	try {
@@ -527,7 +509,7 @@ self.onmessage = async (e: MessageEvent) => {
 				result = [...openDbs.keys()];
 				break;
 			case 'open':
-				result = await (openDbQueue = openDbQueue.then(() => openDb(lang, query)));
+				result = await openDb(lang, query);
 				break;
 			case 'close':
 				await closeDb(lang);
@@ -550,6 +532,11 @@ self.onmessage = async (e: MessageEvent) => {
 	} catch (err) {
 		self.postMessage({ id, error: err instanceof Error ? err.message : String(err) });
 	}
+}
+
+self.onmessage = (e: MessageEvent) => {
+	requestQueue = requestQueue.then(() => handleMessage(e)).catch(console.error);
+	return requestQueue;
 };
 
 init();
