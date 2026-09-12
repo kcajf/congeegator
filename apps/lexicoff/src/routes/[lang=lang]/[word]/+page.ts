@@ -1,5 +1,4 @@
-import * as sqliteClient from '$lib/sqliteClient';
-import { dbsReady } from '$lib/sqliteClient';
+import { storage as sqliteClient } from '$lib/sqliteClient.svelte';
 import { manifest } from '$lib/dataUtils';
 import { error } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
@@ -12,9 +11,6 @@ export const load: PageLoad = async ({ params }) => {
 	if (!(lang in manifest.languages)) {
 		error(404, { message: `Language ${lang} not supported` });
 	}
-
-	// Wait for syncManager to discover and open OPFS databases
-	await dbsReady;
 
 	const entries = await sqliteClient.getWord(lang, word);
 

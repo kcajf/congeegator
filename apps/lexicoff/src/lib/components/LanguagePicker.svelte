@@ -3,7 +3,7 @@
 	import { slide } from 'svelte/transition';
 	import { langName, manifest } from '$lib/dataUtils';
 	import { searchLangState } from '$lib/searchLang.svelte';
-	import { globalSync } from '$lib/syncManager.svelte';
+	import { storage } from '$lib/sqliteClient.svelte';
 
 	let { onSelect }: { onSelect?: () => void } = $props();
 
@@ -12,7 +12,7 @@
 
 	const installedLangs = $derived(
 		Object.values(manifest.languages)
-			.filter((lang) => globalSync.map[lang.code]?.status === 'ready')
+			.filter((lang) => storage.languages[lang.code]?.status === 'ready')
 			.toSorted((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }))
 	);
 
@@ -20,8 +20,8 @@
 
 	// Auto-select first installed language if current selection is no longer installed
 	$effect(() => {
-		if (!globalSync.initialized) return;
-		const currentInstalled = globalSync.map[currentLang]?.status === 'ready';
+		if (storage.phase !== 'ready') return;
+		const currentInstalled = storage.languages[currentLang]?.status === 'ready';
 		if (!currentInstalled && installedLangs.length > 0) {
 			searchLangState.set(installedLangs[0].code);
 		}

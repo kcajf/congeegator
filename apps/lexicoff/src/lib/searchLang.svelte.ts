@@ -1,5 +1,5 @@
 import { browser } from '$app/environment';
-import * as sqliteClient from './sqliteClient';
+import { storage } from './sqliteClient.svelte';
 import { manifest } from './dataUtils';
 
 export const defaultLang = 'fr';
@@ -14,43 +14,15 @@ function getInitialLang(): string {
 class SearchLangState {
 	lang = $state(getInitialLang());
 
-	indexReady = $state(false);
-
-	constructor() {
-		this.onChanged();
-	}
+	indexReady = $derived(
+		storage.phase === 'ready' && storage.languages[this.lang]?.status === 'ready'
+	);
 
 	set(code: string) {
-		if (code != this.lang && code in manifest.languages) {
+		if (code !== this.lang && code in manifest.languages) {
 			this.lang = code;
-			this.onChanged();
+			if (browser) localStorage.setItem('searchLang', code);
 		}
-	}
-
-	onChanged() {
-		if (browser) {
-			localStorage.setItem('searchLang', this.lang);
-			this.checkReady();
-		}
-	}
-
-	checkReady(completedLang?: string) {
-		const lang = this.lang;
-
-		if (completedLang && completedLang !== lang) return;
-
-		this.indexReady = false;
-
-		return sqliteClient
-			.isInstalled(lang)
-			.then((installed) => {
-				if (this.lang === lang) {
-					this.indexReady = installed;
-				}
-			})
-			.catch((err) => {
-				console.error(`Failed to check if ${lang} is installed:`, err);
-			});
 	}
 }
 
