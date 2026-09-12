@@ -18,7 +18,7 @@
 		a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
 	);
 
-	const sahAvailable = $derived(globalSync.initialized ? isSahPoolAvailable() : true);
+	const sahAvailable = $derived(globalSync.initialized && !globalSync.storageError && isSahPoolAvailable());
 </script>
 
 <div class="download-manager">
