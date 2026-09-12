@@ -32,7 +32,7 @@ function setup() {
 	};
 	const dir = {
 		getFileHandle: vi.fn(async (name: string) => {
-			if (!raw.has(name)) throw new Error('Missing download');
+			if (!raw.has(name)) throw new DOMException('Missing download', 'NotFoundError');
 			return { getFile: async () => raw.get(name)! };
 		}),
 		removeEntry: vi.fn(async (name: string) => {
@@ -94,6 +94,7 @@ describe('dictionary storage lifecycle', () => {
 		s.files.add('/fr-aaaaaaaa.sqlite');
 		await s.start();
 		await s.send('open');
+		s.raw.set('fr-bbbbbbbb.sqlite', new Blob(['replacement']));
 		s.pool.reserveMinimumCapacity.mockRejectedValueOnce(new Error('Quota exceeded'));
 		expect((await s.send('open', 'fr', 'bbbbbbbb')).error).toBe('Quota exceeded');
 		expect(s.databases[0].close).not.toHaveBeenCalled();
@@ -173,4 +174,25 @@ describe('dictionary storage lifecycle', () => {
 		);
 		expect(s.pool.removeVfs).not.toHaveBeenCalled();
 	});
+});
+
+it('does not scan an already-installed dictionary on startup', async () => {
+	const s = setup();
+	s.files.add('/fr-aaaaaaaa.sqlite');
+	const query = vi.spyOn(s.pool.OpfsSAHPoolDb.prototype, 'selectValue');
+	await s.start();
+	await s.send('open');
+	expect(query).not.toHaveBeenCalledWith('PRAGMA quick_check');
+});
+
+it('reimports an interrupted installation without a full-database scan', async () => {
+	const s = setup();
+	s.files.add('/fr-aaaaaaaa.sqlite');
+	s.raw.set('fr-aaaaaaaa.sqlite', new Blob(['complete source']));
+	const query = vi.spyOn(s.pool.OpfsSAHPoolDb.prototype, 'selectValue');
+	await s.start();
+	expect((await s.send('open')).result).toBe(true);
+	expect(s.pool.importDb).toHaveBeenCalledOnce();
+	expect(query).not.toHaveBeenCalledWith('PRAGMA quick_check');
+	expect(s.raw.has('fr-aaaaaaaa.sqlite')).toBe(false);
 });
