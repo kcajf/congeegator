@@ -6,6 +6,7 @@
  */
 
 import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
+import { dictionaryWordKey, prefixMatch, searchTokens } from './searchNormalization';
 
 interface InternalResult {
 	word: string;
@@ -30,6 +31,7 @@ interface SearchResult {
 let sqlite3: any;
 let poolUtil: any;
 const openDbs = new Map<string, any>();
+const wordKeyLanguages = new Set<string>();
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
 async function init() {
@@ -65,6 +67,7 @@ async function shutdown() {
 			// best-effort
 		}
 		openDbs.delete(lang);
+		wordKeyLanguages.delete(lang);
 	}
 	// Do not call removeVfs(): it deletes every installed dictionary. Worker
 	// termination releases the OPFS handles and the ownership lock instead.
@@ -78,6 +81,7 @@ async function openDb(lang: string, hash: string): Promise<boolean> {
 	if (previous?.filename === fname) return true;
 
 	let db;
+	let hasWordKey = false;
 	try {
 		let file: File | undefined;
 		try {
@@ -118,6 +122,9 @@ async function openDb(lang: string, hash: string): Promise<boolean> {
 		);
 		db.exec('SELECT rowid FROM entries_fts LIMIT 0');
 		db.exec('SELECT rowid FROM fuzzy LIMIT 0');
+		hasWordKey = execQuery(db, 'PRAGMA table_info(entries)').some(
+			(column) => column[1] === 'word_key'
+		);
 	} catch (error) {
 		db?.close();
 		// Discard the failed candidate, keeping the working database and raw
@@ -128,6 +135,9 @@ async function openDb(lang: string, hash: string): Promise<boolean> {
 
 	previous?.close();
 	openDbs.set(lang, db);
+	// Older downloads remain usable until the user chooses to update them.
+	if (hasWordKey) wordKeyLanguages.add(lang);
+	else wordKeyLanguages.delete(lang);
 
 	// Cleanup is best-effort after the replacement is usable. Failure here
 	// must not turn a successful installation into a failed one.
@@ -154,6 +164,7 @@ async function closeDb(lang: string) {
 	if (!db) return;
 	db.close();
 	openDbs.delete(lang);
+	wordKeyLanguages.delete(lang);
 }
 
 function deleteFromPool(lang: string) {
@@ -183,40 +194,45 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 
 	const seen = new Map<string, InternalResult>();
 
-	const trimmed = query.trim().toLowerCase();
+	const trimmed = dictionaryWordKey(query.trim(), lang);
+	const glossQuery = dictionaryWordKey(query.trim(), 'en');
 	if (!trimmed) return [];
 
 	// When the query uses the target language's script, phonetic matches should rank highly.
 	// When it's purely Latin (e.g. "angry"), demote phonetic coincidences below gloss matches.
-	const isLatinOnly = /^[\p{Script=Latin}\p{N}\s]+$/u.test(trimmed);
+	const isLatinOnly = /^[\p{Script=Latin}\p{M}\p{N}\s]+$/u.test(trimmed);
 
-	// \p{L} = unicode letters, \p{N} = numbers — replace everything else with spaces
-	// so e.g. "self-service" → "self service" (matching the FTS5 unicode61 tokenizer)
-	const sanitized = trimmed
-		.replace(/[^\p{L}\p{N}\s]/gu, ' ') // strip non-letter/number chars
-		.replace(/\s+/g, ' ') // collapse duplicate spaces
-		.trim();
+	// Keep letters, combining marks and numbers; separate punctuation so e.g.
+	// "self-service" → "self service" (matching the FTS5 unicode61 tokenizer).
+	const tokens = searchTokens(trimmed);
+	const sanitized = tokens.join(' ');
 	if (!sanitized) return [];
 
 	// Quote tokens to prevent FTS5 keyword interpretation, prefix-match last token.
 	// Drop 1-char trailing tokens in multi-word queries — the user is mid-keystroke
 	// and the short prefix (e.g. "s"*) causes expensive FTS5 index traversal.
-	const tokens = sanitized.split(' ');
-	if (tokens.length > 1 && tokens[tokens.length - 1].length < 2) {
-		tokens.pop();
+	const glossTokens = searchTokens(glossQuery);
+	for (const queryTokens of [tokens, glossTokens]) {
+		if (queryTokens.length > 1 && queryTokens[queryTokens.length - 1].length < 2) {
+			queryTokens.pop();
+		}
 	}
-	const ftsPrefix = tokens.map((t) => `"${t}"`).join(' ') + '*';
+	const ftsPrefix = prefixMatch(tokens);
+	const glossPrefix = prefixMatch(glossTokens);
 
-	// Exact-match lookup — O(1) via idx_word index, guarantees the word itself
+	// Indexed exact-match lookup guarantees the word itself
 	// is never pushed out by LIMIT on the FTS5 queries.
 	try {
 		const exactRows = execQuery(
 			db,
-			`SELECT id, word, pos, freq FROM entries WHERE word = ? COLLATE NOCASE LIMIT 5`,
-			[trimmed]
+			`SELECT id, word, pos, freq FROM entries WHERE ${wordKeyLanguages.has(lang) ? 'word_key = ?' : 'word = ? COLLATE NOCASE'} ORDER BY id`,
+			[wordKeyLanguages.has(lang) ? trimmed : query.trim()]
 		);
 		for (const [id, word, pos, freq] of exactRows) {
 			const key = `${word}:${pos}`;
+			// Separate etymologies can share spelling and POS. Keep the first
+			// source record for the preview; the detail page returns all of them.
+			if (seen.has(key)) continue;
 			seen.set(key, {
 				word: word as string,
 				pos: pos as string,
@@ -247,7 +263,7 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 				FROM entries e
 				JOIN (SELECT rowid FROM entries_fts WHERE ${col} MATCH ?) AS fts ON e.id = fts.rowid
 				LIMIT 50`,
-				[ftsPrefix]
+				[col === 'gloss_text' ? glossPrefix : ftsPrefix]
 			);
 			for (const row of rows) {
 				const [id, word, pos, freq] = row;
@@ -259,7 +275,8 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 						word: word as string,
 						pos: pos as string,
 						matched: word as string,
-						quality,
+						quality:
+							quality === 10 && dictionaryWordKey(word as string, lang) === trimmed ? 0 : quality,
 						freq: freq as number,
 						id: id as number
 					});
@@ -272,15 +289,9 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 
 	// Phonetic search (quality 30) — only if phoneticQuery differs from query
 	if (phoneticQuery && phoneticQuery !== trimmed) {
-		const phonetic = phoneticQuery
-			.replace(/[^\p{L}\p{N}\s]/gu, ' ') // strip non-letter/number chars
-			.replace(/\s+/g, ' ') // collapse duplicate spaces
-			.trim();
-		const phoneticFts =
-			phonetic
-				.split(' ')
-				.map((t) => `"${t}"`)
-				.join(' ') + '*';
+		const phoneticTokens = searchTokens(phoneticQuery);
+		const phonetic = phoneticTokens.join(' ');
+		const phoneticFts = prefixMatch(phoneticTokens);
 		if (phonetic) {
 			try {
 				const phoneticRows = execQuery(
@@ -321,7 +332,11 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 				FROM entries e
 				JOIN (SELECT rowid FROM fuzzy WHERE fuzzy MATCH ?) AS t ON e.id = t.rowid
 				LIMIT 50`,
-				[sanitized]
+				[
+					searchTokens(sanitized)
+						.map((token) => `"${token}"`)
+						.join(' ')
+				]
 			);
 			for (const [id, word, pos, freq] of fuzzyRows) {
 				const key = `${word}:${pos}`;
@@ -373,7 +388,7 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 				if (s.gloss) glosses.push(s.gloss as string);
 			}
 			sensesMap.set(id as number, glosses);
-			const matchIdx = glosses.findIndex((g) => g.toLowerCase().includes(trimmed));
+			const matchIdx = glosses.findIndex((g) => dictionaryWordKey(g, 'en').includes(glossQuery));
 			glossMatchIdx.set(id as number, matchIdx >= 0 ? matchIdx : 9999);
 		}
 	}
@@ -409,7 +424,7 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 			// top 3 so the user can see *why* this result appeared. If the matched
 			// gloss is already in the top 3, keep natural order; otherwise prepend
 			// it and take 2 more from the top (still 3 total).
-			const matchIdx = allGlosses.findIndex((g) => g.toLowerCase().includes(trimmed));
+			const matchIdx = allGlosses.findIndex((g) => dictionaryWordKey(g, 'en').includes(glossQuery));
 			const top3 = allGlosses.slice(0, 3);
 			if (matchIdx >= 0 && matchIdx < 3) {
 				glosses = top3;
@@ -443,9 +458,9 @@ async function getWord(lang: string, word: string): Promise<unknown[]> {
 	const rows = execQuery(
 		db,
 		`SELECT id, word, pos, senses, freq, gender, forms, pronunciation, etymology
-		FROM entries WHERE word = ? COLLATE NOCASE
+		FROM entries WHERE ${wordKeyLanguages.has(lang) ? 'word_key = ?' : 'word = ? COLLATE NOCASE'}
 		ORDER BY freq DESC`,
-		[word]
+		[wordKeyLanguages.has(lang) ? dictionaryWordKey(word, lang) : word]
 	);
 
 	return rows.map(([id, w, pos, senses, freq, gender, forms, pronunciation, etymology]) => ({

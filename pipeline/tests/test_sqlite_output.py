@@ -4,11 +4,12 @@ import json
 import os
 import sqlite3
 import tempfile
+import unicodedata
 
 import pytest
 import zstandard
 
-from pipeline.sqlite_output import write_sqlite_database
+from pipeline.sqlite_output import dictionary_word_key, write_sqlite_database
 from pipeline.utils import to_phonetic_el
 
 
@@ -76,6 +77,57 @@ def _make_db(entries, lang_code="fr", phonetic_fn=None):
 
 
 class TestSqliteOutput:
+    @pytest.mark.parametrize("lang,word,query,key", [
+        ("vi", "tiếng Việt", "TIẾNG VIỆT", "tiếng việt"),
+        ("uk", "Їсти", "ЇСТИ", "їсти"),
+        ("ru", "Москва", "МОСКВА", "москва"),
+        ("pl", "Łódź", "ŁÓDŹ", "łódź"),
+        ("la", "āmō", "ĀMŌ", "āmō"),
+        ("tr", "Işık", "IŞIK", "ışık"),
+        ("tr", "İstanbul", "İSTANBUL", "istanbul"),
+    ])
+    def test_unicode_exact_prefix_and_form_lookup(self, lang, word, query, key):
+        # Decomposed source text and keyboard input must agree, including the
+        # letters й/ї whose diacritics cannot safely be stripped in Cyrillic.
+        entries = [{"word": unicodedata.normalize("NFD", word), "pos": "noun",
+                    "senses": [{"gloss": "I am a test definition"}]},
+                   {"word": "other", "pos": "noun", "senses": [{"gloss": "other"}],
+                    "forms": [unicodedata.normalize("NFD", word)]}]
+        path = _make_db(entries, lang_code=lang)
+        try:
+            conn = sqlite3.connect(path)
+            normalized = dictionary_word_key(unicodedata.normalize("NFD", query), lang)
+            assert normalized == key
+            exact = conn.execute("SELECT id FROM entries WHERE word_key = ?", (normalized,)).fetchall()
+            assert exact == [(0,)]
+            plan = conn.execute("EXPLAIN QUERY PLAN SELECT id FROM entries WHERE word_key = ?",
+                                (normalized,)).fetchall()
+            assert any("idx_word_key" in row[3] for row in plan)
+            tokens = normalized.split()
+            tokens[-1] = tokens[-1][:-1]  # A partially typed final token.
+            prefix = " ".join(f'"{token}"' for token in tokens) + "*"
+            for column, expected in [("word", 0), ("forms_text", 1)]:
+                rows = conn.execute(f"SELECT rowid FROM entries_fts WHERE {column} MATCH ?",
+                                    (prefix,)).fetchall()
+                assert (expected,) in rows
+            # English glosses use English casing even in a Turkish dictionary.
+            assert conn.execute("SELECT rowid FROM entries_fts WHERE gloss_text MATCH '\"i\"'").fetchall() == [(0,)]
+            conn.close()
+        finally:
+            os.unlink(path)
+
+    def test_turkish_dotted_and_dotless_i_remain_distinct(self):
+        entries = [{"word": word, "pos": "noun", "senses": [{"gloss": "example"}]}
+                   for word in ["İ", "I"]]
+        path = _make_db(entries, lang_code="tr")
+        try:
+            conn = sqlite3.connect(path)
+            assert conn.execute("SELECT rowid FROM entries_fts WHERE word MATCH '\"i\"'").fetchall() == [(0,)]
+            assert conn.execute("SELECT rowid FROM entries_fts WHERE word MATCH '\"ı\"'").fetchall() == [(1,)]
+            conn.close()
+        finally:
+            os.unlink(path)
+
     def test_schema_tables(self, sample_entries):
         path = _make_db(sample_entries)
         try:

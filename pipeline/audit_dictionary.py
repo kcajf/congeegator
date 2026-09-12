@@ -1,0 +1,316 @@
+"""Reproducible, streaming quality review of dictionary source and built SQLite data.
+
+Example (does not download or mutate source/build files):
+    python -m pipeline.audit_dictionary --source-dir cache/VERSION \
+        --data-dir apps/lexicoff/r2_data/data/v1 --output /tmp/dictionary-audit.json
+
+Counts describe records and senses separately from distinct spellings. Form-of
+senses, repeated word/POS pairs, and large paradigms are review signals, not
+automatically errors: inflected forms and separate etymologies are legitimate.
+"""
+
+import argparse
+from collections import Counter
+import hashlib
+import heapq
+import io
+import json
+from pathlib import Path
+import re
+import shutil
+import sqlite3
+import tempfile
+import unicodedata
+
+import msgspec
+import zstandard
+
+from .dictionary import DICT_CONFIGS, process_dict_entry
+from .wiktionary import Entry
+
+
+# Common nouns, verbs and adjectives, with diacritics and non-Latin scripts.
+# These are presence/definition/search probes, not a vocabulary coverage estimate.
+COMMON_WORDS = {
+    "pt": ["casa", "água", "ser", "comer", "bom"],
+    "ca": ["casa", "aigua", "ésser", "menjar", "bo"],
+    "ro": ["casă", "apă", "fi", "mânca", "bun"],
+    "gl": ["casa", "auga", "ser", "comer", "bo"],
+    "nl": ["huis", "water", "zijn", "eten", "goed"],
+    "sv": ["hus", "vatten", "vara", "äta", "bra"],
+    "da": ["hus", "vand", "være", "spise", "god"],
+    "nb": ["hus", "vann", "være", "spise", "god"],
+    "pl": ["dom", "woda", "być", "jeść", "dobry"],
+    "ru": ["дом", "вода", "быть", "есть", "хороший"],
+    "uk": ["дім", "вода", "бути", "їсти", "добрий"],
+    "cs": ["dům", "voda", "být", "jíst", "dobrý"],
+    "fi": ["talo", "vesi", "olla", "syödä", "hyvä"],
+    "hu": ["ház", "víz", "van", "eszik", "jó"],
+    "tr": ["ev", "su", "olmak", "yemek", "iyi"],
+    "id": ["rumah", "air", "ada", "makan", "baik"],
+    "vi": ["nhà", "nước", "là", "ăn", "tốt"],
+    "eo": ["domo", "akvo", "esti", "manĝi", "bona"],
+    "la": ["domus", "aqua", "sum", "edo", "bonus"],
+    "en": ["house", "water", "be", "eat", "good"],
+    "fr": ["maison", "eau", "être", "manger", "bon"],
+    "de": ["Haus", "Wasser", "sein", "essen", "gut"],
+    "es": ["casa", "agua", "ser", "comer", "bueno"],
+    "it": ["casa", "acqua", "essere", "mangiare", "buono"],
+    "el": ["σπίτι", "νερό", "είμαι", "τρώω", "καλός"],
+}
+
+DIRT_PATTERNS = {
+    "wiki_markup": re.compile(r"\{\{|\}\}|\[\[|\]\]"),
+    "html_markup": re.compile(r"</?(?:ref|span|div|br|p|small|sup|sub|table|a|i|b)(?:\s[^>]*|/?)>", re.I),
+    "extraction_error": re.compile(r"(?i:Lua error|Script error)|\b(?:Template|Module):(?=\S)|\[\[Category:"),
+    "replacement_character": re.compile("\ufffd"),
+    "control_character": re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]"),
+    "placeholder_gloss": re.compile(r"(?:please (?:add|provide) (?:a |an |the )?(?:definition|translation)|definition (?:needed|missing)|\bno gloss(?: found)?\b)", re.I),
+}
+
+
+def _summary(record):
+    result = {k: record[k] for k in ("word", "pos", "senses", "gender", "pronunciation", "etymology") if k in record}
+    if record.get("forms"):
+        result["form_count"] = len(record["forms"])
+        result["forms_sample"] = record["forms"][:20]
+    return result
+
+
+def _strings(record):
+    yield "word", record["word"]
+    for sense in record["senses"]:
+        yield "gloss", sense["gloss"]
+        for example in sense.get("examples", []):
+            yield "example", example
+    for form in record.get("forms", []):
+        yield "form", form
+    for key in ("etymology", "pronunciation"):
+        if key in record:
+            yield key, record[key]
+
+
+def audit_source(lines, config, sample_size=12):
+    """Audit every source line through the production importer, without frequencies."""
+    counts, pos_counts, rejected_pos = Counter(), Counter(), Counter()
+    dirt, examples = Counter(), {}
+    words, word_pos, fingerprints = set(), Counter(), set()
+    common = {word: [] for word in COMMON_WORDS.get(config.code, [])}
+    random_samples = []
+    largest_forms = []
+    largest_senses = []
+
+    def flag(kind, word, field, value):
+        dirt[kind] += 1
+        examples.setdefault(kind, [])
+        if len(examples[kind]) < 10:
+            examples[kind].append({"word": word, "field": field, "value": value[:500]})
+
+    for line_number, line in enumerate(lines, 1):
+        if not line.strip():
+            continue
+        counts["source_records"] += 1
+        try:
+            raw = msgspec.json.decode(line)
+            if raw.get("source") == "thesaurus" and not raw.get("pos"):
+                rejected_pos["thesaurus_without_pos"] += 1
+                continue
+            if raw.get("pos") == "hard-redirect":
+                rejected_pos["hard-redirect"] += 1
+                continue
+            entry = msgspec.json.decode(line, type=Entry)
+        except (msgspec.DecodeError, TypeError, AttributeError) as exc:
+            flag("invalid_source_record", str(line_number), "source", str(exc))
+            continue
+        if entry.lang_code != config.code:
+            flag("wrong_language", entry.word, "lang_code", entry.lang_code)
+            continue
+        counts["source_senses"] += len(entry.senses)
+        source_form_senses = sum(bool(s.form_of or "form-of" in s.tags) for s in entry.senses)
+        counts["source_form_of_senses"] += source_form_senses
+        record = process_dict_entry(config, entry)
+        if record is None:
+            rejected_pos[entry.pos] += 1
+            continue
+        counts["records"] += 1
+        counts["senses"] += len(record["senses"])
+        if source_form_senses == len(entry.senses):
+            counts["form_only_records"] += 1
+        word = record["word"]
+        words.add(word)
+        word_pos[(word, record["pos"])] += 1
+        pos_counts[record["pos"]] += 1
+        for key in ("forms", "gender", "pronunciation", "etymology"):
+            counts[f"records_with_{key}"] += bool(record.get(key))
+        counts["records_with_examples"] += any(s.get("examples") for s in record["senses"])
+        fingerprint = hashlib.sha256(json.dumps(record, ensure_ascii=False, sort_keys=True).encode()).digest()
+        if fingerprint in fingerprints:
+            flag("identical_record", word, "record", record["pos"])
+        fingerprints.add(fingerprint)
+        glosses = [s["gloss"] for s in record["senses"]]
+        if len(set(glosses)) < len(glosses):
+            counts["records_with_repeated_gloss"] += 1
+        for field, value in _strings(record):
+            for kind, pattern in DIRT_PATTERNS.items():
+                if kind == "placeholder_gloss" and field != "gloss":
+                    continue
+                if pattern.search(value):
+                    flag(kind, word, field, value)
+            if not value.strip():
+                flag("empty_text", word, field, value)
+            if field == "word" and value != value.strip():
+                flag("word_surrounding_whitespace", word, field, value)
+            if unicodedata.normalize("NFC", value) != value:
+                counts[f"non_nfc_{field}"] += 1
+        if word in common:
+            common[word].append(_summary(record))
+        # Bottom-k stable content hashes give reproducible samples independent of
+        # source ordering; the line number prevents heap comparisons of dicts.
+        sample = (-int.from_bytes(fingerprint[:8], "big"), line_number, _summary(record))
+        if sample_size:
+            heapq.heappush(random_samples, sample)
+            if len(random_samples) > sample_size:
+                heapq.heappop(random_samples)
+        forms = record.get("forms", [])
+        counts["forms"] += len(forms)
+        for heap, size in ((largest_forms, len(forms)), (largest_senses, len(glosses))):
+            heapq.heappush(heap, (size, word, record["pos"]))
+            if len(heap) > 10:
+                heapq.heappop(heap)
+
+    counts["unique_headwords"] = len(words)
+    counts["unique_records"] = len(fingerprints)
+    counts["repeated_word_pos_pairs"] = sum(n > 1 for n in word_pos.values())
+    counts["rejected_records"] = counts["source_records"] - counts["records"]
+    return {
+        "language": config.code,
+        "counts": dict(counts),
+        "pos_counts": dict(pos_counts),
+        "rejected_pos": dict(rejected_pos),
+        "review_flags": dict(dirt),
+        "flag_examples": examples,
+        "common_words": common,
+        "missing_common_words": [word for word, records in common.items() if not records],
+        "random_samples": [sample[2] for sample in sorted(random_samples, reverse=True)],
+        "largest_form_counts": sorted(largest_forms, reverse=True),
+        "largest_sense_counts": sorted(largest_senses, reverse=True),
+        "most_repeated_word_pos": [(word, pos, n) for (word, pos), n in word_pos.most_common(10) if n > 1],
+    }
+
+
+def _fts_query(word):
+    return " ".join('"' + token + '"' for token in re.findall(r"[^\W_]+", word))
+
+
+def audit_sqlite(path, code, source_report=None):
+    """Verify downloaded-size accounting, integrity, counts and common-word FTS."""
+    path = Path(path).resolve()
+    result = {"artifact": path.name, "download_bytes": path.stat().st_size}
+    with path.open("rb") as source:
+        result["data_hash"] = hashlib.file_digest(source, "md5").hexdigest()[:8]
+    with tempfile.TemporaryDirectory(prefix="lexicoff-audit-") as tmp:
+        sqlite_path = Path(tmp) / f"{code}.sqlite"
+        if path.suffix == ".zst":
+            with path.open("rb") as source, sqlite_path.open("wb") as dest:
+                zstandard.ZstdDecompressor().copy_stream(source, dest)
+        else:
+            shutil.copyfile(path, sqlite_path)
+        result["sqlite_bytes"] = sqlite_path.stat().st_size
+        # FTS5's own integrity command uses INSERT syntax. Run it only against
+        # this disposable copy; source/build artifacts are never mutated.
+        conn = sqlite3.connect(sqlite_path)
+        try:
+            result["integrity_check"] = [r[0] for r in conn.execute("PRAGMA integrity_check")]
+            result["fts_integrity"] = {}
+            result["fts_records"] = {}
+            for table in ("entries_fts", "fuzzy"):
+                try:
+                    conn.execute(f"INSERT INTO {table}({table}) VALUES('integrity-check')")
+                    result["fts_integrity"][table] = "ok"
+                except sqlite3.DatabaseError as exc:
+                    result["fts_integrity"][table] = str(exc)
+                finally:
+                    conn.rollback()
+                result["fts_records"][table] = conn.execute(f"SELECT count(*) FROM {table}").fetchone()[0]
+            result["language"] = conn.execute("SELECT value FROM metadata WHERE key='lang'").fetchone()[0]
+            result["records"] = conn.execute("SELECT count(*) FROM entries").fetchone()[0]
+            result["unique_headwords"] = conn.execute("SELECT count(DISTINCT word) FROM entries").fetchone()[0]
+            result["zero_frequency_records"] = conn.execute("SELECT count(*) FROM entries WHERE freq=0").fetchone()[0]
+            result["frequency_range"] = list(conn.execute("SELECT min(freq), max(freq) FROM entries").fetchone())
+            result["invalid_frequency_records"] = conn.execute("SELECT count(*) FROM entries WHERE freq IS NULL OR freq < 0 OR freq > 9").fetchone()[0]
+            result["highest_frequency"] = [dict(zip(("word", "pos", "freq"), r)) for r in conn.execute("SELECT word,pos,freq FROM entries ORDER BY freq DESC, word LIMIT 20")]
+            result["search_probes"] = []
+            for word in COMMON_WORDS.get(code, []):
+                ids = {r[0] for r in conn.execute("SELECT id FROM entries WHERE word=?", (word,))}
+                fts_ids = {r[0] for r in conn.execute("SELECT rowid FROM entries_fts WHERE word MATCH ?", (_fts_query(word),))}
+                result["search_probes"].append({"word": word, "present": bool(ids), "fts_matches_all_records": bool(ids) and ids <= fts_ids})
+            if source_report:
+                counts = source_report["counts"]
+                result["source_counts_match"] = (
+                    result["records"] == counts.get("unique_records", counts["records"])
+                    and result["unique_headwords"] == counts["unique_headwords"]
+                )
+        finally:
+            conn.close()
+    return result
+
+
+def read_source(path):
+    with Path(path).open("rb") as source:
+        if str(path).endswith(".zst"):
+            with zstandard.ZstdDecompressor().stream_reader(source) as stream:
+                yield from io.BufferedReader(stream)
+        else:
+            yield from source
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--source-dir", type=Path, required=True)
+    parser.add_argument("--data-dir", type=Path)
+    parser.add_argument("--manifest", type=Path, help="Optionally verify compressed size/hash against a release manifest")
+    parser.add_argument("--languages", nargs="+", default=list(COMMON_WORDS))
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+    if args.manifest and not args.data_dir:
+        parser.error("--manifest requires --data-dir")
+    manifest = json.loads(args.manifest.read_text())["languages"] if args.manifest else None
+    configs = {config.code: config for config in DICT_CONFIGS}
+    report = {"languages": {}, "notes": [
+        "Form-only records are legitimate dictionary entries, not automatically dirt.",
+        "Repeated word/POS pairs may represent distinct etymologies; identical records merit review.",
+        "Common-word probes and deterministic samples are spot checks, not complete linguistic validation.",
+        "Review flags are heuristics; inspect examples before changing source handling.",
+    ]}
+    for code in args.languages:
+        if code not in configs:
+            parser.error(f"Language is not configured: {code}")
+        source = args.source_dir / f"en-{code}-filtered.jsonl.zst"
+        if not source.exists():
+            source = args.source_dir / f"en-{code}-filtered.jsonl"
+        result = audit_source(read_source(source), configs[code])
+        with source.open("rb") as f:
+            result["source_sha256"] = hashlib.file_digest(f, "sha256").hexdigest()
+        result["source_bytes"] = source.stat().st_size
+        if args.data_dir:
+            paths = sorted(args.data_dir.glob(f"{code}-*/{code}.sqlite.zst"))
+            if not paths:
+                paths = sorted(args.data_dir.glob(f"{code}/{code}.sqlite.zst"))
+            if len(paths) != 1:
+                parser.error(f"Expected one {code} database, found {len(paths)}")
+            result["database"] = audit_sqlite(paths[0], code, result)
+            if manifest is not None:
+                expected = manifest.get(code, {})
+                result["database"]["manifest_matches"] = (
+                    expected.get("code") == code
+                    and expected.get("dataHash") == result["database"]["data_hash"]
+                    and expected.get("dataSize") == result["database"]["download_bytes"]
+                )
+        report["languages"][code] = result
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n")
+        print(f"{code}: {result['counts']['records']:,} records, {result['counts']['unique_headwords']:,} headwords, flags={result['review_flags']}", flush=True)
+
+
+if __name__ == "__main__":
+    main()

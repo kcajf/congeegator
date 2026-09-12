@@ -6,6 +6,7 @@ Produces a single .sqlite file per language with FTS5 full-text search.
 import logging
 import os
 import sqlite3
+import unicodedata
 from typing import Any, Callable
 
 import orjson
@@ -16,6 +17,7 @@ SCHEMA_SQL = """
 CREATE TABLE entries (
     id          INTEGER PRIMARY KEY,
     word        TEXT NOT NULL,
+    word_key    TEXT NOT NULL,
     pos         TEXT NOT NULL,
     senses      TEXT NOT NULL,
     freq        REAL NOT NULL,
@@ -26,6 +28,7 @@ CREATE TABLE entries (
 );
 
 CREATE INDEX idx_word ON entries(word COLLATE NOCASE);
+CREATE INDEX idx_word_key ON entries(word_key);
 CREATE INDEX idx_freq ON entries(freq DESC);
 
 CREATE VIRTUAL TABLE entries_fts USING fts5(
@@ -54,6 +57,18 @@ CREATE TABLE metadata (
 """
 
 BATCH_SIZE = 5000
+
+
+def dictionary_word_key(text: str, lang_code: str) -> str:
+    """Match the browser's NFC + language-aware lowercase exact-lookup key.
+
+    SQLite NOCASE handles ASCII only. Turkish additionally needs I→ı and İ→i;
+    apply this only to target-language words/forms, never to English glosses.
+    """
+    text = unicodedata.normalize("NFC", text)
+    if lang_code == "tr":
+        text = text.replace("I", "ı").replace("İ", "i")
+    return unicodedata.normalize("NFC", text.lower())
 
 
 def write_sqlite_database(
@@ -86,6 +101,7 @@ def write_sqlite_database(
             entry_rows.append((
                 i,
                 entry["word"],
+                dictionary_word_key(entry["word"], lang_code),
                 entry["pos"],
                 senses_json,
                 entry.get("freq", 0.0),
@@ -107,8 +123,12 @@ def write_sqlite_database(
                     parts.append(phonetic_fn(form))
                 phonetic = " ".join(parts)
 
-            fts_rows.append((i, entry["word"], forms_text, gloss_text, phonetic))
-            fuzzy_rows.append((i, entry["word"], phonetic))
+            word_key = dictionary_word_key(entry["word"], lang_code)
+            fts_rows.append((
+                i, word_key, dictionary_word_key(forms_text, lang_code),
+                dictionary_word_key(gloss_text, "en"), phonetic,
+            ))
+            fuzzy_rows.append((i, word_key, phonetic))
 
             if len(entry_rows) >= BATCH_SIZE:
                 _flush_batch(conn, entry_rows, fts_rows, fuzzy_rows)
@@ -146,8 +166,8 @@ def _flush_batch(
     fuzzy_rows: list[tuple],
 ) -> None:
     conn.executemany(
-        "INSERT INTO entries (id, word, pos, senses, freq, gender, forms, pronunciation, etymology) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO entries (id, word, word_key, pos, senses, freq, gender, forms, pronunciation, etymology) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         entry_rows,
     )
     conn.executemany(

@@ -7,6 +7,22 @@ on:
         description: "Branch to run against (default: main)"
         required: false
         default: ""
+      languages:
+        description: "Optional space-separated language codes; leave empty for a full refresh"
+        required: false
+        default: ""
+      version:
+        description: "Optional immutable snapshot timestamp (YYYY-MM-DDTHHMMSSZ)"
+        required: false
+        default: ""
+      source_sha256:
+        description: "Optional SHA256 of the compressed source reviewed locally"
+        required: false
+        default: ""
+      publish_only:
+        description: "Publish reviewed source files only, without generation or a refresh PR"
+        type: boolean
+        default: false
   schedule:
     # First Monday of each month at 06:00 UTC
     - cron: "0 6 1-7 * 1"
@@ -46,12 +62,32 @@ jobs:
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
 
       - name: Pin source data
-        run: pixi run pin-source-data
+        env:
+          PIN_LANGUAGES: ${{ inputs.languages }}
+          PIN_VERSION: ${{ inputs.version }}
+          PIN_SOURCE_SHA256: ${{ inputs.source_sha256 }}
+          PIN_PUBLISH_ONLY: ${{ inputs.publish_only }}
+        run: |
+          args=()
+          if [[ -n "$PIN_LANGUAGES" ]]; then
+            read -r -a languages <<< "$PIN_LANGUAGES"
+            args+=(--languages "${languages[@]}")
+          fi
+          if [[ -n "$PIN_VERSION" ]]; then args+=(--version "$PIN_VERSION"); fi
+          if [[ -n "$PIN_SOURCE_SHA256" ]]; then args+=(--source-sha256 "$PIN_SOURCE_SHA256"); fi
+          if [[ "$PIN_PUBLISH_ONLY" == "true" ]]; then args+=(--no-regenerate); fi
+          pixi run pin-source-data "${args[@]}"
 
       - name: Run golden tests
+        if: ${{ !inputs.publish_only }}
         run: pixi run test
 
+      - name: Check source pinning
+        if: ${{ inputs.publish_only }}
+        run: pixi run pytest pipeline/tests/test_source_pinning.py
+
       - name: Create pull request
+        if: ${{ !inputs.publish_only }}
         uses: peter-evans/create-pull-request@v7
         with:
           commit-message: "Update pinned source data"
