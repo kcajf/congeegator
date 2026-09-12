@@ -1,16 +1,20 @@
 import { afterEach, expect, it, vi } from 'vitest';
 vi.mock('$app/environment', () => ({ browser: true }));
 vi.mock('./dataUtils', () => ({ manifest: { languages: { fr: {}, de: {} } } }));
-const installed = vi.hoisted(() => vi.fn(async () => true));
-vi.mock('./sqliteClient', () => ({ isInstalled: installed }));
+const storage = vi.hoisted(() => ({
+	phase: 'ready',
+	languages: { fr: { status: 'ready' } } as Record<string, { status: string }>
+}));
+vi.mock('./sqliteClient.svelte', () => ({ storage }));
 afterEach(() => vi.unstubAllGlobals());
 
-it('clears readiness when the selected dictionary is removed', async () => {
+it('derives readiness from open storage and the selected language', async () => {
 	vi.stubGlobal('localStorage', { getItem: () => null, setItem: vi.fn() });
 	const { searchLangState } = await import('./searchLang.svelte');
-	await searchLangState.checkReady('fr');
 	expect(searchLangState.indexReady).toBe(true);
-	installed.mockResolvedValue(false);
-	await searchLangState.checkReady('fr');
+	delete storage.languages.fr;
+	expect(searchLangState.indexReady).toBe(false);
+	storage.languages.fr = { status: 'ready' };
+	storage.phase = 'error';
 	expect(searchLangState.indexReady).toBe(false);
 });

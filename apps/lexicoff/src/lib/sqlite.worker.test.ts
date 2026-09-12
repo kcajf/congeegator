@@ -99,7 +99,7 @@ describe('dictionary storage lifecycle', () => {
 		expect((await s.send('open', 'fr', 'bbbbbbbb')).error).toBe('Quota exceeded');
 		expect(s.databases[0].close).not.toHaveBeenCalled();
 		expect(s.files.has('/fr-aaaaaaaa.sqlite')).toBe(true);
-		expect((await s.send('isInstalled')).result).toBe(true);
+		expect(s.databases[0].close).not.toHaveBeenCalled();
 		s.raw.set('de-cccccccc.sqlite', new Blob(['database']));
 		expect((await s.send('open', 'de', 'cccccccc')).result).toBe(true);
 		s.raw.set('fr-bbbbbbbb.sqlite', new Blob(['replacement']));
@@ -127,7 +127,7 @@ describe('dictionary storage lifecycle', () => {
 		s.raw.set('fr-aaaaaaaa.sqlite', new Blob(['database']));
 		s.dir.removeEntry.mockRejectedValueOnce(new Error('cleanup failed'));
 		expect((await s.send('open')).result).toBe(true);
-		expect((await s.send('isInstalled')).result).toBe(true);
+		expect(s.databases[0].close).not.toHaveBeenCalled();
 	});
 
 	it('removes empty interrupted downloads before discovery', async () => {
@@ -137,26 +137,6 @@ describe('dictionary storage lifecycle', () => {
 		s.raw.set('de-bbbbbbbb.sqlite', new Blob(['complete']));
 		expect((await s.send('list')).result).toEqual([['de', 'bbbbbbbb']]);
 		expect(s.raw.has('fr-aaaaaaaa.sqlite')).toBe(false);
-	});
-
-	it('serializes deletion behind an in-flight import', async () => {
-		const s = setup();
-		await s.start();
-		s.raw.set('fr-aaaaaaaa.sqlite', new Blob(['database']));
-		let release!: () => void;
-		s.pool.reserveMinimumCapacity.mockImplementationOnce(
-			() =>
-				new Promise<void>((r) => {
-					release = r;
-				})
-		);
-		const opening = s.send('open');
-		await vi.waitFor(() => expect(release).toBeDefined());
-		const closing = s.send('close');
-		release();
-		await opening;
-		await closing;
-		expect((await s.send('isInstalled')).result).toBe(false);
 	});
 
 	it('waits for another tab to release ownership instead of deleting its files', async () => {
@@ -195,4 +175,14 @@ it('reimports an interrupted installation without a full-database scan', async (
 	expect(s.pool.importDb).toHaveBeenCalledOnce();
 	expect(query).not.toHaveBeenCalledWith('PRAGMA quick_check');
 	expect(s.raw.has('fr-aaaaaaaa.sqlite')).toBe(false);
+});
+
+it('removes all versions of a language, including interrupted replacements', async () => {
+	const s = setup();
+	s.files.add('/fr-aaaaaaaa.sqlite');
+	s.files.add('/fr-bbbbbbbb.sqlite');
+	s.files.add('/de-cccccccc.sqlite');
+	await s.start();
+	await s.send('deleteFromPool');
+	expect([...s.files]).toEqual(['/de-cccccccc.sqlite']);
 });

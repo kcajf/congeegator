@@ -6,10 +6,9 @@
 	import LanguagePicker from '$lib/components/LanguagePicker.svelte';
 	import ToastStack from '$lib/components/ToastStack.svelte';
 	import { appTitle, brandColor } from '$lib/defs';
-	import * as sqliteClient from '$lib/sqliteClient';
-	import type { SearchResult } from '$lib/sqliteClient';
+	import { storage as sqliteClient } from '$lib/sqliteClient.svelte';
+	import type { SearchResult } from '$lib/sqliteClient.svelte';
 	import { searchLangState } from '$lib/searchLang.svelte';
-	import { globalSync } from '$lib/syncManager.svelte';
 	import { toasts } from '$lib/toasts.svelte';
 	import { stripDiacritics, toPhonetic } from '$lib/phonetic';
 	import { onMount, tick } from 'svelte';
@@ -35,6 +34,7 @@
 	const webManifestLink = $derived(pwaInfo?.webManifest?.linkTag ?? '');
 
 	onMount(async () => {
+		void sqliteClient.connect().catch(() => {});
 		if (pwaInfo) {
 			const { registerSW } = await import('virtual:pwa-register');
 			const updateSW = registerSW({
@@ -264,7 +264,7 @@
 		{:else if searchTerm.trim().length >= 1}
 			{#if !searchLangState.indexReady}
 				<div class="no-results">
-					{#if globalSync.map[searchLangState.lang]?.status === 'ready'}
+					{#if sqliteClient.phase === 'opening'}
 						Loading...
 					{:else}
 						Download a language from the homepage to search

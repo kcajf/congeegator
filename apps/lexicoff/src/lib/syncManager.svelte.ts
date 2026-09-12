@@ -1,8 +1,6 @@
 import { browser } from '$app/environment';
-import * as sqliteClient from './sqliteClient';
-import { dbsReady, resolveDbsReady, isSahPoolAvailable, sqliteReady } from './sqliteClient';
+import { storage } from './sqliteClient.svelte';
 import { manifest } from './dataUtils';
-import { searchLangState } from './searchLang.svelte';
 
 let worker: Worker | undefined;
 
@@ -56,34 +54,23 @@ function runDownloadWorker(lang: string, type: 'download' | 'delete'): Promise<s
 }
 
 async function changeLanguage(lang: string, remove: boolean) {
-	if (!browser || !manifest.languages[lang]) return;
-	await dbsReady;
-	if (!isSahPoolAvailable() || globalSync.map[lang]?.status === 'syncing') return;
-
-	const previous = globalSync.map[lang];
-	globalSync.map[lang] = { hash: previous?.hash ?? '', status: 'syncing' };
+	if (!browser || !manifest.languages[lang] || globalSync.map[lang]?.status === 'syncing') return;
+	globalSync.map[lang] = { hash: storage.languages[lang]?.hash ?? '', status: 'syncing' };
 	try {
+		await storage.connect();
 		if (remove) {
-			await sqliteClient.closeDb(lang);
-			await searchLangState.checkReady(lang);
-			await sqliteClient.deleteFromPool(lang, previous?.hash ?? '');
+			await storage.removeDb(lang);
 			await runDownloadWorker(lang, 'delete');
-			delete globalSync.map[lang];
 		} else {
 			const hash = await runDownloadWorker(lang, 'download');
-			const dataHash = hash || manifest.languages[lang].dataHash;
-			if (!(await sqliteClient.openDb(lang, dataHash))) throw new Error('Failed to open database');
-			globalSync.map[lang] = { hash: dataHash, status: 'ready' };
+			await storage.openDb(lang, hash || manifest.languages[lang].dataHash);
 		}
+		delete globalSync.map[lang];
 	} catch (error) {
-		const installed = await sqliteClient.isInstalled(lang).catch(() => false);
 		globalSync.map[lang] = {
-			hash: previous?.hash ?? '',
-			status: installed ? 'ready' : 'error',
+			...(storage.languages[lang] ?? { hash: '', status: 'error' }),
 			errorMessage: error instanceof Error ? error.message : String(error)
 		};
-	} finally {
-		await searchLangState.checkReady(lang);
 	}
 }
 
@@ -96,74 +83,14 @@ export function deleteLang(lang: string) {
 }
 
 class GlobalSyncRegistry {
+	// Only download/removal progress lives here. Storage owns installed state.
 	map = $state<Record<string, LangSyncInfo>>({});
-	initialized = $state(false);
-	storageError = $state<string | undefined>();
-	private attempt = 0;
-
-	constructor() {
-		if (browser) {
-			sqliteClient.onWorkerFailure((error) => {
-				this.storageError = error.message;
-				searchLangState.indexReady = false;
-			});
-			void this.init();
-		}
-	}
 
 	retryStorage() {
-		sqliteClient.restart();
-		void this.init();
-	}
-
-	private async init() {
-		const attempt = ++this.attempt;
-		this.initialized = false;
-		this.storageError = undefined;
-		this.map = {};
-		try {
-			await sqliteReady;
-			if (attempt !== this.attempt) return;
-			if (!isSahPoolAvailable()) {
-				this.storageError = 'Dictionary storage could not be opened.';
-				return;
-			}
-			const files = await sqliteClient.listOpfsFiles();
-			if (attempt !== this.attempt) return;
-			for (const lang of new Set(files.map(([lang]) => lang))) {
-				// Prefer the current version, but keep an older working download
-				// available if a replacement was interrupted or damaged.
-				const currentHash = manifest.languages[lang]?.dataHash;
-				const candidates = files
-					.filter(([code]) => code === lang)
-					.sort((a, b) => Number(b[1] === currentHash) - Number(a[1] === currentHash));
-				for (const [, hash] of candidates) {
-					try {
-						const opened = await sqliteClient.openDb(lang, hash);
-						if (attempt !== this.attempt) return;
-						if (!opened) throw new Error('Failed to open database');
-						this.map[lang] = { hash, status: 'ready' };
-						break;
-					} catch (error) {
-						if (attempt !== this.attempt) return;
-						this.map[lang] = {
-							hash,
-							status: 'error',
-							errorMessage: error instanceof Error ? error.message : String(error)
-						};
-					}
-				}
-			}
-		} catch (error) {
-			if (attempt !== this.attempt) return;
-			this.storageError = error instanceof Error ? error.message : String(error);
-		} finally {
-			if (attempt === this.attempt) {
-				this.initialized = true;
-				resolveDbsReady();
-				await searchLangState.checkReady();
-			}
+		for (const lang of Object.keys(this.map)) {
+			if (this.map[lang].status !== 'syncing') delete this.map[lang];
 		}
+		void storage.restart();
 	}
 }
 

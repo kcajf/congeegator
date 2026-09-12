@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { manifest } from '$lib/dataUtils';
 	import { globalSync, triggerLangSync, deleteLang } from '$lib/syncManager.svelte';
-	import { isSahPoolAvailable } from '$lib/sqliteClient';
+	import { storage } from '$lib/sqliteClient.svelte';
 
 	function formatSize(bytes: number): string {
 		if (bytes < 1024) return `${bytes} B`;
@@ -17,28 +17,24 @@
 	const languages = Object.values(manifest.languages).toSorted((a, b) =>
 		a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
 	);
-
-	const sahAvailable = $derived(
-		globalSync.initialized && !globalSync.storageError && isSahPoolAvailable()
-	);
 </script>
 
 <div class="download-manager">
 	<h2>Languages</h2>
-	{#if !globalSync.initialized}
+	{#if storage.phase === 'opening'}
 		<p class="unavailable-notice">
 			Opening dictionaries… If Lexicoff is open in another tab or window, close it to continue.
 			<button class="btn" onclick={() => globalSync.retryStorage()}>Retry opening</button>
 		</p>
-	{:else if !sahAvailable || globalSync.storageError}
+	{:else if storage.phase === 'error'}
 		<p class="unavailable-notice">
-			{globalSync.storageError ?? 'Dictionary storage could not be opened.'}
+			{storage.error ?? 'Dictionary storage could not be opened.'}
 			<button class="btn" onclick={() => globalSync.retryStorage()}>Retry storage</button>
 		</p>
 	{/if}
 	<div class="lang-list">
 		{#each languages as lang (lang.code)}
-			{@const info = globalSync.map[lang.code]}
+			{@const info = globalSync.map[lang.code] ?? storage.languages[lang.code]}
 			{@const isSyncing = info?.status === 'syncing'}
 			{@const isReady = info?.status === 'ready'}
 			{@const isError = info?.status === 'error'}
@@ -83,7 +79,7 @@
 						<button
 							class="btn btn-install"
 							onclick={() => triggerLangSync(lang.code)}
-							disabled={!globalSync.initialized || !sahAvailable}
+							disabled={storage.phase !== 'ready'}
 						>
 							Install
 						</button>

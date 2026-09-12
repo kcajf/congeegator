@@ -32,10 +32,6 @@ let poolUtil: any;
 const openDbs = new Map<string, any>();
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
-// Keep imports, queries, deletion and shutdown in order. A failed request must
-// never prevent the next request from running.
-let requestQueue: Promise<void> = Promise.resolve();
-
 async function init() {
 	try {
 		// One tab owns the pool at a time. Waiting tabs acquire it automatically
@@ -160,9 +156,11 @@ async function closeDb(lang: string) {
 	openDbs.delete(lang);
 }
 
-function deleteFromPool(lang: string, hash: string) {
+function deleteFromPool(lang: string) {
 	if (!poolUtil) return;
-	poolUtil.unlink(`/${lang}-${hash}.sqlite`);
+	for (const name of poolUtil.getFileNames()) {
+		if (name.startsWith(`/${lang}-`) && name.endsWith('.sqlite')) poolUtil.unlink(name);
+	}
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -502,7 +500,7 @@ async function listOpfsFiles(): Promise<[string, string][]> {
 }
 
 async function handleMessage(e: MessageEvent) {
-	const { id, type, lang, query, word, phoneticQuery, hash } = e.data;
+	const { id, type, lang, query, word, phoneticQuery } = e.data;
 
 	try {
 		let result: unknown;
@@ -513,12 +511,6 @@ async function handleMessage(e: MessageEvent) {
 				break;
 			case 'getWord':
 				result = await getWord(lang, word);
-				break;
-			case 'isInstalled':
-				result = openDbs.has(lang);
-				break;
-			case 'getInstalledLangs':
-				result = [...openDbs.keys()];
 				break;
 			case 'open':
 				result = await openDb(lang, query);
@@ -531,7 +523,7 @@ async function handleMessage(e: MessageEvent) {
 				result = await listOpfsFiles();
 				break;
 			case 'deleteFromPool':
-				deleteFromPool(lang, hash);
+				deleteFromPool(lang);
 				result = true;
 				break;
 			case 'shutdown':
@@ -546,9 +538,7 @@ async function handleMessage(e: MessageEvent) {
 	}
 }
 
-self.onmessage = (e: MessageEvent) => {
-	requestQueue = requestQueue.then(() => handleMessage(e)).catch(console.error);
-	return requestQueue;
-};
+// The client dispatches one request at a time, including imports and shutdown.
+self.onmessage = handleMessage;
 
 init();
