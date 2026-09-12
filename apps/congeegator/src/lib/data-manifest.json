@@ -1122,7 +1122,7 @@
       ]
     },
     "ca": {
-      "dataHash": "9ec8f156",
+      "dataHash": "db1b13f2",
       "dataSize": 4467013,
       "code": "ca",
       "name": "català",
@@ -1316,7 +1316,7 @@
       ]
     },
     "sv": {
-      "dataHash": "d3c3de99",
+      "dataHash": "cc87abdb",
       "dataSize": 2858375,
       "code": "sv",
       "name": "svenska",
@@ -1409,7 +1409,7 @@
       ]
     },
     "la": {
-      "dataHash": "0eaf9b6d",
+      "dataHash": "11e98838",
       "dataSize": 23038582,
       "code": "la",
       "name": "Latina",
@@ -1716,7 +1716,7 @@
       ]
     },
     "fi": {
-      "dataHash": "26b2ab38",
+      "dataHash": "bc18e567",
       "dataSize": 30782823,
       "code": "fi",
       "name": "suomi",

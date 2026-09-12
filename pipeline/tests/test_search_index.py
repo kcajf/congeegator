@@ -1,6 +1,11 @@
 """Tests for build_search_index: verifies key verbs appear under expected prefixes,
 including diacritic-stripped and phonetic variants."""
 
+import os
+from pathlib import Path
+import subprocess
+import sys
+
 import pytest
 
 from pipeline.search import build_search_index
@@ -287,3 +292,29 @@ def test_long_whole_form_beats_compound_auxiliary_at_maximum_prefix():
     index = build_search_index(verbs, lang='la')
     assert index['essemu'][0] == 220
     assert index['esseti'][0] == 220
+
+
+def test_compound_index_serialization_is_reproducible_across_hash_seeds():
+    # Dict key order affects the bundle hash even when search results agree.
+    # Do not sort JSON keys: this tests the order emitted by the actual builder.
+    script = """
+import json
+from pipeline.search import build_search_index
+
+verbs = [
+    {'name': 'opbellen', 'conjugation': ['belde op', 'belt op'], 'freq': 3},
+    {'name': 'skriva', 'conjugation': ['har skrivit', 'hade skrivit'], 'freq': 5},
+    {'name': 'amo', 'conjugation': ['amātus sum', 'amātae sumus'], 'freq': 0},
+]
+print(json.dumps({lang: build_search_index(verbs, lang=lang)
+                  for lang in ('pt', 'ca', 'nl', 'sv', 'la', 'fi')}, ensure_ascii=False))
+"""
+    outputs = [
+        subprocess.check_output(
+            [sys.executable, '-c', script],
+            cwd=Path(__file__).resolve().parents[2],
+            env={**os.environ, 'PYTHONHASHSEED': seed},
+        )
+        for seed in ('1', '2', '42')
+    ]
+    assert outputs[0] == outputs[1] == outputs[2]

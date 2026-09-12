@@ -60,7 +60,9 @@ def build_search_index(
                 exact_forms[strip_diacritics(ss)[:MAX_PREFIX].lower()].add(idx)
                 # Separable verbs and Latin/Finnish compounds do not always
                 # put the lexical form last. Index the phrase and its words.
-                for token in {ss, *ss.split()}:
+                # Preserve phrase/token order so JSON keys and bundle hashes
+                # are reproducible across Python hash seeds.
+                for token in dict.fromkeys((ss, *ss.split())):
                     searchable_words[token].add(idx)
                     searchable_words[strip_diacritics(token)].add(idx)
                 continue
