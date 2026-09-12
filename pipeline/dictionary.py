@@ -1,4 +1,5 @@
 import logging
+import re
 from typing import Any, Callable, Optional
 
 import msgspec
@@ -8,11 +9,27 @@ from .wiktionary import Entry
 
 log = logging.getLogger(__name__)
 
+# These markers are failed Wiktextract/template expansion, not display text.
+# Drop a contaminated field rather than guessing at its intended definition.
+_UNEXPANDED_MARKUP = re.compile(
+    r"\{\{|\}\}|\[\[|\]\]|\b(?:Template|Module):|\b(?:Lua|Script) error\b",
+    re.IGNORECASE,
+)
+
+
+def _clean_text(text: str) -> str | None:
+    text = text.strip()
+    return text if text and not _UNEXPANDED_MARKUP.search(text) else None
+
 # POS types to include
 INCLUDED_POS = frozenset({
     "noun", "verb", "adj", "adv", "prep", "conj", "pron", "det",
     "intj", "num", "particle", "affix", "prefix", "suffix",
     "phrase", "name",
+    "article", "contraction", "postp", "ambiposition", "circumpos",
+    "infix", "interfix", "circumfix", "combining_form", "root",
+    "proverb", "prep_phrase", "adv_phrase", "classifier", "counter",
+    "preverb", "converb", "adj_noun", "adj_verb", "adnominal",
 })
 
 # POS types to skip
@@ -36,6 +53,25 @@ DICT_CONFIGS: list[DictLanguageConfig] = [
     DictLanguageConfig(code="es", name="español", english_wiktionary_name="Spanish"),
     DictLanguageConfig(code="it", name="italiano", english_wiktionary_name="Italian"),
     DictLanguageConfig(code="en", name="English", english_wiktionary_name="English"),
+    DictLanguageConfig(code="pt", name="português", english_wiktionary_name="Portuguese"),
+    DictLanguageConfig(code="ca", name="català", english_wiktionary_name="Catalan"),
+    DictLanguageConfig(code="ro", name="română", english_wiktionary_name="Romanian"),
+    DictLanguageConfig(code="gl", name="galego", english_wiktionary_name="Galician"),
+    DictLanguageConfig(code="nl", name="Nederlands", english_wiktionary_name="Dutch"),
+    DictLanguageConfig(code="sv", name="svenska", english_wiktionary_name="Swedish"),
+    DictLanguageConfig(code="da", name="dansk", english_wiktionary_name="Danish"),
+    DictLanguageConfig(code="nb", name="norsk bokmål", english_wiktionary_name="Norwegian Bokmål"),
+    DictLanguageConfig(code="pl", name="polski", english_wiktionary_name="Polish"),
+    DictLanguageConfig(code="ru", name="русский", english_wiktionary_name="Russian"),
+    DictLanguageConfig(code="uk", name="українська", english_wiktionary_name="Ukrainian"),
+    DictLanguageConfig(code="cs", name="čeština", english_wiktionary_name="Czech"),
+    DictLanguageConfig(code="fi", name="suomi", english_wiktionary_name="Finnish"),
+    DictLanguageConfig(code="hu", name="magyar", english_wiktionary_name="Hungarian"),
+    DictLanguageConfig(code="tr", name="Türkçe", english_wiktionary_name="Turkish"),
+    DictLanguageConfig(code="id", name="Bahasa Indonesia", english_wiktionary_name="Indonesian"),
+    DictLanguageConfig(code="vi", name="Tiếng Việt", english_wiktionary_name="Vietnamese"),
+    DictLanguageConfig(code="eo", name="Esperanto", english_wiktionary_name="Esperanto"),
+    DictLanguageConfig(code="la", name="Latina", english_wiktionary_name="Latin"),
 ]
 
 
@@ -46,14 +82,14 @@ def extract_senses(entry: Entry) -> list[dict[str, Any]]:
         if not sense.glosses:
             continue
         raw_gloss = sense.glosses[-1]
-        gloss = raw_gloss.strip()
+        gloss = _clean_text(raw_gloss)
         if not gloss:
             continue
         sense_dict: dict[str, Any] = {"gloss": gloss}
         examples: list[str] = []
         for ex in sense.examples:
             if isinstance(ex, dict):
-                text = ex.get("text", "")
+                text = _clean_text(ex.get("text", ""))
                 if text and len(text) < 200:
                     examples.append(text)
             if len(examples) >= 2:
@@ -93,7 +129,7 @@ def extract_forms(entry: Entry) -> list[str]:
             continue
         if "inflection-template" in form.tags:
             continue
-        text = form.form.strip()
+        text = _clean_text(form.form)
         if not text or text == "-":
             continue
         if text not in seen:
@@ -105,7 +141,7 @@ def extract_forms(entry: Entry) -> list[str]:
 def extract_pronunciation(entry: Entry) -> Optional[str]:
     for sound in entry.sounds:
         if isinstance(sound, dict):
-            ipa = sound.get("ipa", "")
+            ipa = _clean_text(sound.get("ipa", ""))
             if ipa:
                 return ipa
     return None
@@ -115,7 +151,7 @@ def extract_etymology(entry: Entry) -> Optional[str]:
     for et in entry.etymology_templates:
         if et.expansion and len(et.expansion) < 150:
             if any(kw in et.name for kw in ("inh", "bor", "der", "from", "inherited", "borrowed")):
-                return et.expansion
+                return _clean_text(et.expansion)
     return None
 
 
