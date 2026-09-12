@@ -83,16 +83,30 @@ async function openDb(lang: string, hash: string): Promise<boolean> {
 
 	let db;
 	try {
-		if (!poolUtil.getFileNames().includes(fname)) {
-			await poolUtil.reserveMinimumCapacity(poolUtil.getFileCount() + 3);
+		let file: File | undefined;
+		try {
 			const root = await navigator.storage.getDirectory();
 			const dir = await root.getDirectoryHandle('lexicoff');
-			const file = await (await dir.getFileHandle(`${lang}-${hash}.sqlite`)).getFile();
+			file = await (await dir.getFileHandle(`${lang}-${hash}.sqlite`)).getFile();
+			if (file.size === 0) {
+				await dir.removeEntry(`${lang}-${hash}.sqlite`);
+				file = undefined;
+			}
+		} catch (error) {
+			if (!(error instanceof DOMException && error.name === 'NotFoundError')) throw error;
+		}
+		// The raw download is retained until validation succeeds. If it still
+		// exists, a previous import may have stopped halfway: start it again.
+		// With no raw file, this is an already-completed installation.
+		if (file) {
+			poolUtil.unlink(fname);
+			await poolUtil.reserveMinimumCapacity(poolUtil.getFileCount() + 3);
+			const source = file;
 			let offset = 0;
 			await poolUtil.importDb(fname, async (): Promise<Uint8Array | undefined> => {
-				if (offset >= file.size) return undefined;
-				const end = Math.min(offset + 65536, file.size);
-				const chunk = new Uint8Array(await file.slice(offset, end).arrayBuffer());
+				if (offset >= source.size) return undefined;
+				const end = Math.min(offset + 65536, source.size);
+				const chunk = new Uint8Array(await source.slice(offset, end).arrayBuffer());
 				offset = end;
 				return chunk;
 			});
@@ -102,8 +116,10 @@ async function openDb(lang: string, hash: string): Promise<boolean> {
 		if (db.selectValue("SELECT value FROM metadata WHERE key = 'lang'") !== lang) {
 			throw new Error('Dictionary language does not match');
 		}
-		// A worker may have stopped midway through importing a previous attempt.
-		if (db.selectValue('PRAGMA quick_check') !== 'ok') throw new Error('Dictionary is damaged');
+		// Scan a new import once, not every dictionary on every app launch.
+		if (file && db.selectValue('PRAGMA quick_check') !== 'ok') {
+			throw new Error('Dictionary is damaged');
+		}
 		// Opening a SQLite file alone does not verify the dictionary schema.
 		db.exec(
 			'SELECT id, word, pos, senses, freq, gender, forms, pronunciation, etymology FROM entries LIMIT 0'
