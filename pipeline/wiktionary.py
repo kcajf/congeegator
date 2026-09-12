@@ -35,7 +35,8 @@ class EtymologyTemplate(msgspec.Struct, frozen=True):
 
 
 class EntryJustPos(msgspec.Struct, frozen=True):
-    pos: str
+    pos: str | None = None
+    source: str | None = None
 
 
 class Entry(msgspec.Struct, frozen=True):

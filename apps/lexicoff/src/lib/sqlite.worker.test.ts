@@ -3,10 +3,14 @@ import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({ init: vi.fn() }));
 vi.mock('@sqlite.org/sqlite-wasm', () => ({ default: mocks.init }));
 
-function setup() {
+function setup(hasWordKey = false) {
 	const files = new Set<string>();
 	const raw = new Map<string, Blob>();
-	const databases: { filename: string; close: ReturnType<typeof vi.fn> }[] = [];
+	const databases: {
+		filename: string;
+		close: ReturnType<typeof vi.fn>;
+		exec: ReturnType<typeof vi.fn>;
+	}[] = [];
 	const pool = {
 		getFileNames: () => [...files],
 		getFileCount: () => files.size,
@@ -21,7 +25,11 @@ function setup() {
 		removeVfs: vi.fn(),
 		OpfsSAHPoolDb: class {
 			close = vi.fn();
-			exec = vi.fn();
+			exec = vi.fn((request) => {
+				if (request.sql === 'PRAGMA table_info(entries)' && hasWordKey) {
+					request.callback([2, 'word_key', 'TEXT', 1, null, 0]);
+				}
+			});
 			constructor(public filename: string) {
 				databases.push(this);
 			}
@@ -58,7 +66,7 @@ function setup() {
 	async function send(type: string, lang = 'fr', query = 'aaaaaaaa') {
 		const current = id++;
 		await worker.onmessage({
-			data: { id: current, type, lang, query, hash: query }
+			data: { id: current, type, lang, query, word: query, hash: query }
 		} as MessageEvent);
 		return postMessage.mock.calls.map(([m]) => m).find((m) => m.id === current);
 	}
@@ -185,4 +193,77 @@ it('removes all versions of a language, including interrupted replacements', asy
 	await s.start();
 	await s.send('deleteFromPool');
 	expect([...s.files]).toEqual(['/de-cccccccc.sqlite']);
+});
+
+describe('multilingual dictionary search', () => {
+	it('keeps the first same-POS etymology in exact previews while retaining all detail records', async () => {
+		const s = setup(true);
+		s.files.add('/vi-aaaaaaaa.sqlite');
+		await s.start();
+		await s.send('open', 'vi');
+		const senses = ['water', 'move, step'].map((gloss) => JSON.stringify([{ gloss }]));
+		s.databases[0].exec.mockImplementation((request) => {
+			if (request.sql.startsWith('SELECT id, word, pos, freq FROM entries')) {
+				expect(request.sql).toContain('ORDER BY id');
+				request.callback([1, 'nước', 'noun', 5]);
+				request.callback([2, 'nước', 'noun', 5]);
+			} else if (request.sql.startsWith('SELECT id, senses FROM entries')) {
+				for (const id of request.bind) request.callback([id, senses[id - 1]]);
+			} else if (request.sql.startsWith('SELECT id, word, pos, senses')) {
+				for (const [index, value] of senses.entries()) {
+					request.callback([index + 1, 'nước', 'noun', value, 5, null, null, null, null]);
+				}
+			}
+		});
+		const search = await s.send('search', 'vi', 'NƯỚC'.normalize('NFD'));
+		expect(search.result).toMatchObject([{ word: 'nước', glosses: ['water'], quality: 0 }]);
+		const detail = await s.send('getWord', 'vi', 'nước');
+		expect(detail.result).toHaveLength(2);
+		expect(detail.result[1].senses).toEqual([{ gloss: 'move, step' }]);
+	});
+
+	it('uses indexed Turkish keys for exact and detail lookup, with English gloss casing', async () => {
+		const s = setup(true);
+		s.files.add('/tr-aaaaaaaa.sqlite');
+		await s.start();
+		await s.send('open', 'tr');
+		expect((await s.send('search', 'tr', 'IŞIK')).error).toBeUndefined();
+		await s.send('getWord', 'tr', 'IŞIK');
+		const requests = s.databases[0].exec.mock.calls.map(([request]) => request);
+		const exact = requests.filter((r) => r.sql?.includes('WHERE word_key = ?'));
+		expect(exact).toHaveLength(2);
+		expect(exact.every((r) => r.bind[0] === 'ışık')).toBe(true);
+		expect(requests.find((r) => r.sql?.includes('WHERE word MATCH'))?.bind).toEqual(['"ışık"*']);
+		expect(requests.find((r) => r.sql?.includes('WHERE forms_text MATCH'))?.bind).toEqual([
+			'"ışık"*'
+		]);
+		expect(requests.find((r) => r.sql?.includes('WHERE gloss_text MATCH'))?.bind).toEqual([
+			'"işik"*'
+		]);
+	});
+
+	it('keeps decomposed Vietnamese words intact in FTS queries', async () => {
+		const s = setup(true);
+		s.files.add('/vi-aaaaaaaa.sqlite');
+		await s.start();
+		await s.send('open', 'vi');
+		await s.send('search', 'vi', 'TIẾNG VIỆT'.normalize('NFD'));
+		const requests = s.databases[0].exec.mock.calls.map(([request]) => request);
+		expect(requests.find((r) => r.sql?.includes('WHERE word MATCH'))?.bind).toEqual([
+			'"tiếng" "việt"*'
+		]);
+	});
+
+	it('retains exact matching with the original spelling in older downloaded dictionaries', async () => {
+		const s = setup(false);
+		s.files.add('/de-aaaaaaaa.sqlite');
+		await s.start();
+		await s.send('open', 'de');
+		await s.send('search', 'de', 'Über');
+		const requests = s.databases[0].exec.mock.calls.map(([request]) => request);
+		expect(requests.find((r) => r.sql?.includes('WHERE word = ? COLLATE NOCASE'))?.bind).toEqual([
+			'Über'
+		]);
+		expect(requests.some((r) => r.sql?.includes('WHERE word_key'))).toBe(false);
+	});
 });

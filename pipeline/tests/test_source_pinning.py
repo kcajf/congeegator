@@ -142,3 +142,20 @@ def test_upload_refuses_to_replace_different_remote_content(monkeypatch):
     monkeypatch.setattr(pin.subprocess, "run", run)
     pin._upload_to_r2("source.zst", "remote:bucket/source.zst")
     assert run.call_args.args[0] == ["rclone", "copyto", "--immutable", "source.zst", "remote:bucket/source.zst"]
+
+
+def test_cache_fetches_selected_snapshot_and_cleans_up_interrupted_download(tmp_path, monkeypatch):
+    monkeypatch.setattr(cache, "SOURCE_DATA_VERSIONS", {"pt": "added"})
+    monkeypatch.setattr(cache.CacheManager, "CACHE_DIR", str(tmp_path))
+    response = Mock()
+    response.status_code = 200
+    response.__enter__ = Mock(return_value=response)
+    response.__exit__ = Mock(return_value=False)
+    response.raw.read.side_effect = [b"partial", OSError("interrupted download")]
+    request = Mock(return_value=response)
+    monkeypatch.setattr(cache.requests, "get", request)
+    with pytest.raises(OSError, match="interrupted download"):
+        cache.CacheManager().get_lang_filtered_raw_data("en", "pt")
+    assert request.call_args.args[0].endswith("/source-data/added/en-pt-filtered.jsonl.zst")
+    response.__exit__.assert_called_once()
+    assert list((tmp_path / "added").iterdir()) == []

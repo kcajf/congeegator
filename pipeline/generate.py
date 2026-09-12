@@ -5,6 +5,7 @@ Generates conjugation data for Congeegator and dictionary data for Lexicoff
 in a single pass over the source data.
 """
 import argparse
+import hashlib
 import json
 import logging
 import os
@@ -16,7 +17,7 @@ from typing import Any
 import zstandard
 
 import msgspec
-from wordfreq import zipf_frequency
+from wordfreq import available_languages, get_frequency_dict, get_frequency_list, zipf_frequency
 
 from .cache import CacheManager
 from .conjugation import CONFIG, LanguageConfig, extract_conjugation, make_language_static_metadata
@@ -37,21 +38,42 @@ def generate_data_for_lang(
     dict_config: DictLanguageConfig | None,
     dev: bool,
 ):
+    try:
+        return _generate_data_for_lang(wiki_lang, conj_config, dict_config, dev)
+    finally:
+        # wordfreq retains each loaded corpus in unbounded caches. Release the
+        # corpus after both apps have used it so memory does not grow by language.
+        get_frequency_dict.cache_clear()
+        get_frequency_list.cache_clear()
+
+
+def _generate_data_for_lang(
+    wiki_lang: str,
+    conj_config: LanguageConfig | None,
+    dict_config: DictLanguageConfig | None,
+    dev: bool,
+):
     lang_code = conj_config.code if conj_config else dict_config.code
     log.info(f"generating {lang_code} data")
     cache = CacheManager()
 
     with log_timing(f"{lang_code} download"):
-        data = list(cache.get_lang_filtered_raw_data(wiki_lang, lang_code))
+        data = cache.get_lang_filtered_raw_data(wiki_lang, lang_code)
 
     verbs: list[dict[str, Any]] = []
     seen_verbs: set[str] = set()
     dict_entries: list[dict[str, Any]] = []
+    seen_dict_records: set[bytes] = set()
+    duplicate_dict_records = 0
 
     with log_timing(f"{lang_code} process entries"):
         for line in data:
             entry_just_pos = msgspec.json.decode(line, type=EntryJustPos)
             if entry_just_pos.pos == "hard-redirect":
+                continue
+            # Raw extracts also include thesaurus-only records without a POS or
+            # definitions. They are not lexical entries for either application.
+            if entry_just_pos.pos is None and entry_just_pos.source == "thesaurus":
                 continue
 
             entry = msgspec.json.decode(line, type=Entry)
@@ -69,9 +91,14 @@ def generate_data_for_lang(
             if dict_config is not None:
                 dict_entry = process_dict_entry(dict_config, entry)
                 if dict_entry is not None:
-                    dict_entries.append(dict_entry)
+                    fingerprint = hashlib.sha256(msgspec.json.encode(dict_entry)).digest()
+                    if fingerprint not in seen_dict_records:
+                        seen_dict_records.add(fingerprint)
+                        dict_entries.append(dict_entry)
+                    else:
+                        duplicate_dict_records += 1
 
-            if dev and len(seen_verbs) > 20 and len(dict_entries) > 100:
+            if dev and (conj_config is None or len(seen_verbs) > 20) and (dict_config is None or len(dict_entries) > 100):
                 break
 
     conj_data = None
@@ -101,10 +128,15 @@ def generate_data_for_lang(
     # Build dictionary output
     if dict_config is not None and dict_entries:
         log.info(f"{lang_code} has {len(dict_entries)} dictionary entries")
+        if duplicate_dict_records:
+            log.info("%s removed %d identical dictionary records", lang_code, duplicate_dict_records)
 
         with log_timing(f"{lang_code} dict word frequencies"):
+            has_frequency = lang_code in available_languages()
+            if not has_frequency:
+                log.warning("%s has no wordfreq corpus; using unranked frequency 0", lang_code)
             for entry in dict_entries:
-                entry["freq"] = round(zipf_frequency(entry["word"], lang_code), 2)
+                entry["freq"] = round(zipf_frequency(entry["word"], lang_code), 2) if has_frequency else 0.0
 
         dict_entries = sorted(dict_entries, key=lambda x: -x["freq"])
 
@@ -115,13 +147,11 @@ def generate_data_for_lang(
     return conj_data, dict_data
 
 
-def generate_data(dev: bool):
-    conj_ret: dict[str, dict[str, Any]] = {}
-    dict_ret: dict[str, dict[str, Any]] = {}
-
+def iter_language_data(dev: bool, app: str = "all"):
+    """Process one language at a time so dictionary expansion stays memory bounded."""
     # Build lookup maps for configs by language code
-    conj_configs = {c.code: c for c in CONFIG}
-    dict_configs = {c.code: c for c in DICT_CONFIGS}
+    conj_configs = {c.code: c for c in CONFIG} if app != "lexicoff" else {}
+    dict_configs = {c.code: c for c in DICT_CONFIGS} if app != "congeegator" else {}
 
     # Union of all language codes
     all_lang_codes = sorted(set(conj_configs.keys()) | set(dict_configs.keys()))
@@ -134,7 +164,17 @@ def generate_data(dev: bool):
         conj_data, dict_data = generate_data_for_lang(
             wiki_lang, conj_config, dict_config, dev=dev,
         )
+        if dict_config is not None and dict_data is None:
+            raise RuntimeError(f"No dictionary entries generated for {lang_code}; refusing an incomplete catalogue")
 
+        yield lang_code, conj_data, dict_data
+        del dict_data
+
+
+def generate_data(dev: bool, app: str = "all"):
+    conj_ret = {}
+    dict_ret = {}
+    for lang_code, conj_data, dict_data in iter_language_data(dev, app):
         if conj_data is not None:
             conj_ret[lang_code] = conj_data
         if dict_data is not None:
@@ -223,6 +263,8 @@ def check_manifest_metadata():
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dev", action="store_true")
+    parser.add_argument("--app", choices=("all", "lexicoff", "congeegator"), default="all",
+                        help="Generate only the selected app, leaving the other app untouched")
     parser.add_argument(
         "--pretty", action="store_true", help="Pretty-print JSON output"
     )
@@ -239,10 +281,23 @@ def main():
 
     total_start = time.monotonic()
 
-    with log_timing("generate data (all languages)"):
-        conj_data, dict_data = generate_data(dev=args.dev)
-
     DATA_VERSION = "1"
+
+    dict_data_dir = os.path.join("apps", "lexicoff", "r2_data", "data", f"v{DATA_VERSION}")
+    if args.app != "congeegator":
+        shutil.rmtree(dict_data_dir, ignore_errors=True)
+    dict_configs_by_code = {c.code: c for c in DICT_CONFIGS}
+    conj_data = {}
+    written_dict_languages = set()
+    with log_timing("generate data (all languages)"):
+        for lang_code, language_conj, language_dict in iter_language_data(args.dev, args.app):
+            if language_conj is not None:
+                conj_data[lang_code] = language_conj
+            if language_dict is not None:
+                write_dictionary_language(language_dict["entries"], dict_configs_by_code[lang_code], dict_data_dir)
+                written_dict_languages.add(lang_code)
+            # Do not retain all languages' dictionary records during generation.
+            del language_dict
 
     # --- Congeegator output ---
     if conj_data:
@@ -264,37 +319,22 @@ def main():
         write_data_manifest(conj_data_dir, CONFIG, make_language_static_metadata, conj_manifest_path)
 
     # --- Lexicoff output (SQLite) ---
-    if dict_data:
-        dict_configs_by_code = {c.code: c for c in DICT_CONFIGS}
-        dict_r2_dir = os.path.join("apps", "lexicoff", "r2_data")
-        dict_data_dir = os.path.join(dict_r2_dir, "data", f"v{DATA_VERSION}")
-        shutil.rmtree(dict_data_dir, ignore_errors=True)
-
-        with log_timing("write lexicoff sqlite databases"):
-            for lang_code in dict_data.keys():
-                lang_dir = os.path.join(dict_data_dir, lang_code)
-                os.makedirs(lang_dir, exist_ok=True)
-                sqlite_path = os.path.join(lang_dir, f"{lang_code}.sqlite")
-                dict_config = dict_configs_by_code[lang_code]
-                write_sqlite_database(
-                    dict_data[lang_code]["entries"],
-                    lang_code,
-                    phonetic_fn=dict_config.phonetic_fn,
-                    output_path=sqlite_path,
-                )
-
-                # Compress with zstd and remove original
-                zst_path = sqlite_path + ".zst"
-                cctx = zstandard.ZstdCompressor(level=9)
-                with open(sqlite_path, "rb") as f_in, open(zst_path, "wb") as f_out:
-                    cctx.copy_stream(f_in, f_out)
-                os.remove(sqlite_path)
-
+    if written_dict_languages:
         dict_manifest_path = os.path.join("apps", "lexicoff", "src", "lib", "data-manifest.json")
         write_sqlite_manifest(dict_data_dir, DICT_CONFIGS, make_dict_language_static_metadata, dict_manifest_path)
 
     total = time.monotonic() - total_start
     log.info(f"[timing] total: {total:.1f}s")
+
+
+def write_dictionary_language(entries, config: DictLanguageConfig, data_dir: str):
+    lang_dir = os.path.join(data_dir, config.code)
+    os.makedirs(lang_dir, exist_ok=True)
+    sqlite_path = os.path.join(lang_dir, f"{config.code}.sqlite")
+    write_sqlite_database(entries, config.code, phonetic_fn=config.phonetic_fn, output_path=sqlite_path)
+    with open(sqlite_path, "rb") as f_in, open(sqlite_path + ".zst", "wb") as f_out:
+        zstandard.ZstdCompressor(level=9).copy_stream(f_in, f_out)
+    os.remove(sqlite_path)
 
 
 if __name__ == "__main__":

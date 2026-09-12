@@ -78,21 +78,20 @@ class CacheManager:
             url = f"{self.R2_PUBLIC_URL}/source-data/{version}/{wiki_lang}-{lang}-filtered.jsonl.zst"
             log.info(f"Fetching pinned source data: {url}")
 
-            response = requests.get(url, stream=True)
-            if response.status_code == 404:
-                raise RuntimeError(
-                    f"Pinned source data not found at {url}\n"
-                    f"Make sure source data has been uploaded for version {version}"
-                )
-            response.raise_for_status()
-
             temp_path = None
             try:
-                with tempfile.NamedTemporaryFile(
-                    dir=version_cache_dir, delete=False
-                ) as temp_file:
-                    temp_path = temp_file.name
-                    shutil.copyfileobj(response.raw, temp_file)
+                with requests.get(url, stream=True, timeout=(30, 300)) as response:
+                    if response.status_code == 404:
+                        raise RuntimeError(
+                            f"Pinned source data not found at {url}\n"
+                            f"Make sure source data has been uploaded for version {version}"
+                        )
+                    response.raise_for_status()
+                    with tempfile.NamedTemporaryFile(
+                        dir=version_cache_dir, delete=False
+                    ) as temp_file:
+                        temp_path = temp_file.name
+                        shutil.copyfileobj(response.raw, temp_file)
                 os.rename(temp_path, cache_path)
                 temp_path = None
                 log.info(f"Downloaded to {cache_path}")

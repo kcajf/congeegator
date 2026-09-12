@@ -4,7 +4,7 @@ from typing import Any, Callable, Optional
 
 import msgspec
 
-from .utils import _cat_names, to_phonetic_el
+from .utils import _cat_names, strip_diacritics, to_phonetic_el
 from .wiktionary import Entry
 
 log = logging.getLogger(__name__)
@@ -12,8 +12,8 @@ log = logging.getLogger(__name__)
 # These markers are failed Wiktextract/template expansion, not display text.
 # Drop a contaminated field rather than guessing at its intended definition.
 _UNEXPANDED_MARKUP = re.compile(
-    r"\{\{|\}\}|\[\[|\]\]|\b(?:Template|Module):|\b(?:Lua|Script) error\b",
-    re.IGNORECASE,
+    r"\{\{|\}\}|\[\[|\]\]|\b(?:Template|Module):(?=\S)|(?i:\b(?:Lua|Script) error\b)"
+    r"|(?i:</?(?:ref|span|div|br|p|small|sup|sub|table|a|i|b)(?:\s[^>]*|/?)>)",
 )
 
 
@@ -81,10 +81,14 @@ def extract_senses(entry: Entry) -> list[dict[str, Any]]:
     for sense in entry.senses:
         if not sense.glosses:
             continue
-        raw_gloss = sense.glosses[-1]
-        gloss = _clean_text(raw_gloss)
-        if not gloss:
+        # Wiktextract stores the full nesting path. Keeping only the last item
+        # loses the lemma in form-of senses and context in subordinate meanings.
+        parts = [_clean_text(part) for part in sense.glosses]
+        if not all(parts):
             continue
+        gloss = parts[0]
+        for part in parts[1:]:
+            gloss += (" " if gloss.endswith(":") else ": ") + part
         sense_dict: dict[str, Any] = {"gloss": gloss}
         examples: list[str] = []
         for ex in sense.examples:
@@ -96,19 +100,35 @@ def extract_senses(entry: Entry) -> list[dict[str, Any]]:
                 break
         if examples:
             sense_dict["examples"] = examples
-        tags = [t for t in sense.tags if t in ("formal", "informal", "colloquial", "literary", "archaic", "dated", "rare", "vulgar", "slang", "figurative", "transitive", "intransitive")]
+        tags = [t for t in sense.tags if t in (
+            "formal", "informal", "colloquial", "literary", "archaic", "dated", "rare",
+            "vulgar", "slang", "figurative", "transitive", "intransitive", "obsolete",
+            "nonstandard", "dialectal", "regional", "misspelling", "historical",
+            "poetic", "humorous", "offensive", "derogatory", "Early", "Old-Latin",
+            "Classical-Latin", "Late-Latin", "Medieval-Latin", "New-Latin",
+            "Ecclesiastical-Latin",
+        )]
         if tags:
             sense_dict["tags"] = tags
         senses.append(sense_dict)
     return senses
 
 
-VALID_GENDERS = {"m", "f", "n", "m-f", "mf", "m-p", "f-p", "n-p"}
+VALID_GENDERS = {"m", "f", "n", "c", "m-f", "mf", "m-p", "f-p", "n-p"}
 
 
 def extract_gender(entry: Entry) -> Optional[str]:
+    if entry.pos not in {"noun", "name"}:
+        return None
+    # Positional template arguments are language-specific: Russian noun+ arg1
+    # 'f' is an accent paradigm, and Danish noun arg1 'n' can be an ending.
+    # Wiktextract has already interpreted these templates into sense tags.
+    gender_tags = {"masculine": "m", "feminine": "f", "neuter": "n", "common-gender": "c"}
+    found = {gender_tags[tag] for sense in entry.senses for tag in sense.tags if tag in gender_tags}
+    if found:
+        return "-".join(g for g in ("m", "f", "n", "c") if g in found)
     for ht in entry.head_templates:
-        g = ht.args.get("g", "") or ht.args.get("1", "")
+        g = ht.args.get("g", "")
         if g in VALID_GENDERS:
             g2 = ht.args.get("g2", "")
             if g2 and g2 in VALID_GENDERS:
@@ -125,13 +145,33 @@ def extract_forms(entry: Entry) -> list[str]:
             continue
         if form.form == entry.word:
             continue
-        if "table-tags" in form.tags:
+        if form.tags & {"table-tags", "inflection-template", "class", "romanization", "classifier"}:
             continue
-        if "inflection-template" in form.tags:
-            continue
+        if "canonical" in form.tags:
+            # Canonical forms may be stressed/macronized spellings, but often
+            # contain paradigm notes ("root stress:", "4th conjugation").
+            if strip_diacritics(form.form) != strip_diacritics(entry.word):
+                continue
         text = _clean_text(form.form)
         if not text or text == "-":
             continue
+        # A few upstream table headers carry grammatical tags instead of class.
+        if entry.lang_code == "fi" and "person" in form.tags and text in {"imperative mood", "optative mood"}:
+            continue
+        if entry.lang_code == "pl" and text == "cases" and not form.source:
+            continue
+        if entry.lang_code == "la" and text == "declension" and "pronominal" in form.tags:
+            continue
+        if entry.lang_code == "nb" and text == "used with neuter nouns" and "article" in form.tags:
+            continue
+        if entry.lang_code == "ro" and {"past", "participle"} <= form.tags and text.startswith("of "):
+            continue
+        if entry.lang_code == "hu" and "error-unrecognized-form" in form.tags and text.startswith("or "):
+            text = text[3:]
+        if entry.lang_code == "nl" and "contracted" in form.tags and text.startswith("form "):
+            text = text[5:]
+        if entry.lang_code == "ro" and "feminine" in form.tags and text.startswith("equivalent "):
+            text = text[11:]
         if text not in seen:
             forms.append(text)
             seen.add(text)
@@ -151,7 +191,9 @@ def extract_etymology(entry: Entry) -> Optional[str]:
     for et in entry.etymology_templates:
         if et.expansion and len(et.expansion) < 150:
             if any(kw in et.name for kw in ("inh", "bor", "der", "from", "inherited", "borrowed")):
-                return _clean_text(et.expansion)
+                expansion = _clean_text(et.expansion)
+                if expansion:
+                    return expansion
     return None
 
 

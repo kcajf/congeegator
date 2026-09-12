@@ -10,7 +10,7 @@
 	import type { SearchResult } from '$lib/sqliteClient.svelte';
 	import { searchLangState } from '$lib/searchLang.svelte';
 	import { toasts } from '$lib/toasts.svelte';
-	import { stripDiacritics, toPhonetic } from '$lib/phonetic';
+	import { prepareSearchRequest } from '$lib/searchRequest';
 	import { onMount, tick } from 'svelte';
 	import { pwaInfo } from 'virtual:pwa-info';
 	import type { LayoutProps } from './$types';
@@ -157,14 +157,11 @@
 		const ready = searchLangState.indexReady;
 
 		const currentLang = searchLangState.lang;
-		const originalQuery = searchTerm.toLowerCase().trim();
+		const { query: originalQuery, phoneticQuery } = prepareSearchRequest(currentLang, searchTerm);
 		if (!ready || originalQuery.length < 1) {
 			searchResults = [];
 			return;
 		}
-
-		const stripped = stripDiacritics(originalQuery);
-		const phoneticQuery = toPhonetic(currentLang, stripped);
 
 		// 30ms debounce — imperceptible on single keystrokes, catches burst typing
 		const timer = setTimeout(() => {
@@ -172,7 +169,7 @@
 				.search(currentLang, originalQuery, phoneticQuery)
 				.then((results) => {
 					// Verify query or language hasn't changed while waiting
-					if (originalQuery !== searchTerm.toLowerCase().trim()) return;
+					if (originalQuery !== searchTerm.trim()) return;
 					if (currentLang !== searchLangState.lang) return;
 					searchResults = results;
 				})
