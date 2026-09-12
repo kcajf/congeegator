@@ -98,16 +98,38 @@ export function deleteLang(lang: string) {
 class GlobalSyncRegistry {
 	map = $state<Record<string, LangSyncInfo>>({});
 	initialized = $state(false);
+	storageError = $state<string | undefined>();
+	private attempt = 0;
 
 	constructor() {
-		if (browser) void this.init();
+		if (browser) {
+			sqliteClient.onWorkerFailure((error) => {
+				this.storageError = error.message;
+				searchLangState.indexReady = false;
+			});
+			void this.init();
+		}
+	}
+
+	retryStorage() {
+		sqliteClient.restart();
+		void this.init();
 	}
 
 	private async init() {
+		const attempt = ++this.attempt;
+		this.initialized = false;
+		this.storageError = undefined;
+		this.map = {};
 		try {
 			await sqliteReady;
-			if (!isSahPoolAvailable()) return;
+			if (attempt !== this.attempt) return;
+			if (!isSahPoolAvailable()) {
+				this.storageError = 'Dictionary storage could not be opened.';
+				return;
+			}
 			const files = await sqliteClient.listOpfsFiles();
+			if (attempt !== this.attempt) return;
 			for (const lang of new Set(files.map(([lang]) => lang))) {
 				// Prefer the current version, but keep an older working download
 				// available if a replacement was interrupted or damaged.
@@ -117,11 +139,13 @@ class GlobalSyncRegistry {
 					.sort((a, b) => Number(b[1] === currentHash) - Number(a[1] === currentHash));
 				for (const [, hash] of candidates) {
 					try {
-						if (!(await sqliteClient.openDb(lang, hash)))
-							throw new Error('Failed to open database');
+						const opened = await sqliteClient.openDb(lang, hash);
+						if (attempt !== this.attempt) return;
+						if (!opened) throw new Error('Failed to open database');
 						this.map[lang] = { hash, status: 'ready' };
 						break;
 					} catch (error) {
+						if (attempt !== this.attempt) return;
 						this.map[lang] = {
 							hash,
 							status: 'error',
@@ -131,11 +155,14 @@ class GlobalSyncRegistry {
 				}
 			}
 		} catch (error) {
-			console.error('Failed to discover dictionaries:', error);
+			if (attempt !== this.attempt) return;
+			this.storageError = error instanceof Error ? error.message : String(error);
 		} finally {
-			this.initialized = true;
-			resolveDbsReady();
-			await searchLangState.checkReady();
+			if (attempt === this.attempt) {
+				this.initialized = true;
+				resolveDbsReady();
+				await searchLangState.checkReady();
+			}
 		}
 	}
 }

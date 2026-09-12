@@ -21,10 +21,22 @@ export type SearchResult = {
 let worker: Worker | undefined;
 let sahPoolAvailable = false;
 let msgId = 0;
-const pending = new Map<number, { resolve: (v: unknown) => void; reject: (e: Error) => void }>();
+const pending = new Map<
+	number,
+	{
+		resolve: (v: unknown) => void;
+		reject: (e: Error) => void;
+		timer: ReturnType<typeof setTimeout>;
+	}
+>();
+const failures = new Set<(error: Error) => void>();
+export function onWorkerFailure(callback: (error: Error) => void) {
+	failures.add(callback);
+	return () => failures.delete(callback);
+}
 
 let _resolveSqliteReady: () => void;
-export const sqliteReady: Promise<void> = new Promise((r) => {
+export let sqliteReady: Promise<void> = new Promise((r) => {
 	_resolveSqliteReady = r;
 });
 
@@ -38,26 +50,60 @@ function init() {
 		return;
 	}
 
-	worker = new Worker(new URL('./sqlite.worker.ts', import.meta.url), { type: 'module' });
+	try {
+		worker = new Worker(new URL('./sqlite.worker.ts', import.meta.url), { type: 'module' });
+		const currentWorker = worker;
 
-	const onReady = (e: MessageEvent) => {
-		if (e.data.type !== 'READY') return;
-		sahPoolAvailable = !!e.data.sahPoolAvailable;
-		worker!.removeEventListener('message', onReady);
-		_resolveSqliteReady();
-	};
-	worker.addEventListener('message', onReady);
-	worker.onerror = () => _resolveSqliteReady();
+		const onReady = (e: MessageEvent) => {
+			if (worker !== currentWorker || e.data.type !== 'READY') return;
+			sahPoolAvailable = !!e.data.sahPoolAvailable;
+			currentWorker.removeEventListener('message', onReady);
+			_resolveSqliteReady();
+		};
+		worker.addEventListener('message', onReady);
+		worker.onerror = () =>
+			worker === currentWorker &&
+			failWorker(
+				new Error('Dictionary worker stopped. Retry storage to reopen your dictionaries.')
+			);
+		worker.onmessageerror = () =>
+			worker === currentWorker &&
+			failWorker(new Error('Dictionary worker response could not be read.'));
 
-	worker.onmessage = (e: MessageEvent) => {
-		if (e.data.type === 'READY') return;
-		const { id, result, error } = e.data;
-		const p = pending.get(id);
-		if (!p) return;
-		pending.delete(id);
-		if (error) p.reject(new Error(error));
-		else p.resolve(result);
-	};
+		worker.onmessage = (e: MessageEvent) => {
+			if (worker !== currentWorker || e.data.type === 'READY') return;
+			const { id, result, error } = e.data;
+			const p = pending.get(id);
+			if (!p) return;
+			pending.delete(id);
+			clearTimeout(p.timer);
+			if (error) p.reject(new Error(error));
+			else p.resolve(result);
+		};
+	} catch (error) {
+		failWorker(error instanceof Error ? error : new Error(String(error)));
+	}
+}
+
+function failWorker(error: Error, notify = true) {
+	worker?.terminate();
+	worker = undefined;
+	sahPoolAvailable = false;
+	_resolveSqliteReady();
+	for (const p of pending.values()) {
+		clearTimeout(p.timer);
+		p.reject(error);
+	}
+	pending.clear();
+	if (notify) for (const callback of failures) callback(error);
+}
+
+export function restart() {
+	failWorker(new Error('Dictionary worker restarted'), false);
+	sqliteReady = new Promise((resolve) => {
+		_resolveSqliteReady = resolve;
+	});
+	init();
 }
 
 // Initialize eagerly on import
@@ -74,12 +120,25 @@ export function resolveDbsReady() {
 }
 
 async function send(type: string, data: Record<string, unknown> = {}): Promise<unknown> {
-	if (!worker) throw new Error('SQLite worker not available (server-side?)');
+	const currentWorker = worker;
+	if (!currentWorker)
+		throw new Error('Dictionary storage is unavailable. Retry storage to reopen it.');
 	await sqliteReady;
+	if (worker !== currentWorker) throw new Error('Dictionary worker was restarted');
+	if (!sahPoolAvailable) throw new Error('Dictionary storage could not be opened');
 	const id = msgId++;
 	return new Promise((resolve, reject) => {
-		pending.set(id, { resolve, reject });
-		worker!.postMessage({ id, type, ...data });
+		// Imports can take longer on slow storage. Queries and discovery should not hang.
+		const timer = setTimeout(
+			() => failWorker(new Error('Dictionary operation timed out. Retry storage to reopen it.')),
+			type === 'open' ? 180_000 : 30_000
+		);
+		pending.set(id, { resolve, reject, timer });
+		try {
+			currentWorker.postMessage({ id, type, ...data });
+		} catch (error) {
+			failWorker(error instanceof Error ? error : new Error(String(error)));
+		}
 	});
 }
 
@@ -154,11 +213,5 @@ export async function terminate(): Promise<void> {
 		// best-effort — proceed to terminate even if shutdown times out
 	}
 
-	worker.terminate();
-	worker = undefined;
-
-	for (const [, p] of pending) {
-		p.reject(new Error('Worker terminated'));
-	}
-	pending.clear();
+	failWorker(new Error('Worker terminated'), false);
 }

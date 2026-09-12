@@ -33,6 +33,8 @@ function setupClient() {
 	});
 	return {
 		dbsReady,
+		onWorkerFailure: vi.fn(),
+		restart: vi.fn(),
 		resolveDbsReady,
 		sqliteReady: Promise.resolve(),
 		isSahPoolAvailable: () => true,
@@ -177,4 +179,23 @@ it('recreates a crashed download worker on retry', async () => {
 	DownloadWorker.instances[1].message({ type: 'COMPLETE', lang: 'fr', hash: 'bbbbbbbb' });
 	await retry;
 	expect(sync.globalSync.map.fr.status).toBe('ready');
+});
+
+it('retrying discovery ignores completion from the previous worker', async () => {
+	let finishOld!: (files: [string, string][]) => void;
+	client.listOpfsFiles.mockReturnValueOnce(
+		new Promise((resolve) => {
+			finishOld = resolve;
+		})
+	);
+	const { globalSync } = await import('./syncManager.svelte');
+	await vi.waitFor(() => expect(client.listOpfsFiles).toHaveBeenCalledOnce());
+	client.listOpfsFiles.mockResolvedValue([['fr', 'bbbbbbbb']]);
+	globalSync.retryStorage();
+	await vi.waitFor(() => expect(globalSync.map.fr?.status).toBe('ready'));
+	finishOld([]);
+	await Promise.resolve();
+	expect(globalSync.map.fr.status).toBe('ready');
+	expect(globalSync.initialized).toBe(true);
+	expect(client.restart).toHaveBeenCalledOnce();
 });

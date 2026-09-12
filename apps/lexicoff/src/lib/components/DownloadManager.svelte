@@ -26,10 +26,12 @@
 	{#if !globalSync.initialized}
 		<p class="unavailable-notice">
 			Opening dictionaries… If Lexicoff is open in another tab or window, close it to continue.
+			<button class="btn" onclick={() => globalSync.retryStorage()}>Retry opening</button>
 		</p>
-	{:else if !sahAvailable}
+	{:else if !sahAvailable || globalSync.storageError}
 		<p class="unavailable-notice">
-			Dictionary storage could not be opened. Close other Lexicoff tabs and reload to try again.
+			{globalSync.storageError ?? 'Dictionary storage could not be opened.'}
+			<button class="btn" onclick={() => globalSync.retryStorage()}>Retry storage</button>
 		</p>
 	{/if}
 	<div class="lang-list">
