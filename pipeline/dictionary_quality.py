@@ -187,31 +187,6 @@ def enhance_record(entry, record, clean_text):
                 sense['examples'] = examples
             else:
                 sense.pop('examples')
-    accepted = set(record.get('forms', []))
-    output, details = {}, {}
-    table_labels = []
-    for form in entry.forms:
-        if 'table-tags' in form.tags:
-            table_labels = labels((form.form or '').split())
-            continue
-        text = clean_text(form.form or '')
-        if text not in accepted:
-            continue
-        variants, extra = _form_variants(entry, form, text)
-        source_labels = form_grammar(form.tags) + labels(form.tags) + raw_labels(form.raw_tags, clean_text) + (table_labels if form.source else []) + extra
-        for variant in variants:
-            if not variant or variant == entry.word:
-                continue
-            output[variant] = None
-            if source_labels:
-                details.setdefault(variant, [])
-                details[variant] = list(dict.fromkeys(details[variant] + source_labels))
-    if output:
-        record['forms'] = list(output)
-    else:
-        record.pop('forms', None)
-    if details:
-        record['formDetails'] = [{'form': f, 'tags': tags} for f, tags in details.items()]
     pronunciations = []
     for sound in entry.sounds:
         if not isinstance(sound, dict) or not (ipa := clean_text(sound.get('ipa', ''))):

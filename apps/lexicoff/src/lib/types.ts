@@ -52,7 +52,14 @@ export interface DictSense {
 	qualifier?: string;
 }
 
+export interface DictFormReading {
+	grammar?: string[];
+	qualifiers?: string[];
+}
+
 export interface DictFormDetail {
+	kind?: 'inflection' | 'variant' | 'related' | 'other';
+	readings?: DictFormReading[];
 	form: string;
 	tags?: string[];
 }

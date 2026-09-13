@@ -1,0 +1,613 @@
+{
+  "baseline_commit": "bc209df",
+  "unit": "Form occurrences within accepted source records, before generator deduplication. Diagnostic counts are source form objects; they can overlap.",
+  "languages": [
+    {
+      "language": "az",
+      "source_version": "2026-09-13T130000Z",
+      "source_lines": 16493,
+      "baseline_forms": 965417,
+      "forms": 965416,
+      "removed": 110,
+      "added": 109,
+      "diagnostics": {
+        "az:normalized-spelling": 112,
+        "az:reviewed-source-cleanup": 47670,
+        "az:unknown-tag:general": 4767,
+        "az:unknown-tag:specific": 4767
+      }
+    },
+    {
+      "language": "br",
+      "source_version": "2026-09-13T130000Z",
+      "source_lines": 2334,
+      "baseline_forms": 5199,
+      "forms": 5144,
+      "removed": 55,
+      "added": 0,
+      "diagnostics": {
+        "br:normalized-spelling": 55,
+        "br:reviewed-source-cleanup": 76
+      }
+    },
+    {
+      "language": "ca",
+      "source_version": "2026-09-12T210000Z",
+      "source_lines": 198491,
+      "baseline_forms": 246027,
+      "forms": 246027,
+      "removed": 0,
+      "added": 0,
+      "diagnostics": {
+        "ca:unknown-tag:including": 3
+      }
+    },
+    {
+      "language": "cs",
+      "source_version": "2026-09-12T210000Z",
+      "source_lines": 72205,
+      "baseline_forms": 477230,
+      "forms": 477071,
+      "removed": 159,
+      "added": 0,
+      "diagnostics": {
+        "cs:table-instruction": 159,
+        "cs:unknown-tag:suffix": 2
+      }
+    },
+    {
+      "language": "cy",
+      "source_version": "2026-09-13T130000Z",
+      "source_lines": 28435,
+      "baseline_forms": 161176,
+      "forms": 161174,
+      "removed": 2,
+      "added": 0,
+      "diagnostics": {
+        "cy:placeholder": 2
+      }
+    },
+    {
+      "language": "da",
+      "source_version": "2026-09-12T210000Z",
+      "source_lines": 58429,
+      "baseline_forms": 120147,
+      "forms": 118097,
+      "removed": 2353,
+      "added": 303,
+      "diagnostics": {
+        "da:normalized-spelling": 2351,
+        "da:placeholder": 2,
+        "da:unknown-tag:literally": 1
+      }
+    },
+    {
+      "language": "de",
+      "source_version": "2026-09-07T120928Z",
+      "source_lines": 369987,
+      "baseline_forms": 1393456,
+      "forms": 1393451,
+      "removed": 6,
+      "added": 1,
+      "diagnostics": {
+        "de:normalized-spelling": 10,
+        "de:pronunciation-note": 1,
+        "de:unknown-tag:18th-ct.": 1,
+        "de:unknown-tag:different-sort": 5,
+        "de:unknown-tag:disjunctive": 1,
+        "de:unknown-tag:including": 1,
+        "de:unknown-tag:same-sort": 5,
+        "de:unknown-tag:southern-Germany": 20
+      }
+    },
+    {
+      "language": "el",
+      "source_version": "2026-09-07T120928Z",
+      "source_lines": 85316,
+      "baseline_forms": 259900,
+      "forms": 258718,
+      "removed": 2384,
+      "added": 1202,
+      "diagnostics": {
+        "el:placeholder": 12,
+        "el:split-or-unwrapped": 2740,
+        "el:unresolved-greek-cell": 8848
+      }
+    },
+    {
+      "language": "en",
+      "source_version": "2026-09-07T120928Z",
+      "source_lines": 1492836,
+      "baseline_forms": 901405,
+      "forms": 901405,
+      "removed": 0,
+      "added": 0,
+      "diagnostics": {
+        "en:unknown-tag:-i": 1,
+        "en:unknown-tag:-na": 1,
+        "en:unknown-tag:including": 8,
+        "en:unknown-tag:misconstruction": 20,
+        "en:unknown-tag:nominal": 1,
+        "en:unknown-tag:nonce-word": 1,
+        "en:unknown-tag:term-of-address": 1
+      }
+    },
+    {
+      "language": "eo",
+      "source_version": "2026-09-12T210000Z",
+      "source_lines": 135141,
+      "baseline_forms": 228442,
+      "forms": 228442,
+      "removed": 0,
+      "added": 0,
+      "diagnostics": {}
+    },
+    {
+      "language": "es",
+      "source_version": "2026-09-07T120928Z",
+      "source_lines": 809603,
+      "baseline_forms": 1205090,
+      "forms": 1205090,
+      "removed": 0,
+      "added": 0,
+      "diagnostics": {
+        "es:unknown-tag:disjunctive": 1
+      }
+    },
+    {
+      "language": "et",
+      "source_version": "2026-09-13T130000Z",
+      "source_lines": 13473,
+      "baseline_forms": 245767,
+      "forms": 245767,
+      "removed": 0,
+      "added": 0,
+      "diagnostics": {
+        "et:unknown-tag:literally": 2
+      }
+    },
+    {
+      "language": "eu",
+      "source_version": "2026-09-13T130000Z",
+      "source_lines": 18243,
+      "baseline_forms": 223792,
+      "forms": 223796,
+      "removed": 2,
+      "added": 6,
+      "diagnostics": {}
+    },
+    {
+      "language": "fa",
+      "source_version": "2026-09-13T130000Z",
+      "source_lines": 20288,
+      "baseline_forms": 120491,
+      "forms": 120491,
+      "removed": 0,
+      "added": 0,
+      "diagnostics": {
+        "fa:normalized-spelling": 6557,
+        "fa:placeholder": 5,
+        "fa:reviewed-source-cleanup": 6541
+      }
+    },
+    {
+      "language": "fi",
+      "source_version": "2026-09-12T210000Z",
+      "source_lines": 266150,
+      "baseline_forms": 27717076,
+      "forms": 27696843,
+      "removed": 20233,
+      "added": 0,
+      "diagnostics": {
+        "fi:table-instruction": 20285,
+        "fi:unknown-tag:literally": 78,
+        "fi:unknown-tag:misconstruction": 1,
+        "fi:unknown-tag:oppositive": 28
+      }
+    },
+    {
+      "language": "fr",
+      "source_version": "2026-09-07T120928Z",
+      "source_lines": 402395,
+      "baseline_forms": 390077,
+      "forms": 389674,
+      "removed": 413,
+      "added": 10,
+      "diagnostics": {
+        "fr:construction-instruction": 132,
+        "fr:detached-auxiliary": 276,
+        "fr:unknown-tag:misconstruction": 5
+      }
+    },
+    {
+      "language": "ga",
+      "source_version": "2026-09-13T130000Z",
+      "source_lines": 38747,
+      "baseline_forms": 352353,
+      "forms": 352353,
+      "removed": 1,
+      "added": 1,
+      "diagnostics": {
+        "ga:normalized-spelling": 2,
+        "ga:reviewed-source-cleanup": 1
+      }
+    },
+    {
+      "language": "gl",
+      "source_version": "2026-09-12T210000Z",
+      "source_lines": 212972,
+      "baseline_forms": 263889,
+      "forms": 263889,
+      "removed": 0,
+      "added": 0,
+      "diagnostics": {}
+    },
+    {
+      "language": "grc",
+      "source_version": "2026-09-13T130000Z",
+      "source_lines": 68196,
+      "baseline_forms": 1015154,
+      "forms": 1015155,
+      "removed": 4,
+      "added": 5,
+      "diagnostics": {
+        "grc:construction-instruction": 1,
+        "grc:reviewed-source-cleanup": 31586,
+        "grc:unknown-tag:declension-3": 1,
+        "grc:unknown-tag:post-Classical": 2,
+        "grc:unknown-tag:post-Homeric": 1,
+        "grc:unknown-tag:prefix": 12
+      }
+    },
+    {
+      "language": "he",
+      "source_version": "2026-09-13T130000Z",
+      "source_lines": 18075,
+      "baseline_forms": 157600,
+      "forms": 157600,
+      "removed": 1,
+      "added": 1,
+      "diagnostics": {
+        "he:normalized-spelling": 90,
+        "he:reviewed-source-cleanup": 2231,
+        "he:unknown-tag:-i": 2
+      }
+    },
+    {
+      "language": "hi",
+      "source_version": "2026-09-13T130000Z",
+      "source_lines": 39220,
+      "baseline_forms": 277880,
+      "forms": 277880,
+      "removed": 0,
+      "added": 0,
+      "diagnostics": {
+        "hi:normalized-spelling": 90,
+        "hi:reviewed-source-cleanup": 732,
+        "hi:unknown-tag:suffix": 1
+      }
+    },
+    {
+      "language": "hu",
+      "source_version": "2026-09-12T210000Z",
+      "source_lines": 78817,
+      "baseline_forms": 2181430,
+      "forms": 2182999,
+      "removed": 28224,
+      "added": 29793,
+      "diagnostics": {
+        "hu:broken-brace": 48,
+        "hu:table-instruction": 2789
+      }
+    },
+    {
+      "language": "id",
+      "source_version": "2026-09-12T210000Z",
+      "source_lines": 40098,
+      "baseline_forms": 43575,
+      "forms": 43566,
+      "removed": 24,
+      "added": 15,
+      "diagnostics": {
+        "id:language-note": 9,
+        "id:normalized-spelling": 15,
+        "id:unknown-tag:indirect": 3
+      }
+    },
+    {
+      "language": "is",
+      "source_version": "2026-09-13T130000Z",
+      "source_lines": 25366,
+      "baseline_forms": 188862,
+      "forms": 188864,
+      "removed": 2,
+      "added": 4,
+      "diagnostics": {
+        "is:normalized-spelling": 10,
+        "is:reviewed-source-cleanup": 4,
+        "is:unknown-tag:literally": 1
+      }
+    },
+    {
+      "language": "it",
+      "source_version": "2026-09-07T120928Z",
+      "source_lines": 623477,
+      "baseline_forms": 768590,
+      "forms": 768587,
+      "removed": 11,
+      "added": 8,
+      "diagnostics": {
+        "it:auxiliary-note": 3,
+        "it:normalized-spelling": 4,
+        "it:table-header": 2,
+        "it:unknown-tag:-i": 2,
+        "it:unknown-tag:misconstruction": 2,
+        "it:unknown-tag:specific": 1
+      }
+    },
+    {
+      "language": "ka",
+      "source_version": "2026-09-13T130000Z",
+      "source_lines": 27082,
+      "baseline_forms": 561511,
+      "forms": 559150,
+      "removed": 2363,
+      "added": 2,
+      "diagnostics": {
+        "ka:mixed-script-fragment": 2766,
+        "ka:normalized-spelling": 10,
+        "ka:placeholder": 260,
+        "ka:reviewed-source-cleanup": 51
+      }
+    },
+    {
+      "language": "ko",
+      "source_version": "2026-09-13T130000Z",
+      "source_lines": 63773,
+      "baseline_forms": 381681,
+      "forms": 381680,
+      "removed": 1,
+      "added": 0,
+      "diagnostics": {
+        "ko:construction-instruction": 1,
+        "ko:reviewed-source-cleanup": 162,
+        "ko:unknown-tag:-na": 1
+      }
+    },
+    {
+      "language": "la",
+      "source_version": "2026-09-12T210000Z",
+      "source_lines": 892320,
+      "baseline_forms": 1830427,
+      "forms": 1830398,
+      "removed": 39,
+      "added": 10,
+      "diagnostics": {
+        "la:declension-note": 34,
+        "la:unknown-tag:declension-1": 1,
+        "la:unknown-tag:post-Augustan": 3,
+        "la:unknown-tag:post-Classical": 6,
+        "la:unknown-tag:praenominal": 3
+      }
+    },
+    {
+      "language": "lt",
+      "source_version": "2026-09-13T130000Z",
+      "source_lines": 30195,
+      "baseline_forms": 230297,
+      "forms": 230297,
+      "removed": 0,
+      "added": 0,
+      "diagnostics": {
+        "lt:placeholder": 20,
+        "lt:unknown-tag:literally": 1,
+        "lt:unknown-tag:special": 745
+      }
+    },
+    {
+      "language": "mk",
+      "source_version": "2026-09-13T130000Z",
+      "source_lines": 68852,
+      "baseline_forms": 742075,
+      "forms": 742060,
+      "removed": 51,
+      "added": 36,
+      "diagnostics": {
+        "mk:normalized-spelling": 58,
+        "mk:reviewed-source-cleanup": 22844,
+        "mk:unknown-tag:-na": 1,
+        "mk:unknown-tag:general": 1,
+        "mk:unknown-tag:има": 721
+      }
+    },
+    {
+      "language": "ms",
+      "source_version": "2026-09-13T130000Z",
+      "source_lines": 17640,
+      "baseline_forms": 31630,
+      "forms": 31624,
+      "removed": 6,
+      "added": 0,
+      "diagnostics": {
+        "ms:language-note": 6
+      }
+    },
+    {
+      "language": "nb",
+      "source_version": "2026-09-12T210000Z",
+      "source_lines": 79403,
+      "baseline_forms": 88674,
+      "forms": 88674,
+      "removed": 0,
+      "added": 0,
+      "diagnostics": {}
+    },
+    {
+      "language": "nl",
+      "source_version": "2026-09-12T210000Z",
+      "source_lines": 146492,
+      "baseline_forms": 197633,
+      "forms": 197630,
+      "removed": 3,
+      "added": 0,
+      "diagnostics": {
+        "nl:placeholder": 6,
+        "nl:unknown-tag:circumposition": 17,
+        "nl:unknown-tag:misconstruction": 1
+      }
+    },
+    {
+      "language": "oc",
+      "source_version": "2026-09-13T130000Z",
+      "source_lines": 7503,
+      "baseline_forms": 60739,
+      "forms": 60739,
+      "removed": 0,
+      "added": 0,
+      "diagnostics": {
+        "oc:reviewed-source-cleanup": 3375
+      }
+    },
+    {
+      "language": "pl",
+      "source_version": "2026-09-12T210000Z",
+      "source_lines": 199289,
+      "baseline_forms": 674965,
+      "forms": 674965,
+      "removed": 0,
+      "added": 0,
+      "diagnostics": {
+        "pl:unknown-tag:place": 2
+      }
+    },
+    {
+      "language": "pt",
+      "source_version": "2026-09-12T210000Z",
+      "source_lines": 446044,
+      "baseline_forms": 496796,
+      "forms": 496796,
+      "removed": 0,
+      "added": 0,
+      "diagnostics": {
+        "pt:unknown-tag:term-of-address": 2
+      }
+    },
+    {
+      "language": "ro",
+      "source_version": "2026-09-12T210000Z",
+      "source_lines": 130512,
+      "baseline_forms": 748856,
+      "forms": 748848,
+      "removed": 8,
+      "added": 0,
+      "diagnostics": {
+        "ro:unavailable-form": 7,
+        "ro:unknown-tag:misconstruction": 2
+      }
+    },
+    {
+      "language": "ru",
+      "source_version": "2026-09-12T210000Z",
+      "source_lines": 442594,
+      "baseline_forms": 1474500,
+      "forms": 1474492,
+      "removed": 8,
+      "added": 0,
+      "diagnostics": {
+        "ru:foreign-table-cell": 7,
+        "ru:unavailable-form": 1
+      }
+    },
+    {
+      "language": "sa",
+      "source_version": "2026-09-13T130000Z",
+      "source_lines": 14880,
+      "baseline_forms": 258864,
+      "forms": 258861,
+      "removed": 148,
+      "added": 145,
+      "diagnostics": {
+        "sa:normalized-spelling": 236,
+        "sa:reviewed-source-cleanup": 56774,
+        "sa:unknown-tag:-i": 7,
+        "sa:unknown-tag:-tari": 2,
+        "sa:unknown-tag:prefix": 7
+      }
+    },
+    {
+      "language": "sh",
+      "source_version": "2026-09-13T130000Z",
+      "source_lines": 70309,
+      "baseline_forms": 501736,
+      "forms": 501736,
+      "removed": 0,
+      "added": 0,
+      "diagnostics": {
+        "sh:placeholder": 2
+      }
+    },
+    {
+      "language": "sk",
+      "source_version": "2026-09-13T130000Z",
+      "source_lines": 17711,
+      "baseline_forms": 165630,
+      "forms": 165630,
+      "removed": 0,
+      "added": 0,
+      "diagnostics": {
+        "sk:reviewed-source-cleanup": 71117,
+        "sk:unknown-tag:place": 1
+      }
+    },
+    {
+      "language": "sv",
+      "source_version": "2026-09-12T210000Z",
+      "source_lines": 313364,
+      "baseline_forms": 281953,
+      "forms": 281939,
+      "removed": 14,
+      "added": 0,
+      "diagnostics": {
+        "sv:translation": 14,
+        "sv:unknown-tag:misconstruction": 2
+      }
+    },
+    {
+      "language": "tr",
+      "source_version": "2026-09-12T210000Z",
+      "source_lines": 45949,
+      "baseline_forms": 2866758,
+      "forms": 2866758,
+      "removed": 0,
+      "added": 0,
+      "diagnostics": {
+        "tr:repaired-person-column": 534912,
+        "tr:unknown-tag:specific": 9572,
+        "tr:withheld-person-column": 1156660
+      }
+    },
+    {
+      "language": "uk",
+      "source_version": "2026-09-12T210000Z",
+      "source_lines": 59877,
+      "baseline_forms": 466030,
+      "forms": 465561,
+      "removed": 469,
+      "added": 0,
+      "diagnostics": {
+        "uk:placeholder": 3,
+        "uk:transliteration-in-table": 499
+      }
+    },
+    {
+      "language": "vi",
+      "source_version": "2026-09-12T210000Z",
+      "source_lines": 51896,
+      "baseline_forms": 18033,
+      "forms": 18039,
+      "removed": 3,
+      "added": 9,
+      "diagnostics": {}
+    }
+  ]
+}
