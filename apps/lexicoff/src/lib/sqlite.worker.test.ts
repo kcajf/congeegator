@@ -1,9 +1,11 @@
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
+import { DatabaseSync } from 'node:sqlite';
+import { dictionarySearchKey, dictionaryWordKey } from './searchNormalization';
 
 const mocks = vi.hoisted(() => ({ init: vi.fn() }));
 vi.mock('@sqlite.org/sqlite-wasm', () => ({ default: mocks.init }));
 
-function setup(hasWordKey = false) {
+function setup(hasWordKey = false, realDb?: DatabaseSync) {
 	const files = new Set<string>();
 	const raw = new Map<string, Blob>();
 	const databases: {
@@ -26,6 +28,14 @@ function setup(hasWordKey = false) {
 		OpfsSAHPoolDb: class {
 			close = vi.fn();
 			exec = vi.fn((request) => {
+				if (realDb) {
+					if (typeof request === 'string') realDb.exec(request);
+					else
+						for (const row of realDb.prepare(request.sql).all(...(request.bind ?? []))) {
+							request.callback(Object.values(row));
+						}
+					return;
+				}
 				if (request.sql === 'PRAGMA table_info(entries)' && hasWordKey) {
 					request.callback([2, 'word_key', 'TEXT', 1, null, 0]);
 				}
@@ -34,7 +44,8 @@ function setup(hasWordKey = false) {
 				databases.push(this);
 			}
 			selectValue(sql: string) {
-				return sql === 'PRAGMA quick_check' ? 'ok' : this.filename.slice(1, 3);
+				if (realDb) return Object.values(realDb.prepare(sql).get() ?? {})[0];
+				return sql === 'PRAGMA quick_check' ? 'ok' : this.filename.slice(1).split('-')[0];
 			}
 		}
 	};
@@ -420,5 +431,168 @@ describe('linked entry compatibility and reverse forms', () => {
 			(await s.send('getWord', 'de', 'Haus')).result.map((entry: { word: string }) => entry.word)
 		).toEqual(['Haus']);
 		expect((await s.send('getWord', 'de', 'HAUS')).result).toHaveLength(2);
+	});
+});
+
+describe('extended dictionaries with real SQLite FTS', () => {
+	function database(lang: string, entries: { word: string; gloss: string; forms?: string[] }[]) {
+		const db = new DatabaseSync(':memory:');
+		db.exec(`
+			CREATE TABLE metadata (key TEXT, value TEXT);
+			CREATE TABLE entries (id INTEGER PRIMARY KEY, word TEXT, word_key TEXT, pos TEXT, senses TEXT,
+				freq REAL, gender TEXT, forms TEXT, pronunciation TEXT, etymology TEXT,
+				search_key TEXT, form_details TEXT, pronunciations TEXT);
+			CREATE VIRTUAL TABLE entries_fts USING fts5(word, forms_text, gloss_text, phonetic,
+				content='', tokenize="unicode61 remove_diacritics 2 categories 'L* N* Co M*'", detail='column');
+			CREATE VIRTUAL TABLE fuzzy USING fts5(word, phonetic, content='', tokenize='trigram');
+		`);
+		db.prepare('INSERT INTO metadata VALUES (?, ?)').run('lang', lang);
+		for (const [id, entry] of entries.entries()) {
+			const word = dictionaryWordKey(entry.word, lang);
+			const alias = dictionarySearchKey(entry.word, lang);
+			db.prepare('INSERT INTO entries VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').run(
+				id,
+				entry.word,
+				word,
+				'noun',
+				JSON.stringify([{ gloss: entry.gloss }]),
+				0,
+				null,
+				entry.forms ? JSON.stringify(entry.forms) : null,
+				null,
+				null,
+				alias,
+				null,
+				null
+			);
+			db.prepare(
+				'INSERT INTO entries_fts(rowid, word, forms_text, gloss_text, phonetic) VALUES (?, ?, ?, ?, ?)'
+			).run(
+				id,
+				word === alias ? word : `${word} ${alias}`,
+				dictionarySearchKey(entry.forms?.join(' ') ?? '', lang),
+				entry.gloss,
+				''
+			);
+			db.prepare('INSERT INTO fuzzy(rowid, word, phonetic) VALUES (?, ?, ?)').run(id, alias, '');
+		}
+		return db;
+	}
+
+	it.each([
+		['hi', 'पानी', 'water', 'पान', 'पानियों', 'पानिय'],
+		['sa', 'गृह', 'house', 'गृ', 'गृ॒हेण॑', 'गृ॒हे'],
+		['he', 'שלום', 'peace', 'שָׁלוֹ', 'שְׁלוֹמִי', 'שלומי'],
+		['grc', 'ὕδωρ', 'water', 'υδω', 'ῠ̔́δᾰτος', 'υδατ'],
+		['az', 'işıq', 'light', 'İŞ', 'işıqlar', 'İŞIQL']
+	])(
+		'finds %s prefixes and inflections without swallowed FTS errors',
+		async (lang, word, gloss, prefix, form, formPrefix) => {
+			const db = database(lang, [{ word, gloss, forms: [form] }]);
+			try {
+				const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
+				const s = setup(true, db);
+				s.files.add(`/${lang}-aaaaaaaa.sqlite`);
+				await s.start();
+				expect((await s.send('open', lang)).result).toBe(true);
+				expect((await s.send('search', lang, prefix)).result).toMatchObject([
+					{ word, glosses: [gloss] }
+				]);
+				expect((await s.send('search', lang, formPrefix)).result).toMatchObject([
+					{ word, quality: 20 }
+				]);
+				expect(errors).not.toHaveBeenCalled();
+				errors.mockRestore();
+			} finally {
+				db.close();
+			}
+		}
+	);
+
+	it('ranks the exact Greek homograph above aliases and decodes usage metadata', async () => {
+		const db = database('grc', [
+			{ word: 'ἄλλα', gloss: 'other things' },
+			{ word: 'ἀλλά', gloss: 'but' }
+		]);
+		db.exec('ALTER TABLE entries ADD COLUMN details TEXT');
+		db.exec(
+			'CREATE TABLE form_lookup (form_key TEXT, entry_id INTEGER, PRIMARY KEY(form_key, entry_id)) WITHOUT ROWID'
+		);
+		db.prepare('INSERT INTO form_lookup VALUES (?, 0)').run(dictionaryWordKey('ἄλλων', 'grc'));
+		const details = { related: [{ word: 'ἄλλος', lang: 'grc' }] };
+		db.prepare('UPDATE entries SET details=? WHERE id=0').run(JSON.stringify(details));
+		const formDetails = [{ form: 'ἄλλων', tags: ['Attic'] }];
+		const pronunciations = [{ ipa: '/ál.la/', label: '5th BCE Attic' }];
+		db.prepare('UPDATE entries SET form_details=?, pronunciations=? WHERE id=0').run(
+			JSON.stringify(formDetails),
+			JSON.stringify(pronunciations)
+		);
+		try {
+			const s = setup(true, db);
+			s.files.add('/grc-aaaaaaaa.sqlite');
+			await s.start();
+			await s.send('open', 'grc');
+			const exact = await s.send('search', 'grc', 'ἀλλά');
+			expect(
+				exact.result.map((r: { word: string; quality: number }) => [r.word, r.quality])
+			).toEqual([
+				['ἀλλά', 0],
+				['ἄλλα', 5]
+			]);
+			const alias = await s.send('search', 'grc', 'αλλα');
+			expect(alias.result.map((r: { word: string }) => r.word).sort()).toEqual(
+				['ἄλλα', 'ἀλλά'].sort()
+			);
+			expect((await s.send('getWord', 'grc', 'ἄλλα'.normalize('NFD'))).result).toMatchObject([
+				{ word: 'ἄλλα', senses: [{ gloss: 'other things' }], details, formDetails, pronunciations }
+			]);
+			expect((await s.send('getWord', 'grc', 'ἄλλων')).result).toMatchObject([
+				{ word: 'ἄλλα', matchedForm: 'ἄλλων', details, formDetails, pronunciations }
+			]);
+			expect((await s.send('search', 'grc', 'ἄλλων')).result).toMatchObject([
+				{ word: 'ἄλλα', matched: 'ἄλλων', quality: 5 }
+			]);
+		} finally {
+			db.close();
+		}
+	});
+
+	it('loads old databases without word keys or new optional columns', async () => {
+		const db = database('fr', [{ word: 'maison', gloss: 'house' }]);
+		for (const column of ['word_key', 'search_key', 'form_details', 'pronunciations']) {
+			db.exec(`ALTER TABLE entries DROP COLUMN ${column}`);
+		}
+		try {
+			const s = setup(false, db);
+			s.files.add('/fr-aaaaaaaa.sqlite');
+			await s.start();
+			await s.send('open');
+			expect((await s.send('search', 'fr', 'Maison')).result).toMatchObject([
+				{ word: 'maison', quality: 0 }
+			]);
+			expect((await s.send('getWord', 'fr', 'Maison')).result).toMatchObject([
+				{
+					word: 'maison',
+					senses: [{ gloss: 'house' }],
+					formDetails: undefined,
+					pronunciations: undefined
+				}
+			]);
+		} finally {
+			db.close();
+		}
+	});
+
+	it('discovers both imported and raw three-letter language downloads', async () => {
+		const s = setup();
+		s.files.add('/grc-aaaaaaaa.sqlite');
+		s.raw.set('grc-bbbbbbbb.sqlite', new Blob(['dictionary']));
+		s.raw.set('grc-cccccccc.sqlite', new Blob());
+		await s.start();
+		expect((await s.send('list')).result).toEqual([
+			['grc', 'aaaaaaaa'],
+			['grc', 'bbbbbbbb']
+		]);
+		expect(s.raw.has('grc-cccccccc.sqlite')).toBe(false);
 	});
 });

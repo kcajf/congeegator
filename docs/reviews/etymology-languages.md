@@ -1,19 +1,19 @@
 # Etymology languages: complete classification and routing
 
-Reviewed 2026-09-13 against Wiktionary's complete canonical etymology-only registry, with an independent semantics review and a separate inventory of all 25 generated Lexicoff dictionaries.
+Reviewed 2026-09-13 against Wiktionary's complete canonical etymology-only registry, with an independent semantics review and a separate inventory of the 25 dictionaries generated at the time of the audit. Routing classifications below include the 45 dictionaries now on main.
 
 ## Result
 
 | Classification | Canonical codes | Behavior |
 | --- | ---: | --- |
-| Parent dictionary supported by Lexicoff | 80 | Open that dictionary when installed; otherwise link to its Wiktionary language section |
-| Other full language | 610 | Keep external; never substitute a modern descendant |
+| Parent dictionary supported by Lexicoff | 144 | Open that dictionary when installed; otherwise link to its Wiktionary language section |
+| Other full language | 546 | Keep external; never substitute a modern descendant |
 | Reconstructed parent language | 26 | Keep external; never substitute a modern descendant |
 | Translingual or undetermined parent | 5 | Keep external; no invented language dictionary |
 | Family parent or unresolved parent | 0 | None in this revision; importer checks families and rejects unresolved roots |
 | **Total etymology-only codes** | **721** | Every active record classified |
 
-The 80 eligible codes span 16 of Lexicoff's 25 dictionaries. Eligibility is language-level: the source may still reference a word missing from the installed dictionary. Starred reconstructed terms never become local lemma links, including Proto-Romance, whose containment ultimately reaches Latin.
+The 144 eligible codes span 28 of Lexicoff's 45 dictionaries. Eligibility is language-level: the source may still reference a word missing from the installed dictionary. Starred reconstructed terms never become local lemma links, including Proto-Romance, whose containment ultimately reaches Latin.
 
 Wiktionary also defines **11 legacy code aliases**. These are applied before following containment. Eight occur in our dictionaries. They are distinct from the language-name aliases inside records, which are not guaranteed unique.
 
@@ -35,20 +35,32 @@ The source-data audit also found 2,609 links bearing `+…` template instruction
 
 | Entry dictionary | Count | Varieties |
 | --- | ---: | --- |
+| Azerbaijani (`az`) | 2 | Classical Azerbaijani (`az-cls`); Qashqai (`qxq`) |
 | Catalan (`ca`) | 1 | Valencian (`ca-val`) |
 | Czech (`cs`) | 1 | Early Modern Czech (`cs-ear`) |
+| Welsh (`cy`) | 2 | North Wales Welsh (`cy-nor`); South Wales Welsh (`cy-sou`) |
 | German (`de`) | 5 | Austrian German (`de-AT`); Viennese German (`de-AT-vie`); Switzerland German (`de-CH`); Baltic German (`de-bal`); Early New High German (`de-ear`) |
 | Greek (`el`) | 5 | Cretan Greek (`el-crt`); Cypriot Greek (`el-cyp`); Kaliarda (`el-kal`); Katharevousa (`el-kth`); Paphian Greek (`el-pap`) |
 | English (`en`) | 20 | Australian English (`en-AU`); Canadian English (`en-CA`); British English (`en-GB`); Northern Irish English (`en-GB-NIR`); Scottish English (`en-GB-SCT`); Welsh English (`en-GB-WLS`); Hong Kong English (`en-HK`); Irish English (`en-IE`); Manx English (`en-IM`); Indian English (`en-IN`); North American English (`en-NNN`); New Zealand English (`en-NZ`); American English (`en-US`); California English (`en-US-CA`); South African English (`en-ZA`); Australian Aboriginal English (`en-aae`); Early Modern English (`en-ear`); Geordie (`en-geo`); Ulster English (`en-uls`); Polari (`pld`) |
 | Spanish (`es`) | 13 | Rioplatense Spanish (`es-AR`); Bolivian Spanish (`es-BO`); Chilean Spanish (`es-CL`); Colombian Spanish (`es-CO`); Cuban Spanish (`es-CU`); Mexican Spanish (`es-MX`); Peruvian Spanish (`es-PE`); Philippine Spanish (`es-PH`); Puerto Rican Spanish (`es-PR`); United States Spanish (`es-US`); Venezuelan Spanish (`es-VE`); Early Modern Spanish (`es-ear`); Lunfardo (`es-lun`) |
+| Persian (`fa`) | 5 | Classical Persian (`fa-cls`); Early New Persian (`fa-ear`); Iranian Persian (`fa-ira`); Hazaragi (`haz`); Dari (`prs`) |
 | French (`fr`) | 6 | Canadian French (`fr-CA`); Swiss French (`fr-CH`); Acadian French (`fr-aca`); Louisiana French (`fr-lou`); Missouri French (`fr-mis`); Cajun French (`frc`) |
+| Ancient Greek (`grc`) | 17 | Byzantine Greek (`gkm`); Aeolic Greek (`grc-aeo`); Arcadian Greek (`grc-arc`); Arcadocypriot Greek (`grc-arp`); Attic Greek (`grc-att`); Boeotian Greek (`grc-boi`); Cypriot Ancient Greek (`grc-cyp`); Doric Greek (`grc-dor`); Elean Greek (`grc-ela`); Epic Greek (`grc-epi`); Ionic Greek (`grc-ion`); Koine Greek (`grc-koi`); Cretan Ancient Greek (`grc-kre`); Opuntian Locrian (`grc-opl`); Ozolian Locrian (`grc-ozl`); Pamphylian Greek (`grc-pam`); Thessalian Greek (`grc-ths`) |
+| Hebrew (`he`) | 4 | Biblical Hebrew (`hbo`); Israeli Hebrew (`he-IL`); Medieval Hebrew (`he-med`); Mishnaic Hebrew (`he-mis`) |
+| Hindi (`hi`) | 1 | Bombay Hindi (`hi-mum`) |
 | Italian (`it`) | 2 | Switzerland Italian (`it-CH`); Old Italian (`roa-oit`) |
+| Georgian (`ka`) | 1 | Middle Georgian (`ka-mid`) |
+| Korean (`ko`) | 12 | North Korean standard (`ko-KP`); South Korean standard (`ko-KR`); Central Korean (`ko-cen`); Chungcheong Korean (`ko-chu`); Gangwon Korean (`ko-gan`); Gyeonggi Korean (`ko-gyg`); Gyeongsang Korean (`ko-gys`); Hamgyong Korean (`ko-ham`); Hwanghae Korean (`ko-hwa`); Jeolla Korean (`ko-jeo`); Pyongan Korean (`ko-pyo`); Yukjin Korean (`ko-yuk`) |
 | Latin (`la`) | 15 | Archaic Latin (`itc-ala`); Lanuvian (`itc-lan`); Old Latin (`itc-ola`); Praenestine (`itc-pra`); African Romance (`la-afr`); Classical Latin (`la-cla`); Contemporary Latin (`la-con`); Ecclesiastical Latin (`la-ecc`); Early Medieval Latin (`la-eme`); Late Latin (`la-lat`); Medieval Latin (`la-med`); New Latin (`la-new`); Renaissance Latin (`la-ren`); Vulgar Latin (`la-vul`); Proto-Romance (`roa-pro`) |
+| Malay (`ms`) | 2 | Classical Malay (`ms-cla`); Old Malay (`ms-old`) |
 | Dutch (`nl`) | 1 | Belgian Dutch (`nl-BE`) |
+| Occitan (`oc`) | 8 | Aranese (`oc-ara`); Auvergnat (`oc-auv`); Gascon (`oc-gas`); Shuadit (`oc-jud`); Languedocien (`oc-lan`); Limousin (`oc-lim`); Provençal (`oc-pro`); Vivaro-Alpine (`oc-viv`) |
 | Polish (`pl`) | 5 | Goral (`pl-gor`); Greater Polish (`pl-gre`); Lesser Polish (`pl-les`); Masovian Polish (`pl-mas`); Middle Polish (`zlw-mpl`) |
 | Portuguese (`pt`) | 2 | Brazilian Portuguese (`pt-BR`); European Portuguese (`pt-PT`) |
 | Romanian (`ro`) | 1 | Moldovan (`ro-MD`) |
 | Russian (`ru`) | 1 | Middle Russian (`zle-mru`) |
+| Sanskrit (`sa`) | 7 | Classical Sanskrit (`cls`); Buddhist Hybrid Sanskrit (`sa-bhs`); Brahmanic Sanskrit (`sa-bra`); Epic Sanskrit (`sa-epi`); New Sanskrit (`sa-neo`); Rigvedic Sanskrit (`sa-rig`); Vedic Sanskrit (`vsn`) |
+| Serbo-Croatian (`sh`) | 3 | Chakavian Serbo-Croatian (`ckm`); Kajkavian Serbo-Croatian (`kjv`); Torlakian Serbo-Croatian (`sh-tor`) |
 | Turkish (`tr`) | 1 | Cypriot Turkish (`tr-CY`) |
 | Ukrainian (`uk`) | 1 | Canadian Ukrainian (`uk-CA`) |
 

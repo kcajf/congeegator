@@ -1,0 +1,207 @@
+{
+  "name": "capio",
+  "nameNoDiacritics": "capio",
+  "conjugation": [
+    [
+      "capiō",
+      "capis",
+      "capit",
+      "capimus",
+      "capitis",
+      "capiunt"
+    ],
+    [
+      "capiēbam",
+      "capiēbās",
+      "capiēbat",
+      "capiēbāmus",
+      "capiēbātis",
+      "capiēbant"
+    ],
+    [
+      "capiam",
+      "capiēs",
+      "capiet",
+      "capiēmus",
+      "capiētis",
+      "capient"
+    ],
+    [
+      "cēpī",
+      "cēpistī",
+      "cēpit",
+      "cēpimus",
+      "cēpistis",
+      "cēpērunt/cēpēre"
+    ],
+    [
+      "cēperam",
+      "cēperās",
+      "cēperat",
+      "cēperāmus",
+      "cēperātis",
+      "cēperant"
+    ],
+    [
+      "cēperō",
+      "cēperis",
+      "cēperit",
+      "cēperimus",
+      "cēperitis",
+      "cēperint"
+    ],
+    [
+      "capior",
+      "caperis/capere",
+      "capitur",
+      "capimur",
+      "capiminī",
+      "capiuntur"
+    ],
+    [
+      "capiēbar",
+      "capiēbāris/capiēbāre",
+      "capiēbātur",
+      "capiēbāmur",
+      "capiēbāminī",
+      "capiēbantur"
+    ],
+    [
+      "capiar",
+      "capiēris/capiēre",
+      "capiētur",
+      "capiēmur",
+      "capiēminī",
+      "capientur"
+    ],
+    [
+      "captus sum (masculine)/capta sum (feminine)/captum sum (neuter)",
+      "captus es (masculine)/capta es (feminine)/captum es (neuter)",
+      "captus est (masculine)/capta est (feminine)/captum est (neuter)",
+      "captī sumus (masculine)/captae sumus (feminine)/capta sumus (neuter)",
+      "captī estis (masculine)/captae estis (feminine)/capta estis (neuter)",
+      "captī sunt (masculine)/captae sunt (feminine)/capta sunt (neuter)"
+    ],
+    [
+      "captus eram (masculine)/capta eram (feminine)/captum eram (neuter)",
+      "captus erās (masculine)/capta erās (feminine)/captum erās (neuter)",
+      "captus erat (masculine)/capta erat (feminine)/captum erat (neuter)",
+      "captī erāmus (masculine)/captae erāmus (feminine)/capta erāmus (neuter)",
+      "captī erātis (masculine)/captae erātis (feminine)/capta erātis (neuter)",
+      "captī erant (masculine)/captae erant (feminine)/capta erant (neuter)"
+    ],
+    [
+      "captus erō (masculine)/capta erō (feminine)/captum erō (neuter)",
+      "captus eris (masculine)/capta eris (feminine)/captum eris (neuter)",
+      "captus erit (masculine)/capta erit (feminine)/captum erit (neuter)",
+      "captī erimus (masculine)/captae erimus (feminine)/capta erimus (neuter)",
+      "captī eritis (masculine)/captae eritis (feminine)/capta eritis (neuter)",
+      "captī erunt (masculine)/captae erunt (feminine)/capta erunt (neuter)"
+    ],
+    [
+      "capiam",
+      "capiās",
+      "capiat",
+      "capiāmus",
+      "capiātis",
+      "capiant"
+    ],
+    [
+      "caperem",
+      "caperēs",
+      "caperet",
+      "caperēmus",
+      "caperētis",
+      "caperent"
+    ],
+    [
+      "cēperim",
+      "cēperīs",
+      "cēperit",
+      "cēperīmus",
+      "cēperītis",
+      "cēperint"
+    ],
+    [
+      "cēpissem",
+      "cēpissēs",
+      "cēpisset",
+      "cēpissēmus",
+      "cēpissētis",
+      "cēpissent"
+    ],
+    [
+      "capiar",
+      "capiāris/capiāre",
+      "capiātur",
+      "capiāmur",
+      "capiāminī",
+      "capiantur"
+    ],
+    [
+      "caperer",
+      "caperēris/caperēre",
+      "caperētur",
+      "caperēmur",
+      "caperēminī",
+      "caperentur"
+    ],
+    [
+      "captus sim (masculine)/capta sim (feminine)/captum sim (neuter)",
+      "captus sīs (masculine)/capta sīs (feminine)/captum sīs (neuter)",
+      "captus sit (masculine)/capta sit (feminine)/captum sit (neuter)",
+      "captī sīmus (masculine)/captae sīmus (feminine)/capta sīmus (neuter)",
+      "captī sītis (masculine)/captae sītis (feminine)/capta sītis (neuter)",
+      "captī sint (masculine)/captae sint (feminine)/capta sint (neuter)"
+    ],
+    [
+      "captus essem (masculine)/capta essem (feminine)/captum essem (neuter)",
+      "captus essēs (masculine)/capta essēs (feminine)/captum essēs (neuter)",
+      "captus esset (masculine)/capta esset (feminine)/captum esset (neuter)",
+      "captī essēmus (masculine)/captae essēmus (feminine)/capta essēmus (neuter)",
+      "captī essētis (masculine)/captae essētis (feminine)/capta essētis (neuter)",
+      "captī essent (masculine)/captae essent (feminine)/capta essent (neuter)"
+    ],
+    [
+      "cape",
+      "capite"
+    ],
+    [
+      "capitō",
+      "capitō",
+      "capitōte",
+      "capiuntō"
+    ],
+    [
+      "capere",
+      "capiminī"
+    ],
+    [
+      "capitor",
+      "capitor",
+      "capiuntor"
+    ],
+    "capere",
+    "cēpisse",
+    "captūrum esse",
+    "capī",
+    "captum esse",
+    "captum īrī",
+    "capiēns",
+    "",
+    "captus",
+    "captūrus",
+    "capiendus/capiundus",
+    [
+      "capiendī",
+      "capiendō",
+      "capiendum",
+      "capiendō"
+    ],
+    [
+      "captum",
+      "captū"
+    ]
+  ],
+  "gloss": "to take, to capture, to catch, to seize, to take captive, to storm; to take on, adopt; to hold, to contain; ..."
+}

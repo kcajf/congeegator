@@ -1,0 +1,170 @@
+{
+  "name": "tehdä",
+  "nameNoDiacritics": "tehda",
+  "conjugation": [
+    [
+      "teen",
+      "teet",
+      "tekee",
+      "teemme",
+      "teette",
+      "tekevät",
+      "tehdään"
+    ],
+    [
+      "en tee",
+      "et tee",
+      "ei tee",
+      "emme tee",
+      "ette tee",
+      "eivät tee",
+      "ei tehdä"
+    ],
+    [
+      "tein",
+      "teit",
+      "teki",
+      "teimme",
+      "teitte",
+      "tekivät",
+      "tehtiin"
+    ],
+    [
+      "en tehnyt",
+      "et tehnyt",
+      "ei tehnyt",
+      "emme tehneet",
+      "ette tehneet",
+      "eivät tehneet",
+      "ei tehty"
+    ],
+    [
+      "olen tehnyt",
+      "olet tehnyt",
+      "on tehnyt",
+      "olemme tehneet",
+      "olette tehneet",
+      "ovat tehneet",
+      "on tehty"
+    ],
+    [
+      "en ole tehnyt",
+      "et ole tehnyt",
+      "ei ole tehnyt",
+      "emme ole tehneet",
+      "ette ole tehneet",
+      "eivät ole tehneet",
+      "ei ole tehty"
+    ],
+    [
+      "olin tehnyt",
+      "olit tehnyt",
+      "oli tehnyt",
+      "olimme tehneet",
+      "olitte tehneet",
+      "olivat tehneet",
+      "oli tehty"
+    ],
+    [
+      "en ollut tehnyt",
+      "et ollut tehnyt",
+      "ei ollut tehnyt",
+      "emme olleet tehneet",
+      "ette olleet tehneet",
+      "eivät olleet tehneet",
+      "ei ollut tehty"
+    ],
+    [
+      "tekisin",
+      "tekisit",
+      "tekisi",
+      "tekisimme",
+      "tekisitte",
+      "tekisivät",
+      "tehtäisiin"
+    ],
+    [
+      "en tekisi",
+      "et tekisi",
+      "ei tekisi",
+      "emme tekisi",
+      "ette tekisi",
+      "eivät tekisi",
+      "ei tehtäisi"
+    ],
+    [
+      "olisin tehnyt",
+      "olisit tehnyt",
+      "olisi tehnyt",
+      "olisimme tehneet",
+      "olisitte tehneet",
+      "olisivat tehneet",
+      "olisi tehty"
+    ],
+    [
+      "en olisi tehnyt",
+      "et olisi tehnyt",
+      "ei olisi tehnyt",
+      "emme olisi tehneet",
+      "ette olisi tehneet",
+      "eivät olisi tehneet",
+      "ei olisi tehty"
+    ],
+    [
+      "tehnen",
+      "tehnet",
+      "tehnee",
+      "tehnemme",
+      "tehnette",
+      "tehnevät",
+      "tehtäneen"
+    ],
+    [
+      "en tehne",
+      "et tehne",
+      "ei tehne",
+      "emme tehne",
+      "ette tehne",
+      "eivät tehne",
+      "ei tehtäne"
+    ],
+    [
+      "lienen tehnyt",
+      "lienet tehnyt",
+      "lienee tehnyt",
+      "lienemme tehneet",
+      "lienette tehneet",
+      "lienevät tehneet",
+      "lienee tehty"
+    ],
+    [
+      "en liene tehnyt",
+      "et liene tehnyt",
+      "ei liene tehnyt",
+      "emme liene tehneet",
+      "ette liene tehneet",
+      "eivät liene tehneet",
+      "ei liene tehty"
+    ],
+    [
+      "tee",
+      "tehköön",
+      "tehkäämme",
+      "tehkää",
+      "tehkööt",
+      "tehtäköön"
+    ],
+    [
+      "älä tee",
+      "älköön tehkö",
+      "älkäämme tehkö",
+      "älkää tehkö",
+      "älkööt tehkö",
+      "älköön tehtäkö"
+    ],
+    "tehdä",
+    "tekevä",
+    "tehtävä"
+  ],
+  "gloss": "to do, perform, execute, carry out; to make, manufacture; to make, render, turn; ..."
+}

@@ -7,6 +7,7 @@
 	import { langWiktionaryName, manifest } from '$lib/dataUtils';
 	import { appTitle, siteUrl } from '$lib/defs';
 	import { tenseSettings } from '$lib/i18n.svelte';
+	import { languageCoverage, verbCoverage } from '$lib/languageCoverage';
 	import {
 		formatPronoun,
 		getExternalLinks,
@@ -34,7 +35,7 @@
 
 	function isHighlighted(form: string): boolean {
 		if (highlightForm === '') return false;
-		return stripFormMarkers(form).toLowerCase() === highlightForm;
+		return stripFormMarkers(form).toLowerCase().split('/').includes(highlightForm);
 	}
 
 	$effect(() => {
@@ -82,9 +83,11 @@
 		let hasFormal = false;
 		for (const forms of data.verb.conjugation) {
 			const check = (s: string) => {
-				if (s.includes('(')) hasDeprecated = true;
-				if (s.includes('[')) hasRare = true;
-				if (s.includes('{')) hasFormal = true;
+				for (const segment of parseAndFormatForm(s)) {
+					if (segment.markers.includes('deprecated')) hasDeprecated = true;
+					if (segment.markers.includes('rare')) hasRare = true;
+					if (segment.markers.includes('formal')) hasFormal = true;
+				}
 			};
 			if (typeof forms === 'string') {
 				check(forms);
@@ -96,11 +99,16 @@
 	});
 
 	const langEn = $derived(langWiktionaryName(data.verb.lang));
+	const coverage = $derived(
+		[languageCoverage[data.verb.lang], verbCoverage[data.verb.lang]?.[data.verb.name]]
+			.filter(Boolean)
+			.join(' ')
+	);
 	const verbTitle = $derived(`${data.verb.name} — ${appTitle}`);
 	const verbDescription = $derived(
 		data.verb.gloss
-			? `Conjugation of the ${langEn} verb ${data.verb.name} (${data.verb.gloss}). All tenses and forms.`
-			: `Conjugation of the ${langEn} verb ${data.verb.name}. All tenses and forms.`
+			? `Conjugation tables for the ${langEn} verb ${data.verb.name} (${data.verb.gloss}).`
+			: `Conjugation tables for the ${langEn} verb ${data.verb.name}.`
 	);
 	const canonicalUrl = $derived(
 		`${siteUrl}/${data.verb.lang}/${encodeURIComponent(data.verb.name)}`
@@ -161,6 +169,9 @@
 		{/each}
 	</div>
 	{#if data.verb.gloss}<p class="gloss">{data.verb.gloss}</p>{/if}
+	{#if coverage}<p class="coverage-note">
+			{coverage}
+		</p>{/if}
 
 	{#each tenseGroups as tenseGroup (tenseGroup.name)}
 		{#if tenseGroup.tenseIndices.some((i) => !isTenseEmpty(data.verb.conjugation[i]))}
@@ -173,7 +184,7 @@
 						class="tense-wiki-link">{getTenseDisplayName(tenseGroup.name)}</a
 					>{:else}{getTenseDisplayName(tenseGroup.name)}{/if}
 			</h2>
-			<div class="tenseGroup">
+			<div class="tenseGroup" class:expanded={Boolean(languageCoverage[data.verb.lang])}>
 				{#each tenseGroup.tenseIndices as tenseI (tenseI)}
 					{@const tenseForms = data.verb.conjugation[tenseI]}
 					{#if !isTenseEmpty(tenseForms)}
@@ -291,6 +302,20 @@
 		gap: 1rem;
 	}
 
+	.expanded .tense {
+		min-width: 0;
+		max-width: 100%;
+	}
+
+	.expanded .tenseTable td:nth-child(2) {
+		white-space: normal;
+		overflow-wrap: anywhere;
+	}
+
+	.expanded .tense-inline {
+		flex-wrap: wrap;
+	}
+
 	.tense-inline {
 		display: flex;
 		align-items: baseline;
@@ -353,6 +378,12 @@
 		font-style: italic;
 		color: #858585;
 		margin-top: 0.3rem;
+	}
+
+	.coverage-note {
+		font-size: 0.9rem;
+		color: #666;
+		margin-bottom: 1.5rem;
 	}
 
 	:global(.marker-deprecated) {

@@ -1,0 +1,170 @@
+{
+  "name": "tulla",
+  "nameNoDiacritics": "tulla",
+  "conjugation": [
+    [
+      "tulen",
+      "tulet",
+      "tulee",
+      "tulemme",
+      "tulette",
+      "tulevat",
+      "tullaan"
+    ],
+    [
+      "en tule",
+      "et tule",
+      "ei tule",
+      "emme tule",
+      "ette tule",
+      "eivät tule",
+      "ei tulla"
+    ],
+    [
+      "tulin",
+      "tulit",
+      "tuli",
+      "tulimme",
+      "tulitte",
+      "tulivat",
+      "tultiin"
+    ],
+    [
+      "en tullut",
+      "et tullut",
+      "ei tullut",
+      "emme tulleet",
+      "ette tulleet",
+      "eivät tulleet",
+      "ei tultu"
+    ],
+    [
+      "olen tullut",
+      "olet tullut",
+      "on tullut",
+      "olemme tulleet",
+      "olette tulleet",
+      "ovat tulleet",
+      "on tultu"
+    ],
+    [
+      "en ole tullut",
+      "et ole tullut",
+      "ei ole tullut",
+      "emme ole tulleet",
+      "ette ole tulleet",
+      "eivät ole tulleet",
+      "ei ole tultu"
+    ],
+    [
+      "olin tullut",
+      "olit tullut",
+      "oli tullut",
+      "olimme tulleet",
+      "olitte tulleet",
+      "olivat tulleet",
+      "oli tultu"
+    ],
+    [
+      "en ollut tullut",
+      "et ollut tullut",
+      "ei ollut tullut",
+      "emme olleet tulleet",
+      "ette olleet tulleet",
+      "eivät olleet tulleet",
+      "ei ollut tultu"
+    ],
+    [
+      "tulisin",
+      "tulisit",
+      "tulisi",
+      "tulisimme",
+      "tulisitte",
+      "tulisivat",
+      "tultaisiin"
+    ],
+    [
+      "en tulisi",
+      "et tulisi",
+      "ei tulisi",
+      "emme tulisi",
+      "ette tulisi",
+      "eivät tulisi",
+      "ei tultaisi"
+    ],
+    [
+      "olisin tullut",
+      "olisit tullut",
+      "olisi tullut",
+      "olisimme tulleet",
+      "olisitte tulleet",
+      "olisivat tulleet",
+      "olisi tultu"
+    ],
+    [
+      "en olisi tullut",
+      "et olisi tullut",
+      "ei olisi tullut",
+      "emme olisi tulleet",
+      "ette olisi tulleet",
+      "eivät olisi tulleet",
+      "ei olisi tultu"
+    ],
+    [
+      "tullen",
+      "tullet",
+      "tullee",
+      "tullemme",
+      "tullette",
+      "tullevat",
+      "tultaneen"
+    ],
+    [
+      "en tulle",
+      "et tulle",
+      "ei tulle",
+      "emme tulle",
+      "ette tulle",
+      "eivät tulle",
+      "ei tultane"
+    ],
+    [
+      "lienen tullut",
+      "lienet tullut",
+      "lienee tullut",
+      "lienemme tulleet",
+      "lienette tulleet",
+      "lienevät tulleet",
+      "lienee tultu"
+    ],
+    [
+      "en liene tullut",
+      "et liene tullut",
+      "ei liene tullut",
+      "emme liene tulleet",
+      "ette liene tulleet",
+      "eivät liene tulleet",
+      "ei liene tultu"
+    ],
+    [
+      "tule",
+      "tulkoon",
+      "tulkaamme",
+      "tulkaa",
+      "tulkoot",
+      "tultakoon"
+    ],
+    [
+      "älä tule",
+      "älköön tulko",
+      "älkäämme tulko",
+      "älkää tulko",
+      "älkööt tulko",
+      "älköön tultako"
+    ],
+    "tulla",
+    "tuleva",
+    "tultava"
+  ],
+  "gloss": "to come; to become, get, go, turn; to come into, get; ..."
+}

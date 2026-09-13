@@ -1,0 +1,207 @@
+{
+  "name": "audio",
+  "nameNoDiacritics": "audio",
+  "conjugation": [
+    [
+      "audiō",
+      "audīs",
+      "audit",
+      "audīmus",
+      "audītis",
+      "audiunt"
+    ],
+    [
+      "audiēbam",
+      "audiēbās",
+      "audiēbat",
+      "audiēbāmus",
+      "audiēbātis",
+      "audiēbant"
+    ],
+    [
+      "audiam",
+      "audiēs",
+      "audiet",
+      "audiēmus",
+      "audiētis",
+      "audient"
+    ],
+    [
+      "audīvī/audiī",
+      "audīvistī/audīstī/audiistī",
+      "audīvit/audīt/audiit",
+      "audīvimus/audīmus/audiimus",
+      "audīvistis/audīstis/audiistis",
+      "audīvērunt/audīrunt/audīvēre/audiērunt/audiēre"
+    ],
+    [
+      "audīveram/audīram/audieram",
+      "audīverās/audīrās/audierās",
+      "audīverat/audīrat/audierat",
+      "audīverāmus/audīrāmus/audierāmus",
+      "audīverātis/audīrātis/audierātis",
+      "audīverant/audīrant/audierant"
+    ],
+    [
+      "audīverō/audīrō/audierō",
+      "audīveris/audīris/audieris",
+      "audīverit/audīrit/audierit",
+      "audīverimus/audīrimus/audierimus",
+      "audīveritis/audīritis/audieritis",
+      "audīverint/audīrint/audierint"
+    ],
+    [
+      "audior",
+      "audīris/audīre",
+      "audītur",
+      "audīmur",
+      "audīminī",
+      "audiuntur"
+    ],
+    [
+      "audiēbar",
+      "audiēbāris/audiēbāre",
+      "audiēbātur",
+      "audiēbāmur",
+      "audiēbāminī",
+      "audiēbantur"
+    ],
+    [
+      "audiar",
+      "audiēris/audiēre",
+      "audiētur",
+      "audiēmur",
+      "audiēminī",
+      "audientur"
+    ],
+    [
+      "audītus sum (masculine)/audīta sum (feminine)/audītum sum (neuter)",
+      "audītus es (masculine)/audīta es (feminine)/audītum es (neuter)",
+      "audītus est (masculine)/audīta est (feminine)/audītum est (neuter)",
+      "audītī sumus (masculine)/audītae sumus (feminine)/audīta sumus (neuter)",
+      "audītī estis (masculine)/audītae estis (feminine)/audīta estis (neuter)",
+      "audītī sunt (masculine)/audītae sunt (feminine)/audīta sunt (neuter)"
+    ],
+    [
+      "audītus eram (masculine)/audīta eram (feminine)/audītum eram (neuter)",
+      "audītus erās (masculine)/audīta erās (feminine)/audītum erās (neuter)",
+      "audītus erat (masculine)/audīta erat (feminine)/audītum erat (neuter)",
+      "audītī erāmus (masculine)/audītae erāmus (feminine)/audīta erāmus (neuter)",
+      "audītī erātis (masculine)/audītae erātis (feminine)/audīta erātis (neuter)",
+      "audītī erant (masculine)/audītae erant (feminine)/audīta erant (neuter)"
+    ],
+    [
+      "audītus erō (masculine)/audīta erō (feminine)/audītum erō (neuter)",
+      "audītus eris (masculine)/audīta eris (feminine)/audītum eris (neuter)",
+      "audītus erit (masculine)/audīta erit (feminine)/audītum erit (neuter)",
+      "audītī erimus (masculine)/audītae erimus (feminine)/audīta erimus (neuter)",
+      "audītī eritis (masculine)/audītae eritis (feminine)/audīta eritis (neuter)",
+      "audītī erunt (masculine)/audītae erunt (feminine)/audīta erunt (neuter)"
+    ],
+    [
+      "audiam",
+      "audiās",
+      "audiat",
+      "audiāmus",
+      "audiātis",
+      "audiant"
+    ],
+    [
+      "audīrem",
+      "audīrēs",
+      "audīret",
+      "audīrēmus",
+      "audīrētis",
+      "audīrent"
+    ],
+    [
+      "audīverim/audīrim/audierim",
+      "audīverīs/audīrīs/audierīs",
+      "audīverit/audīrit/audierit",
+      "audīverīmus/audīrīmus/audierīmus",
+      "audīverītis/audīrītis/audierītis",
+      "audīverint/audīrint/audierint"
+    ],
+    [
+      "audīvissem/audīssem/audiissem",
+      "audīvissēs/audīssēs/audiissēs",
+      "audīvisset/audīsset/audiisset",
+      "audīvissēmus/audīssēmus/audiissēmus",
+      "audīvissētis/audīssētis/audiissētis",
+      "audīvissent/audīssent/audiissent"
+    ],
+    [
+      "audiar",
+      "audiāris/audiāre",
+      "audiātur",
+      "audiāmur",
+      "audiāminī",
+      "audiantur"
+    ],
+    [
+      "audīrer",
+      "audīrēris/audīrēre",
+      "audīrētur",
+      "audīrēmur",
+      "audīrēminī",
+      "audīrentur"
+    ],
+    [
+      "audītus sim (masculine)/audīta sim (feminine)/audītum sim (neuter)",
+      "audītus sīs (masculine)/audīta sīs (feminine)/audītum sīs (neuter)",
+      "audītus sit (masculine)/audīta sit (feminine)/audītum sit (neuter)",
+      "audītī sīmus (masculine)/audītae sīmus (feminine)/audīta sīmus (neuter)",
+      "audītī sītis (masculine)/audītae sītis (feminine)/audīta sītis (neuter)",
+      "audītī sint (masculine)/audītae sint (feminine)/audīta sint (neuter)"
+    ],
+    [
+      "audītus essem (masculine)/audīta essem (feminine)/audītum essem (neuter)",
+      "audītus essēs (masculine)/audīta essēs (feminine)/audītum essēs (neuter)",
+      "audītus esset (masculine)/audīta esset (feminine)/audītum esset (neuter)",
+      "audītī essēmus (masculine)/audītae essēmus (feminine)/audīta essēmus (neuter)",
+      "audītī essētis (masculine)/audītae essētis (feminine)/audīta essētis (neuter)",
+      "audītī essent (masculine)/audītae essent (feminine)/audīta essent (neuter)"
+    ],
+    [
+      "audī",
+      "audīte"
+    ],
+    [
+      "audītō",
+      "audītō",
+      "audītōte",
+      "audiuntō"
+    ],
+    [
+      "audīre",
+      "audīminī"
+    ],
+    [
+      "audītor",
+      "audītor",
+      "audiuntor"
+    ],
+    "audīre",
+    "audīvisse/audīsse/audiisse",
+    "audītūrum esse",
+    "audīrī/audīrier",
+    "audītum esse",
+    "audītum īrī",
+    "audiēns",
+    "",
+    "audītus",
+    "audītūrus",
+    "audiendus/audiundus",
+    [
+      "audiendī",
+      "audiendō",
+      "audiendum",
+      "audiendō"
+    ],
+    [
+      "audītum",
+      "audītū"
+    ]
+  ],
+  "gloss": "to hear, listen to; to attend, pay attention to; to accept, agree with, obey; ..."
+}

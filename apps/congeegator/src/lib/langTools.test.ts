@@ -183,3 +183,20 @@ describe('stripFormMarkers', () => {
 		expect(stripFormMarkers(matched).toLowerCase()).toBe(decodeURIComponent(hash).toLowerCase());
 	});
 });
+
+describe('regional conjugation qualifiers', () => {
+	it('preserves labels and does not abbreviate across Portuguese regions', () => {
+		expect(parseAndFormatForm('falámos (Portugal)/falamos (Brazil)')).toEqual([
+			{ text: 'falámos', markers: [] },
+			{ text: ' (Portugal)', markers: [] },
+			{ text: 'falamos', markers: [], separator: '/' },
+			{ text: ' (Brazil)', markers: [] }
+		]);
+	});
+	it('keeps rarity styling on the form rather than its usage note', () => {
+		expect(parseAndFormatForm('[form (historical)]')).toEqual([
+			{ text: 'form', markers: ['rare'] },
+			{ text: ' (historical)', markers: [] }
+		]);
+	});
+});

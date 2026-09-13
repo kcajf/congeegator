@@ -1,0 +1,27 @@
+{
+  "name": "sms:a",
+  "nameNoDiacritics": "sms:a",
+  "conjugation": [
+    "sms:ar",
+    "sms:ade",
+    "har sms:at",
+    "hade sms:at",
+    "sms:a",
+    "sms:as",
+    "sms:ades",
+    "har sms:ats",
+    "hade sms:ats",
+    "",
+    "[sms:e]",
+    "[sms:ade]",
+    "[sms:es]",
+    "[sms:ades]",
+    "sms:a",
+    "sms:as",
+    "sms:at",
+    "sms:ats",
+    "sms:ande",
+    "sms:ad"
+  ],
+  "gloss": "to communicate via SMS; to send an SMS message, to text"
+}

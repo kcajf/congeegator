@@ -17,6 +17,7 @@
 		MAX_PREFIX_IDS,
 		MAX_SEARCH_RESULTS,
 		prefixLookup,
+		rankSearchResults,
 		stripDiacritics,
 		toPhonetic,
 		type SearchResult
@@ -135,7 +136,7 @@
 			return;
 		}
 
-		const allPrefixIds = prefixLookup(index, currentQuery);
+		const allPrefixIds = prefixLookup(index, currentQuery, currentLang);
 		const prefixIds = allPrefixIds.slice(0, MAX_PREFIX_IDS);
 
 		if (prefixIds.length === 0) {
@@ -173,12 +174,11 @@
 								.filter((r): r is SearchResult => r !== null)
 						: [];
 
-				searchResults = [...nativeResults, ...glossResults]
-					.sort(
-						(a, b) =>
-							a.quality - b.quality || b.freq - a.freq || a.matched.length - b.matched.length
-					)
-					.slice(0, MAX_SEARCH_RESULTS);
+				searchResults = rankSearchResults(
+					[...nativeResults, ...glossResults],
+					originalQuery,
+					currentLang
+				).slice(0, MAX_SEARCH_RESULTS);
 			})
 			.catch((err) => {
 				console.error('Search lookup failed:', err);

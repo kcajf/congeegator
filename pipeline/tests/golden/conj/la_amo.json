@@ -1,0 +1,207 @@
+{
+  "name": "amo",
+  "nameNoDiacritics": "amo",
+  "conjugation": [
+    [
+      "amō",
+      "amās",
+      "amat",
+      "amāmus",
+      "amātis",
+      "amant"
+    ],
+    [
+      "amābam",
+      "amābās",
+      "amābat",
+      "amābāmus",
+      "amābātis",
+      "amābant"
+    ],
+    [
+      "amābō",
+      "amābis",
+      "amābit",
+      "amābimus",
+      "amābitis",
+      "amābunt"
+    ],
+    [
+      "amāvī",
+      "amāvistī/amāstī",
+      "amāvit/amāt",
+      "amāvimus/amāmus",
+      "amāvistis/amāstis",
+      "amāvērunt/amārunt/amāvēre"
+    ],
+    [
+      "amāveram/amāram",
+      "amāverās/amārās",
+      "amāverat/amārat",
+      "amāverāmus/amārāmus",
+      "amāverātis/amārātis",
+      "amāverant/amārant"
+    ],
+    [
+      "amāverō/amārō",
+      "amāveris/amāris",
+      "amāverit/amārit",
+      "amāverimus/amārimus",
+      "amāveritis/amāritis",
+      "amāverint/amārint"
+    ],
+    [
+      "amor",
+      "amāris/amāre",
+      "amātur",
+      "amāmur",
+      "amāminī",
+      "amantur"
+    ],
+    [
+      "amābar",
+      "amābāris/amābāre",
+      "amābātur",
+      "amābāmur",
+      "amābāminī",
+      "amābantur"
+    ],
+    [
+      "amābor",
+      "amāberis/amābere",
+      "amābitur",
+      "amābimur",
+      "amābiminī",
+      "amābuntur"
+    ],
+    [
+      "amātus sum (masculine)/amāta sum (feminine)/amātum sum (neuter)",
+      "amātus es (masculine)/amāta es (feminine)/amātum es (neuter)",
+      "amātus est (masculine)/amāta est (feminine)/amātum est (neuter)",
+      "amātī sumus (masculine)/amātae sumus (feminine)/amāta sumus (neuter)",
+      "amātī estis (masculine)/amātae estis (feminine)/amāta estis (neuter)",
+      "amātī sunt (masculine)/amātae sunt (feminine)/amāta sunt (neuter)"
+    ],
+    [
+      "amātus eram (masculine)/amāta eram (feminine)/amātum eram (neuter)",
+      "amātus erās (masculine)/amāta erās (feminine)/amātum erās (neuter)",
+      "amātus erat (masculine)/amāta erat (feminine)/amātum erat (neuter)",
+      "amātī erāmus (masculine)/amātae erāmus (feminine)/amāta erāmus (neuter)",
+      "amātī erātis (masculine)/amātae erātis (feminine)/amāta erātis (neuter)",
+      "amātī erant (masculine)/amātae erant (feminine)/amāta erant (neuter)"
+    ],
+    [
+      "amātus erō (masculine)/amāta erō (feminine)/amātum erō (neuter)",
+      "amātus eris (masculine)/amāta eris (feminine)/amātum eris (neuter)",
+      "amātus erit (masculine)/amāta erit (feminine)/amātum erit (neuter)",
+      "amātī erimus (masculine)/amātae erimus (feminine)/amāta erimus (neuter)",
+      "amātī eritis (masculine)/amātae eritis (feminine)/amāta eritis (neuter)",
+      "amātī erunt (masculine)/amātae erunt (feminine)/amāta erunt (neuter)"
+    ],
+    [
+      "amem",
+      "amēs",
+      "amet",
+      "amēmus",
+      "amētis",
+      "ament"
+    ],
+    [
+      "amārem",
+      "amārēs",
+      "amāret",
+      "amārēmus",
+      "amārētis",
+      "amārent"
+    ],
+    [
+      "amāverim/amārim",
+      "amāverīs/amārīs",
+      "amāverit/amārit",
+      "amāverīmus/amārīmus",
+      "amāverītis/amārītis",
+      "amāverint/amārint"
+    ],
+    [
+      "amāvissem/amāssem",
+      "amāvissēs/amāssēs",
+      "amāvisset/amāsset",
+      "amāvissēmus/amāssēmus",
+      "amāvissētis/amāssētis",
+      "amāvissent/amāssent"
+    ],
+    [
+      "amer",
+      "amēris/amēre",
+      "amētur",
+      "amēmur",
+      "amēminī",
+      "amentur"
+    ],
+    [
+      "amārer",
+      "amārēris/amārēre",
+      "amārētur",
+      "amārēmur",
+      "amārēminī",
+      "amārentur"
+    ],
+    [
+      "amātus sim (masculine)/amāta sim (feminine)/amātum sim (neuter)",
+      "amātus sīs (masculine)/amāta sīs (feminine)/amātum sīs (neuter)",
+      "amātus sit (masculine)/amāta sit (feminine)/amātum sit (neuter)",
+      "amātī sīmus (masculine)/amātae sīmus (feminine)/amāta sīmus (neuter)",
+      "amātī sītis (masculine)/amātae sītis (feminine)/amāta sītis (neuter)",
+      "amātī sint (masculine)/amātae sint (feminine)/amāta sint (neuter)"
+    ],
+    [
+      "amātus essem (masculine)/amāta essem (feminine)/amātum essem (neuter)",
+      "amātus essēs (masculine)/amāta essēs (feminine)/amātum essēs (neuter)",
+      "amātus esset (masculine)/amāta esset (feminine)/amātum esset (neuter)",
+      "amātī essēmus (masculine)/amātae essēmus (feminine)/amāta essēmus (neuter)",
+      "amātī essētis (masculine)/amātae essētis (feminine)/amāta essētis (neuter)",
+      "amātī essent (masculine)/amātae essent (feminine)/amāta essent (neuter)"
+    ],
+    [
+      "amā",
+      "amāte"
+    ],
+    [
+      "amātō",
+      "amātō",
+      "amātōte",
+      "amantō"
+    ],
+    [
+      "amāre",
+      "amāminī"
+    ],
+    [
+      "amātor",
+      "amātor",
+      "amantor"
+    ],
+    "amāre",
+    "amāvisse/amāsse",
+    "amātūrum esse",
+    "amārī",
+    "amātum esse",
+    "amātum īrī",
+    "amāns",
+    "",
+    "amātus",
+    "amātūrus",
+    "amandus",
+    [
+      "amandī",
+      "amandō",
+      "amandum",
+      "amandō"
+    ],
+    [
+      "amātum",
+      "amātū"
+    ]
+  ],
+  "gloss": "to love; to be fond of, like, admire; to be pleased by or with for; ..."
+}

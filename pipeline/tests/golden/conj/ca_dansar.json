@@ -1,0 +1,81 @@
+{
+  "name": "dansar",
+  "nameNoDiacritics": "dansar",
+  "conjugation": [
+    "dansar",
+    "dansant",
+    "dansat",
+    [
+      "danso",
+      "danses",
+      "dansa",
+      "dansem",
+      "danseu",
+      "dansen"
+    ],
+    [
+      "dansava",
+      "dansaves",
+      "dansava",
+      "dansàvem",
+      "dansàveu",
+      "dansaven"
+    ],
+    [
+      "dansí",
+      "dansares",
+      "dansà",
+      "dansàrem",
+      "dansàreu",
+      "dansaren"
+    ],
+    [
+      "vaig dansar",
+      "vas dansar/vares dansar",
+      "va dansar",
+      "vam dansar/vàrem dansar",
+      "vau dansar/vàreu dansar",
+      "van dansar/varen dansar"
+    ],
+    [
+      "dansaré",
+      "dansaràs",
+      "dansarà",
+      "dansarem",
+      "dansareu",
+      "dansaran"
+    ],
+    [
+      "dansaria",
+      "dansaries",
+      "dansaria",
+      "dansaríem",
+      "dansaríeu",
+      "dansarien"
+    ],
+    [
+      "dansi",
+      "dansis",
+      "dansi",
+      "dansem",
+      "danseu",
+      "dansin"
+    ],
+    [
+      "dansés",
+      "dansessis",
+      "dansés",
+      "danséssim",
+      "danséssiu",
+      "dansessin"
+    ],
+    [
+      "dansa",
+      "dansi",
+      "dansem",
+      "danseu",
+      "dansin"
+    ]
+  ],
+  "gloss": "to dance"
+}

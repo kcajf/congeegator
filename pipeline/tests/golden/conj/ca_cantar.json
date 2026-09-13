@@ -1,0 +1,81 @@
+{
+  "name": "cantar",
+  "nameNoDiacritics": "cantar",
+  "conjugation": [
+    "cantar",
+    "cantant",
+    "cantat",
+    [
+      "canto",
+      "cantes",
+      "canta",
+      "cantem",
+      "canteu",
+      "canten"
+    ],
+    [
+      "cantava",
+      "cantaves",
+      "cantava",
+      "cantàvem",
+      "cantàveu",
+      "cantaven"
+    ],
+    [
+      "cantí",
+      "cantares",
+      "cantà",
+      "cantàrem",
+      "cantàreu",
+      "cantaren"
+    ],
+    [
+      "vaig cantar",
+      "vas cantar/vares cantar",
+      "va cantar",
+      "vam cantar/vàrem cantar",
+      "vau cantar/vàreu cantar",
+      "van cantar/varen cantar"
+    ],
+    [
+      "cantaré",
+      "cantaràs",
+      "cantarà",
+      "cantarem",
+      "cantareu",
+      "cantaran"
+    ],
+    [
+      "cantaria",
+      "cantaries",
+      "cantaria",
+      "cantaríem",
+      "cantaríeu",
+      "cantarien"
+    ],
+    [
+      "canti",
+      "cantis",
+      "canti",
+      "cantem",
+      "canteu",
+      "cantin"
+    ],
+    [
+      "cantés",
+      "cantessis",
+      "cantés",
+      "cantéssim",
+      "cantéssiu",
+      "cantessin"
+    ],
+    [
+      "canta",
+      "canti",
+      "cantem",
+      "canteu",
+      "cantin"
+    ]
+  ],
+  "gloss": "to sing; to call out the names and order of the castellers who will form"
+}

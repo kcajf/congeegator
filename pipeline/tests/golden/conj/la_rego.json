@@ -1,0 +1,207 @@
+{
+  "name": "rego",
+  "nameNoDiacritics": "rego",
+  "conjugation": [
+    [
+      "regō",
+      "regis",
+      "regit",
+      "regimus",
+      "regitis",
+      "regunt"
+    ],
+    [
+      "regēbam",
+      "regēbās",
+      "regēbat",
+      "regēbāmus",
+      "regēbātis",
+      "regēbant"
+    ],
+    [
+      "regam",
+      "regēs",
+      "reget",
+      "regēmus",
+      "regētis",
+      "regent"
+    ],
+    [
+      "rēxī",
+      "rēxistī",
+      "rēxit",
+      "rēximus",
+      "rēxistis",
+      "rēxērunt/rēxēre"
+    ],
+    [
+      "rēxeram",
+      "rēxerās",
+      "rēxerat",
+      "rēxerāmus",
+      "rēxerātis",
+      "rēxerant"
+    ],
+    [
+      "rēxerō",
+      "rēxeris",
+      "rēxerit",
+      "rēxerimus",
+      "rēxeritis",
+      "rēxerint"
+    ],
+    [
+      "regor",
+      "regeris/regere",
+      "regitur",
+      "regimur",
+      "regiminī",
+      "reguntur"
+    ],
+    [
+      "regēbar",
+      "regēbāris/regēbāre",
+      "regēbātur",
+      "regēbāmur",
+      "regēbāminī",
+      "regēbantur"
+    ],
+    [
+      "regar",
+      "regēris/regēre",
+      "regētur",
+      "regēmur",
+      "regēminī",
+      "regentur"
+    ],
+    [
+      "rēctus sum (masculine)/rēcta sum (feminine)/rēctum sum (neuter)",
+      "rēctus es (masculine)/rēcta es (feminine)/rēctum es (neuter)",
+      "rēctus est (masculine)/rēcta est (feminine)/rēctum est (neuter)",
+      "rēctī sumus (masculine)/rēctae sumus (feminine)/rēcta sumus (neuter)",
+      "rēctī estis (masculine)/rēctae estis (feminine)/rēcta estis (neuter)",
+      "rēctī sunt (masculine)/rēctae sunt (feminine)/rēcta sunt (neuter)"
+    ],
+    [
+      "rēctus eram (masculine)/rēcta eram (feminine)/rēctum eram (neuter)",
+      "rēctus erās (masculine)/rēcta erās (feminine)/rēctum erās (neuter)",
+      "rēctus erat (masculine)/rēcta erat (feminine)/rēctum erat (neuter)",
+      "rēctī erāmus (masculine)/rēctae erāmus (feminine)/rēcta erāmus (neuter)",
+      "rēctī erātis (masculine)/rēctae erātis (feminine)/rēcta erātis (neuter)",
+      "rēctī erant (masculine)/rēctae erant (feminine)/rēcta erant (neuter)"
+    ],
+    [
+      "rēctus erō (masculine)/rēcta erō (feminine)/rēctum erō (neuter)",
+      "rēctus eris (masculine)/rēcta eris (feminine)/rēctum eris (neuter)",
+      "rēctus erit (masculine)/rēcta erit (feminine)/rēctum erit (neuter)",
+      "rēctī erimus (masculine)/rēctae erimus (feminine)/rēcta erimus (neuter)",
+      "rēctī eritis (masculine)/rēctae eritis (feminine)/rēcta eritis (neuter)",
+      "rēctī erunt (masculine)/rēctae erunt (feminine)/rēcta erunt (neuter)"
+    ],
+    [
+      "regam",
+      "regās",
+      "regat",
+      "regāmus",
+      "regātis",
+      "regant"
+    ],
+    [
+      "regerem",
+      "regerēs",
+      "regeret",
+      "regerēmus",
+      "regerētis",
+      "regerent"
+    ],
+    [
+      "rēxerim",
+      "rēxerīs",
+      "rēxerit",
+      "rēxerīmus",
+      "rēxerītis",
+      "rēxerint"
+    ],
+    [
+      "rēxissem",
+      "rēxissēs",
+      "rēxisset",
+      "rēxissēmus",
+      "rēxissētis",
+      "rēxissent"
+    ],
+    [
+      "regar",
+      "regāris/regāre",
+      "regātur",
+      "regāmur",
+      "regāminī",
+      "regantur"
+    ],
+    [
+      "regerer",
+      "regerēris/regerēre",
+      "regerētur",
+      "regerēmur",
+      "regerēminī",
+      "regerentur"
+    ],
+    [
+      "rēctus sim (masculine)/rēcta sim (feminine)/rēctum sim (neuter)",
+      "rēctus sīs (masculine)/rēcta sīs (feminine)/rēctum sīs (neuter)",
+      "rēctus sit (masculine)/rēcta sit (feminine)/rēctum sit (neuter)",
+      "rēctī sīmus (masculine)/rēctae sīmus (feminine)/rēcta sīmus (neuter)",
+      "rēctī sītis (masculine)/rēctae sītis (feminine)/rēcta sītis (neuter)",
+      "rēctī sint (masculine)/rēctae sint (feminine)/rēcta sint (neuter)"
+    ],
+    [
+      "rēctus essem (masculine)/rēcta essem (feminine)/rēctum essem (neuter)",
+      "rēctus essēs (masculine)/rēcta essēs (feminine)/rēctum essēs (neuter)",
+      "rēctus esset (masculine)/rēcta esset (feminine)/rēctum esset (neuter)",
+      "rēctī essēmus (masculine)/rēctae essēmus (feminine)/rēcta essēmus (neuter)",
+      "rēctī essētis (masculine)/rēctae essētis (feminine)/rēcta essētis (neuter)",
+      "rēctī essent (masculine)/rēctae essent (feminine)/rēcta essent (neuter)"
+    ],
+    [
+      "rege",
+      "regite"
+    ],
+    [
+      "regitō",
+      "regitō",
+      "regitōte",
+      "reguntō"
+    ],
+    [
+      "regere",
+      "regiminī"
+    ],
+    [
+      "regitor",
+      "regitor",
+      "reguntor"
+    ],
+    "regere",
+    "rēxisse",
+    "rēctūrum esse",
+    "regī",
+    "rēctum esse",
+    "rēctum īrī",
+    "regēns",
+    "",
+    "rēctus",
+    "rēctūrus",
+    "regendus/regundus",
+    [
+      "regendī",
+      "regendō",
+      "regendum",
+      "regendō"
+    ],
+    [
+      "rēctum",
+      "rēctū"
+    ]
+  ],
+  "gloss": "to rule, govern, direct; to guide, steer, control; to oversee, manage; ..."
+}

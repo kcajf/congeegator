@@ -110,15 +110,18 @@ def _generate_data_for_lang(
         verbs = sorted(verbs, key=lambda x: x["nameNoDiacritics"])
 
         with log_timing(f"{lang_code} conj word frequencies"):
+            has_frequency = lang_code in available_languages()
+            if not has_frequency:
+                log.warning("%s has no wordfreq corpus; using unranked frequency 0", lang_code)
             for verb in verbs:
-                verb["freq"] = round(zipf_frequency(verb["name"], lang_code), 2)
+                verb["freq"] = round(zipf_frequency(verb["name"], lang_code), 2) if has_frequency else 0.0
 
         unique_verbs = {x["name"] for x in verbs}
         if len(unique_verbs) != len(verbs):
             raise ValueError("duplicate conjugation entries")
 
         with log_timing(f"{lang_code} conj search index"):
-            search_index = build_search_index(verbs, phonetic_fn=conj_config.phonetic_fn)
+            search_index = build_search_index(verbs, phonetic_fn=conj_config.phonetic_fn, lang=lang_code)
 
         conj_data = {
             "verbs": verbs,
@@ -166,6 +169,8 @@ def iter_language_data(dev: bool, app: str = "all"):
         )
         if dict_config is not None and dict_data is None:
             raise RuntimeError(f"No dictionary entries generated for {lang_code}; refusing an incomplete catalogue")
+        if conj_config is not None and conj_data is None:
+            raise RuntimeError(f"No conjugation entries generated for {lang_code}; refusing an incomplete catalogue")
 
         yield lang_code, conj_data, dict_data
         del dict_data

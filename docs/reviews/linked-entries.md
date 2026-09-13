@@ -1,6 +1,6 @@
 # Lexicoff linked entries — review guide
 
-Implemented on `codex/lexicoff-linked-entries`, in `/private/tmp/lexicoff-linked-entries`, from committed revision `eeed86d`. Existing work in the original checkout was not included. The local preview is [http://127.0.0.1:5177](http://127.0.0.1:5177). No deployment or pull request has been made.
+Implemented on `codex/lexicoff-linked-entries` in an isolated worktree, initially from `eeed86d` and merged with main at `6e0e544` before PR review. The original checkout was left untouched. The local preview is [http://127.0.0.1:5177](http://127.0.0.1:5177).
 
 ## What changed
 
@@ -8,13 +8,17 @@ Definitions now link to source-specified words. Form-of and alternative-of sense
 
 Sense-level synonyms and antonyms retain their association and qualifiers. Grammar and explicit topic labels precede definitions. Examples retain original text, translation, romanization, validated emphasis, and quotation attribution. The first example is shown, with additional examples and references collapsed. Up to three examples are retained, preferring usage examples over quotations; texts longer than 1,200 characters are omitted.
 
-Full etymology prose is preserved for each entry, with conservative links from common mention, borrowing, doublet, and compound/affix templates. Ambiguous and repeated etymology labels remain plain rather than receiving a guessed destination. Related words, derived words, and forms are collapsed; large collections load their contents on expansion, group repeated labels, and offer filtering. Part-of-speech links allow quick jumps within long pages. Exact spellings distinguish entries such as German Haus and haus.
+Full etymology prose is preserved for each entry, with conservative links from common mention, borrowing, doublet, and compound/affix templates. Ambiguous and repeated etymology labels remain plain rather than receiving a guessed destination. Related words, derived words, and forms are collapsed; large collections load their contents on expansion. Related and derived words group repeated labels and offer filtering; forms have no separate search bar. Part-of-speech links allow quick jumps within long pages. Exact spellings distinguish entries such as German Haus and haus.
 
 A new indexed `form_lookup` table provides exact reverse lookup without scanning paradigms. Exact form matches rank after exact headwords and before broad prefix matches, and the result shows the matched form alongside its headword. If a form has no standalone entry, its page shows the matching entries under “Found under.” This wording also covers source forms that are related words or derivations rather than strict inflections. Auxiliary verbs and identified grammatical instructions are excluded from form indexing.
 
-Older installed dictionaries still open and render their original string examples. The new data is obtained through the existing manual update/download flow. All 25 dictionaries and their manifest were regenerated locally; the data artifacts remain in the worktree's ignored `apps/lexicoff/r2_data/` directory.
+Older installed dictionaries still open and render their original string examples. The new data is obtained through the existing manual update/download flow. The original 25 dictionaries and their manifest were regenerated locally; their data artifacts remain in the worktree's ignored `apps/lexicoff/r2_data/` directory. Main subsequently added 20 dictionaries. Those additions retain their existing manifest artifacts here; the merged pipeline will generate rich data for all 45 on deployment. The full-database audit and size figures below describe the original 25-dictionary snapshot.
 
 The presentation follows the sense-level relationships and progressive disclosure described in [motî's documentation](https://xn--mot-xma.net/documentation/), while keeping Lexicoff's existing appearance. The extraction uses [Wiktextract's structured fields](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/extractor/en/type_utils.py), rather than parsing arbitrary raw gloss markup.
+
+The merge preserves the new dictionaries’ pronunciation labels, form qualifiers, script isolation and search aliases. Regression checks cover rich examples through language-specific filtering and SQLite/worker round-trips with links, pronunciation metadata, and exact reverse forms together. The [complete etymology-language classification](etymology-languages.md) covers all 721 varieties and 11 legacy aliases; 144 varieties now resolve to 28 of the 45 supported dictionaries.
+
+Kaikki still omits ordinary mention links from some etymologies, including French **avaler: aval + -er**. This PR does not guess those destinations. The extractor fix is committed separately on [kcajf/wiktextract’s etymology-links branch](https://github.com/kcajf/wiktextract/tree/etymology-links), with all 1,796 upstream tests passing. Integration of its new `etymology_links` field is deferred until upstream data carries it.
 
 ## Suggested review paths
 
@@ -29,8 +33,8 @@ Install languages from the preview homepage before exploring them. German, Greek
 
 ## Validation
 
-- **257 pipeline tests** and **65 frontend tests** passed, including legacy-database compatibility, exact-form retrieval, Unicode boundaries, canonical targets, ambiguous links, and source emphasis offsets.
-- Type checking passed with no errors. Lint and formatting passed. The production build completed. Existing non-blocking warnings remain for two unused homepage CSS selectors, optional PWA icon-generation packages absent in this local installation, and a PWA JSON glob with no matches.
+- **606 pipeline tests** and **111 frontend tests** passed, including legacy-database compatibility, exact-form retrieval, Unicode boundaries, canonical targets, ambiguous links, and source emphasis offsets.
+- Type checking passed with no errors. Lint and formatting passed. The production build completed. The staging build also passed after merging main. Non-blocking build warnings remain for optional PWA icon-generation packages absent in this local installation and a PWA JSON glob with no matches.
 - All **25 generated databases**, containing **7,632,607 records** and **45,342,685 indexed form relationships**, passed SQLite integrity and both FTS integrity checks. No orphaned form relationships were found. All **125 common-word presence/search probes** passed. Every compressed hash and byte count matches the final manifest. The machine-readable results are in [database-verification.json](database-verification.json).
 - Browser checks covered linked-word navigation, history, disclosure/filtering, missing-word recovery, exact form search, grammatical base links, and a 390-pixel layout without horizontal overflow. A Greek related-word navigation succeeded with the local server stopped, using the installed dictionary. This is an in-session offline navigation check, not a new end-to-end audit of the existing PWA installation/update lifecycle.
 

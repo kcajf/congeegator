@@ -1,0 +1,27 @@
+{
+  "name": "läsa",
+  "nameNoDiacritics": "lasa",
+  "conjugation": [
+    "läser",
+    "läste/[las]",
+    "har läst/[har läsit]",
+    "hade läst/[hade läsit]",
+    "läs",
+    "läses",
+    "lästes/[lass]",
+    "har lästs/[har läsits]",
+    "hade lästs/[hade läsits]",
+    "",
+    "[läse]",
+    "[läste]/[låse]",
+    "[läses]",
+    "[lästes]/[låses]",
+    "läsa",
+    "läsas",
+    "läst/[läsit]",
+    "lästs/[läsits]",
+    "läsande",
+    "läst/[läsen]"
+  ],
+  "gloss": "to read; to study, to read"
+}

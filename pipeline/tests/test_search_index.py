@@ -1,6 +1,11 @@
 """Tests for build_search_index: verifies key verbs appear under expected prefixes,
 including diacritic-stripped and phonetic variants."""
 
+import os
+from pathlib import Path
+import subprocess
+import sys
+
 import pytest
 
 from pipeline.search import build_search_index
@@ -240,3 +245,76 @@ class TestGlossInSearchIndex:
         assert "atte" in self.index
         assert "atten" in self.index
         assert "attend" in self.index
+
+@pytest.mark.parametrize('lang,name,form,query', [
+    ('nl', 'opbellen', 'belde op', 'belde'),
+    ('la', 'amo', 'amātus sum', 'amatus'),
+    ('fi', 'muistaa', 'en muista', 'en mui'),
+    ('pt', 'falar', 'falámos (Portugal)/falamos (Brazil)', 'falámo'),
+])
+def test_added_language_compounds_and_qualifiers(lang, name, form, query):
+    index = build_search_index([{'name': name, 'conjugation': [form]}], lang=lang)
+    assert index[query] == [0]
+    assert 'brazil' not in index
+    assert 'portug' not in index
+
+
+def test_capped_added_language_bucket_keeps_root_and_whole_native_form():
+    # Alphabetically early compounds used to push the very common ha out.
+    verbs = [{'name': f'a{i:03}', 'conjugation': ['har arbetat'], 'freq': 1} for i in range(220)]
+    verbs += [{'name': 'ha', 'conjugation': ['har', 'hade'], 'freq': 6.39}]
+    index = build_search_index(verbs, lang='sv')
+    assert index['ha'][0] == 220
+    assert index['har'][0] == 220
+    assert len(index['ha']) == 200
+
+
+def test_short_accented_form_is_protected_from_many_lemma_prefixes():
+    verbs = [{'name': f'est{i:03}', 'conjugation': [], 'freq': 1} for i in range(220)]
+    verbs += [{'name': 'ser', 'conjugation': ['é', 'és'], 'freq': 6}]
+    index = build_search_index(verbs, lang='pt')
+    assert index['e'][0] == index['es'][0] == 220
+
+
+def test_added_language_capped_candidates_prefer_frequency_after_exact_forms():
+    verbs = [{'name': f'a{i:03}', 'conjugation': ['hade arbetat'], 'freq': 1} for i in range(220)]
+    verbs += [{'name': 'skriva', 'conjugation': ['hade skrivit'], 'freq': 5.4}]
+    assert build_search_index(verbs, lang='sv')['hade'][0] == 220
+    # Existing language buckets preserve their previous ID order.
+    assert build_search_index(verbs, lang='fr')['a'] == list(range(200))
+
+
+def test_long_whole_form_beats_compound_auxiliary_at_maximum_prefix():
+    # Latin has no frequency data. essēmus must beat alphabetically earlier
+    # verbs whose compound forms merely contain essēmus as an auxiliary.
+    verbs = [{'name': f'a{i:03}', 'conjugation': ['amāti essēmus'], 'freq': 0} for i in range(220)]
+    verbs += [{'name': 'sum', 'conjugation': ['essēmus', 'essētis'], 'freq': 0}]
+    index = build_search_index(verbs, lang='la')
+    assert index['essemu'][0] == 220
+    assert index['esseti'][0] == 220
+
+
+def test_compound_index_serialization_is_reproducible_across_hash_seeds():
+    # Dict key order affects the bundle hash even when search results agree.
+    # Do not sort JSON keys: this tests the order emitted by the actual builder.
+    script = """
+import json
+from pipeline.search import build_search_index
+
+verbs = [
+    {'name': 'opbellen', 'conjugation': ['belde op', 'belt op'], 'freq': 3},
+    {'name': 'skriva', 'conjugation': ['har skrivit', 'hade skrivit'], 'freq': 5},
+    {'name': 'amo', 'conjugation': ['amātus sum', 'amātae sumus'], 'freq': 0},
+]
+print(json.dumps({lang: build_search_index(verbs, lang=lang)
+                  for lang in ('pt', 'ca', 'nl', 'sv', 'la', 'fi')}, ensure_ascii=False))
+"""
+    outputs = [
+        subprocess.check_output(
+            [sys.executable, '-c', script],
+            cwd=Path(__file__).resolve().parents[2],
+            env={**os.environ, 'PYTHONHASHSEED': seed},
+        )
+        for seed in ('1', '2', '42')
+    ]
+    assert outputs[0] == outputs[1] == outputs[2]

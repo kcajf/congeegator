@@ -19,7 +19,18 @@ export function stripDiacritics(s: string): string {
 	return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
 
-export function prefixLookup(index: SearchIndex, query: string): Id[] {
+const expandedLanguages = new Set(['pt', 'ca', 'nl', 'sv', 'fi', 'la']);
+
+export function prefixLookup(index: SearchIndex, query: string, lang?: string): Id[] {
+	if (lang && expandedLanguages.has(lang) && /\s/.test(query)) {
+		// A six-character phrase prefix can contain only the auxiliary. Start
+		// with the narrowest lexical-token bucket, then union the other buckets.
+		const buckets = [query, ...query.split(/\s+/)]
+			.map((part) => prefixLookup(index, part))
+			.filter((ids) => ids.length > 0)
+			.sort((a, b) => a.length - b.length);
+		return [...new Set(buckets.flat())].slice(0, MAX_PREFIX_IDS);
+	}
 	for (let i = query.length; i > 0; i--) {
 		const prefix = query.slice(0, i);
 		if (index.has(prefix)) {
@@ -27,6 +38,26 @@ export function prefixLookup(index: SearchIndex, query: string): Id[] {
 		}
 	}
 	return [];
+}
+
+export function rankSearchResults(
+	results: SearchResult[],
+	query: string,
+	lang: string
+): SearchResult[] {
+	const surfaceRank = (result: SearchResult) => {
+		if (!expandedLanguages.has(lang)) return 0;
+		const form = result.matched.toLowerCase();
+		if (form === query) return 0;
+		return stripDiacritics(form) === stripDiacritics(query) ? 1 : 2;
+	};
+	return results.sort(
+		(a, b) =>
+			surfaceRank(a) - surfaceRank(b) ||
+			a.quality - b.quality ||
+			b.freq - a.freq ||
+			a.matched.length - b.matched.length
+	);
 }
 
 export function toPhoneticEl(s: string): string {
@@ -187,6 +218,15 @@ export function findMatches(
 	// build_search_index tokenises compound forms.
 	const GERMAN_AUXILIARY_INFINITIVES = new Set(['haben', 'sein']);
 	const considerConjugation = (form: string) => {
+		if (['pt', 'ca', 'nl', 'sv', 'fi', 'la'].includes(lang)) {
+			for (const variant of form.split('/')) {
+				const spelling = variant
+					.replace(/\s+\([^()]+\)(?=[\]}]*$)/, '')
+					.replace(/^[[({]+|[\])}]+$/g, '');
+				consider(spelling);
+			}
+			return;
+		}
 		if (!form.includes(' ')) return consider(form);
 		const words = form.split(' ');
 		const matchForm =

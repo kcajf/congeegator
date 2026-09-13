@@ -1,8 +1,8 @@
 {
   "languages": {
     "fr": {
-      "dataHash": "4fda97cd",
-      "dataSize": 9810367,
+      "dataHash": "fa6ff789",
+      "dataSize": 9810209,
       "code": "fr",
       "name": "français",
       "englishWiktionaryName": "French",
@@ -162,8 +162,8 @@
       ]
     },
     "el": {
-      "dataHash": "88cc2069",
-      "dataSize": 6116259,
+      "dataHash": "5a760a3a",
+      "dataSize": 5911315,
       "code": "el",
       "name": "ελληνικά",
       "englishWiktionaryName": "Greek",
@@ -354,8 +354,8 @@
       ]
     },
     "de": {
-      "dataHash": "f46652de",
-      "dataSize": 18114987,
+      "dataHash": "04d17397",
+      "dataSize": 18045049,
       "code": "de",
       "name": "Deutsch",
       "englishWiktionaryName": "German",
@@ -682,8 +682,8 @@
       ]
     },
     "it": {
-      "dataHash": "ae0c0387",
-      "dataSize": 22793098,
+      "dataHash": "e09aa5ab",
+      "dataSize": 22794131,
       "code": "it",
       "name": "italiano",
       "englishWiktionaryName": "Italian",
@@ -956,6 +956,1004 @@
             0,
             1,
             2
+          ]
+        }
+      ]
+    },
+    "pt": {
+      "dataHash": "9ea190d7",
+      "dataSize": 7229737,
+      "code": "pt",
+      "name": "português",
+      "englishWiktionaryName": "Portuguese",
+      "tenseNames": [
+        "pt_impers_inf",
+        "pt_impers_gerund",
+        "pt_impers_partic",
+        "pt_inf_personal",
+        "pt_indic_pres",
+        "pt_indic_pret",
+        "pt_indic_imperf",
+        "pt_indic_pluperf",
+        "pt_indic_fut",
+        "pt_cond_pres",
+        "pt_subj_pres",
+        "pt_subj_imperf",
+        "pt_subj_fut",
+        "pt_imper"
+      ],
+      "tensePronouns": [
+        [],
+        [],
+        [],
+        [
+          "eu",
+          "tu",
+          "ele/ela/você",
+          "nós",
+          "vós",
+          "eles/elas/vocês"
+        ],
+        [
+          "eu",
+          "tu",
+          "ele/ela/você",
+          "nós",
+          "vós",
+          "eles/elas/vocês"
+        ],
+        [
+          "eu",
+          "tu",
+          "ele/ela/você",
+          "nós",
+          "vós",
+          "eles/elas/vocês"
+        ],
+        [
+          "eu",
+          "tu",
+          "ele/ela/você",
+          "nós",
+          "vós",
+          "eles/elas/vocês"
+        ],
+        [
+          "eu",
+          "tu",
+          "ele/ela/você",
+          "nós",
+          "vós",
+          "eles/elas/vocês"
+        ],
+        [
+          "eu",
+          "tu",
+          "ele/ela/você",
+          "nós",
+          "vós",
+          "eles/elas/vocês"
+        ],
+        [
+          "eu",
+          "tu",
+          "ele/ela/você",
+          "nós",
+          "vós",
+          "eles/elas/vocês"
+        ],
+        [
+          "eu",
+          "tu",
+          "ele/ela/você",
+          "nós",
+          "vós",
+          "eles/elas/vocês"
+        ],
+        [
+          "eu",
+          "tu",
+          "ele/ela/você",
+          "nós",
+          "vós",
+          "eles/elas/vocês"
+        ],
+        [
+          "eu",
+          "tu",
+          "ele/ela/você",
+          "nós",
+          "vós",
+          "eles/elas/vocês"
+        ],
+        [
+          "tu",
+          "você",
+          "nós",
+          "vós",
+          "vocês"
+        ]
+      ],
+      "tenseGroups": [
+        {
+          "name": "pt_indic",
+          "tenseIndices": [
+            4,
+            5,
+            6,
+            7,
+            8
+          ]
+        },
+        {
+          "name": "pt_subj",
+          "tenseIndices": [
+            10,
+            11,
+            12
+          ]
+        },
+        {
+          "name": "pt_cond",
+          "tenseIndices": [
+            9
+          ]
+        },
+        {
+          "name": "pt_imper",
+          "tenseIndices": [
+            13
+          ]
+        },
+        {
+          "name": "pt_inf",
+          "tenseIndices": [
+            3
+          ]
+        },
+        {
+          "name": "pt_impers",
+          "tenseIndices": [
+            0,
+            1,
+            2
+          ]
+        }
+      ]
+    },
+    "ca": {
+      "dataHash": "db1b13f2",
+      "dataSize": 4467013,
+      "code": "ca",
+      "name": "català",
+      "englishWiktionaryName": "Catalan",
+      "tenseNames": [
+        "ca_impers_inf",
+        "ca_impers_gerund",
+        "ca_impers_partic",
+        "ca_indic_pres",
+        "ca_indic_imperf",
+        "ca_indic_pret",
+        "ca_indic_periphrastic",
+        "ca_indic_fut",
+        "ca_cond_pres",
+        "ca_subj_pres",
+        "ca_subj_imperf",
+        "ca_imper"
+      ],
+      "tensePronouns": [
+        [],
+        [],
+        [],
+        [
+          "jo",
+          "tu",
+          "ell/ella",
+          "nosaltres",
+          "vosaltres",
+          "ells/elles"
+        ],
+        [
+          "jo",
+          "tu",
+          "ell/ella",
+          "nosaltres",
+          "vosaltres",
+          "ells/elles"
+        ],
+        [
+          "jo",
+          "tu",
+          "ell/ella",
+          "nosaltres",
+          "vosaltres",
+          "ells/elles"
+        ],
+        [
+          "jo",
+          "tu",
+          "ell/ella",
+          "nosaltres",
+          "vosaltres",
+          "ells/elles"
+        ],
+        [
+          "jo",
+          "tu",
+          "ell/ella",
+          "nosaltres",
+          "vosaltres",
+          "ells/elles"
+        ],
+        [
+          "jo",
+          "tu",
+          "ell/ella",
+          "nosaltres",
+          "vosaltres",
+          "ells/elles"
+        ],
+        [
+          "jo",
+          "tu",
+          "ell/ella",
+          "nosaltres",
+          "vosaltres",
+          "ells/elles"
+        ],
+        [
+          "jo",
+          "tu",
+          "ell/ella",
+          "nosaltres",
+          "vosaltres",
+          "ells/elles"
+        ],
+        [
+          "tu",
+          "vostè",
+          "nosaltres",
+          "vosaltres",
+          "vostès"
+        ]
+      ],
+      "tenseGroups": [
+        {
+          "name": "ca_indic",
+          "tenseIndices": [
+            3,
+            4,
+            5,
+            6,
+            7
+          ]
+        },
+        {
+          "name": "ca_subj",
+          "tenseIndices": [
+            9,
+            10
+          ]
+        },
+        {
+          "name": "ca_cond",
+          "tenseIndices": [
+            8
+          ]
+        },
+        {
+          "name": "ca_imper",
+          "tenseIndices": [
+            11
+          ]
+        },
+        {
+          "name": "ca_impers",
+          "tenseIndices": [
+            0,
+            1,
+            2
+          ]
+        }
+      ]
+    },
+    "nl": {
+      "dataHash": "4b21b457",
+      "dataSize": 2992196,
+      "code": "nl",
+      "name": "Nederlands",
+      "englishWiktionaryName": "Dutch",
+      "tenseNames": [
+        "nl_indic_pres",
+        "nl_indic_past",
+        "nl_imper_pres",
+        "nl_impers_inf",
+        "nl_impers_pres_partic",
+        "nl_impers_past_partic"
+      ],
+      "tensePronouns": [
+        [
+          "ik",
+          "jij / … jij",
+          "u",
+          "hij/zij/het",
+          "wij/jullie/zij"
+        ],
+        [
+          "ik",
+          "jij / … jij",
+          "u",
+          "hij/zij/het",
+          "wij/jullie/zij"
+        ],
+        [],
+        [],
+        [],
+        []
+      ],
+      "tenseGroups": [
+        {
+          "name": "nl_indic",
+          "tenseIndices": [
+            0,
+            1
+          ]
+        },
+        {
+          "name": "nl_imper",
+          "tenseIndices": [
+            2
+          ]
+        },
+        {
+          "name": "nl_impers",
+          "tenseIndices": [
+            3,
+            4,
+            5
+          ]
+        }
+      ]
+    },
+    "sv": {
+      "dataHash": "cc87abdb",
+      "dataSize": 2858375,
+      "code": "sv",
+      "name": "svenska",
+      "englishWiktionaryName": "Swedish",
+      "tenseNames": [
+        "sv_active_pres",
+        "sv_active_past",
+        "sv_active_perfect",
+        "sv_active_pluperfect",
+        "sv_active_imper",
+        "sv_s_pres",
+        "sv_s_past",
+        "sv_s_perfect",
+        "sv_s_pluperfect",
+        "sv_s_imper",
+        "sv_subj_pres",
+        "sv_subj_past",
+        "sv_subj_s_pres",
+        "sv_subj_s_past",
+        "sv_impers_inf",
+        "sv_impers_s_inf",
+        "sv_impers_supine",
+        "sv_impers_s_supine",
+        "sv_impers_pres_partic",
+        "sv_impers_past_partic"
+      ],
+      "tensePronouns": [
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "tenseGroups": [
+        {
+          "name": "sv_active",
+          "tenseIndices": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "name": "sv_s",
+          "tenseIndices": [
+            5,
+            6,
+            7,
+            8,
+            9
+          ]
+        },
+        {
+          "name": "sv_subj",
+          "tenseIndices": [
+            10,
+            11,
+            12,
+            13
+          ]
+        },
+        {
+          "name": "sv_impers",
+          "tenseIndices": [
+            14,
+            15,
+            16,
+            17,
+            18,
+            19
+          ]
+        }
+      ]
+    },
+    "la": {
+      "dataHash": "11e98838",
+      "dataSize": 23038582,
+      "code": "la",
+      "name": "Latina",
+      "englishWiktionaryName": "Latin",
+      "tenseNames": [
+        "la_indic_pres_active",
+        "la_indic_imperf_active",
+        "la_indic_fut_active",
+        "la_indic_perf_active",
+        "la_indic_pluperf_active",
+        "la_indic_fut_perf_active",
+        "la_indic_pres_passive",
+        "la_indic_imperf_passive",
+        "la_indic_fut_passive",
+        "la_indic_perf_passive",
+        "la_indic_pluperf_passive",
+        "la_indic_fut_perf_passive",
+        "la_subj_pres_active",
+        "la_subj_imperf_active",
+        "la_subj_perf_active",
+        "la_subj_pluperf_active",
+        "la_subj_pres_passive",
+        "la_subj_imperf_passive",
+        "la_subj_perf_passive",
+        "la_subj_pluperf_passive",
+        "la_imper_pres_active",
+        "la_imper_fut_active",
+        "la_imper_pres_passive",
+        "la_imper_fut_passive",
+        "la_nonfinite_inf_pres_active",
+        "la_nonfinite_inf_perf_active",
+        "la_nonfinite_inf_fut_active",
+        "la_nonfinite_inf_pres_passive",
+        "la_nonfinite_inf_perf_passive",
+        "la_nonfinite_inf_fut_passive",
+        "la_nonfinite_part_pres_active",
+        "la_nonfinite_part_perf_active",
+        "la_nonfinite_part_perf_passive",
+        "la_nonfinite_part_fut_active",
+        "la_nonfinite_gerundive",
+        "la_nonfinite_gerund",
+        "la_nonfinite_supine"
+      ],
+      "tensePronouns": [
+        [
+          "ego",
+          "tū",
+          "is/ea/id",
+          "nōs",
+          "vōs",
+          "eī/eae/ea"
+        ],
+        [
+          "ego",
+          "tū",
+          "is/ea/id",
+          "nōs",
+          "vōs",
+          "eī/eae/ea"
+        ],
+        [
+          "ego",
+          "tū",
+          "is/ea/id",
+          "nōs",
+          "vōs",
+          "eī/eae/ea"
+        ],
+        [
+          "ego",
+          "tū",
+          "is/ea/id",
+          "nōs",
+          "vōs",
+          "eī/eae/ea"
+        ],
+        [
+          "ego",
+          "tū",
+          "is/ea/id",
+          "nōs",
+          "vōs",
+          "eī/eae/ea"
+        ],
+        [
+          "ego",
+          "tū",
+          "is/ea/id",
+          "nōs",
+          "vōs",
+          "eī/eae/ea"
+        ],
+        [
+          "ego",
+          "tū",
+          "is/ea/id",
+          "nōs",
+          "vōs",
+          "eī/eae/ea"
+        ],
+        [
+          "ego",
+          "tū",
+          "is/ea/id",
+          "nōs",
+          "vōs",
+          "eī/eae/ea"
+        ],
+        [
+          "ego",
+          "tū",
+          "is/ea/id",
+          "nōs",
+          "vōs",
+          "eī/eae/ea"
+        ],
+        [
+          "ego",
+          "tū",
+          "is/ea/id",
+          "nōs",
+          "vōs",
+          "eī/eae/ea"
+        ],
+        [
+          "ego",
+          "tū",
+          "is/ea/id",
+          "nōs",
+          "vōs",
+          "eī/eae/ea"
+        ],
+        [
+          "ego",
+          "tū",
+          "is/ea/id",
+          "nōs",
+          "vōs",
+          "eī/eae/ea"
+        ],
+        [
+          "ego",
+          "tū",
+          "is/ea/id",
+          "nōs",
+          "vōs",
+          "eī/eae/ea"
+        ],
+        [
+          "ego",
+          "tū",
+          "is/ea/id",
+          "nōs",
+          "vōs",
+          "eī/eae/ea"
+        ],
+        [
+          "ego",
+          "tū",
+          "is/ea/id",
+          "nōs",
+          "vōs",
+          "eī/eae/ea"
+        ],
+        [
+          "ego",
+          "tū",
+          "is/ea/id",
+          "nōs",
+          "vōs",
+          "eī/eae/ea"
+        ],
+        [
+          "ego",
+          "tū",
+          "is/ea/id",
+          "nōs",
+          "vōs",
+          "eī/eae/ea"
+        ],
+        [
+          "ego",
+          "tū",
+          "is/ea/id",
+          "nōs",
+          "vōs",
+          "eī/eae/ea"
+        ],
+        [
+          "ego",
+          "tū",
+          "is/ea/id",
+          "nōs",
+          "vōs",
+          "eī/eae/ea"
+        ],
+        [
+          "ego",
+          "tū",
+          "is/ea/id",
+          "nōs",
+          "vōs",
+          "eī/eae/ea"
+        ],
+        [
+          "tū",
+          "vōs"
+        ],
+        [
+          "tū",
+          "is/ea/id",
+          "vōs",
+          "eī/eae/ea"
+        ],
+        [
+          "tū",
+          "vōs"
+        ],
+        [
+          "tū",
+          "is/ea/id",
+          "eī/eae/ea"
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [
+          "gen.",
+          "dat.",
+          "acc.",
+          "abl."
+        ],
+        [
+          "acc.",
+          "abl."
+        ]
+      ],
+      "tenseGroups": [
+        {
+          "name": "la_indic",
+          "tenseIndices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11
+          ]
+        },
+        {
+          "name": "la_subj",
+          "tenseIndices": [
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19
+          ]
+        },
+        {
+          "name": "la_imper",
+          "tenseIndices": [
+            20,
+            21,
+            22,
+            23
+          ]
+        },
+        {
+          "name": "la_nonfinite",
+          "tenseIndices": [
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36
+          ]
+        }
+      ]
+    },
+    "fi": {
+      "dataHash": "bc18e567",
+      "dataSize": 30782823,
+      "code": "fi",
+      "name": "suomi",
+      "englishWiktionaryName": "Finnish",
+      "tenseNames": [
+        "fi_indic_pres",
+        "fi_indic_pres_neg",
+        "fi_indic_past",
+        "fi_indic_past_neg",
+        "fi_indic_perf",
+        "fi_indic_perf_neg",
+        "fi_indic_pluperf",
+        "fi_indic_pluperf_neg",
+        "fi_cond_pres",
+        "fi_cond_pres_neg",
+        "fi_cond_perf",
+        "fi_cond_perf_neg",
+        "fi_pot_pres",
+        "fi_pot_pres_neg",
+        "fi_pot_perf",
+        "fi_pot_perf_neg",
+        "fi_imper_pres",
+        "fi_imper_pres_neg",
+        "fi_nonfinite_inf",
+        "fi_nonfinite_part_pres_active",
+        "fi_nonfinite_part_pres_passive"
+      ],
+      "tensePronouns": [
+        [
+          "minä",
+          "sinä",
+          "hän",
+          "me",
+          "te",
+          "he",
+          "passiivi"
+        ],
+        [
+          "minä",
+          "sinä",
+          "hän",
+          "me",
+          "te",
+          "he",
+          "passiivi"
+        ],
+        [
+          "minä",
+          "sinä",
+          "hän",
+          "me",
+          "te",
+          "he",
+          "passiivi"
+        ],
+        [
+          "minä",
+          "sinä",
+          "hän",
+          "me",
+          "te",
+          "he",
+          "passiivi"
+        ],
+        [
+          "minä",
+          "sinä",
+          "hän",
+          "me",
+          "te",
+          "he",
+          "passiivi"
+        ],
+        [
+          "minä",
+          "sinä",
+          "hän",
+          "me",
+          "te",
+          "he",
+          "passiivi"
+        ],
+        [
+          "minä",
+          "sinä",
+          "hän",
+          "me",
+          "te",
+          "he",
+          "passiivi"
+        ],
+        [
+          "minä",
+          "sinä",
+          "hän",
+          "me",
+          "te",
+          "he",
+          "passiivi"
+        ],
+        [
+          "minä",
+          "sinä",
+          "hän",
+          "me",
+          "te",
+          "he",
+          "passiivi"
+        ],
+        [
+          "minä",
+          "sinä",
+          "hän",
+          "me",
+          "te",
+          "he",
+          "passiivi"
+        ],
+        [
+          "minä",
+          "sinä",
+          "hän",
+          "me",
+          "te",
+          "he",
+          "passiivi"
+        ],
+        [
+          "minä",
+          "sinä",
+          "hän",
+          "me",
+          "te",
+          "he",
+          "passiivi"
+        ],
+        [
+          "minä",
+          "sinä",
+          "hän",
+          "me",
+          "te",
+          "he",
+          "passiivi"
+        ],
+        [
+          "minä",
+          "sinä",
+          "hän",
+          "me",
+          "te",
+          "he",
+          "passiivi"
+        ],
+        [
+          "minä",
+          "sinä",
+          "hän",
+          "me",
+          "te",
+          "he",
+          "passiivi"
+        ],
+        [
+          "minä",
+          "sinä",
+          "hän",
+          "me",
+          "te",
+          "he",
+          "passiivi"
+        ],
+        [
+          "sinä",
+          "hän",
+          "me",
+          "te",
+          "he",
+          "passiivi"
+        ],
+        [
+          "sinä",
+          "hän",
+          "me",
+          "te",
+          "he",
+          "passiivi"
+        ],
+        [],
+        [],
+        []
+      ],
+      "tenseGroups": [
+        {
+          "name": "fi_indic",
+          "tenseIndices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ]
+        },
+        {
+          "name": "fi_cond",
+          "tenseIndices": [
+            8,
+            9,
+            10,
+            11
+          ]
+        },
+        {
+          "name": "fi_pot",
+          "tenseIndices": [
+            12,
+            13,
+            14,
+            15
+          ]
+        },
+        {
+          "name": "fi_imper",
+          "tenseIndices": [
+            16,
+            17
+          ]
+        },
+        {
+          "name": "fi_nonfinite",
+          "tenseIndices": [
+            18,
+            19,
+            20
           ]
         }
       ]

@@ -1,0 +1,81 @@
+{
+  "name": "ploure",
+  "nameNoDiacritics": "ploure",
+  "conjugation": [
+    "ploure",
+    "plovent",
+    "plogut",
+    [
+      "",
+      "",
+      "plou",
+      "",
+      "",
+      "plouen"
+    ],
+    [
+      "",
+      "",
+      "plovia",
+      "",
+      "",
+      "plovien"
+    ],
+    [
+      "",
+      "",
+      "plogué",
+      "",
+      "",
+      "plogueren"
+    ],
+    [
+      "",
+      "",
+      "va ploure",
+      "",
+      "",
+      "van ploure/varen ploure"
+    ],
+    [
+      "",
+      "",
+      "plourà",
+      "",
+      "",
+      "plouran"
+    ],
+    [
+      "",
+      "",
+      "plouria",
+      "",
+      "",
+      "plourien"
+    ],
+    [
+      "",
+      "",
+      "plogui",
+      "",
+      "",
+      "ploguin"
+    ],
+    [
+      "",
+      "",
+      "plogués",
+      "",
+      "",
+      "ploguessin"
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      ""
+    ]
+  ],
+  "gloss": "to rain"
+}

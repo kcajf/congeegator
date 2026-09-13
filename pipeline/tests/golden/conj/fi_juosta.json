@@ -1,0 +1,170 @@
+{
+  "name": "juosta",
+  "nameNoDiacritics": "juosta",
+  "conjugation": [
+    [
+      "juoksen",
+      "juokset",
+      "juoksee",
+      "juoksemme",
+      "juoksette",
+      "juoksevat",
+      "juostaan"
+    ],
+    [
+      "en juokse",
+      "et juokse",
+      "ei juokse",
+      "emme juokse",
+      "ette juokse",
+      "eivät juokse",
+      "ei juosta"
+    ],
+    [
+      "juoksin",
+      "juoksit",
+      "juoksi",
+      "juoksimme",
+      "juoksitte",
+      "juoksivat",
+      "juostiin"
+    ],
+    [
+      "en juossut",
+      "et juossut",
+      "ei juossut",
+      "emme juosseet",
+      "ette juosseet",
+      "eivät juosseet",
+      "ei juostu"
+    ],
+    [
+      "olen juossut",
+      "olet juossut",
+      "on juossut",
+      "olemme juosseet",
+      "olette juosseet",
+      "ovat juosseet",
+      "on juostu"
+    ],
+    [
+      "en ole juossut",
+      "et ole juossut",
+      "ei ole juossut",
+      "emme ole juosseet",
+      "ette ole juosseet",
+      "eivät ole juosseet",
+      "ei ole juostu"
+    ],
+    [
+      "olin juossut",
+      "olit juossut",
+      "oli juossut",
+      "olimme juosseet",
+      "olitte juosseet",
+      "olivat juosseet",
+      "oli juostu"
+    ],
+    [
+      "en ollut juossut",
+      "et ollut juossut",
+      "ei ollut juossut",
+      "emme olleet juosseet",
+      "ette olleet juosseet",
+      "eivät olleet juosseet",
+      "ei ollut juostu"
+    ],
+    [
+      "juoksisin",
+      "juoksisit",
+      "juoksisi",
+      "juoksisimme",
+      "juoksisitte",
+      "juoksisivat",
+      "juostaisiin"
+    ],
+    [
+      "en juoksisi",
+      "et juoksisi",
+      "ei juoksisi",
+      "emme juoksisi",
+      "ette juoksisi",
+      "eivät juoksisi",
+      "ei juostaisi"
+    ],
+    [
+      "olisin juossut",
+      "olisit juossut",
+      "olisi juossut",
+      "olisimme juosseet",
+      "olisitte juosseet",
+      "olisivat juosseet",
+      "olisi juostu"
+    ],
+    [
+      "en olisi juossut",
+      "et olisi juossut",
+      "ei olisi juossut",
+      "emme olisi juosseet",
+      "ette olisi juosseet",
+      "eivät olisi juosseet",
+      "ei olisi juostu"
+    ],
+    [
+      "juossen",
+      "juosset",
+      "juossee",
+      "juossemme",
+      "juossette",
+      "juossevat",
+      "juostaneen"
+    ],
+    [
+      "en juosse",
+      "et juosse",
+      "ei juosse",
+      "emme juosse",
+      "ette juosse",
+      "eivät juosse",
+      "ei juostane"
+    ],
+    [
+      "lienen juossut",
+      "lienet juossut",
+      "lienee juossut",
+      "lienemme juosseet",
+      "lienette juosseet",
+      "lienevät juosseet",
+      "lienee juostu"
+    ],
+    [
+      "en liene juossut",
+      "et liene juossut",
+      "ei liene juossut",
+      "emme liene juosseet",
+      "ette liene juosseet",
+      "eivät liene juosseet",
+      "ei liene juostu"
+    ],
+    [
+      "juokse",
+      "juoskoon",
+      "juoskaamme",
+      "juoskaa",
+      "juoskoot",
+      "juostakoon"
+    ],
+    [
+      "älä juokse",
+      "älköön juosko",
+      "älkäämme juosko",
+      "älkää juosko",
+      "älkööt juosko",
+      "älköön juostako"
+    ],
+    "juosta",
+    "juokseva",
+    "juostava"
+  ],
+  "gloss": "to run; to visit, pay a visit to; to flow, run; ..."
+}
