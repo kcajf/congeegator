@@ -6,6 +6,7 @@ import msgspec
 
 from .utils import _cat_names, strip_diacritics, to_phonetic_el
 from .wiktionary import Entry
+from .dictionary_quality import enhance_record, trusted_persian_head
 
 log = logging.getLogger(__name__)
 
@@ -72,6 +73,26 @@ DICT_CONFIGS: list[DictLanguageConfig] = [
     DictLanguageConfig(code="vi", name="Tiếng Việt", english_wiktionary_name="Vietnamese"),
     DictLanguageConfig(code="eo", name="Esperanto", english_wiktionary_name="Esperanto"),
     DictLanguageConfig(code="la", name="Latina", english_wiktionary_name="Latin"),
+    DictLanguageConfig(code="grc", name="Ancient Greek", english_wiktionary_name="Ancient Greek"),
+    DictLanguageConfig(code="az", name="azərbaycanca", english_wiktionary_name="Azerbaijani"),
+    DictLanguageConfig(code="eu", name="euskara", english_wiktionary_name="Basque"),
+    DictLanguageConfig(code="br", name="brezhoneg", english_wiktionary_name="Breton"),
+    DictLanguageConfig(code="et", name="eesti", english_wiktionary_name="Estonian"),
+    DictLanguageConfig(code="ka", name="ქართული", english_wiktionary_name="Georgian"),
+    DictLanguageConfig(code="he", name="עברית", english_wiktionary_name="Hebrew"),
+    DictLanguageConfig(code="hi", name="हिन्दी", english_wiktionary_name="Hindi"),
+    DictLanguageConfig(code="is", name="íslenska", english_wiktionary_name="Icelandic"),
+    DictLanguageConfig(code="ga", name="Gaeilge", english_wiktionary_name="Irish"),
+    DictLanguageConfig(code="ko", name="한국어", english_wiktionary_name="Korean"),
+    DictLanguageConfig(code="lt", name="lietuvių", english_wiktionary_name="Lithuanian"),
+    DictLanguageConfig(code="mk", name="македонски", english_wiktionary_name="Macedonian"),
+    DictLanguageConfig(code="ms", name="Bahasa Melayu", english_wiktionary_name="Malay"),
+    DictLanguageConfig(code="oc", name="occitan", english_wiktionary_name="Occitan"),
+    DictLanguageConfig(code="fa", name="فارسی", english_wiktionary_name="Persian"),
+    DictLanguageConfig(code="sa", name="संस्कृतम्", english_wiktionary_name="Sanskrit"),
+    DictLanguageConfig(code="sh", name="srpskohrvatski / српскохрватски", english_wiktionary_name="Serbo-Croatian"),
+    DictLanguageConfig(code="sk", name="slovenčina", english_wiktionary_name="Slovak"),
+    DictLanguageConfig(code="cy", name="Cymraeg", english_wiktionary_name="Welsh"),
 ]
 
 
@@ -405,6 +426,8 @@ def entry_is_valid(entry: Entry) -> bool:
     }
     for c in _cat_names(entry.categories):
         if c in BAD_CATEGORIES:
+            if c == "Persian terms in nonstandard scripts" and trusted_persian_head(entry):
+                continue
             return False
     return True
 
@@ -442,7 +465,7 @@ def process_dict_entry(config: DictLanguageConfig, entry: Entry) -> dict[str, An
             details[field] = refs
     if details:
         processed["details"] = details
-    return processed
+    return enhance_record(entry, processed, _clean_text)
 
 
 def make_dict_language_static_metadata(config: DictLanguageConfig):

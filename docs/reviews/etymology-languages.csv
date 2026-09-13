@@ -45,7 +45,7 @@ as-bkm,Barpetia Kamrupi Assamese,as,as,Assamese,external language,as-bkm > as
 as-nkm,Nalbaria Kamrupi Assamese,as,as,Assamese,external language,as-nkm > as
 as-pkm,Palasbaria Kamrupi Assamese,as,as,Assamese,external language,as-pkm > as
 atn,Ashtiani,xme-taf,xme-taf,Tafreshi,external language,atn > xme-taf
-az-cls,Classical Azerbaijani,az,az,Azerbaijani,external language,az-cls > az
+az-cls,Classical Azerbaijani,az,az,Azerbaijani,available in Lexicoff,az-cls > az
 bat-dni,Dnieper Baltic,bat-pro,ine-bsl-pro,Proto-Balto-Slavic,external reconstructed,bat-dni > bat-pro > ine-bsl-pro
 bat-gol,Golyad,bat-dni,ine-bsl-pro,Proto-Balto-Slavic,external reconstructed,bat-gol > bat-dni > bat-pro > ine-bsl-pro
 bat-pro,Proto-Baltic,ine-bsl-pro,ine-bsl-pro,Proto-Balto-Slavic,external reconstructed,bat-pro > ine-bsl-pro
@@ -65,8 +65,8 @@ bsg-min,Minabi,bsg,bsg,Bashkardi,external language,bsg-min > bsg
 bsh-kat,Kativiri,bsh,bsh,Kamkata-viri,external language,bsh-kat > bsh
 bsh-mum,Mumviri,bsh,bsh,Kamkata-viri,external language,bsh-mum > bsh
 ca-val,Valencian,ca,ca,Catalan,available in Lexicoff,ca-val > ca
-ckm,Chakavian Serbo-Croatian,sh,sh,Serbo-Croatian,external language,ckm > sh
-cls,Classical Sanskrit,sa,sa,Sanskrit,external language,cls > sa
+ckm,Chakavian Serbo-Croatian,sh,sh,Serbo-Croatian,available in Lexicoff,ckm > sh
+cls,Classical Sanskrit,sa,sa,Sanskrit,available in Lexicoff,cls > sa
 cmn-MY,Malaysian Mandarin,cmn,cmn,Mandarin,external language,cmn-MY > cmn
 cmn-PH,Philippine Mandarin,cmn,cmn,Mandarin,external language,cmn-PH > cmn
 cmn-SG,Singapore Mandarin,cmn,cmn,Mandarin,external language,cmn-SG > cmn
@@ -112,8 +112,8 @@ cv-ana,Anatri Chuvash,cv,cv,Chuvash,external language,cv-ana > cv
 cv-mid,Middle Chuvash,cv,cv,Chuvash,external language,cv-mid > cv
 cv-old,Old Chuvash,cv,cv,Chuvash,external language,cv-old > cv
 cv-vir,Viryal Chuvash,cv,cv,Chuvash,external language,cv-vir > cv
-cy-nor,North Wales Welsh,cy,cy,Welsh,external language,cy-nor > cy
-cy-sou,South Wales Welsh,cy,cy,Welsh,external language,cy-sou > cy
+cy-nor,North Wales Welsh,cy,cy,Welsh,available in Lexicoff,cy-nor > cy
+cy-sou,South Wales Welsh,cy,cy,Welsh,available in Lexicoff,cy-sou > cy
 de-AT,Austrian German,de,de,German,available in Lexicoff,de-AT > de
 de-AT-vie,Viennese German,de-AT,de,German,available in Lexicoff,de-AT-vie > de-AT > de
 de-CH,Switzerland German,de,de,German,available in Lexicoff,de-CH > de
@@ -178,9 +178,9 @@ es-ear,Early Modern Spanish,es,es,Spanish,available in Lexicoff,es-ear > es
 es-lun,Lunfardo,es,es,Spanish,available in Lexicoff,es-lun > es
 esi,North Alaskan Inupiatun,ik,ik,Inupiaq,external language,esi > ik
 esk,Northwest Alaskan Inupiatun,ik,ik,Inupiaq,external language,esk > ik
-fa-cls,Classical Persian,fa,fa,Persian,external language,fa-cls > fa
-fa-ear,Early New Persian,fa,fa,Persian,external language,fa-ear > fa
-fa-ira,Iranian Persian,fa,fa,Persian,external language,fa-ira > fa
+fa-cls,Classical Persian,fa,fa,Persian,available in Lexicoff,fa-cls > fa
+fa-ear,Early New Persian,fa,fa,Persian,available in Lexicoff,fa-ear > fa
+fa-ira,Iranian Persian,fa,fa,Persian,available in Lexicoff,fa-ira > fa
 fat,Fante Akan,ak,ak,Akan,external language,fat > ak
 fay-bsh,Bushehri,fay,fay,Southwestern Fars,external language,fay-bsh > fay
 fay-bur,Burenjani,fay,fay,Southwestern Fars,external language,fay-bur > fay
@@ -235,27 +235,27 @@ fuv,Nigerian Fulfulde,ff,ff,Fula,external language,fuv > ff
 gax,Borana,om,om,Oromo,external language,gax > om
 gbz,Zoroastrian Dari,xme-ker,xme-ker,Kermanic,external language,gbz > xme-ker
 gem-sue,Suevic,gmw-pro,gmw-pro,Proto-West Germanic,external reconstructed,gem-sue > gmw-pro
-gkm,Byzantine Greek,grc,grc,Ancient Greek,external language,gkm > grc
+gkm,Byzantine Greek,grc,grc,Ancient Greek,available in Lexicoff,gkm > grc
 gmq-osw-lat,Late Old Swedish,gmq-osw,gmq-osw,Old Swedish,external language,gmq-osw-lat > gmq-osw
 gmw-afr-pro,Proto-Anglo-Frisian,gmw-nsg-pro,gmw-pro,Proto-West Germanic,external reconstructed,gmw-afr-pro > gmw-nsg-pro > gmw-pro
 gmw-nsg-pro,Proto-North Sea Germanic,gmw-pro,gmw-pro,Proto-West Germanic,external reconstructed,gmw-nsg-pro > gmw-pro
 gos,Gronings,nds-nl,nds,Low German,external language,gos > nds-nl > nds
-grc-aeo,Aeolic Greek,grc,grc,Ancient Greek,external language,grc-aeo > grc
-grc-arc,Arcadian Greek,grc-arp,grc,Ancient Greek,external language,grc-arc > grc-arp > grc
-grc-arp,Arcadocypriot Greek,grc,grc,Ancient Greek,external language,grc-arp > grc
-grc-att,Attic Greek,grc,grc,Ancient Greek,external language,grc-att > grc
-grc-boi,Boeotian Greek,grc-aeo,grc,Ancient Greek,external language,grc-boi > grc-aeo > grc
-grc-cyp,Cypriot Ancient Greek,grc-arp,grc,Ancient Greek,external language,grc-cyp > grc-arp > grc
-grc-dor,Doric Greek,grc,grc,Ancient Greek,external language,grc-dor > grc
-grc-ela,Elean Greek,grc,grc,Ancient Greek,external language,grc-ela > grc
-grc-epi,Epic Greek,grc,grc,Ancient Greek,external language,grc-epi > grc
-grc-ion,Ionic Greek,grc,grc,Ancient Greek,external language,grc-ion > grc
-grc-koi,Koine Greek,grc,grc,Ancient Greek,external language,grc-koi > grc
-grc-kre,Cretan Ancient Greek,grc-dor,grc,Ancient Greek,external language,grc-kre > grc-dor > grc
-grc-opl,Opuntian Locrian,grc,grc,Ancient Greek,external language,grc-opl > grc
-grc-ozl,Ozolian Locrian,grc,grc,Ancient Greek,external language,grc-ozl > grc
-grc-pam,Pamphylian Greek,grc,grc,Ancient Greek,external language,grc-pam > grc
-grc-ths,Thessalian Greek,grc-aeo,grc,Ancient Greek,external language,grc-ths > grc-aeo > grc
+grc-aeo,Aeolic Greek,grc,grc,Ancient Greek,available in Lexicoff,grc-aeo > grc
+grc-arc,Arcadian Greek,grc-arp,grc,Ancient Greek,available in Lexicoff,grc-arc > grc-arp > grc
+grc-arp,Arcadocypriot Greek,grc,grc,Ancient Greek,available in Lexicoff,grc-arp > grc
+grc-att,Attic Greek,grc,grc,Ancient Greek,available in Lexicoff,grc-att > grc
+grc-boi,Boeotian Greek,grc-aeo,grc,Ancient Greek,available in Lexicoff,grc-boi > grc-aeo > grc
+grc-cyp,Cypriot Ancient Greek,grc-arp,grc,Ancient Greek,available in Lexicoff,grc-cyp > grc-arp > grc
+grc-dor,Doric Greek,grc,grc,Ancient Greek,available in Lexicoff,grc-dor > grc
+grc-ela,Elean Greek,grc,grc,Ancient Greek,available in Lexicoff,grc-ela > grc
+grc-epi,Epic Greek,grc,grc,Ancient Greek,available in Lexicoff,grc-epi > grc
+grc-ion,Ionic Greek,grc,grc,Ancient Greek,available in Lexicoff,grc-ion > grc
+grc-koi,Koine Greek,grc,grc,Ancient Greek,available in Lexicoff,grc-koi > grc
+grc-kre,Cretan Ancient Greek,grc-dor,grc,Ancient Greek,available in Lexicoff,grc-kre > grc-dor > grc
+grc-opl,Opuntian Locrian,grc,grc,Ancient Greek,available in Lexicoff,grc-opl > grc
+grc-ozl,Ozolian Locrian,grc,grc,Ancient Greek,available in Lexicoff,grc-ozl > grc
+grc-pam,Pamphylian Greek,grc,grc,Ancient Greek,available in Lexicoff,grc-pam > grc
+grc-ths,Thessalian Greek,grc-aeo,grc,Ancient Greek,available in Lexicoff,grc-ths > grc-aeo > grc
 gsw-FR-als,Alsatian Alemannic German,gsw-low,gsw,Alemannic German,external language,gsw-FR-als > gsw-low > gsw
 gsw-hig,High Alemannic German,gsw,gsw,Alemannic German,external language,gsw-hig > gsw
 gsw-hst,Highest Alemannic German,gsw,gsw,Alemannic German,external language,gsw-hst > gsw
@@ -274,13 +274,13 @@ hak-hui-MY,Malaysian Huiyang Hakka,hak-hui,hak,Hakka,external language,hak-hui-M
 hak-mei,Meixian Hakka,hak,hak,Hakka,external language,hak-mei > hak
 hak-six,Sixian Hakka,hak-TW,hak,Hakka,external language,hak-six > hak-TW > hak
 hak-zha,Zhao'an Hakka,hak,hak,Hakka,external language,hak-zha > hak
-haz,Hazaragi,prs,fa,Persian,external language,haz > prs > fa
-hbo,Biblical Hebrew,he,he,Hebrew,external language,hbo > he
-he-IL,Israeli Hebrew,he,he,Hebrew,external language,he-IL > he
-he-med,Medieval Hebrew,he,he,Hebrew,external language,he-med > he
-he-mis,Mishnaic Hebrew,he,he,Hebrew,external language,he-mis > he
+haz,Hazaragi,prs,fa,Persian,available in Lexicoff,haz > prs > fa
+hbo,Biblical Hebrew,he,he,Hebrew,available in Lexicoff,hbo > he
+he-IL,Israeli Hebrew,he,he,Hebrew,available in Lexicoff,he-IL > he
+he-med,Medieval Hebrew,he,he,Hebrew,available in Lexicoff,he-med > he
+he-mis,Mishnaic Hebrew,he,he,Hebrew,available in Lexicoff,he-mis > he
 hi-mid,Middle Hindi,inc-ohi,inc-ohi,Old Hindi,external language,hi-mid > inc-ohi
-hi-mum,Bombay Hindi,hi,hi,Hindi,external language,hi-mum > hi
+hi-mum,Bombay Hindi,hi,hi,Hindi,available in Lexicoff,hi-mum > hi
 hsn-hya,Hengyang Xiang,hsn-hzh,hsn,Xiang,external language,hsn-hya > hsn-hzh > hsn
 hsn-hzh,Hengzhou Xiang,hsn,hsn,Xiang,external language,hsn-hzh > hsn
 hsn-lou,Loudi Xiang,hsn-old,hsn,Xiang,external language,hsn-lou > hsn-old > hsn
@@ -315,7 +315,7 @@ ja-mid-ear,Early Middle Japanese,ja-mid,ojp,Old Japanese,external language,ja-mi
 ja-mid-lat,Late Middle Japanese,ja-mid,ojp,Old Japanese,external language,ja-mid-lat > ja-mid > ojp
 jpa,Jewish Palestinian Aramaic,arc,arc,Aramaic,external language,jpa > arc
 jrb,Judeo-Arabic,ar,ar,Arabic,external language,jrb > ar
-ka-mid,Middle Georgian,ka,ka,Georgian,external language,ka-mid > ka
+ka-mid,Middle Georgian,ka,ka,Georgian,available in Lexicoff,ka-mid > ka
 kbg,Khamba,bo,bo,Tibetan,external language,kbg > bo
 kea-alu,ALUPEC Kabuverdianu,kea,kea,Kabuverdianu,external language,kea-alu > kea
 kea-bar,Barlavento Kabuverdianu,kea,kea,Kabuverdianu,external language,kea-bar > kea
@@ -334,22 +334,22 @@ khg,Khams Tibetan,bo,bo,Tibetan,external language,khg > bo
 kho-lat,Late Khotanese,kho-old,kho,Khotanese,external language,kho-lat > kho-old > kho
 kho-old,Old Khotanese,kho,kho,Khotanese,external language,kho-old > kho
 kjh-fyu,Fuyu Kyrgyz,kjh,kjh,Khakas,external language,kjh-fyu > kjh
-kjv,Kajkavian Serbo-Croatian,sh,sh,Serbo-Croatian,external language,kjv > sh
+kjv,Kajkavian Serbo-Croatian,sh,sh,Serbo-Croatian,available in Lexicoff,kjv > sh
 klj-arg,Arghu,klj,klj,Khalaj,external language,klj-arg > klj
 kn-hav,Havigannada,kn,kn,Kannada,external language,kn-hav > kn
 kn-kun,Kundagannada,kn,kn,Kannada,external language,kn-kun > kn
-ko-KP,North Korean standard,ko,ko,Korean,external language,ko-KP > ko
-ko-KR,South Korean standard,ko,ko,Korean,external language,ko-KR > ko
-ko-cen,Central Korean,ko,ko,Korean,external language,ko-cen > ko
-ko-chu,Chungcheong Korean,ko-cen,ko,Korean,external language,ko-chu > ko-cen > ko
-ko-gan,Gangwon Korean,ko-cen,ko,Korean,external language,ko-gan > ko-cen > ko
-ko-gyg,Gyeonggi Korean,ko-cen,ko,Korean,external language,ko-gyg > ko-cen > ko
-ko-gys,Gyeongsang Korean,ko,ko,Korean,external language,ko-gys > ko
-ko-ham,Hamgyong Korean,ko,ko,Korean,external language,ko-ham > ko
-ko-hwa,Hwanghae Korean,ko-cen,ko,Korean,external language,ko-hwa > ko-cen > ko
-ko-jeo,Jeolla Korean,ko,ko,Korean,external language,ko-jeo > ko
-ko-pyo,Pyongan Korean,ko,ko,Korean,external language,ko-pyo > ko
-ko-yuk,Yukjin Korean,ko,ko,Korean,external language,ko-yuk > ko
+ko-KP,North Korean standard,ko,ko,Korean,available in Lexicoff,ko-KP > ko
+ko-KR,South Korean standard,ko,ko,Korean,available in Lexicoff,ko-KR > ko
+ko-cen,Central Korean,ko,ko,Korean,available in Lexicoff,ko-cen > ko
+ko-chu,Chungcheong Korean,ko-cen,ko,Korean,available in Lexicoff,ko-chu > ko-cen > ko
+ko-gan,Gangwon Korean,ko-cen,ko,Korean,available in Lexicoff,ko-gan > ko-cen > ko
+ko-gyg,Gyeonggi Korean,ko-cen,ko,Korean,available in Lexicoff,ko-gyg > ko-cen > ko
+ko-gys,Gyeongsang Korean,ko,ko,Korean,available in Lexicoff,ko-gys > ko
+ko-ham,Hamgyong Korean,ko,ko,Korean,available in Lexicoff,ko-ham > ko
+ko-hwa,Hwanghae Korean,ko-cen,ko,Korean,available in Lexicoff,ko-hwa > ko-cen > ko
+ko-jeo,Jeolla Korean,ko,ko,Korean,available in Lexicoff,ko-jeo > ko
+ko-pyo,Pyongan Korean,ko,ko,Korean,available in Lexicoff,ko-pyo > ko
+ko-yuk,Yukjin Korean,ko,ko,Korean,available in Lexicoff,ko-yuk > ko
 kok-mid,Middle Konkani,kok,kok,Konkani,external language,kok-mid > kok
 kok-old,Old Konkani,kok,kok,Konkani,external language,kok-old > kok
 krl-nor,North Karelian,krl,krl,Karelian,external language,krl-nor > krl
@@ -396,8 +396,8 @@ mn-khr,Khorchin Mongolian,mn,mn,Mongolian,external language,mn-khr > mn
 mn-ord,Ordos Mongolian,mn,mn,Mongolian,external language,mn-ord > mn
 mns-eas,Eastern Mansi,mns-cen,mns-cen,Central Mansi,external language,mns-eas > mns-cen
 mns-wes,Western Mansi,mns-cen,mns-cen,Central Mansi,external language,mns-wes > mns-cen
-ms-cla,Classical Malay,ms,ms,Malay,external language,ms-cla > ms
-ms-old,Old Malay,ms,ms,Malay,external language,ms-old > ms
+ms-cla,Classical Malay,ms,ms,Malay,available in Lexicoff,ms-cla > ms
+ms-old,Old Malay,ms,ms,Malay,available in Lexicoff,ms-old > ms
 mul-tax,taxonomic name,mul,mul,Translingual,external special,mul-tax > mul
 nan-anx,Anxi Hokkien,nan-qua,nan-hbl,Hokkien,external language,nan-anx > nan-qua > nan-hbl
 nan-cha,Changtai Hokkien,nan-zha,nan-hbl,Hokkien,external language,nan-cha > nan-zha > nan-hbl
@@ -435,15 +435,15 @@ nrf-grn,Guernsey Norman,nrf,nrf,Norman,external language,nrf-grn > nrf
 nrf-jer,Jersey Norman,nrf,nrf,Norman,external language,nrf-jer > nrf
 ntz,Natanzi,xme-ker,xme-ker,Kermanic,external language,ntz > xme-ker
 nyq,Nayini,xme-ker,xme-ker,Kermanic,external language,nyq > xme-ker
-oc-ara,Aranese,oc-gas,oc,Occitan,external language,oc-ara > oc-gas > oc
-oc-auv,Auvergnat,oc,oc,Occitan,external language,oc-auv > oc
-oc-gas,Gascon,oc,oc,Occitan,external language,oc-gas > oc
-oc-jud,Shuadit,oc,oc,Occitan,external language,oc-jud > oc
-oc-lan,Languedocien,oc,oc,Occitan,external language,oc-lan > oc
-oc-lim,Limousin,oc,oc,Occitan,external language,oc-lim > oc
-oc-pro,Provençal,oc,oc,Occitan,external language,oc-pro > oc
+oc-ara,Aranese,oc-gas,oc,Occitan,available in Lexicoff,oc-ara > oc-gas > oc
+oc-auv,Auvergnat,oc,oc,Occitan,available in Lexicoff,oc-auv > oc
+oc-gas,Gascon,oc,oc,Occitan,available in Lexicoff,oc-gas > oc
+oc-jud,Shuadit,oc,oc,Occitan,available in Lexicoff,oc-jud > oc
+oc-lan,Languedocien,oc,oc,Occitan,available in Lexicoff,oc-lan > oc
+oc-lim,Limousin,oc,oc,Occitan,available in Lexicoff,oc-lim > oc
+oc-pro,Provençal,oc,oc,Occitan,available in Lexicoff,oc-pro > oc
 oc-pro-old,Old Provençal,pro,pro,Old Occitan,external language,oc-pro-old > pro
-oc-viv,Vivaro-Alpine,oc,oc,Occitan,external language,oc-viv > oc
+oc-viv,Vivaro-Alpine,oc,oc,Occitan,available in Lexicoff,oc-viv > oc
 och-ear,Early Old Chinese,och,och,Old Chinese,external language,och-ear > och
 och-lat,Late Old Chinese,och,och,Old Chinese,external language,och-lat > och
 oht,Old Hittite,hit,hit,Hittite,external language,oht > hit
@@ -495,7 +495,7 @@ pra-pro,Proto-New Indo-Aryan,pra,pra,Prakrit,external language,pra-pro > pra
 pra-sab,Sabari,pra,pra,Prakrit,external language,pra-sab > pra
 pra-sak,Sakari,pra,pra,Prakrit,external language,pra-sak > pra
 pra-sau,Sauraseni Prakrit,pra,pra,Prakrit,external language,pra-sau > pra
-prs,Dari,fa,fa,Persian,external language,prs > fa
+prs,Dari,fa,fa,Persian,available in Lexicoff,prs > fa
 ps-afr,Afridi,ps-nea,ps,Pashto,external language,ps-afr > ps-nea > ps
 ps-ban,Bannu,ps-sea,ps,Pashto,external language,ps-ban > ps-sea > ps
 ps-bng,Bangash,ps-nea,ps,Pashto,external language,ps-bng > ps-nea > ps
@@ -526,7 +526,7 @@ qsb-ibe,Paleo-Hispanic,und,und,Undetermined,external special,qsb-ibe > und
 qwm-arm,Armeno-Kipchak,qwm,qwm,Kipchak,external language,qwm-arm > qwm
 qwm-cum,Cuman,qwm,qwm,Kipchak,external language,qwm-cum > qwm
 qwm-mam,Mamluk-Kipchak,qwm,qwm,Kipchak,external language,qwm-mam > qwm
-qxq,Qashqai,az,az,Azerbaijani,external language,qxq > az
+qxq,Qashqai,az,az,Azerbaijani,available in Lexicoff,qxq > az
 rdb-jir,Jirofti,rdb,rdb,Rudbari,external language,rdb-jir > rdb
 rdb-kah,Kahnuji,rdb,rdb,Rudbari,external language,rdb-kah > rdb
 rgn-old,Old Romagnol,rgn,rgn,Romagnol,external language,rgn-old > rgn
@@ -542,11 +542,11 @@ roa-oit,Old Italian,it,it,Italian,available in Lexicoff,roa-oit > it
 roa-pro,Proto-Romance,la-lat,la,Latin,available in Lexicoff,roa-pro > la-lat > la
 rw-kin,Kinyarwanda,rw,rw,Rwanda-Rundi,external language,rw-kin > rw
 rw-run,Kirundi,rw,rw,Rwanda-Rundi,external language,rw-run > rw
-sa-bhs,Buddhist Hybrid Sanskrit,sa,sa,Sanskrit,external language,sa-bhs > sa
-sa-bra,Brahmanic Sanskrit,vsn,sa,Sanskrit,external language,sa-bra > vsn > sa
-sa-epi,Epic Sanskrit,cls,sa,Sanskrit,external language,sa-epi > cls > sa
-sa-neo,New Sanskrit,sa,sa,Sanskrit,external language,sa-neo > sa
-sa-rig,Rigvedic Sanskrit,vsn,sa,Sanskrit,external language,sa-rig > vsn > sa
+sa-bhs,Buddhist Hybrid Sanskrit,sa,sa,Sanskrit,available in Lexicoff,sa-bhs > sa
+sa-bra,Brahmanic Sanskrit,vsn,sa,Sanskrit,available in Lexicoff,sa-bra > vsn > sa
+sa-epi,Epic Sanskrit,cls,sa,Sanskrit,available in Lexicoff,sa-epi > cls > sa
+sa-neo,New Sanskrit,sa,sa,Sanskrit,available in Lexicoff,sa-neo > sa
+sa-rig,Rigvedic Sanskrit,vsn,sa,Sanskrit,available in Lexicoff,sa-rig > vsn > sa
 sc-nuo,Nuorese,sc-src,sc,Sardinian,external language,sc-nuo > sc-src > sc
 sc-old,Old Sardinian,sc,sc,Sardinian,external language,sc-old > sc
 sc-src,Logudorese,sc,sc,Sardinian,external language,sc-src > sc
@@ -566,7 +566,7 @@ sgh-rsx,Roshani-Khufi,sgh,sgh,Shughni,external language,sgh-rsx > sgh
 sgh-xgb,Khughni-Bajui,sgh,sgh,Shughni,external language,sgh-xgb > sgh
 sgh-xuf,Khufi,sgh-rsx,sgh,Shughni,external language,sgh-xuf > sgh-rsx > sgh
 sgh-xug,Khughni,sgh-xgb,sgh,Shughni,external language,sgh-xug > sgh-xgb > sgh
-sh-tor,Torlakian Serbo-Croatian,sh,sh,Serbo-Croatian,external language,sh-tor > sh
+sh-tor,Torlakian Serbo-Croatian,sh,sh,Serbo-Croatian,available in Lexicoff,sh-tor > sh
 shi-med,Medieval Tashelhit,shi,shi,Tashelhit,external language,shi-med > shi
 si-med,Medieval Sinhalese,si,si,Sinhalese,external language,si-med > si
 ska,Skagit,lut-nor,lut,Lushootseed,external language,ska > lut-nor > lut
@@ -632,7 +632,7 @@ uz-afg,Afghan Uzbek,uz,uz,Uzbek,external language,uz-afg > uz
 vaf,Vafsi,xme-taf,xme-taf,Tafreshi,external language,vaf > xme-taf
 vec-old,Old Venetan,vec,vec,Venetan,external language,vec-old > vec
 vel,Veluws,nds-nl,nds,Low German,external language,vel > nds-nl > nds
-vsn,Vedic Sanskrit,sa,sa,Sanskrit,external language,vsn > sa
+vsn,Vedic Sanskrit,sa,sa,Sanskrit,available in Lexicoff,vsn > sa
 wae,Walser German,gsw-hst,gsw,Alemannic German,external language,wae > gsw-hst > gsw
 wep,Westphalian,nds-de,nds,Low German,external language,wep > nds-de > nds
 wss,Wasa,ak,ak,Akan,external language,wss > ak

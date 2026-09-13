@@ -26,6 +26,7 @@ import msgspec
 import zstandard
 
 from .dictionary import DICT_CONFIGS, process_dict_entry
+from .sqlite_output import dictionary_search_key
 from .wiktionary import Entry
 
 
@@ -57,6 +58,26 @@ COMMON_WORDS = {
     "es": ["casa", "agua", "ser", "comer", "bueno"],
     "it": ["casa", "acqua", "essere", "mangiare", "buono"],
     "el": ["σπίτι", "νερό", "είμαι", "τρώω", "καλός"],
+    "grc": ["οἶκος", "ὕδωρ", "εἰμί", "ἐσθίω", "ἀγαθός", "λόγος"],
+    "az": ["ev", "su", "olmaq", "yemək", "yaxşı"],
+    "eu": ["etxe", "ur", "izan", "jan", "on"],
+    "br": ["ti", "dour", "bezañ", "debriñ", "mat"],
+    "et": ["maja", "vesi", "olema", "sööma", "hea"],
+    "ka": ["სახლი", "წყალი", "არის", "ჭამა", "კარგი"],
+    "he": ["בית", "מים", "היה", "אכל", "טוב", "שלום"],
+    "hi": ["घर", "पानी", "होना", "खाना", "अच्छा"],
+    "is": ["hús", "vatn", "vera", "borða", "góður"],
+    "ga": ["teach", "uisce", "bí", "ith", "maith"],
+    "ko": ["집", "물", "이다", "먹다", "좋다"],
+    "lt": ["namas", "vanduo", "būti", "valgyti", "geras"],
+    "mk": ["куќа", "вода", "сум", "јаде", "добар"],
+    "ms": ["rumah", "air", "ada", "makan", "baik"],
+    "oc": ["ostal", "aiga", "èsser", "manjar", "bon"],
+    "fa": ["خانه", "آب", "بودن", "خوردن", "خوب"],
+    "sa": ["गृह", "जल", "अस्ति", "अत्ति", "साधु"],
+    "sh": ["kuća", "voda", "biti", "jesti", "dobar", "кућа", "mleko", "mlijeko"],
+    "sk": ["dom", "voda", "byť", "jesť", "dobrý"],
+    "cy": ["tŷ", "dŵr", "bod", "bwyta", "da"],
 }
 
 DIRT_PATTERNS = {
@@ -74,6 +95,10 @@ def _summary(record):
     if record.get("forms"):
         result["form_count"] = len(record["forms"])
         result["forms_sample"] = record["forms"][:20]
+    if record.get("formDetails"):
+        result["form_details_sample"] = record["formDetails"][:20]
+    if record.get("pronunciations"):
+        result["pronunciations"] = record["pronunciations"]
     return result
 
 
@@ -109,6 +134,18 @@ def _strings(record):
     for key in ("etymology", "pronunciation"):
         if key in record:
             yield key, record[key]
+    for form in record.get("formDetails", []):
+        yield "annotated_form", form["form"]
+        for tag in form.get("tags", []):
+            yield "form_label", tag
+    for pronunciation in record.get("pronunciations", []):
+        yield "labelled_ipa", pronunciation["ipa"]
+        if pronunciation.get("label"):
+            yield "pronunciation_label", pronunciation["label"]
+
+
+def _record_fingerprint(record):
+    return hashlib.sha256(json.dumps(record, ensure_ascii=False, sort_keys=True).encode()).digest()
 
 
 def audit_source(lines, config, sample_size=12):
@@ -178,7 +215,7 @@ def audit_source(lines, config, sample_size=12):
                     for start, end in example.get(range_key, []):
                         if not (0 <= start < end <= len(example.get(text_key, ""))):
                             flag("invalid_emphasis", word, range_key, str([start, end]))
-        fingerprint = hashlib.sha256(json.dumps(record, ensure_ascii=False, sort_keys=True).encode()).digest()
+        fingerprint = _record_fingerprint(record)
         if fingerprint in fingerprints:
             flag("identical_record", word, "record", record["pos"])
         fingerprints.add(fingerprint)
@@ -219,6 +256,7 @@ def audit_source(lines, config, sample_size=12):
     counts["rejected_records"] = counts["source_records"] - counts["records"]
     return {
         "language": config.code,
+        "records_sha256": hashlib.sha256(b"".join(sorted(fingerprints))).hexdigest(),
         "counts": dict(counts),
         "pos_counts": dict(pos_counts),
         "rejected_pos": dict(rejected_pos),
@@ -233,8 +271,11 @@ def audit_source(lines, config, sample_size=12):
     }
 
 
-def _fts_query(word):
-    return " ".join('"' + token + '"' for token in re.findall(r"[^\W_]+", word))
+def _fts_query(word, code="en"):
+    # Match the browser's L/M/N token boundaries, including vowel/virama marks.
+    word = dictionary_search_key(word, code)
+    normalized = "".join(c if unicodedata.category(c)[0] in "LMN" or c.isspace() else " " for c in word)
+    return " ".join('"' + token + '"' for token in normalized.split())
 
 
 def audit_sqlite(path, code, source_report=None):
@@ -280,10 +321,24 @@ def audit_sqlite(path, code, source_report=None):
             result["frequency_range"] = list(conn.execute("SELECT min(freq), max(freq) FROM entries").fetchone())
             result["invalid_frequency_records"] = conn.execute("SELECT count(*) FROM entries WHERE freq IS NULL OR freq < 0 OR freq > 9").fetchone()[0]
             result["highest_frequency"] = [dict(zip(("word", "pos", "freq"), r)) for r in conn.execute("SELECT word,pos,freq FROM entries ORDER BY freq DESC, word LIMIT 20")]
+            columns = {row[1] for row in conn.execute("PRAGMA table_info(entries)")}
+            selected = ["word", "pos", "senses", "gender", "forms", "pronunciation", "etymology"]
+            selected += [name for name in ("details", "form_details", "pronunciations") if name in columns]
+            fingerprints = set()
+            for row in conn.execute("SELECT " + ",".join(selected) + " FROM entries"):
+                record = {}
+                for key, value in zip(selected, row):
+                    if value is None:
+                        continue
+                    if key in {"senses", "forms", "details", "form_details", "pronunciations"}:
+                        value = json.loads(value)
+                    record["formDetails" if key == "form_details" else key] = value
+                fingerprints.add(_record_fingerprint(record))
+            result["records_sha256"] = hashlib.sha256(b"".join(sorted(fingerprints))).hexdigest()
             result["search_probes"] = []
             for word in COMMON_WORDS.get(code, []):
                 ids = {r[0] for r in conn.execute("SELECT id FROM entries WHERE word=?", (word,))}
-                fts_ids = {r[0] for r in conn.execute("SELECT rowid FROM entries_fts WHERE word MATCH ?", (_fts_query(word),))}
+                fts_ids = {r[0] for r in conn.execute("SELECT rowid FROM entries_fts WHERE word MATCH ?", (_fts_query(word, code),))}
                 result["search_probes"].append({"word": word, "present": bool(ids), "fts_matches_all_records": bool(ids) and ids <= fts_ids})
             if source_report:
                 counts = source_report["counts"]
@@ -291,6 +346,8 @@ def audit_sqlite(path, code, source_report=None):
                     result["records"] == counts.get("unique_records", counts["records"])
                     and result["unique_headwords"] == counts["unique_headwords"]
                 )
+                if source_report.get("records_sha256"):
+                    result["source_records_match"] = source_report["records_sha256"] == result["records_sha256"]
         finally:
             conn.close()
     return result

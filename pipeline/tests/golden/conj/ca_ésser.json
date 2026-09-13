@@ -1,0 +1,81 @@
+{
+  "name": "ésser",
+  "nameNoDiacritics": "esser",
+  "conjugation": [
+    "ésser",
+    "sent/essent",
+    "estat/sigut",
+    [
+      "soc",
+      "ets",
+      "és",
+      "som",
+      "sou",
+      "són"
+    ],
+    [
+      "era",
+      "eres",
+      "era",
+      "érem",
+      "éreu",
+      "eren"
+    ],
+    [
+      "fui",
+      "fores",
+      "fou",
+      "fórem",
+      "fóreu",
+      "foren"
+    ],
+    [
+      "vaig ésser",
+      "vas ésser/vares ésser",
+      "va ésser",
+      "vam ésser/vàrem ésser",
+      "vau ésser/vàreu ésser",
+      "van ésser/varen ésser"
+    ],
+    [
+      "seré",
+      "seràs",
+      "serà",
+      "serem",
+      "sereu",
+      "seran"
+    ],
+    [
+      "seria/fora",
+      "series/fores",
+      "seria/fora",
+      "seríem/fórem",
+      "seríeu/fóreu",
+      "serien/foren"
+    ],
+    [
+      "sigui",
+      "siguis",
+      "sigui",
+      "siguem",
+      "sigueu",
+      "siguin"
+    ],
+    [
+      "fos",
+      "fossis",
+      "fos",
+      "fóssim",
+      "fóssiu",
+      "fossin"
+    ],
+    [
+      "sigues",
+      "sigui",
+      "siguem",
+      "sigueu",
+      "siguin"
+    ]
+  ],
+  "gloss": "to be; to exist, to be real, to be reality"
+}

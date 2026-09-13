@@ -41,7 +41,7 @@
 			{@const hasUpdate = isReady && info.hash !== lang.dataHash}
 			<div class="lang-row">
 				<div class="lang-info">
-					<span class="lang-name">{lang.name}</span>
+					<span class="lang-name"><bdi lang={lang.code}>{lang.name}</bdi></span>
 					<span class="lang-meta">{lang.englishWiktionaryName} · {formatSize(lang.dataSize)}</span>
 				</div>
 

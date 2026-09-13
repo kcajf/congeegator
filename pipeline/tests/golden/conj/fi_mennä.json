@@ -1,0 +1,170 @@
+{
+  "name": "mennä",
+  "nameNoDiacritics": "menna",
+  "conjugation": [
+    [
+      "menen",
+      "menet",
+      "menee",
+      "menemme",
+      "menette",
+      "menevät",
+      "mennään"
+    ],
+    [
+      "en mene",
+      "et mene",
+      "ei mene",
+      "emme mene",
+      "ette mene",
+      "eivät mene",
+      "ei mennä"
+    ],
+    [
+      "menin",
+      "menit",
+      "meni",
+      "menimme",
+      "menitte",
+      "menivät",
+      "mentiin"
+    ],
+    [
+      "en mennyt",
+      "et mennyt",
+      "ei mennyt",
+      "emme menneet",
+      "ette menneet",
+      "eivät menneet",
+      "ei menty"
+    ],
+    [
+      "olen mennyt",
+      "olet mennyt",
+      "on mennyt",
+      "olemme menneet",
+      "olette menneet",
+      "ovat menneet",
+      "on menty"
+    ],
+    [
+      "en ole mennyt",
+      "et ole mennyt",
+      "ei ole mennyt",
+      "emme ole menneet",
+      "ette ole menneet",
+      "eivät ole menneet",
+      "ei ole menty"
+    ],
+    [
+      "olin mennyt",
+      "olit mennyt",
+      "oli mennyt",
+      "olimme menneet",
+      "olitte menneet",
+      "olivat menneet",
+      "oli menty"
+    ],
+    [
+      "en ollut mennyt",
+      "et ollut mennyt",
+      "ei ollut mennyt",
+      "emme olleet menneet",
+      "ette olleet menneet",
+      "eivät olleet menneet",
+      "ei ollut menty"
+    ],
+    [
+      "menisin",
+      "menisit",
+      "menisi",
+      "menisimme",
+      "menisitte",
+      "menisivät",
+      "mentäisiin"
+    ],
+    [
+      "en menisi",
+      "et menisi",
+      "ei menisi",
+      "emme menisi",
+      "ette menisi",
+      "eivät menisi",
+      "ei mentäisi"
+    ],
+    [
+      "olisin mennyt",
+      "olisit mennyt",
+      "olisi mennyt",
+      "olisimme menneet",
+      "olisitte menneet",
+      "olisivat menneet",
+      "olisi menty"
+    ],
+    [
+      "en olisi mennyt",
+      "et olisi mennyt",
+      "ei olisi mennyt",
+      "emme olisi menneet",
+      "ette olisi menneet",
+      "eivät olisi menneet",
+      "ei olisi menty"
+    ],
+    [
+      "mennen",
+      "mennet",
+      "mennee",
+      "mennemme",
+      "mennette",
+      "mennevät",
+      "mentäneen"
+    ],
+    [
+      "en menne",
+      "et menne",
+      "ei menne",
+      "emme menne",
+      "ette menne",
+      "eivät menne",
+      "ei mentäne"
+    ],
+    [
+      "lienen mennyt",
+      "lienet mennyt",
+      "lienee mennyt",
+      "lienemme menneet",
+      "lienette menneet",
+      "lienevät menneet",
+      "lienee menty"
+    ],
+    [
+      "en liene mennyt",
+      "et liene mennyt",
+      "ei liene mennyt",
+      "emme liene menneet",
+      "ette liene menneet",
+      "eivät liene menneet",
+      "ei liene menty"
+    ],
+    [
+      "mene",
+      "menköön",
+      "menkäämme",
+      "menkää",
+      "menkööt",
+      "mentäköön"
+    ],
+    [
+      "älä mene",
+      "älköön menkö",
+      "älkäämme menkö",
+      "älkää menkö",
+      "älkööt menkö",
+      "älköön mentäkö"
+    ],
+    "mennä",
+    "menevä",
+    "mentävä"
+  ],
+  "gloss": "to go; to go, extend; to go, lead; ..."
+}

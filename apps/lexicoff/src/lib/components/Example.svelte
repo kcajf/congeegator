@@ -1,30 +1,33 @@
 <script lang="ts">
 	import { boldText } from '$lib/entryText';
 	import type { DictExample } from '$lib/types';
-	let { example }: { example: string | DictExample } = $props();
+	let { example, lang }: { example: string | DictExample; lang?: string } = $props();
 	const value = $derived(typeof example === 'string' ? { text: example } : example);
 </script>
 
 <blockquote>
-	<p class="original">
+	<p class="original" {lang} dir="auto">
 		{#each boldText(value.text, value.bold) as part, i (i)}{#if part.bold}<strong
 					>{part.text}</strong
 				>{:else}{part.text}{/if}{/each}
 	</p>
-	{#if value.roman}<p class="roman">{value.roman}</p>{/if}
-	{#if value.translation}<p class="translation">
+	{#if value.roman}<p class="roman" dir="auto">{value.roman}</p>{/if}
+	{#if value.translation}<p class="translation" lang="en" dir="auto">
 			{#each boldText(value.translation, value.translationBold) as part, i (i)}{#if part.bold}<strong
 						>{part.text}</strong
 					>{:else}{part.text}{/if}{/each}
 		</p>{/if}
-	{#if value.ref}<details><summary>Quotation source</summary><cite>{value.ref}</cite></details>{/if}
+	{#if value.ref}<details>
+			<summary>Quotation source</summary><cite dir="auto">{value.ref}</cite>
+		</details>{/if}
 </blockquote>
 
 <style>
 	blockquote {
 		margin: 0.6rem 0;
-		padding: 0.1rem 0 0.1rem 0.8rem;
-		border-left: 2px solid var(--border);
+		padding: 0.1rem 0;
+		padding-inline-start: 0.8rem;
+		border-inline-start: 2px solid var(--border);
 		font-size: 0.9em;
 	}
 	p {

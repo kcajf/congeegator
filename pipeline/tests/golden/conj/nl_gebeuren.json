@@ -1,0 +1,25 @@
+{
+  "name": "gebeuren",
+  "nameNoDiacritics": "gebeuren",
+  "conjugation": [
+    [
+      "gebeur",
+      "gebeurt/gebeur",
+      "gebeurt",
+      "gebeurt",
+      "gebeuren"
+    ],
+    [
+      "gebeurde",
+      "gebeurde",
+      "gebeurde",
+      "gebeurde",
+      "gebeurden"
+    ],
+    "gebeur",
+    "gebeuren",
+    "gebeurend",
+    "gebeurd"
+  ],
+  "gloss": "to happen"
+}

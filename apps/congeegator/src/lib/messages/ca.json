@@ -1,0 +1,18 @@
+{
+	"ca_indic": "Indicatiu",
+	"ca_subj": "Subjuntiu",
+	"ca_cond": "Condicional",
+	"ca_imper": "Imperatiu afirmatiu",
+	"ca_impers": "Formes no personals",
+	"ca_impers_inf": "Infinitiu",
+	"ca_impers_gerund": "Gerundi",
+	"ca_impers_partic": "Participi (masculí singular)",
+	"ca_indic_pres": "Present",
+	"ca_indic_imperf": "Imperfet",
+	"ca_indic_pret": "Passat simple",
+	"ca_indic_periphrastic": "Passat perifràstic",
+	"ca_indic_fut": "Futur",
+	"ca_cond_pres": "Condicional",
+	"ca_subj_pres": "Present",
+	"ca_subj_imperf": "Imperfet"
+}

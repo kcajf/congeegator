@@ -1,0 +1,170 @@
+{
+  "name": "nähdä",
+  "nameNoDiacritics": "nahda",
+  "conjugation": [
+    [
+      "näen",
+      "näet",
+      "näkee",
+      "näemme",
+      "näette",
+      "näkevät",
+      "nähdään"
+    ],
+    [
+      "en näe",
+      "et näe",
+      "ei näe",
+      "emme näe",
+      "ette näe",
+      "eivät näe",
+      "ei nähdä"
+    ],
+    [
+      "näin",
+      "näit",
+      "näki",
+      "näimme",
+      "näitte",
+      "näkivät",
+      "nähtiin"
+    ],
+    [
+      "en nähnyt",
+      "et nähnyt",
+      "ei nähnyt",
+      "emme nähneet",
+      "ette nähneet",
+      "eivät nähneet",
+      "ei nähty"
+    ],
+    [
+      "olen nähnyt",
+      "olet nähnyt",
+      "on nähnyt",
+      "olemme nähneet",
+      "olette nähneet",
+      "ovat nähneet",
+      "on nähty"
+    ],
+    [
+      "en ole nähnyt",
+      "et ole nähnyt",
+      "ei ole nähnyt",
+      "emme ole nähneet",
+      "ette ole nähneet",
+      "eivät ole nähneet",
+      "ei ole nähty"
+    ],
+    [
+      "olin nähnyt",
+      "olit nähnyt",
+      "oli nähnyt",
+      "olimme nähneet",
+      "olitte nähneet",
+      "olivat nähneet",
+      "oli nähty"
+    ],
+    [
+      "en ollut nähnyt",
+      "et ollut nähnyt",
+      "ei ollut nähnyt",
+      "emme olleet nähneet",
+      "ette olleet nähneet",
+      "eivät olleet nähneet",
+      "ei ollut nähty"
+    ],
+    [
+      "näkisin",
+      "näkisit",
+      "näkisi",
+      "näkisimme",
+      "näkisitte",
+      "näkisivät",
+      "nähtäisiin"
+    ],
+    [
+      "en näkisi",
+      "et näkisi",
+      "ei näkisi",
+      "emme näkisi",
+      "ette näkisi",
+      "eivät näkisi",
+      "ei nähtäisi"
+    ],
+    [
+      "olisin nähnyt",
+      "olisit nähnyt",
+      "olisi nähnyt",
+      "olisimme nähneet",
+      "olisitte nähneet",
+      "olisivat nähneet",
+      "olisi nähty"
+    ],
+    [
+      "en olisi nähnyt",
+      "et olisi nähnyt",
+      "ei olisi nähnyt",
+      "emme olisi nähneet",
+      "ette olisi nähneet",
+      "eivät olisi nähneet",
+      "ei olisi nähty"
+    ],
+    [
+      "nähnen",
+      "nähnet",
+      "nähnee",
+      "nähnemme",
+      "nähnette",
+      "nähnevät",
+      "nähtäneen"
+    ],
+    [
+      "en nähne",
+      "et nähne",
+      "ei nähne",
+      "emme nähne",
+      "ette nähne",
+      "eivät nähne",
+      "ei nähtäne"
+    ],
+    [
+      "lienen nähnyt",
+      "lienet nähnyt",
+      "lienee nähnyt",
+      "lienemme nähneet",
+      "lienette nähneet",
+      "lienevät nähneet",
+      "lienee nähty"
+    ],
+    [
+      "en liene nähnyt",
+      "et liene nähnyt",
+      "ei liene nähnyt",
+      "emme liene nähneet",
+      "ette liene nähneet",
+      "eivät liene nähneet",
+      "ei liene nähty"
+    ],
+    [
+      "näe",
+      "nähköön",
+      "nähkäämme",
+      "nähkää",
+      "nähkööt",
+      "nähtäköön"
+    ],
+    [
+      "älä näe",
+      "älköön nähkö",
+      "älkäämme nähkö",
+      "älkää nähkö",
+      "älkööt nähkö",
+      "älköön nähtäkö"
+    ],
+    "nähdä",
+    "näkevä",
+    "nähtävä"
+  ],
+  "gloss": "to see; can see; to see, meet; ..."
+}

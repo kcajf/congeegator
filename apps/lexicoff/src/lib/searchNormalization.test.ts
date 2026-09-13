@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { dictionaryWordKey, prefixMatch, searchTokens } from './searchNormalization';
+import {
+	dictionarySearchKey,
+	dictionaryWordKey,
+	prefixMatch,
+	searchTokens
+} from './searchNormalization';
 
 describe('dictionary query normalization', () => {
 	it.each([
@@ -11,9 +16,38 @@ describe('dictionary query normalization', () => {
 		['la', 'ĀMŌ', 'āmō'],
 		['tr', 'IŞIK', 'ışık'],
 		['tr', 'İSTANBUL', 'istanbul'],
-		['tr', 'İSTANBUL'.normalize('NFD'), 'istanbul']
+		['tr', 'İSTANBUL'.normalize('NFD'), 'istanbul'],
+		['az', 'IŞIQ', 'ışıq'],
+		['az', 'İŞIQ', 'işıq']
 	])('normalizes %s input %s', (lang, input, expected) => {
 		expect(dictionaryWordKey(input, lang)).toBe(expected);
+	});
+
+	it.each([
+		['grc', 'ὝΔΩΡ', 'υδωρ'],
+		['grc', 'ΛΌΓΟΣ', 'λογοσ'],
+		['he', 'שָׁלוֹם', 'שלום'],
+		['fa', 'كِتاب', 'کتاب'],
+		['fa', 'خانه‌ها', 'خانهها'],
+		['fa', 'آب', 'آب'],
+		['hi', 'पानी', 'पानी'],
+		['sa', 'कर्म', 'कर्म'],
+		['uk', 'ЇСТИ', 'їсти'],
+		['el', 'ΝΕΡΌ', 'νερό']
+	])('normalizes only intended %s search aliases', (lang, word, expected) => {
+		expect(dictionarySearchKey(word.normalize('NFD'), lang)).toBe(expected);
+	});
+
+	it('keeps exact Greek homographs and pointed Hebrew display keys distinct', () => {
+		expect(dictionaryWordKey('ἄλλα', 'grc')).not.toBe(dictionaryWordKey('ἀλλά', 'grc'));
+		expect(dictionarySearchKey('ἄλλα', 'grc')).toBe(dictionarySearchKey('ἀλλά', 'grc'));
+		expect(dictionaryWordKey('שָׁלוֹם', 'he')).toBe('שָׁלוֹם');
+	});
+
+	it('preserves Indic marks and splits ZWNJ into separate FTS terms', () => {
+		expect(prefixMatch(searchTokens('पानी'))).toBe('"पानी"*');
+		expect(prefixMatch(searchTokens('घर में'))).toBe('"घर" "में"*');
+		expect(prefixMatch(searchTokens('خانه‌ها'))).toBe('"خانه" "ها"*');
 	});
 
 	it('retains meaningful marks and Cyrillic letters without splitting a word', () => {

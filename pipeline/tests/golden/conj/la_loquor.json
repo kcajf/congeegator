@@ -1,0 +1,207 @@
+{
+  "name": "loquor",
+  "nameNoDiacritics": "loquor",
+  "conjugation": [
+    [
+      "loquor",
+      "loqueris/loquere",
+      "loquitur",
+      "loquimur",
+      "loquiminī",
+      "loquuntur"
+    ],
+    [
+      "loquēbar",
+      "loquēbāris/loquēbāre",
+      "loquēbātur",
+      "loquēbāmur",
+      "loquēbāminī",
+      "loquēbantur"
+    ],
+    [
+      "loquar",
+      "loquēris/loquēre",
+      "loquētur",
+      "loquēmur",
+      "loquēminī",
+      "loquentur"
+    ],
+    [
+      "locūtus sum (masculine)/locūta sum (feminine)/locūtum sum (neuter)",
+      "locūtus es (masculine)/locūta es (feminine)/locūtum es (neuter)",
+      "locūtus est (masculine)/locūta est (feminine)/locūtum est (neuter)",
+      "locūtī sumus (masculine)/locūtae sumus (feminine)/locūta sumus (neuter)",
+      "locūtī estis (masculine)/locūtae estis (feminine)/locūta estis (neuter)",
+      "locūtī sunt (masculine)/locūtae sunt (feminine)/locūta sunt (neuter)"
+    ],
+    [
+      "locūtus eram (masculine)/locūta eram (feminine)/locūtum eram (neuter)",
+      "locūtus erās (masculine)/locūta erās (feminine)/locūtum erās (neuter)",
+      "locūtus erat (masculine)/locūta erat (feminine)/locūtum erat (neuter)",
+      "locūtī erāmus (masculine)/locūtae erāmus (feminine)/locūta erāmus (neuter)",
+      "locūtī erātis (masculine)/locūtae erātis (feminine)/locūta erātis (neuter)",
+      "locūtī erant (masculine)/locūtae erant (feminine)/locūta erant (neuter)"
+    ],
+    [
+      "locūtus erō (masculine)/locūta erō (feminine)/locūtum erō (neuter)",
+      "locūtus eris (masculine)/locūta eris (feminine)/locūtum eris (neuter)",
+      "locūtus erit (masculine)/locūta erit (feminine)/locūtum erit (neuter)",
+      "locūtī erimus (masculine)/locūtae erimus (feminine)/locūta erimus (neuter)",
+      "locūtī eritis (masculine)/locūtae eritis (feminine)/locūta eritis (neuter)",
+      "locūtī erunt (masculine)/locūtae erunt (feminine)/locūta erunt (neuter)"
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "loquar",
+      "loquāris/loquāre",
+      "loquātur",
+      "loquāmur",
+      "loquāminī",
+      "loquantur"
+    ],
+    [
+      "loquerer",
+      "loquerēris/loquerēre",
+      "loquerētur",
+      "loquerēmur",
+      "loquerēminī",
+      "loquerentur"
+    ],
+    [
+      "locūtus sim (masculine)/locūta sim (feminine)/locūtum sim (neuter)",
+      "locūtus sīs (masculine)/locūta sīs (feminine)/locūtum sīs (neuter)",
+      "locūtus sit (masculine)/locūta sit (feminine)/locūtum sit (neuter)",
+      "locūtī sīmus (masculine)/locūtae sīmus (feminine)/locūta sīmus (neuter)",
+      "locūtī sītis (masculine)/locūtae sītis (feminine)/locūta sītis (neuter)",
+      "locūtī sint (masculine)/locūtae sint (feminine)/locūta sint (neuter)"
+    ],
+    [
+      "locūtus essem (masculine)/locūta essem (feminine)/locūtum essem (neuter)",
+      "locūtus essēs (masculine)/locūta essēs (feminine)/locūtum essēs (neuter)",
+      "locūtus esset (masculine)/locūta esset (feminine)/locūtum esset (neuter)",
+      "locūtī essēmus (masculine)/locūtae essēmus (feminine)/locūta essēmus (neuter)",
+      "locūtī essētis (masculine)/locūtae essētis (feminine)/locūta essētis (neuter)",
+      "locūtī essent (masculine)/locūtae essent (feminine)/locūta essent (neuter)"
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "loquere",
+      "loquiminī"
+    ],
+    [
+      "loquitor",
+      "loquitor",
+      "",
+      "loquuntor"
+    ],
+    [
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      ""
+    ],
+    "loquī/loquier",
+    "locūtum esse",
+    "locūtūrum esse",
+    "",
+    "",
+    "",
+    "loquēns",
+    "locūtus",
+    "",
+    "locūtūrus",
+    "loquendus",
+    [
+      "loquendī",
+      "loquendō",
+      "loquendum",
+      "loquendō"
+    ],
+    [
+      "locūtum",
+      "locūtū"
+    ]
+  ],
+  "gloss": "to say, speak, tell, talk, utter; to declare, speak, or state more formally as in a legal context or in defense of someone or something"
+}

@@ -85,7 +85,7 @@ def main(paths):
               "terminals": dict(sorted(terminals.items()))}
     (ROOT / "apps/lexicoff/src/lib/etymologyLanguages.json").write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n")
     with (ROOT / "docs/reviews/etymology-languages.csv").open("w") as handle:
-        writer = csv.writer(handle)
+        writer = csv.writer(handle, lineterminator="\n")
         writer.writerow(["code", "name", "immediate parent", "entry language", "entry language name", "routing classification", "containment chain"])
         writer.writerows(rows)
     print(f"Classified {len(varieties)} etymology-only codes and {len(aliases)} legacy code aliases; no unresolved roots or cycles.")

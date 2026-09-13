@@ -1,7 +1,10 @@
 import json
 
 from pipeline.audit_dictionary import audit_source, audit_sqlite, read_source
-from pipeline.dictionary import DictLanguageConfig
+from pipeline.dictionary import DictLanguageConfig, process_dict_entry
+from pipeline.wiktionary import Entry
+import msgspec
+import sqlite3
 from pipeline.sqlite_output import write_sqlite_database
 
 
@@ -101,3 +104,50 @@ def test_audit_tracks_linked_senses_and_structured_examples():
     assert result['counts']['emphasized_examples']==1
     assert result['counts']['records_with_derived']==1
     assert result['review_flags']=={}
+
+
+def test_audit_detects_lost_pronunciation_context_even_when_counts_match(tmp_path):
+    config = DictLanguageConfig("grc", "Ancient Greek", "Ancient Greek")
+    raw = json.dumps({
+        "word": "ὕδωρ", "lang": "Ancient Greek", "lang_code": "grc", "pos": "noun",
+        "senses": [{"glosses": ["water"]}],
+        "sounds": [{"ipa": "/hy.dɔːr/", "note": "5th BCE Attic"}],
+    }).encode()
+    source = audit_source([raw], config)
+    record = process_dict_entry(config, msgspec.json.decode(raw, type=Entry))
+    path = tmp_path / "grc.sqlite"
+    write_sqlite_database([record], "grc", None, str(path))
+    assert audit_sqlite(path, "grc", source)["source_records_match"] is True
+    with sqlite3.connect(path) as conn:
+        conn.execute("UPDATE entries SET pronunciations=?", ('[{"ipa":"/hy.dɔːr/"}]',))
+    result = audit_sqlite(path, "grc", source)
+    assert result["source_counts_match"] is True
+    assert result["source_records_match"] is False
+
+
+def test_audit_search_probes_preserve_hindi_vowel_marks(tmp_path):
+    path = tmp_path / "hi.sqlite"
+    write_sqlite_database([{"word": "पानी", "pos": "noun", "senses": [{"gloss": "water"}]}], "hi", None, str(path))
+    result = audit_sqlite(path, "hi")
+    probe = next(p for p in result["search_probes"] if p["word"] == "पानी")
+    assert probe["fts_matches_all_records"] is True
+
+
+def test_audit_fingerprints_include_entry_relationships(tmp_path):
+    # Same headword and gloss can have distinct relationship data. The audit
+    # must compare the full serialized record, not only its definition count.
+    lines = [
+        _line('casa', [{'glosses': ['house']}], derived=[{'word': 'casinha'}]),
+        _line('casa', [{'glosses': ['house']}], derived=[{'word': 'casarão'}]),
+    ]
+    source = audit_source(lines, CONFIG)
+    assert source['counts']['unique_records'] == 2
+    records = [process_dict_entry(CONFIG, msgspec.json.decode(line, type=Entry)) for line in lines]
+    path = tmp_path / 'pt.sqlite'
+    write_sqlite_database(records, 'pt', None, str(path))
+    assert audit_sqlite(path, 'pt', source)['source_records_match'] is True
+    with sqlite3.connect(path) as conn:
+        conn.execute('UPDATE entries SET details = NULL WHERE id = (SELECT min(id) FROM entries)')
+    result = audit_sqlite(path, 'pt', source)
+    assert result['source_counts_match'] is True
+    assert result['source_records_match'] is False
