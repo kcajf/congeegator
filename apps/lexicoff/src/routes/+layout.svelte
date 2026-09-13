@@ -239,6 +239,7 @@
 </script>
 
 <svelte:head>
+	<link rel="icon" type="image/svg+xml" href={lexicoffIcon} />
 	<meta name="theme-color" content={brandColor} />
 	<meta name="application-name" content={appTitle} />
 
