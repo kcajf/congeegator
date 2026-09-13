@@ -74,10 +74,10 @@ function setup(hasWordKey = false, realDb?: DatabaseSync) {
 	});
 	mocks.init.mockResolvedValue({ installOpfsSAHPoolVfs: async () => pool });
 	let id = 0;
-	async function send(type: string, lang = 'fr', query = 'aaaaaaaa') {
+	async function send(type: string, lang = 'fr', query = 'aaaaaaaa', words: string[] = []) {
 		const current = id++;
 		await worker.onmessage({
-			data: { id: current, type, lang, query, word: query, hash: query }
+			data: { id: current, type, lang, query, word: query, hash: query, words }
 		} as MessageEvent);
 		return postMessage.mock.calls.map(([m]) => m).find((m) => m.id === current);
 	}
@@ -478,6 +478,26 @@ describe('extended dictionaries with real SQLite FTS', () => {
 		}
 		return db;
 	}
+
+	it('links only exact headwords, not forms, case fallbacks, or missing words', async () => {
+		const db = database('az', [
+			{ word: 'flağ', gloss: 'flag', forms: ['flağı', 'flağlar'] },
+			{ word: 'bayraq', gloss: 'flag' },
+			{ word: 'Bayraq', gloss: 'name' }
+		]);
+		try {
+			const s = setup(true, db);
+			s.files.add('/az-aaaaaaaa.sqlite');
+			await s.start();
+			await s.send('open', 'az');
+			const words = ['flağı', 'flağlar', 'bayraq', 'BAYRAQ', 'missing', 'bayraq'];
+			expect((await s.send('exactHeadwords', 'az', '', words)).result).toEqual(['bayraq']);
+			expect((await s.send('exactHeadwords', 'az', '', [])).result).toEqual([]);
+			expect((await s.send('exactHeadwords', 'fr', '', words)).result).toEqual([]);
+		} finally {
+			db.close();
+		}
+	});
 
 	it.each([
 		['hi', 'पानी', 'water', 'पान', 'पानियों', 'पानिय'],

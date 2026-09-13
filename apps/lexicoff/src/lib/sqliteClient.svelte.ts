@@ -194,6 +194,12 @@ class DictionaryStorage {
 		return (await connection.request('search', { lang, query, phoneticQuery })) as SearchResult[];
 	}
 
+	async exactHeadwords(lang: string, words: string[]): Promise<string[]> {
+		if (!words.length) return [];
+		const connection = await this.connect();
+		return (await connection.request('exactHeadwords', { lang, words })) as string[];
+	}
+
 	async getWord(lang: string, word: string): Promise<DictRecord[]> {
 		const connection = await this.connect();
 		const raw = (await connection.request('getWord', { lang, word })) as RawDictRecord[];

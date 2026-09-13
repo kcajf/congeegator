@@ -518,6 +518,27 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 	});
 }
 
+function exactHeadwords(lang: string, words: string[]): string[] {
+	const db = openDbs.get(lang);
+	if (!db || !words.length) return [];
+	const requested = new Set(words);
+	const found = new Set<string>();
+	const unique = [...requested];
+	for (let i = 0; i < unique.length; i += 100) {
+		const batch = unique.slice(i, i + 100);
+		// Use the existing word index, then require the original spelling exactly.
+		// Form aliases and case/diacritic fallbacks are not independent headwords.
+		db.exec({
+			sql: `SELECT DISTINCT word FROM entries WHERE word COLLATE NOCASE IN (${batch.map(() => '?').join(',')})`,
+			bind: batch,
+			callback: (row: unknown[]) => {
+				if (requested.has(row[0] as string)) found.add(row[0] as string);
+			}
+		});
+	}
+	return [...found];
+}
+
 async function getWord(lang: string, word: string): Promise<unknown[]> {
 	const db = openDbs.get(lang);
 	if (!db) return [];
@@ -625,12 +646,15 @@ async function listOpfsFiles(): Promise<[string, string][]> {
 }
 
 async function handleMessage(e: MessageEvent) {
-	const { id, type, lang, query, word, phoneticQuery } = e.data;
+	const { id, type, lang, query, word, words, phoneticQuery } = e.data;
 
 	try {
 		let result: unknown;
 
 		switch (type) {
+			case 'exactHeadwords':
+				result = exactHeadwords(lang, words);
+				break;
 			case 'wordCount':
 				result = [...openDbs.values()].reduce(
 					(sum, db) => sum + Number(db.selectValue('SELECT COUNT(DISTINCT word) FROM entries')),

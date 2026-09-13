@@ -146,7 +146,9 @@ def test_raw_period_and_meaning_qualifiers_remain_attached():
     assert any('in Attic prose' in s.get('tags', []) for s in first('grc', 'μῦθος')['senses'])
     assert any('in Koine' in s.get('tags', []) for s in first('grc', 'ὑμέτερος')['senses'])
     kind = {f['form']: f['tags'] for f in first('is', 'kind')['formDetails']}
-    assert kind['kindir'] == ['in the meaning race']
+    assert 'in the meaning race' in kind['kindir']
+    assert 'nominative plural' in kind['kindir']
+    assert 'indefinite accusative plural' in kind['kindir']
     fjandi = {f['form']: f['tags'] for f in first('is', 'fjandi')['formDetails']}
     assert 'in the meaning "devil"' in fjandi['fjandar']
     assert 'in the meaning "enemy"' in fjandi['fjendur']

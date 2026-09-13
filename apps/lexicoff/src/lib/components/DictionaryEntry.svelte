@@ -41,6 +41,7 @@
 
 <script lang="ts">
 	import type { DictRecord } from '$lib/types';
+	import { storage } from '$lib/sqliteClient.svelte';
 	import {
 		entryPronunciations,
 		formUsageLabels,
@@ -63,6 +64,25 @@
 	let formsOpen = $state(false);
 	let formLimit = $state(formBatchSize);
 	const visibleForms = $derived(formsOpen ? (entry.forms?.slice(0, formLimit) ?? []) : []);
+	let linkedForms = $state<Set<string>>(new Set());
+	$effect(() => {
+		const words = visibleForms.filter((form) => form !== entry.word);
+		const installed = storage.languages[lang];
+		linkedForms = new Set();
+		if (!words.length || installed?.status !== 'ready') return;
+		let cancelled = false;
+		void storage
+			.exactHeadwords(lang, words)
+			.then((found) => {
+				if (!cancelled) linkedForms = new Set(found);
+			})
+			.catch(() => {
+				// Unverified destinations remain readable plain text.
+			});
+		return () => {
+			cancelled = true;
+		};
+	});
 	function usageLabel(label: string) {
 		const names: Record<string, string> = {
 			figuratively: 'figurative',
@@ -199,7 +219,10 @@
 				<ul class="forms">
 					{#each visibleForms as form, i (i)}
 						<li class="form">
-							<bdi {lang}><WordLink link={{ word: form, lang }} /></bdi
+							<bdi {lang}
+								>{#if linkedForms.has(form)}<WordLink
+										link={{ word: form, lang }}
+									/>{:else}{form}{/if}</bdi
 							>{#if formLabels.get(form)}<span class="form-tags">({formLabels.get(form)})</span
 								>{/if}
 						</li>
@@ -312,11 +335,11 @@
 		line-height: 1.6;
 	}
 	.form {
-		display: inline;
+		display: block;
+		margin-block: 0.2rem;
 		overflow-wrap: anywhere;
 	}
-	.form + .form::before {
-		content: ' · ';
+	.form-tags {
 		color: var(--text-muted);
 	}
 	.count {
