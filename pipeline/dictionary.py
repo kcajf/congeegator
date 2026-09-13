@@ -264,6 +264,9 @@ def greek_form_variants(text: str) -> list[str]:
         if part in {"η", "ο"} and part != text:
             continue
         if any("\u0370" <= c <= "\u03ff" or "\u1f00" <= c <= "\u1fff" for c in part):
+            # The future particle applies to each alternative in the same cell.
+            if text.startswith("θα ") and not part.startswith("θα "):
+                part = "θα " + part
             variants.append(part)
     return variants
 

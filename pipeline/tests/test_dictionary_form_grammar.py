@@ -63,6 +63,10 @@ def test_modern_greek_source_forms_keep_labels_and_exclude_table_instructions(tm
     assert 'second person active present indicative singular' in details['απαντάς']
     assert 'imperfective' in details['απαντάς']
     assert 'απαντιέμαι' in details and 'απαντώμαι' in details
+    assert 'θα απαντώμαι' in details
+    assert not any('future' in tag for tag in details['απαντώμαι'])
+    assert 'active aorist infinitive' in details['απαντήσει']
+    assert any('dependent' in tag for tag in details['απαντήσω'])
     assert 'απαντάτο' in details
     assert 'απαντώμενος' in details
     assert 'έχοντας απαντήσει' in details
