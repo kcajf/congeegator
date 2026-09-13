@@ -189,6 +189,11 @@ class DictionaryStorage {
 		return (await connection.request('wordCount')) as number | null;
 	}
 
+	async dictionaryBytes(): Promise<number> {
+		const connection = await this.connect();
+		return (await connection.request('dictionaryBytes')) as number;
+	}
+
 	async search(lang: string, query: string, phoneticQuery?: string): Promise<SearchResult[]> {
 		const connection = await this.connect();
 		return (await connection.request('search', { lang, query, phoneticQuery })) as SearchResult[];
