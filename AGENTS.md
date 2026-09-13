@@ -1,168 +1,145 @@
-# CLAUDE.md
+## Repository
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+A monorepo for two Wiktionary-powered language apps:
 
-## What is this repo?
+- **Congeegator** (`apps/congeegator/`) — verb conjugation PWA, https://congeegator.com.
+- **Lexicoff** (`apps/lexicoff/`) — offline dictionary PWA covering all parts of speech, https://lexicoff.com.
+- **Pipeline** (`pipeline/`) — shared Python pipeline processing English Wiktionary JSONL extracts from kaikki.org.
 
-A monorepo for Wiktionary-powered language apps. Contains:
+Both apps use SvelteKit 2, Svelte 5, TypeScript and Vite, and deploy to Cloudflare Workers. Each app has its own `package.json` and dependencies; there are no npm workspaces.
 
-- **Congeegator** (`apps/congeegator/`) — A verb conjugation PWA. SvelteKit 2 / Svelte 5, Cloudflare Workers. https://congeegator.com
-- **Lexicoff** (`apps/lexicoff/`) — An offline dictionary PWA (all parts of speech). SvelteKit 2 / Svelte 5, Cloudflare Workers. https://lexicoff.com
-- **Pipeline** (`pipeline/`) — A shared Python data pipeline that processes Wiktionary JSONL data from kaikki.org. One loop over source data produces both conjugation and dictionary output.
-
-Supported languages are configured in `pipeline/conjugation.py` (`CONFIG`) and `pipeline/dictionary.py` (`DICT_CONFIGS`).
-
-## Directory Structure
-
-```
-/
-├── pipeline/              # Shared Python data pipeline
-│   ├── cache.py           # CacheManager, SOURCE_DATA_VERSION
-│   ├── wiktionary.py      # Entry, Form, Sense structs (maximal, shared by both extractors)
-│   ├── utils.py           # strip_diacritics, to_phonetic_el, _orjson_dump
-│   ├── gloss.py           # extract_gloss, _is_junk_gloss
-│   ├── search.py          # build_search_index (congeegator, with merged gloss index)
-│   ├── output.py          # write_language_data, write_data_manifest, generate_sitemaps
-│   ├── conjugation.py     # LanguageConfig, TenseConfig, FormMatcher, all 6 lang configs, extract_conjugation()
-│   ├── dictionary.py      # DictLanguageConfig, process_dict_entry, extract_senses/gender/forms/pronunciation/etymology
-│   ├── generate.py        # main() — single entry point, one loop, two outputs
-│   ├── pin_source_data.py # Download & pin latest Wiktionary source data
-│   └── tests/
-│       ├── test_conjugation.py  # verb golden tests
-│       ├── test_shared.py       # phonetic tests
-│       ├── test_search_index.py # search index tests
-│       ├── fixtures/            # JSONL test data
-│       └── golden/conj/         # golden files for conjugation
-├── apps/
-│   ├── congeegator/       # SvelteKit verb conjugation app
-│   │   ├── src/
-│   │   ├── package.json
-│   │   ├── wrangler.jsonc
-│   │   └── ...
-│   └── lexicoff/          # SvelteKit dictionary app
-│       ├── src/
-│       ├── package.json
-│       ├── wrangler.jsonc
-│       └── ...
-├── pixi.toml              # Python environment
-└── .github/workflows/
-    ├── ci-congeegator.yml
-    ├── ci-lexicoff.yml
-    ├── deploy-congeegator.yml
-    ├── deploy-lexicoff.yml
-    └── pin-source-data.yml
-```
+Language catalogues are independent: `pipeline/conjugation.py` defines `CONFIG`, and `pipeline/dictionary.py` defines `DICT_CONFIGS`. Do not infer one app's supported languages from the other.
 
 ## Commands
 
-### Pipeline (run from repo root)
-- **Generate data:** `pixi run generate` (or `pixi run generate-dev` for small subset). Outputs to both `apps/congeegator/r2_data/` and `apps/lexicoff/r2_data/`.
-- **Run pipeline tests:** `pixi run test`
-- **Pin source data:** `pixi run pin-source-data`
-- **Check manifests:** `pixi run python -m pipeline.generate --check-manifest-metadata`
+### Pipeline (repository root)
 
-### Congeegator frontend (run from `apps/congeegator/`)
-- **Dev server:** `npm run dev`
-- **Build:** `npm run build:prod`, `npm run build:staging`, `npm run build:dev`
-- **Type check:** `npm run check`
-- **Lint:** `npm run lint` (prettier + eslint)
-- **Frontend tests:** `npm test`
-- **Deploy:** `npm run deploy:staging`, `npm run deploy:prod`
+- Generate both apps: `pixi run generate`
+- Generate a small development subset: `pixi run generate-dev`
+- Generate only Lexicoff, preserving Congeegator output: `pixi run python -m pipeline.generate --app lexicoff`
+- Generate only Congeegator: `pixi run python -m pipeline.generate --app congeegator`
+- Tests: `pixi run test`
+- Check manifest metadata: `pixi run python -m pipeline.generate --check-manifest-metadata`
+- Pin source data: `pixi run pin-source-data`
 
-### Lexicoff frontend (run from `apps/lexicoff/`)
-- Same commands as congeegator: `npm run dev`, `npm run check`, `npm run lint`, `npm run build:prod`, etc.
+The Pixi environment in `pixi.toml` currently targets Linux (`linux-64`).
+
+### Frontends (run from the relevant app directory)
+
+- Install dependencies: `npm ci`
+- Development server: `npm run dev`
+- Type check: `npm run check`
+- Lint and formatting check: `npm run lint`
+- Tests: `npm test`
+- Build: `npm run build:dev`, `npm run build:staging`, `npm run build:prod`
+- Deploy: `npm run deploy:staging`, `npm run deploy:prod`
+
+Local deploy scripts regenerate data for both apps, upload the selected app's data, then build and deploy that app.
 
 ## Architecture
 
-### Data Flow
+### Shared data pipeline
 
-1. **`pipeline/generate.py`** downloads raw Wiktionary JSONL data and loops over it once per language. For each entry:
-   - If it's a verb with conjugation data → `extract_conjugation()` → congeegator output
-   - If it's a valid dictionary entry (any POS) → `process_dict_entry()` → lexicoff output
-2. Output is written to `apps/*/r2_data/data/v1/<lang>-<hash>/` with per-app `data-manifest.json`.
-3. **R2** hosts the processed data (JSON chunks by first letter, full `data.json` bundles, `index.json` word lists). Both apps use the same R2 bucket.
-4. **SvelteKit SSR** (Cloudflare Worker) fetches chunk data from R2 for initial page loads.
-5. **Client-side sync** (Web Worker) downloads the full language bundle into IndexedDB for offline use.
-6. **Search** uses a prefix-based search index stored in IndexedDB metadata.
+`pipeline/generate.py` processes one language at a time. A single pass over that language's source feeds the applicable conjugation and dictionary extractors. Dictionary output is written before moving to the next language to avoid retaining the whole catalogue in memory.
 
-### Congeegator Data Model
+Generated data lives under `apps/<app>/r2_data/data/v1/<lang>-<hash>/`. Each app's `src/lib/data-manifest.json` identifies its language versions and download sizes. Both apps publish to the same R2 bucket, with content-hashed directories identifying their datasets.
 
-Each verb produces a `VerbRecord` with `name`, `nameNoDiacritics`, `conjugation` (flat array indexed by tense position), `freq`, `gloss`. Manifest includes `tenseNames`, `tensePronouns`, `tenseGroups` per language.
+Key pipeline files:
 
-### Lexicoff Data Model
+- `cache.py` — source versions, downloads and local caching.
+- `wiktionary.py` — shared source entry, form and sense structures.
+- `conjugation.py` — conjugation configurations and extraction.
+- `dictionary.py` — dictionary configurations and extraction of senses, forms, pronunciation, etymology and links.
+- `sqlite_output.py` — Lexicoff's SQLite schema, search indexes and database generation.
+- `search.py` — Congeegator's prefix and gloss search index generation.
+- `output.py` — JSON output, manifests and sitemap generation.
+- `generate.py` — generation entry point; compresses Lexicoff databases with Zstandard.
+- `pin_source_data.py` — source snapshot pinning.
+- `audit_dictionary.py` — source and SQLite quality/integrity checks.
 
-Each dictionary entry (`DictRecord`) has `word`, `wordNoDiacritics`, `pos`, `senses[]` (gloss, examples, tags), `freq`, and optional `gender`, `forms`, `pronunciation`, `etymology`. Same word with multiple POS = separate records with different IDs. Detail page groups by POS.
+### Data delivery: server pages and client bundles
 
-### Key Frontend Files
+Preserve the distinction between server rendering and client data installation:
 
-**Congeegator** (`apps/congeegator/src/lib/`):
-- `types.ts` — `VerbRecord`, `DataManifest` (with tense metadata)
-- `db.ts` — Dexie schema (verbs + metadata)
-- `i18n.svelte.ts` — Tense name translation
-- `langTools.ts` — Language-specific display logic (e.g. French pronoun elision)
+- **Server-rendered pages / SEO:** Congeegator's letter-based JSON chunks let a Cloudflare Worker fetch only the relevant portion of a language when rendering a page, including for search-engine crawlers. This keeps server-side data access efficient.
+- **Client apps:** language downloads use complete bundles — `data.json` for Congeegator and `<lang>.sqlite.zst` for Lexicoff. Letter chunks are a server-rendering optimization, not the client language-download format. Keep full-bundle delivery as the client architecture.
 
-**Lexicoff** (`apps/lexicoff/src/lib/`):
-- `types.ts` — `DictRecord`, `DictSense`, `DataManifest` (simpler, no tense metadata)
-- `db.ts` — Dexie schema (entries + metadata)
-- `search.ts` — Prefix search with phonetic (Greek) and gloss matching
+Current fallback: Congeegator’s universal page loader also fetches a letter chunk in the browser when the requested verb is missing from IndexedDB or the local read fails. Thus chunks support server rendering and individual online lookups; they are not strictly server-only. `loadVerbIndex` similarly has a network fallback to `index.json`, though it currently has no callers.
 
-**Shared patterns** (both apps have their own copies):
-- `dataUtils.ts` — Manifest access, R2 URL construction
-- `dataLoading.ts` — SSR + IndexedDB hybrid loading
-- `sync.worker.ts` — Web Worker for offline bundle download
-- `syncManager.svelte.ts` — Sync orchestration with toasts
-- `searchLang.svelte.ts` — Language selection state + search index loading
+### Congeegator: JSON and IndexedDB
 
-### Routing
+R2 hosts the letter chunks for server-rendered verb pages, full `data.json` language bundles for client installation, and `index.json` word lists. The selected language syncs on app startup, language changes and reconnects, downloading the full bundle if its current version is not installed. Bundles are stored in IndexedDB through Dexie; search uses the generated index in IndexedDB metadata.
 
-**Congeegator:**
-- `/[lang]/[verb]` — conjugation table for a specific verb
+`VerbRecord` contains `name`, `nameNoDiacritics`, a flat `conjugation` array indexed by tense position, `freq` and `gloss`. The manifest supplies `tenseNames`, `tensePronouns` and `tenseGroups`.
 
-**Lexicoff:**
-- `/[lang]/[word]` — dictionary entry page (all POS for that word)
+Key files under `apps/congeegator/src/lib/`:
 
-**Both apps:**
-- `/` — homepage
-- `/[lang]` — redirects to `/?lang={lang}`
-- `/app-shell` — prerendered PWA shell for offline navigation fallback
-- `/dev-r2-mock/[...file]` — dev-only proxy serving `r2_data/` files locally
+- `db.ts` — Dexie schema for verbs and metadata.
+- `dataLoading.ts` — server data and IndexedDB loading.
+- `search.ts`, `searchLang.svelte.ts` — search and language/index state.
+- `sync.worker.ts`, `syncManager.svelte.ts` — offline downloads and orchestration.
+- `i18n.svelte.ts`, `langTools.ts` — translations and language-specific presentation.
 
-### Environment
+### Lexicoff: SQLite, WebAssembly and OPFS
 
-- `VITE_R2_URL` — base URL for data. Set to `/dev-r2-mock` in dev (`.env`), real R2 URLs in `.env.staging` and `.env.production`. Both apps point to the same R2 bucket.
+Each language is a prebuilt SQLite database, distributed from R2 as `<lang>.sqlite.zst`. `download.worker.ts` streams the download, decompresses it with Zstandard and writes it to the browser's Origin Private File System (OPFS). Downloads run separately from queries.
 
-## Data Pipeline
+`sqlite.worker.ts` runs the official `@sqlite.org/sqlite-wasm` build in a Web Worker. Its Sync Access Handle pool VFS (SAH Pool) imports and opens the local databases read-only, reading pages as needed rather than loading a whole database into memory. A Web Lock gives one tab ownership of the storage pool; waiting tabs can acquire it when the owner releases it.
 
-### Source Data Pinning
+SQLite stores entry fields and JSON-encoded structured details. `entries_fts` uses FTS5 for word prefixes, forms, glosses and phonetic search; a separate trigram FTS5 table supports fuzzy matching. `form_lookup` maps exact inflected forms to entries. Search ranks match quality and frequency, with language-aware normalization.
 
-Source data from kaikki.org is pinned at a timestamp-keyed path in R2 (`source-data/<timestamp>/`). The version is controlled by `SOURCE_DATA_VERSION` in `pipeline/cache.py`. This ensures reproducible builds.
+`DictRecord` includes `id`, `word`, `lang`, `pos`, `senses` and `freq`, with optional forms, pronunciation, etymology and linked details. Some dictionaries include additional form and pronunciation metadata. Multiple records can share a word; detail pages group records by part of speech. Normalized lookup keys are stored separately from display spelling.
 
-### Golden Tests
+Dictionary pages disable server rendering and load from installed local databases. A PWA service worker caches the app shell, scripts, styles and WebAssembly assets for offline navigation. Lexicoff's dictionary storage uses SQLite/OPFS, not Dexie/IndexedDB.
 
-`pipeline/tests/test_conjugation.py` runs `extract_conjugation()` against committed fixture verbs and compares output to golden files in `pipeline/tests/golden/conj/`. To regenerate: `pixi run pytest pipeline/tests/ --update-golden`.
+Key files under `apps/lexicoff/src/lib/`:
 
-### Sitemaps
+- `sqlite.worker.ts` — database installation, queries, search and deletion.
+- `sqliteClient.svelte.ts` — worker messaging and reactive storage state.
+- `download.worker.ts` — streaming download and decompression to OPFS.
+- `syncManager.svelte.ts` — manual download/update orchestration.
+- `searchLang.svelte.ts` — selected language and database readiness.
+- `searchNormalization.ts`, `phonetic.ts` — query normalization and phonetic helpers.
+- `types.ts` — dictionary records and manifest types.
 
-Generated into `apps/*/static/`. Large sitemaps (>40K URLs) are automatically split into numbered parts (e.g. `sitemap-en-1.xml`, `sitemap-en-2.xml`). English dictionary has ~700K entries = ~18 sitemap files.
+The SQLite dependency is pinned and patched to preserve downloaded databases when pool initialization fails. `npm ci` applies the patch through `postinstall`; review `apps/lexicoff/patches/README.md` and the patch when upgrading SQLite. Do not call `removeVfs()` for ordinary shutdown: it deletes installed dictionaries.
 
-### CI/Deploy Flow
+### Routing and environment
 
-- **PR CI:** `ci-congeegator.yml` and `ci-lexicoff.yml` with path filters on `apps/<app>/**` and `pipeline/**`. Runs lint, typecheck, build, pipeline golden tests, manifest metadata check.
-- **Deploy (`deploy.yml`):** Single workflow with path-based conditional jobs:
-  - `changes` job detects what changed (`pipeline/**`, `apps/congeegator/**`, `apps/lexicoff/**`)
-  - `generate` job runs the pipeline once — **only if pipeline code changed** (or manual dispatch). Uploads data to R2 and passes manifests as artifacts.
-  - `deploy-congeegator` / `deploy-lexicoff` jobs run in parallel if their app or the pipeline changed. UI-only changes skip generation entirely (~30s deploy).
-- **Manual deploy:** `workflow_dispatch` on `deploy.yml` runs everything (generate + both deploys). Or `npm run deploy:prod` from app directory for local deploy.
-- **Pin source data:** Monthly cron (`pin-source-data.yml`). Downloads latest data, updates `SOURCE_DATA_VERSION`, regenerates output, opens PR.
+- Congeegator `/[lang]/[verb]` — verb conjugation page.
+- Lexicoff `/[lang]/[word]` — local dictionary page.
+- Both apps: `/` homepage, `/[lang]` redirect to `/?lang={lang}`, `/app-shell` offline fallback, `/dev-r2-mock/[...file]` local data proxy.
+- Each app's `dataUtils.ts` reads its manifest and constructs R2 URLs.
+- `VITE_R2_URL` is `/dev-r2-mock` in development and points at R2 in staging/production. Local proxy data comes from the app's `r2_data/` directory.
 
-### Manifest Metadata Check
+## Source data and validation
 
-`pixi run python -m pipeline.generate --check-manifest-metadata` verifies both congeegator and lexicoff `data-manifest.json` files match current config definitions. Runs in CI on every PR.
+Source snapshots are pinned in R2 under `source-data/<timestamp>/`. `pipeline/cache.py` defines the default `SOURCE_DATA_VERSION` and per-language overrides in `SOURCE_DATA_VERSIONS`. Partial updates preserve other languages' snapshots. Pinning splits the English extract across the union of both apps' language catalogues.
+
+For a local source review without uploads or version changes:
+
+```sh
+pixi run pin-source-data --languages pt ca --output-dir /tmp/dictionary-source --no-upload
+pixi run python -m pipeline.audit_dictionary --languages pt ca \
+  --source-dir /tmp/dictionary-source --output /tmp/dictionary-audit.json
+```
+
+Pinning also accepts `--input-file` for a downloaded extract and `--source-sha256` to verify it. The source-pinning workflow supports publishing a reviewed snapshot through its `languages`, `version`, `source_sha256` and `publish_only` inputs.
+
+Conjugation golden tests compare fixtures with `pipeline/tests/golden/conj/`. Regenerate intentionally with `pixi run pytest pipeline/tests/ --update-golden`. Dictionary and SQLite tests live alongside them in `pipeline/tests/`. Manifest checks compare both apps' committed metadata with their language configurations.
+
+The current generation entry point writes Congeegator sitemaps into `apps/congeegator/static/`; it does not generate Lexicoff dictionary sitemaps.
+
+## CI and deployment
+
+- `ci-congeegator.yml` and `ci-lexicoff.yml` run frontend checks and pipeline validation for their configured PR paths. Consult the workflows for exact filters and commands.
+- `deploy.yml` runs on matching pushes to `main` or manual dispatch. It regenerates both datasets, uploads them to R2, then builds and deploys both apps in parallel using fresh manifest artifacts. There is currently no per-app change-detection job or UI-only generation bypass.
+- `pin-source-data.yml` provides scheduled and manual source updates, with a publish-only option. Consult its schedule and inputs before changing source-pinning behavior.
 
 ## Conventions
 
-- Svelte 5 runes (`$state`, `$derived`, `$effect`, `$props`) throughout — no legacy `$:` reactive statements
-- `.svelte.ts` extension for files using Svelte runes outside components
-- No npm workspaces — each app has its own `package.json` and `node_modules`
-- Pipeline modules use relative imports within the `pipeline/` package
-- No auto-sync — downloads are manual via the homepage download manager
+- Use Svelte 5 runes (`$state`, `$derived`, `$effect`, `$props`), not legacy `$:` reactive statements.
+- Use `.svelte.ts` for runes outside components.
+- Use relative imports within the Python `pipeline` package.
+- Preserve each app’s download behavior: Congeegator automatically syncs the selected language; Lexicoff uses manual downloads through the homepage download manager.
+- Keep Python and browser dictionary normalization consistent, including language-specific casing and script handling.
