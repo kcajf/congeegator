@@ -396,6 +396,107 @@ class TestSqliteOutput:
 
 
 class TestExtendedDictionaries:
+    def test_rich_greek_entry_round_trip_preserves_links_and_search(self, tmp_path):
+        # Linked-entry fields and the new language-specific fields must coexist
+        # in one database; testing the two schemas separately misses a merge loss.
+        path = str(tmp_path / "grc-rich.sqlite")
+        entry = {
+            "word": "λόγος",
+            "pos": "noun",
+            "freq": 5.25,
+            "gender": "m",
+            "senses": [{
+                "gloss": "word, speech",
+                "tags": ["literary"],
+                "topics": ["linguistics"],
+                "qualifier": "of spoken language",
+                "links": [{"word": "word", "lang": "en"}],
+                "synonyms": [{"word": "ῥῆμα", "lang": "grc"}],
+                "examples": [{
+                    "text": "ὁ λόγος καλός.",
+                    "translation": "The word is good.",
+                    "roman": "ho logos kalos",
+                    "bold": [[2, 7]],
+                    "translationBold": [[4, 8]],
+                }],
+            }],
+            "forms": ["λόγου", "λόγοι"],
+            "pronunciation": "/ló.ɡos/",
+            "etymology": "From λέγω.",
+            "details": {
+                "etymologyLinks": [{"word": "λέγω", "lang": "grc"}],
+                "derived": [{"word": "λογικός", "lang": "grc", "sense": "rational"}],
+            },
+            "formDetails": [{"form": "λόγου", "tags": ["Attic", "genitive", "singular"]}],
+            "pronunciations": [
+                {"ipa": "/ló.ɡos/", "label": "5th BCE Attic"},
+                {"ipa": "/ˈlo.ɣos/", "label": "Koine"},
+            ],
+        }
+        inflection = {
+            "word": "λόγου",
+            "pos": "noun",
+            "senses": [{
+                "gloss": "genitive singular of λόγος",
+                "formOf": [{"word": "λόγος", "lang": "grc"}],
+                "links": [{"word": "λόγος", "lang": "grc"}],
+            }],
+        }
+        write_sqlite_database([entry, inflection], "grc", None, path)
+        with sqlite3.connect(path) as conn:
+            conn.row_factory = sqlite3.Row
+            stored = dict(conn.execute("SELECT * FROM entries WHERE id = 0").fetchone())
+            json_fields = {
+                "senses": "senses",
+                "forms": "forms",
+                "details": "details",
+                "form_details": "formDetails",
+                "pronunciations": "pronunciations",
+            }
+            for column in json_fields:
+                stored[column] = json.loads(stored[column])
+            assert stored == {
+                "id": 0,
+                "word": entry["word"],
+                "word_key": "λόγος",
+                "search_key": "λογοσ",
+                "pos": entry["pos"],
+                "freq": entry["freq"],
+                "gender": entry["gender"],
+                "pronunciation": entry["pronunciation"],
+                "etymology": entry["etymology"],
+                **{column: entry[field] for column, field in json_fields.items()},
+            }
+            stored_inflection = conn.execute("SELECT * FROM entries WHERE id = 1").fetchone()
+            assert json.loads(stored_inflection["senses"]) == inflection["senses"]
+            for column in ("details", "form_details", "pronunciations"):
+                assert stored_inflection[column] is None
+
+            conn.row_factory = None
+            # Accent-free aliases aid search without altering exact reverse links
+            # or the spelling and rich data displayed on the destination page.
+            assert conn.execute(
+                "SELECT id FROM entries WHERE search_key = ?",
+                (dictionary_search_key("ΛΟΓΟΣ", "grc"),),
+            ).fetchall() == [(0,)]
+            assert conn.execute("SELECT form_key, entry_id FROM form_lookup ORDER BY form_key").fetchall() == [
+                ("λόγοι", 0), ("λόγου", 0),
+            ]
+            exact_form = dictionary_word_key(unicodedata.normalize("NFD", "ΛΌΓΟΥ"), "grc")
+            assert conn.execute(
+                "SELECT entry_id FROM form_lookup WHERE form_key = ?", (exact_form,),
+            ).fetchall() == [(0,)]
+            assert conn.execute(
+                "SELECT entry_id FROM form_lookup WHERE form_key = 'λογου'",
+            ).fetchall() == []
+            for column, query in [("word", "λογοσ"), ("forms_text", "λογου"), ("gloss_text", "speech")]:
+                assert conn.execute(
+                    f"SELECT rowid FROM entries_fts WHERE {column} MATCH ?", (f'"{query}"',),
+                ).fetchall() == [(0,)]
+            assert conn.execute(
+                "SELECT rowid FROM entries_fts WHERE forms_text MATCH 'Attic'",
+            ).fetchall() == []
+
     @pytest.mark.parametrize("lang,word,query,form,form_query", [
         ("grc", "ὕδωρ", "υδω", "ῠ̔́δᾰτος", "υδατο"),
         ("hi", "पानी", "पान", "पानियों", "पानिय"),
@@ -470,6 +571,6 @@ class TestExtendedDictionaries:
         write_sqlite_database(sample_entries, "fr", None, path)
         with sqlite3.connect(path) as conn:
             assert [r[1] for r in conn.execute("PRAGMA table_info(entries)")] == [
-                "id", "word", "word_key", "pos", "senses", "freq", "gender", "forms", "pronunciation", "etymology"]
+                "id", "word", "word_key", "pos", "senses", "freq", "gender", "forms", "pronunciation", "etymology", "details"]
             schema = conn.execute("SELECT sql FROM sqlite_master WHERE name='entries_fts'").fetchone()[0]
             assert "categories" not in schema

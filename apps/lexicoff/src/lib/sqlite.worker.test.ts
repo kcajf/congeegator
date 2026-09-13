@@ -279,6 +279,161 @@ describe('multilingual dictionary search', () => {
 	});
 });
 
+describe('linked entry compatibility and reverse forms', () => {
+	async function openLinked() {
+		const s = setup(true);
+		// The fake database advertises the added schema at open time.
+		const Base = s.pool.OpfsSAHPoolDb;
+		s.pool.OpfsSAHPoolDb = class extends Base {
+			constructor(filename: string) {
+				super(filename);
+				const old = this.exec.getMockImplementation()!;
+				this.exec.mockImplementation((request) => {
+					old(request);
+					if (request.sql === 'PRAGMA table_info(entries)')
+						request.callback([10, 'details', 'TEXT', 0, null, 0]);
+				});
+			}
+		};
+		s.files.add('/de-aaaaaaaa.sqlite');
+		await s.start();
+		await s.send('open', 'de');
+		return s;
+	}
+
+	it('reads rich fields and does not replace a real headword with form matches', async () => {
+		const s = await openLinked();
+		const exec = s.databases[0].exec;
+		exec.mockImplementation((request) => {
+			if (request.sql?.includes('FROM entries WHERE word_key'))
+				request.callback([
+					1,
+					'manchen',
+					'pron',
+					'[{"gloss":"inflection of manch","formOf":[{"word":"manch","lang":"de"}]}]',
+					2,
+					null,
+					null,
+					null,
+					null,
+					'{"related":[{"word":"manch","lang":"de"}]}'
+				]);
+		});
+		const response = await s.send('getWord', 'de', 'manchen');
+		expect(response.result[0].details.related[0].word).toBe('manch');
+		expect(response.result[0].senses[0].formOf[0].lang).toBe('de');
+		expect(response.result[0].matchedForm).toBeUndefined();
+		expect(exec.mock.calls.some(([request]) => request.sql?.includes('FROM form_lookup'))).toBe(
+			false
+		);
+	});
+
+	it('returns all matching lemmas when only an exact inflection is present', async () => {
+		const s = await openLinked();
+		s.databases[0].exec.mockImplementation((request) => {
+			if (request.sql?.includes('FROM form_lookup')) {
+				expect(request.bind).toEqual(['machte sich auf den weg']);
+				request.callback([
+					7,
+					'sich auf den Weg machen',
+					'verb',
+					'[{"gloss":"hit the road"}]',
+					2,
+					null,
+					null,
+					null,
+					null,
+					null
+				]);
+			}
+		});
+		const response = await s.send('getWord', 'de', 'machte sich auf den Weg');
+		expect(response.result[0]).toMatchObject({
+			word: 'sich auf den Weg machen',
+			matchedForm: 'machte sich auf den Weg',
+			lang: 'de'
+		});
+	});
+
+	it('keeps old downloads readable without querying added columns or tables', async () => {
+		const s = setup(true);
+		s.files.add('/fr-aaaaaaaa.sqlite');
+		await s.start();
+		await s.send('open');
+		s.databases[0].exec.mockImplementation((request) => {
+			if (request.sql?.includes('FROM entries WHERE'))
+				request.callback([
+					1,
+					'maison',
+					'noun',
+					'[{"gloss":"house","examples":["une maison"]}]',
+					4,
+					'f',
+					'["maisons"]',
+					null,
+					'From Latin'
+				]);
+		});
+		const response = await s.send('getWord', 'fr', 'maison');
+		expect(response.result[0].senses[0].examples).toEqual(['une maison']);
+		expect(response.result[0].details).toBeUndefined();
+		expect(
+			s.databases[0].exec.mock.calls.some(
+				([request]) => request.sql?.includes('form_lookup') || request.sql?.includes(', details')
+			)
+		).toBe(false);
+	});
+	it('ranks exact forms ahead of prefix results and shows the matched form', async () => {
+		const s = await openLinked();
+		s.databases[0].exec.mockImplementation((request) => {
+			if (request.sql?.includes('FROM form_lookup f')) {
+				expect(request.bind).toEqual(['cob']);
+				request.callback([7, 'corncob', 'noun', 2]);
+			} else if (request.sql?.includes('SELECT id, senses')) {
+				request.callback([7, '[{"gloss":"the core of a maize ear"}]']);
+			}
+		});
+		const response = await s.send('search', 'de', 'cob');
+		expect(response.result[0]).toMatchObject({ word: 'corncob', matched: 'cob', quality: 5 });
+	});
+
+	it('keeps exact spelling apart from case-insensitive fallback', async () => {
+		const s = await openLinked();
+		s.databases[0].exec.mockImplementation((request) => {
+			if (request.sql?.includes('FROM entries WHERE word_key')) {
+				request.callback([
+					1,
+					'Haus',
+					'noun',
+					'[{"gloss":"house"}]',
+					4,
+					null,
+					null,
+					null,
+					null,
+					null
+				]);
+				request.callback([
+					2,
+					'haus',
+					'verb',
+					'[{"gloss":"imperative of hausen"}]',
+					4,
+					null,
+					null,
+					null,
+					null,
+					null
+				]);
+			}
+		});
+		expect(
+			(await s.send('getWord', 'de', 'Haus')).result.map((entry: { word: string }) => entry.word)
+		).toEqual(['Haus']);
+		expect((await s.send('getWord', 'de', 'HAUS')).result).toHaveLength(2);
+	});
+});
+
 describe('extended dictionaries with real SQLite FTS', () => {
 	function database(lang: string, entries: { word: string; gloss: string; forms?: string[] }[]) {
 		const db = new DatabaseSync(':memory:');
@@ -359,6 +514,13 @@ describe('extended dictionaries with real SQLite FTS', () => {
 			{ word: 'ἄλλα', gloss: 'other things' },
 			{ word: 'ἀλλά', gloss: 'but' }
 		]);
+		db.exec('ALTER TABLE entries ADD COLUMN details TEXT');
+		db.exec(
+			'CREATE TABLE form_lookup (form_key TEXT, entry_id INTEGER, PRIMARY KEY(form_key, entry_id)) WITHOUT ROWID'
+		);
+		db.prepare('INSERT INTO form_lookup VALUES (?, 0)').run(dictionaryWordKey('ἄλλων', 'grc'));
+		const details = { related: [{ word: 'ἄλλος', lang: 'grc' }] };
+		db.prepare('UPDATE entries SET details=? WHERE id=0').run(JSON.stringify(details));
 		const formDetails = [{ form: 'ἄλλων', tags: ['Attic'] }];
 		const pronunciations = [{ ipa: '/ál.la/', label: '5th BCE Attic' }];
 		db.prepare('UPDATE entries SET form_details=?, pronunciations=? WHERE id=0').run(
@@ -382,7 +544,13 @@ describe('extended dictionaries with real SQLite FTS', () => {
 				['ἄλλα', 'ἀλλά'].sort()
 			);
 			expect((await s.send('getWord', 'grc', 'ἄλλα'.normalize('NFD'))).result).toMatchObject([
-				{ word: 'ἄλλα', senses: [{ gloss: 'other things' }], formDetails, pronunciations }
+				{ word: 'ἄλλα', senses: [{ gloss: 'other things' }], details, formDetails, pronunciations }
+			]);
+			expect((await s.send('getWord', 'grc', 'ἄλλων')).result).toMatchObject([
+				{ word: 'ἄλλα', matchedForm: 'ἄλλων', details, formDetails, pronunciations }
+			]);
+			expect((await s.send('search', 'grc', 'ἄλλων')).result).toMatchObject([
+				{ word: 'ἄλλα', matched: 'ἄλλων', quality: 5 }
 			]);
 		} finally {
 			db.close();

@@ -27,7 +27,11 @@
 </script>
 
 {#if toasts.list.length > 0}
-	<div class="toast-stack" aria-live="polite" style:bottom="{bottomOffset}px">
+	<div
+		class="toast-stack"
+		aria-live="polite"
+		style:bottom="calc({bottomOffset}px + var(--history-bar-height, 0px))"
+	>
 		{#each toasts.list as toast (toast.id)}
 			<div
 				class="toast"
@@ -65,19 +69,6 @@
 		letter-spacing: 0.02em;
 		pointer-events: auto;
 		text-align: center;
-	}
-
-	/* Extends the last toast's background color downward to fill the gap between
-	   the toast stack and the screen edge when bottomOffset lifts the stack. */
-	.toast:last-child::after {
-		content: '';
-		position: absolute;
-		left: 0;
-		right: 0;
-		top: calc(100% - 1px);
-		height: 100vh;
-		background: inherit;
-		pointer-events: none;
 	}
 
 	.toast.clickable {

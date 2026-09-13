@@ -159,7 +159,53 @@ def test_occitan_compound_instructions_removed_but_attested_compounds_retained()
 
 
 def test_coordinate_linkage_is_not_a_usage_example():
-    assert not any('Coordinate term:' in x for s in first('grc', 'γυνή')['senses'] for x in s.get('examples', []))
+    assert not any('Coordinate term:' in x['text'] for s in first('grc', 'γυνή')['senses'] for x in s.get('examples', []))
+
+
+def test_enrichment_preserves_rich_examples_and_sense_alignment():
+    entry = msgspec.convert({
+        'word': 'ὕδωρ', 'lang_code': 'grc', 'lang': 'Ancient Greek', 'pos': 'noun',
+        'senses': [
+            {'glosses': ['{{unexpanded}}'], 'raw_tags': ['wrong sense']},
+            {
+                'glosses': ['water'], 'links': [['water', 'water']],
+                'raw_tags': ['in Attic prose'],
+                'synonyms': [{'word': 'νᾶμα'}],
+                'examples': [
+                    {'text': 'Coordinate term: ἀνήρ', 'type': 'example'},
+                    {'text': 'P#61;A#95;1', 'type': 'example'},
+                    {
+                        'text': 'τὸ ὕδωρ', 'translation': 'the water',
+                        'roman': 'tò húdōr', 'ref': 'An attested quotation',
+                        'type': 'quotation', 'bold_text_offsets': [[3, 7]],
+                        'bold_translation_offsets': [[4, 9]],
+                    },
+                ],
+            },
+        ],
+        'derived': [{'word': 'ὑδάτινος'}],
+    }, type=Entry)
+    record = process_dict_entry(DictLanguageConfig('grc', 'Greek', 'Ancient Greek'), entry)
+    assert len(record['senses']) == 1
+    sense = record['senses'][0]
+    assert sense['examples'] == [{
+        'text': 'τὸ ὕδωρ', 'translation': 'the water', 'roman': 'tò húdōr',
+        'ref': 'An attested quotation', 'type': 'quotation',
+        'bold': [[3, 7]], 'translationBold': [[4, 9]],
+    }]
+    assert sense['tags'] == ['in Attic prose']
+    assert sense['links'] == [{'word': 'water', 'lang': 'en'}]
+    assert sense['synonyms'] == [{'word': 'νᾶμα', 'lang': 'grc'}]
+    assert record['details']['derived'] == [{'word': 'ὑδάτινος', 'lang': 'grc'}]
+
+
+def test_enrichment_still_filters_legacy_string_examples():
+    entry = msgspec.structs.replace(ENTRIES[0], senses=ENTRIES[0].senses[:1])
+    record = {'word': entry.word, 'pos': entry.pos, 'senses': [{
+        'gloss': 'water',
+        'examples': ['Coordinate term: ἀνήρ', 'P#61;A#95;1', 'τὸ ὕδωρ'],
+    }]}
+    assert enhance_record(entry, record, str.strip)['senses'][0]['examples'] == ['τὸ ὕδωρ']
 
 
 def test_water_long_vowel_ipa_retains_verified_epic_condition():

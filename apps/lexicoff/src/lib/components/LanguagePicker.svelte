@@ -105,6 +105,9 @@
 <style>
 	.picker-container {
 		position: relative;
+		max-width: 35%;
+		min-width: 0;
+		flex-shrink: 0;
 	}
 
 	.picker-container,
@@ -118,6 +121,7 @@
 	.trigger {
 		touch-action: none;
 		display: inline-flex;
+		max-width: 100%;
 		align-items: center;
 		gap: 0.35rem;
 		padding: 0.4rem 0.2rem;
@@ -129,7 +133,14 @@
 		color: #333;
 	}
 
+	.trigger bdi {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
 	.chevron {
+		flex-shrink: 0;
 		transition: transform 0.15s ease;
 		color: #999;
 	}
