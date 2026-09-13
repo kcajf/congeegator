@@ -96,7 +96,7 @@ def _generate_data_for_lang(
                     fingerprint = hashlib.sha256(encoded).digest()
                     if fingerprint not in seen_dict_records:
                         seen_dict_records.add(fingerprint)
-                        dict_entries.append(dict_entry, encoded)
+                        dict_entries.append(dict_entry)
                     else:
                         duplicate_dict_records += 1
 

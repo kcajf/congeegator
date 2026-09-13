@@ -48,9 +48,9 @@ def main():
             "language": args.language,
             "sqlite_version": sqlite3.sqlite_version,
             "entries": len(entries),
-            "forms": sum(len(entry.get("forms", [])) for entry in (
-                entries.iter_for_sqlite() if isinstance(entries, PackedDictionaryEntries) else entries
-            )),
+            "forms": entries.form_count if isinstance(entries, PackedDictionaryEntries) else sum(
+                len(entry.get("forms", [])) for entry in entries
+            ),
             "packed_payload_bytes": entries.payload_bytes if isinstance(entries, PackedDictionaryEntries) else None,
             "peak_rss_bytes": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * (1 if sys.platform == "darwin" else 1024),
             "processing_seconds": round(processed - start, 3),

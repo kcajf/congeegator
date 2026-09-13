@@ -21,7 +21,7 @@ def records():
 def packed(source):
     result = PackedDictionaryEntries()
     for entry in source:
-        result.append(entry, msgspec.json.encode(entry))
+        result.append(entry)
     result.sort_by_frequency(lambda word: 4.5 if word == "talo" else 0.0)
     return result
 
@@ -61,11 +61,23 @@ def test_packed_records_produce_identical_database_and_search_indexes(tmp_path, 
             assert a.execute(f"SELECT * FROM {table}_vocab ORDER BY 1, 2, 3, 4").fetchall() == b.execute(f"SELECT * FROM {table}_vocab ORDER BY 1, 2, 3, 4").fetchall()
 
 
-def test_sqlite_iteration_keeps_completed_json_unparsed():
+def test_sqlite_iteration_keeps_final_compressed_details_unchanged(monkeypatch):
+    from pipeline.entry_json import decode_entry_json
     source = records()
     result = packed(source)
-    entry = next(result.iter_for_sqlite())
-    assert isinstance(entry['formDetails'], msgspec.Raw)
-    assert msgspec.json.decode(entry['formDetails']) == source[0]['formDetails']
-    assert isinstance(entry['forms'], list)
-    assert isinstance(entry['senses'], list)
+    prepared = next(result.iter_for_sqlite())
+    assert isinstance(prepared.form_details, bytes)
+    assert prepared.form_details is result._rows[0].form_details
+    assert prepared.forms is result._rows[0].forms
+    assert decode_entry_json(prepared.form_details) == source[0]['formDetails']
+    assert prepared.entry['forms'] == source[0]['forms']
+    assert 'formDetails' not in prepared.entry
+    assert result.form_count == 122
+
+    # SQLite must not recompress any already prepared large field.
+    def unexpected(*args):
+        raise AssertionError('Packed fields must pass through unchanged')
+    monkeypatch.setattr('pipeline.sqlite_output.encode_entry_json', unexpected)
+    import tempfile
+    with tempfile.TemporaryDirectory() as directory:
+        write_sqlite_database(result, 'fi', None, directory + '/test.sqlite')

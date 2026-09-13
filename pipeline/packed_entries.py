@@ -1,9 +1,9 @@
-"""Compact, repeatable dictionary records between extraction and SQLite writing.
+"""Retain dictionary fields in the same compact format written into SQLite.
 
-Keep encoded records instead of millions of live form-detail dicts/lists. Large
-records compress particularly well because their grammatical readings repeat.
-Only the entry being consumed is expanded; the public JSON/SQLite schema stays
-unchanged. Iteration returns independent snapshots, not mutable stored objects.
+The large forms/details columns are encoded and compressed once on extraction.
+Ranking touches only small metadata. SQLite expands forms for its search indexes,
+but copies the stored fields directly; detail JSON stays compressed until a word
+page is read. Ordinary sequence iteration returns independent decoded snapshots.
 """
 
 from collections.abc import Callable, Iterator, Sequence
@@ -12,79 +12,96 @@ from typing import Any
 import msgspec
 import zstandard
 
+from .entry_json import ROW_COMPRESSION_LEVEL, decode_entry_json, encode_entry_json
 
-class _SqliteEntry(msgspec.Struct):
+StoredJson = str | bytes | None
+
+
+class _SqliteMetadata(msgspec.Struct, frozen=True):
     word: str
     pos: str
     senses: list[dict[str, Any]]
-    forms: list[str] | None = None
     gender: str | None = None
     pronunciation: str | None = None
     etymology: str | None = None
-    # These columns are copied into SQLite verbatim. Parsing their nested
-    # dictionaries/lists would only be followed by encoding them again.
+    # These smaller columns are also copied verbatim, without parsing their
+    # nested objects just to encode them again. They retain JSON TEXT storage.
     details: msgspec.Raw = msgspec.Raw(b"null")
-    formDetails: msgspec.Raw = msgspec.Raw(b"null")
     pronunciations: msgspec.Raw = msgspec.Raw(b"null")
+
+
+class PreparedDictionaryEntry(msgspec.Struct, frozen=True):
+    entry: dict[str, Any]
+    forms: StoredJson
+    form_details: StoredJson
 
 
 # Private metadata contains only strings, bytes, bools and floats: no cycles.
 class _PackedEntry(msgspec.Struct, gc=False):
     word: str
     payload: bytes
-    compressed: bool
+    forms: StoredJson
+    form_details: StoredJson
     frequency: float = 0.0
 
 
 class PackedDictionaryEntries(Sequence[dict[str, Any]]):
     def __init__(self) -> None:
         self._rows: list[_PackedEntry] = []
-        self._compressor = zstandard.ZstdCompressor(level=1)
+        self._compressor = zstandard.ZstdCompressor(level=ROW_COMPRESSION_LEVEL, write_checksum=True)
+        self.form_count = 0
 
-    def append(self, entry: dict[str, Any], encoded: bytes) -> None:
-        # Tiny entries gain little from a separate compression frame. Reuse the
-        # exact JSON already encoded for deduplication rather than encode again.
-        payload = self._compressor.compress(encoded) if len(encoded) >= 1024 else encoded
-        compressed = len(payload) < len(encoded)
-        self._rows.append(_PackedEntry(entry["word"], payload if compressed else encoded, compressed))
+    def append(self, entry: dict[str, Any]) -> None:
+        forms = encode_entry_json(entry.get("forms"), self._compressor)
+        details = encode_entry_json(entry.get("formDetails"), self._compressor)
+        # Keep only small fields in the metadata JSON, preserving explicit empty
+        # values for ordinary sequence reads. Large columns live once, separately.
+        metadata = dict(entry)
+        if forms is not None:
+            del metadata["forms"]
+        if details is not None:
+            del metadata["formDetails"]
+        self._rows.append(_PackedEntry(entry["word"], msgspec.json.encode(metadata), forms, details))
+        self.form_count += len(entry.get("forms") or ())
 
     def sort_by_frequency(self, frequency: Callable[[str], float]) -> None:
         for row in self._rows:
             row.frequency = frequency(row.word)
-        # Python's stable sort preserves source order for tied frequencies,
-        # including distinct entries sharing a headword. SQLite IDs depend on it.
+        # Stable source order for tied frequencies preserves SQLite entry IDs.
         self._rows.sort(key=lambda row: -row.frequency)
 
     @property
     def payload_bytes(self) -> int:
-        return sum(len(row.payload) for row in self._rows)
+        def size(value):
+            return len(value.encode()) if isinstance(value, str) else len(value or b"")
+        return sum(len(row.payload) + size(row.forms) + size(row.form_details) for row in self._rows)
 
     def __len__(self) -> int:
         return len(self._rows)
 
     @staticmethod
-    def _decode(row: _PackedEntry, decompressor) -> dict[str, Any]:
-        payload = decompressor.decompress(row.payload) if row.compressed else row.payload
-        entry = msgspec.json.decode(payload)
+    def _decode(row: _PackedEntry) -> dict[str, Any]:
+        entry = msgspec.json.decode(row.payload)
+        if row.forms is not None:
+            entry["forms"] = decode_entry_json(row.forms)
+        if row.form_details is not None:
+            entry["formDetails"] = decode_entry_json(row.form_details)
         entry["freq"] = row.frequency
         return entry
 
     def __iter__(self) -> Iterator[dict[str, Any]]:
-        decompressor = zstandard.ZstdDecompressor()
         for row in self._rows:
-            yield self._decode(row, decompressor)
+            yield self._decode(row)
 
-    def iter_for_sqlite(self) -> Iterator[dict[str, Any]]:
-        decompressor = zstandard.ZstdDecompressor()
-        decoder = msgspec.json.Decoder(_SqliteEntry)
+    def iter_for_sqlite(self) -> Iterator[PreparedDictionaryEntry]:
+        decoder = msgspec.json.Decoder(_SqliteMetadata)
         for row in self._rows:
-            payload = decompressor.decompress(row.payload) if row.compressed else row.payload
-            entry = msgspec.structs.asdict(decoder.decode(payload))
+            entry = msgspec.structs.asdict(decoder.decode(row.payload))
+            entry["forms"] = decode_entry_json(row.forms) if row.forms is not None else None
             entry["freq"] = row.frequency
-            yield entry
+            yield PreparedDictionaryEntry(entry, row.forms, row.form_details)
 
     def __getitem__(self, index):
-        decompressor = zstandard.ZstdDecompressor()
         if isinstance(index, slice):
-            return [self._decode(row, decompressor) for row in self._rows[index]]
-        return self._decode(self._rows[index], decompressor)
+            return [self._decode(row) for row in self._rows[index]]
+        return self._decode(self._rows[index])

@@ -15,7 +15,7 @@ import orjson
 import msgspec
 import zstandard
 
-from .packed_entries import PackedDictionaryEntries
+from .packed_entries import PackedDictionaryEntries, PreparedDictionaryEntry
 
 from .utils import log_timing
 from .entry_json import ROW_COMPRESSION_LEVEL, encode_entry_json
@@ -191,11 +191,18 @@ def write_sqlite_database(
             fts_rows = []
             fuzzy_rows = []
 
-            rows = entries.iter_for_sqlite() if isinstance(entries, PackedDictionaryEntries) else entries
-            for i, entry in enumerate(rows):
+            rows = entries.iter_for_sqlite() if isinstance(entries, PackedDictionaryEntries) else (
+                PreparedDictionaryEntry(
+                    entry,
+                    encode_entry_json(entry.get("forms"), field_compressor),
+                    encode_entry_json(entry.get("formDetails"), field_compressor),
+                ) for entry in entries
+            )
+            for i, prepared in enumerate(rows):
+                entry = prepared.entry
                 senses_json = orjson.dumps(entry["senses"]).decode()
                 forms = entry.get("forms")
-                forms_json = encode_entry_json(forms, field_compressor)
+                forms_json = prepared.forms
 
                 row = (
                     i,
@@ -209,7 +216,7 @@ def write_sqlite_database(
                     entry.get("pronunciation"),
                     entry.get("etymology"),
                     _json_column(entry.get("details")),
-                    encode_entry_json(entry.get("formDetails"), field_compressor),
+                    prepared.form_details,
                 )
                 if extended:
                     row += (
