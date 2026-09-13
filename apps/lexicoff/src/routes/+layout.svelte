@@ -102,6 +102,8 @@
 	let searchInput: HTMLInputElement | undefined = $state();
 
 	let searchResults = $state<SearchResult[]>([]);
+	let searchResultsQuery = $state('');
+	let previousSearchLang: string | undefined;
 	let searchStatus = $state<'idle' | 'searching' | 'complete' | 'error'>('idle');
 
 	afterNavigate((navigation) => {
@@ -211,6 +213,9 @@
 		const ready = searchLangState.indexReady;
 
 		const currentLang = searchLangState.lang;
+		// Keep results while refining a query, but never across language changes.
+		if (currentLang !== previousSearchLang) searchResults = [];
+		previousSearchLang = currentLang;
 		const { query: originalQuery, phoneticQuery } = prepareSearchRequest(currentLang, searchTerm);
 		if (!ready || originalQuery.length < 1) {
 			searchResults = [];
@@ -218,7 +223,6 @@
 			return;
 		}
 
-		searchResults = [];
 		searchStatus = 'searching';
 		let cancelled = false;
 
@@ -233,6 +237,7 @@
 					if (originalQuery !== searchTerm.trim()) return;
 					if (currentLang !== searchLangState.lang) return;
 					searchResults = results;
+					searchResultsQuery = originalQuery;
 					searchStatus = 'complete';
 				})
 				.catch((err: unknown) => {
@@ -351,7 +356,7 @@
 											&middot;
 										{/if}
 										{#if i === item.matchedGlossIdx}
-											{#each highlightGloss(gloss, searchTerm.trim()) as seg, j (j)}
+											{#each highlightGloss(gloss, searchResultsQuery) as seg, j (j)}
 												{#if seg.bold}<b>{seg.text}</b>{:else}{seg.text}{/if}
 											{/each}
 										{:else}
