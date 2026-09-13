@@ -422,16 +422,8 @@
 			padding-bottom: calc(2rem + var(--history-bar-height));
 		}
 
-		.navbar {
-			flex-wrap: wrap;
-		}
-
-		.logo {
-			flex-basis: 100%;
-		}
-
 		.search-container {
-			padding-left: 0;
+			padding-left: 0.5rem;
 		}
 	}
 
