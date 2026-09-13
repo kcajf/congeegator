@@ -1,0 +1,353 @@
+{
+  "form_occurrences": {
+    "az": 472,
+    "br": 58,
+    "cs": 31,
+    "cy": 9,
+    "da": 8,
+    "de": 95,
+    "el": 185,
+    "es": 133,
+    "et": 143,
+    "eu": 151,
+    "fa": 198,
+    "fi": 508,
+    "fr": 114,
+    "ga": 113,
+    "grc": 896,
+    "he": 80,
+    "hi": 8,
+    "hu": 467,
+    "id": 8,
+    "is": 124,
+    "it": 276,
+    "ka": 205,
+    "ko": 39,
+    "la": 24,
+    "lt": 191,
+    "mk": 47,
+    "ms": 9,
+    "nl": 17,
+    "oc": 176,
+    "ro": 1,
+    "ru": 43,
+    "sa": 104,
+    "sh": 52,
+    "sk": 26,
+    "sv": 1,
+    "tr": 910,
+    "uk": 32
+  },
+  "forms_per_entry": {
+    "az:101–1000": 1,
+    "az:11–100": 2,
+    "az:1–10": 1,
+    "br:11–100": 1,
+    "br:1–10": 2,
+    "cs:11–100": 1,
+    "cy:0": 1,
+    "cy:1–10": 3,
+    "da:1–10": 1,
+    "de:11–100": 1,
+    "el:11–100": 2,
+    "el:1–10": 1,
+    "es:101–1000": 1,
+    "et:101–1000": 1,
+    "et:11–100": 1,
+    "eu:11–100": 3,
+    "fa:11–100": 3,
+    "fa:1–10": 2,
+    "fi:101–1000": 3,
+    "fr:11–100": 3,
+    "ga:0": 1,
+    "ga:101–1000": 1,
+    "ga:1–10": 4,
+    "grc:101–1000": 2,
+    "grc:11–100": 5,
+    "he:0": 1,
+    "he:11–100": 3,
+    "he:1–10": 7,
+    "hi:1–10": 3,
+    "hu:0": 1,
+    "hu:101–1000": 2,
+    "hu:11–100": 1,
+    "id:0": 1,
+    "id:1–10": 5,
+    "is:0": 2,
+    "is:11–100": 5,
+    "is:1–10": 1,
+    "it:101–1000": 1,
+    "it:11–100": 2,
+    "it:1–10": 5,
+    "ka:101–1000": 1,
+    "ka:11–100": 2,
+    "ko:11–100": 1,
+    "ko:1–10": 2,
+    "la:11–100": 2,
+    "lt:101–1000": 1,
+    "lt:11–100": 2,
+    "lt:1–10": 3,
+    "mk:11–100": 2,
+    "ms:0": 1,
+    "ms:1–10": 2,
+    "nl:0": 2,
+    "nl:11–100": 1,
+    "oc:11–100": 2,
+    "oc:1–10": 1,
+    "ro:1–10": 1,
+    "ru:11–100": 1,
+    "sa:11–100": 5,
+    "sh:11–100": 1,
+    "sh:1–10": 6,
+    "sk:1–10": 3,
+    "sv:1–10": 1,
+    "tr:101–1000": 1,
+    "uk:11–100": 2,
+    "uk:1–10": 1
+  },
+  "diagnostics": {
+    "az:reviewed-source-cleanup": 30,
+    "az:unknown-tag:general": 3,
+    "az:unknown-tag:specific": 3,
+    "br:normalized-spelling": 1,
+    "br:reviewed-source-cleanup": 6,
+    "cs:table-instruction": 1,
+    "da:normalized-spelling": 1,
+    "el:placeholder": 2,
+    "el:split-or-unwrapped": 60,
+    "el:unresolved-greek-cell": 12,
+    "fa:normalized-spelling": 30,
+    "fa:reviewed-source-cleanup": 103,
+    "fi:table-instruction": 2,
+    "fr:construction-instruction": 6,
+    "fr:detached-auxiliary": 3,
+    "ga:normalized-spelling": 2,
+    "ga:reviewed-source-cleanup": 1,
+    "grc:reviewed-source-cleanup": 33,
+    "he:normalized-spelling": 1,
+    "he:reviewed-source-cleanup": 1,
+    "hi:normalized-spelling": 1,
+    "hu:broken-brace": 16,
+    "hu:table-instruction": 2,
+    "id:language-note": 4,
+    "is:normalized-spelling": 1,
+    "is:reviewed-source-cleanup": 2,
+    "it:auxiliary-note": 3,
+    "it:normalized-spelling": 3,
+    "it:table-header": 2,
+    "ka:mixed-script-fragment": 22,
+    "ka:reviewed-source-cleanup": 1,
+    "ko:reviewed-source-cleanup": 2,
+    "la:declension-note": 2,
+    "lt:placeholder": 20,
+    "lt:unknown-tag:special": 1,
+    "mk:reviewed-source-cleanup": 12,
+    "nl:placeholder": 2,
+    "oc:reviewed-source-cleanup": 178,
+    "ro:unavailable-form": 1,
+    "ru:foreign-table-cell": 7,
+    "sa:reviewed-source-cleanup": 37,
+    "sh:placeholder": 2,
+    "sk:reviewed-source-cleanup": 25,
+    "sv:translation": 1,
+    "tr:repaired-person-column": 224,
+    "tr:unknown-tag:specific": 4,
+    "tr:withheld-person-column": 484,
+    "uk:transliteration-in-table": 15
+  },
+  "samples": {
+    "az:reviewed-source-cleanup": {
+      "word": "olmaq",
+      "form": "(mənim +) olacağım"
+    },
+    "az:unknown-tag:general": {
+      "word": "olmaq",
+      "form": "olanda"
+    },
+    "az:unknown-tag:specific": {
+      "word": "olmaq",
+      "form": "olarkən"
+    },
+    "br:normalized-spelling": {
+      "word": "barn",
+      "form": "barnet (auxiliary verb: kaout)"
+    },
+    "br:reviewed-source-cleanup": {
+      "word": "mat",
+      "form": "never occurs"
+    },
+    "cs:table-instruction": {
+      "word": "emigrovat",
+      "form": "When the verb is used in imperfective aspect, the future tense is a combination of a future form of být + infinitive emigrovat."
+    },
+    "da:normalized-spelling": {
+      "word": "google",
+      "form": "(have /havde) googlet"
+    },
+    "el:placeholder": {
+      "word": "απαντάω",
+      "form": "- —"
+    },
+    "el:split-or-unwrapped": {
+      "word": "ευχαριστώ",
+      "form": "ευχαριστιέμαι¹ - ευχαριστούμαι"
+    },
+    "el:unresolved-greek-cell": {
+      "word": "ευχαριστώ",
+      "form": "-ομε"
+    },
+    "fa:normalized-spelling": {
+      "word": "خانه",
+      "form": "خانهها، خانها (xâne-hấ, xâneấ^△)"
+    },
+    "fa:reviewed-source-cleanup": {
+      "word": "خانه",
+      "form": "خانهمان، خانهمون، خانمون^△ (xâné-(y)emân, xânámun^△)"
+    },
+    "fi:table-instruction": {
+      "word": "olla",
+      "form": "Regularly derivable colloquial forms (e.g. through omission of final consonants) are not listed."
+    },
+    "fr:construction-instruction": {
+      "word": "passer",
+      "form": "present indicative of avoir"
+    },
+    "fr:detached-auxiliary": {
+      "word": "absenter",
+      "form": "ayant"
+    },
+    "ga:normalized-spelling": {
+      "word": "Ó",
+      "form": "(obsolete except in sept names) Uíbh"
+    },
+    "ga:reviewed-source-cleanup": {
+      "word": "bhfeolta",
+      "form": "obsolete"
+    },
+    "grc:reviewed-source-cleanup": {
+      "word": "ἄγω",
+      "form": "εἶτον"
+    },
+    "he:normalized-spelling": {
+      "word": "בית",
+      "form": "form בָּיִת"
+    },
+    "he:reviewed-source-cleanup": {
+      "word": "היה",
+      "form": "אַל + Second person future tense"
+    },
+    "hi:normalized-spelling": {
+      "word": "पण्डित",
+      "form": "पण्डित ा"
+    },
+    "hu:broken-brace": {
+      "word": "ellenőriz",
+      "form": "ellen}őrizhetendem"
+    },
+    "hu:table-instruction": {
+      "word": "ad",
+      "form": "(and the concomitant changes in conditional and subjunctive mostly in the 1st- and 3rd-person singular like with other traditional -ik verbs)."
+    },
+    "id:language-note": {
+      "word": "Afganistan",
+      "form": "nonstandard or standard Indonesian"
+    },
+    "is:normalized-spelling": {
+      "word": "þvo",
+      "form": "þvondist (rare; see appendix)"
+    },
+    "is:reviewed-source-cleanup": {
+      "word": "fær",
+      "form": "declension"
+    },
+    "it:auxiliary-note": {
+      "word": "succedere",
+      "form": "the sense \"to succeed (someone in an office) \""
+    },
+    "it:normalized-spelling": {
+      "word": "bue",
+      "form": "buaccio (“dimwit, fool”)"
+    },
+    "it:table-header": {
+      "word": "essere",
+      "form": "infinitive"
+    },
+    "ka:mixed-script-fragment": {
+      "word": "ჭკვიანი",
+      "form": "ჭკვიანთაt)"
+    },
+    "ka:reviewed-source-cleanup": {
+      "word": "აკეთებს",
+      "form": "with neutral versioner"
+    },
+    "ko:reviewed-source-cleanup": {
+      "word": "자동차",
+      "form": "대"
+    },
+    "la:declension-note": {
+      "word": "quadrupes",
+      "form": "Third-declension noun (imparisyllabic non-i-stem or i-stem, ablative singular in -e or -ī)."
+    },
+    "lt:placeholder": {
+      "word": "abelnas",
+      "form": "Term?"
+    },
+    "lt:unknown-tag:special": {
+      "word": "arti",
+      "form": "árdamas"
+    },
+    "mk:reviewed-source-cleanup": {
+      "word": "сум",
+      "form": "present of сум + imperfect l-participle"
+    },
+    "nl:placeholder": {
+      "word": "no.",
+      "form": "[please provide]"
+    },
+    "oc:reviewed-source-cleanup": {
+      "word": "faire",
+      "form": "use gerund of aver + past participle"
+    },
+    "ro:unavailable-form": {
+      "word": "divide",
+      "form": "not used"
+    },
+    "ru:foreign-table-cell": {
+      "word": "азбука Брайля",
+      "form": "Capital sign"
+    },
+    "sa:reviewed-source-cleanup": {
+      "word": "गृह",
+      "form": "गृ॒हा1"
+    },
+    "sh:placeholder": {
+      "word": "karo",
+      "form": "Term?"
+    },
+    "sk:reviewed-source-cleanup": {
+      "word": "dom",
+      "form": "singular"
+    },
+    "sv:translation": {
+      "word": "sparka på någon som ligger",
+      "form": "kick someone who lies (down)"
+    },
+    "tr:repaired-person-column": {
+      "word": "gitmek",
+      "form": "giderim"
+    },
+    "tr:unknown-tag:specific": {
+      "word": "gitmek",
+      "form": "gidince"
+    },
+    "tr:withheld-person-column": {
+      "word": "gitmek",
+      "form": "gidermişsin"
+    },
+    "uk:transliteration-in-table": {
+      "word": "-лог",
+      "form": "-(ó)loh"
+    }
+  },
+  "output_sha256": "dee8a5747c04faed79339403298c74867ec6aafd656c2aebdb1fe879e16d8eae"
+}

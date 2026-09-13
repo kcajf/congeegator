@@ -3,10 +3,25 @@ import json
 import sqlite3
 
 import msgspec
+import pytest
 
 from pipeline.dictionary import (DICT_CONFIGS, extract_examples, extract_senses,
     extract_etymology, extract_etymology_links, process_dict_entry, word_link)
 from pipeline.sqlite_output import write_sqlite_database
+
+
+@pytest.mark.parametrize("text, expected", [
+    (" maison ", "maison"), ("ääkkönen", "ääkkönen"), ("κόσμος", "κόσμος"),
+    ("हिन्दी", "हिन्दी"), ("中文", "中文"), ("a\u0301", "a\u0301"),
+    ("two words", "two words"), ("", None), ("   ", None),
+    (" {{bad}} ", None), ("[[word]]", None), ("Template:word", None),
+    ("Module:word", None), ("Lua error", None), ("sCrIpT eRrOr", None),
+    ("<span>word</span>", None), ("plain: text", "plain: text"),
+])
+def test_text_fast_path_preserves_markup_filter(text, expected):
+    from pipeline.dictionary import _clean_text
+
+    assert _clean_text(text) == expected
 from pipeline.wiktionary import Entry, EtymologyTemplate, Sense, FormOf
 
 

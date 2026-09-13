@@ -28,7 +28,7 @@ def test_ancient_greek_gender_periods_and_dialect_forms():
     assert all('label' in p for p in r['pronunciations'])
     assert any('Attic' in p['label'] for p in r['pronunciations'])
     assert any('Koine' in p['label'] for p in r['pronunciations'])
-    assert any('Epic' in f['tags'] for f in r['formDetails'])
+    assert any('Epic' in reading_labels(f) for f in r['formDetails'])
     assert not any('hŭ' in f for f in r['forms'])
     assert not {'εἶτον', 'εἴτην', 'εἶμεν', 'εἶτε', 'εἶεν'} & set(first('grc', 'ἄγω')['forms'])
     assert 'εἶτον' in first('grc', 'εἰμί')['forms']
@@ -81,7 +81,7 @@ def test_persian_lexical_heads_recover_and_varieties_stay_labelled():
     assert not any('(' in f or 'ZWNJ' in f for f in r['forms'])
     assert any('Classical Persian' in p.get('label', '') for p in r['pronunciations'])
     assert any('Iran' in p.get('label', '') for p in r['pronunciations'])
-    assert any(f['form'] == 'хона' and 'Tajik' in f['tags'] for f in r['formDetails'])
+    assert any(f['form'] == 'хона' and 'Tajik' in reading_labels(f) for f in r['formDetails'])
     e = next(e for e in ENTRIES if e.lang_code == 'fa' and e.word == 'بودن')
     assert not trusted_persian_head(msgspec.structs.replace(e, head_templates=()))
     assert not trusted_persian_head(msgspec.structs.replace(e, word='budan'))
@@ -128,7 +128,7 @@ def test_every_form_detail_refers_to_a_retained_indexed_form():
     for e in ENTRIES:
         r = process_dict_entry(DictLanguageConfig(e.lang_code, e.lang, e.lang), e)
         if r:
-            assert all(f['form'] in r.get('forms', []) and f['tags'] for f in r.get('formDetails', []))
+            assert all(f['form'] in r.get('forms', []) and f['kind'] for f in r.get('formDetails', []))
 
 
 def test_english_looking_serbo_croatian_inflections_are_real_words():
@@ -145,11 +145,11 @@ def test_unexpanded_term_placeholder_is_never_a_spelling(code, word):
 def test_raw_period_and_meaning_qualifiers_remain_attached():
     assert any('in Attic prose' in s.get('tags', []) for s in first('grc', 'μῦθος')['senses'])
     assert any('in Koine' in s.get('tags', []) for s in first('grc', 'ὑμέτερος')['senses'])
-    kind = {f['form']: f['tags'] for f in first('is', 'kind')['formDetails']}
+    kind = {f['form']: reading_labels(f) for f in first('is', 'kind')['formDetails']}
     assert 'in the meaning race' in kind['kindir']
     assert 'nominative plural' in kind['kindir']
     assert 'indefinite accusative plural' in kind['kindir']
-    fjandi = {f['form']: f['tags'] for f in first('is', 'fjandi')['formDetails']}
+    fjandi = {f['form']: reading_labels(f) for f in first('is', 'fjandi')['formDetails']}
     assert 'in the meaning "devil"' in fjandi['fjandar']
     assert 'in the meaning "enemy"' in fjandi['fjendur']
 
@@ -218,3 +218,8 @@ def test_water_long_vowel_ipa_retains_verified_epic_condition():
     assert {'ipa': '/hý.dɔːr/', 'label': '5ᵗʰ BCE Attic'} in pronunciations
     assert all('Epic poetic variant' not in p.get('label', '')
                for p in pronunciations if p['ipa'] != '/hy̌ː.dɔːr/')
+
+
+def reading_labels(detail):
+    return [label for reading in detail.get('readings', [])
+            for label in ([' '.join(reading.get('grammar', []))] + reading.get('qualifiers', [])) if label]

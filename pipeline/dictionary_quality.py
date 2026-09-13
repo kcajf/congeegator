@@ -5,6 +5,7 @@ serialization. Error tags alone never disqualify a lexical form.
 """
 import re
 import unicodedata
+from functools import lru_cache
 
 from .utils import strip_diacritics
 from .wiktionary import Entry
@@ -31,12 +32,21 @@ nominative accusative genitive dative ablative locative instrumental vocative
 ergative absolutive partitive illative inessive elative allative adessive
 essive translative comitative abessive terminative prolative
 singular dual plural'''.split()
+_FORM_GRAMMAR_TAGS = frozenset(_FORM_GRAMMAR)
 
 
 def form_grammar(tags):
+    # Paradigms repeat the same few hundred grammatical readings millions of
+    # times. Ignore unrelated tags in the cache key; never retain raw qualifiers.
+    # Return a fresh list because callers combine/mutate their label lists.
+    return list(_cached_form_grammar(_FORM_GRAMMAR_TAGS.intersection(tags)))
+
+
+@lru_cache(maxsize=8192)
+def _cached_form_grammar(tags: frozenset[str]) -> tuple[str, ...]:
     reading = ' '.join(('aorist infinitive' if tag == 'infinitive-aorist' else tag.replace('-', ' '))
                        for tag in _FORM_GRAMMAR if tag in tags)
-    return [reading] if reading else []
+    return (reading,) if reading else ()
 
 
 def labels(tags):
@@ -187,31 +197,6 @@ def enhance_record(entry, record, clean_text):
                 sense['examples'] = examples
             else:
                 sense.pop('examples')
-    accepted = set(record.get('forms', []))
-    output, details = {}, {}
-    table_labels = []
-    for form in entry.forms:
-        if 'table-tags' in form.tags:
-            table_labels = labels((form.form or '').split())
-            continue
-        text = clean_text(form.form or '')
-        if text not in accepted:
-            continue
-        variants, extra = _form_variants(entry, form, text)
-        source_labels = form_grammar(form.tags) + labels(form.tags) + raw_labels(form.raw_tags, clean_text) + (table_labels if form.source else []) + extra
-        for variant in variants:
-            if not variant or variant == entry.word:
-                continue
-            output[variant] = None
-            if source_labels:
-                details.setdefault(variant, [])
-                details[variant] = list(dict.fromkeys(details[variant] + source_labels))
-    if output:
-        record['forms'] = list(output)
-    else:
-        record.pop('forms', None)
-    if details:
-        record['formDetails'] = [{'form': f, 'tags': tags} for f, tags in details.items()]
     pronunciations = []
     for sound in entry.sounds:
         if not isinstance(sound, dict) or not (ipa := clean_text(sound.get('ipa', ''))):

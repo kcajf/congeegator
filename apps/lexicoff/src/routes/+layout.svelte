@@ -104,6 +104,7 @@
 	let searchInput: HTMLInputElement | undefined = $state();
 
 	let searchResults = $state<SearchResult[]>([]);
+	let searchStatus = $state<'idle' | 'searching' | 'complete' | 'error'>('idle');
 
 	afterNavigate((navigation) => {
 		const lang = page.params.lang || page.url.searchParams.get('lang');
@@ -215,26 +216,39 @@
 		const { query: originalQuery, phoneticQuery } = prepareSearchRequest(currentLang, searchTerm);
 		if (!ready || originalQuery.length < 1) {
 			searchResults = [];
+			searchStatus = 'idle';
 			return;
 		}
+
+		searchResults = [];
+		searchStatus = 'searching';
+		let cancelled = false;
 
 		// 30ms debounce — imperceptible on single keystrokes, catches burst typing
 		const timer = setTimeout(() => {
 			sqliteClient
 				.search(currentLang, originalQuery, phoneticQuery)
 				.then((results) => {
+					// Ignore every response from a superseded effect, including A → B → A.
+					if (cancelled) return;
 					// Verify query or language hasn't changed while waiting
 					if (originalQuery !== searchTerm.trim()) return;
 					if (currentLang !== searchLangState.lang) return;
 					searchResults = results;
+					searchStatus = 'complete';
 				})
 				.catch((err: unknown) => {
+					if (cancelled) return;
 					console.error('Search failed:', err);
+					searchStatus = 'error';
 					searchResults = [];
 				});
 		}, 30);
 
-		return () => clearTimeout(timer);
+		return () => {
+			cancelled = true;
+			clearTimeout(timer);
+		};
 	});
 </script>
 
@@ -361,8 +375,12 @@
 						Download a language from the homepage to search
 					{/if}
 				</div>
-			{:else}
-				<div class="no-results">No matches found</div>
+			{:else if searchStatus === 'searching'}
+				<div class="no-results" role="status">Searching…</div>
+			{:else if searchStatus === 'error'}
+				<div class="no-results" role="status">Search failed. Try again.</div>
+			{:else if searchStatus === 'complete'}
+				<div class="no-results" role="status">No matches found</div>
 			{/if}
 		{:else}
 			{@render children()}

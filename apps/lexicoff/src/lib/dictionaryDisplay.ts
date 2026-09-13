@@ -41,3 +41,39 @@ export function formUsageLabels(entry: DictRecord): Map<string, string> {
 	}
 	return new Map([...labels].map(([form, tags]) => [form, [...tags].join(', ')]));
 }
+
+/** Complete readings keep qualifiers attached; legacy labels remain one reading. */
+export function formReadings(entry: DictRecord): Map<string, string[]> {
+	const result = new Map<string, string[]>();
+	const legacy = formUsageLabels(entry);
+	for (const detail of entry.formDetails ?? []) {
+		const readings = result.get(detail.form) ?? [];
+		for (const reading of detail.readings ?? []) {
+			const grammar = (reading.grammar ?? []).map(formatUsageLabel).join(' ');
+			const qualifiers = (reading.qualifiers ?? []).map(formatUsageLabel).join(', ');
+			const text = [grammar, qualifiers].filter(Boolean).join(' · ');
+			if (text && !readings.includes(text)) readings.push(text);
+		}
+		result.set(detail.form, readings);
+	}
+	for (const [form, label] of legacy) {
+		if (!result.get(form)?.length && label) result.set(form, [label]);
+	}
+	return result;
+}
+
+export function formGroups(entry: DictRecord, forms: string[]) {
+	const kinds = new Map((entry.formDetails ?? []).map((detail) => [detail.form, detail.kind]));
+	const groups = [
+		{ kind: 'inflection', label: 'Inflections' },
+		{ kind: 'variant', label: 'Spelling variants' },
+		{ kind: 'related', label: 'Related formations' },
+		{ kind: 'other', label: 'Other forms' }
+	];
+	return groups
+		.map(({ kind, label }) => ({
+			label,
+			forms: forms.filter((form) => (kinds.get(form) ?? 'other') === kind)
+		}))
+		.filter((group) => group.forms.length);
+}

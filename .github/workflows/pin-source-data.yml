@@ -82,6 +82,25 @@ jobs:
         if: ${{ !inputs.publish_only }}
         run: pixi run test
 
+      - name: Audit refreshed dictionary forms
+        if: ${{ !inputs.publish_only }}
+        env:
+          AUDIT_LANGUAGES: ${{ inputs.languages }}
+        run: |
+          args=()
+          if [[ -n "$AUDIT_LANGUAGES" ]]; then
+            read -r -a languages <<< "$AUDIT_LANGUAGES"
+            args+=(--languages "${languages[@]}")
+          fi
+          pixi run python -m pipeline.audit_forms --source-root cache --workers 4 --output output/forms-quality "${args[@]}"
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !inputs.publish_only }}
+        with:
+          name: dictionary-forms-quality
+          path: output/forms-quality/
+          if-no-files-found: error
+
       - name: Check source pinning
         if: ${{ inputs.publish_only }}
         run: pixi run pytest pipeline/tests/test_source_pinning.py
@@ -95,7 +114,7 @@ jobs:
           body: |
             Automated update of pinned source data from kaikki.org.
 
-            Review golden test diffs and update golden files if needed.
+            Review golden test diffs and the dictionary-forms-quality audit artifact (unknown tags, omission reasons, and forms-per-entry distributions). Update reviewed baselines only after checking the changes.
           branch: pin-source-data
           delete-branch: true
           add-paths: |
