@@ -7,6 +7,8 @@ class Form(msgspec.Struct, frozen=True):
     form: Optional[str] = None
     tags: set[str] = set()
     source: Optional[str] = None
+    links: tuple[Any, ...] = ()
+    raw_tags: tuple[str, ...] = ()
 
 
 class FormOf(msgspec.Struct, frozen=True):
@@ -21,11 +23,13 @@ class Sense(msgspec.Struct, frozen=True):
     categories: tuple[Any, ...] = ()
     glosses: tuple[str, ...] = ()
     examples: tuple[Any, ...] = ()
+    raw_tags: tuple[str, ...] = ()
 
 
 class HeadTemplate(msgspec.Struct, frozen=True):
     name: str
     args: dict[str, str] = {}
+    expansion: str = ""
 
 
 class EtymologyTemplate(msgspec.Struct, frozen=True):

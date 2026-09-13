@@ -6,6 +6,7 @@ import msgspec
 
 from .utils import _cat_names, strip_diacritics, to_phonetic_el
 from .wiktionary import Entry
+from .dictionary_quality import enhance_record, trusted_persian_head
 
 log = logging.getLogger(__name__)
 
@@ -230,6 +231,8 @@ def entry_is_valid(entry: Entry) -> bool:
     }
     for c in _cat_names(entry.categories):
         if c in BAD_CATEGORIES:
+            if c == "Persian terms in nonstandard scripts" and trusted_persian_head(entry):
+                continue
             return False
     return True
 
@@ -257,7 +260,7 @@ def process_dict_entry(config: DictLanguageConfig, entry: Entry) -> dict[str, An
     etymology = extract_etymology(entry)
     if etymology:
         processed["etymology"] = etymology
-    return processed
+    return enhance_record(entry, processed, _clean_text)
 
 
 def make_dict_language_static_metadata(config: DictLanguageConfig):

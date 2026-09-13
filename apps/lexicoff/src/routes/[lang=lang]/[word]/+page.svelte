@@ -1,51 +1,13 @@
 <script lang="ts">
 	import { appTitle, siteUrl } from '$lib/defs';
 	import { langWiktionaryName } from '$lib/dataUtils';
+	import DictionaryEntry from '$lib/components/DictionaryEntry.svelte';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
 
-	const POS_LABELS: Record<string, string> = {
-		noun: 'Noun',
-		verb: 'Verb',
-		adj: 'Adjective',
-		adv: 'Adverb',
-		prep: 'Preposition',
-		postp: 'Postposition',
-		ambiposition: 'Ambiposition',
-		circumpos: 'Circumposition',
-		conj: 'Conjunction',
-		contraction: 'Contraction',
-		pron: 'Pronoun',
-		det: 'Determiner',
-		article: 'Article',
-		intj: 'Interjection',
-		num: 'Numeral',
-		particle: 'Particle',
-		affix: 'Affix',
-		prefix: 'Prefix',
-		suffix: 'Suffix',
-		infix: 'Infix',
-		interfix: 'Interfix',
-		circumfix: 'Circumfix',
-		combining_form: 'Combining form',
-		root: 'Root',
-		phrase: 'Phrase',
-		prep_phrase: 'Prepositional phrase',
-		adv_phrase: 'Adverbial phrase',
-		proverb: 'Proverb',
-		classifier: 'Classifier',
-		counter: 'Counter',
-		preverb: 'Preverb',
-		converb: 'Converb',
-		adj_noun: 'Adjectival noun',
-		adj_verb: 'Adjectival verb',
-		adnominal: 'Adnominal',
-		name: 'Proper noun'
-	};
-
 	const wiktionaryUrl = $derived(
-		`https://en.wiktionary.org/wiki/${encodeURIComponent(data.word)}#${encodeURIComponent(langWiktionaryName(data.lang))}`
+		`https://en.wiktionary.org/wiki/${encodeURIComponent(data.word)}#${encodeURIComponent(langWiktionaryName(data.lang).replaceAll(' ', '_'))}`
 	);
 
 	const canonicalUrl = $derived(`${siteUrl}/${data.lang}/${encodeURIComponent(data.word)}`);
@@ -73,54 +35,12 @@
 
 <article class="word-page">
 	<header>
-		<h1>{data.word}</h1>
-		{#if data.entries[0]?.pronunciation}
-			<span class="pronunciation">{data.entries[0].pronunciation}</span>
-		{/if}
+		<h1><bdi lang={data.lang}>{data.word}</bdi></h1>
 	</header>
 
 	{#each data.entries as entry (entry.id)}
-		<section class="pos-section">
-			<h2 class="pos-label">
-				{POS_LABELS[entry.pos] ?? entry.pos}
-				{#if entry.gender}
-					<span class="gender">{entry.gender}</span>
-				{/if}
-			</h2>
-
-			<ol class="senses">
-				{#each entry.senses as sense, i (i)}
-					<li>
-						{#if sense.tags && sense.tags.length > 0}
-							<span class="tags">{sense.tags.join(', ')}</span>
-						{/if}
-						<span class="gloss">{sense.gloss}</span>
-						{#if sense.examples}
-							<ul class="examples">
-								{#each sense.examples as example, j (j)}
-									<li class="example">{example}</li>
-								{/each}
-							</ul>
-						{/if}
-					</li>
-				{/each}
-			</ol>
-
-			{#if entry.forms && entry.forms.length > 0}
-				<details class="forms-section">
-					<summary>Forms</summary>
-					<p class="forms">{entry.forms.join(', ')}</p>
-				</details>
-			{/if}
-		</section>
+		<DictionaryEntry {entry} lang={data.lang} />
 	{/each}
-
-	{#if data.entries[0]?.etymology}
-		<section class="etymology">
-			<h3>Etymology</h3>
-			<p>{data.entries[0].etymology}</p>
-		</section>
-	{/if}
 
 	<footer class="external-links">
 		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external URL -->
@@ -141,109 +61,7 @@
 		font-size: 2rem;
 		margin: 0;
 		display: inline;
-	}
-
-	.pronunciation {
-		color: var(--text-muted);
-		font-size: 0.9rem;
-		margin-left: 0.5rem;
-	}
-
-	.pos-section {
-		margin: 1.5rem 0;
-	}
-
-	.pos-label {
-		font-size: 1rem;
-		font-style: italic;
-		color: #3d85c6;
-		margin: 0 0 0.5rem;
-		font-weight: normal;
-		border-bottom: 1px solid var(--border);
-		padding-bottom: 0.25rem;
-	}
-
-	.gender {
-		font-size: 0.85em;
-		color: var(--text-muted);
-		font-style: normal;
-	}
-
-	.senses {
-		margin: 0;
-		padding-left: 1.5rem;
-	}
-
-	.senses li {
-		margin: 0.4rem 0;
-		line-height: 1.5;
-	}
-
-	.tags {
-		font-size: 0.8em;
-		color: #888;
-		font-style: italic;
-	}
-
-	.tags::after {
-		content: ' ';
-	}
-
-	.gloss {
-		font-size: 0.95rem;
-	}
-
-	.examples {
-		list-style: none;
-		padding: 0;
-		margin: 0.25rem 0 0;
-	}
-
-	.example {
-		font-style: italic;
-		color: var(--text-muted);
-		font-size: 0.85rem;
-		padding: 0.1rem 0;
-	}
-
-	.example::before {
-		content: '\201C';
-	}
-
-	.example::after {
-		content: '\201D';
-	}
-
-	.forms-section {
-		margin-top: 0.5rem;
-		font-size: 0.85rem;
-	}
-
-	.forms-section summary {
-		cursor: pointer;
-		color: var(--text-muted);
-	}
-
-	.forms {
-		color: var(--text-muted);
-		margin: 0.25rem 0;
-		line-height: 1.6;
-	}
-
-	.etymology {
-		margin-top: 1.5rem;
-		font-size: 0.85rem;
-		color: var(--text-muted);
-	}
-
-	.etymology h3 {
-		font-size: 0.9rem;
-		margin: 0 0 0.25rem;
-	}
-
-	.etymology p {
-		margin: 0;
-		line-height: 1.5;
+		overflow-wrap: anywhere;
 	}
 
 	.external-links {

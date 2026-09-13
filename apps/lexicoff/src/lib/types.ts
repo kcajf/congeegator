@@ -18,6 +18,16 @@ export interface DictSense {
 	tags?: string[];
 }
 
+export interface DictFormDetail {
+	form: string;
+	tags?: string[];
+}
+
+export interface DictPronunciation {
+	ipa: string;
+	label?: string;
+}
+
 export interface DictRecord {
 	id: Id;
 	word: string;
@@ -27,6 +37,8 @@ export interface DictRecord {
 	freq: number;
 	gender?: string;
 	forms?: string[];
+	formDetails?: DictFormDetail[];
+	pronunciations?: DictPronunciation[];
 	pronunciation?: string;
 	etymology?: string;
 }

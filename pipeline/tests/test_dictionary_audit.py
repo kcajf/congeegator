@@ -1,7 +1,10 @@
 import json
 
 from pipeline.audit_dictionary import audit_source, audit_sqlite, read_source
-from pipeline.dictionary import DictLanguageConfig
+from pipeline.dictionary import DictLanguageConfig, process_dict_entry
+from pipeline.wiktionary import Entry
+import msgspec
+import sqlite3
 from pipeline.sqlite_output import write_sqlite_database
 
 
@@ -90,3 +93,30 @@ def test_read_source_preserves_unicode_and_final_unterminated_line(tmp_path):
     path = tmp_path / "pt.jsonl.zst"
     path.write_bytes(zstandard.ZstdCompressor().compress(b"\n".join(lines)))
     assert [line.rstrip(b"\n") for line in read_source(path)] == lines
+
+
+def test_audit_detects_lost_pronunciation_context_even_when_counts_match(tmp_path):
+    config = DictLanguageConfig("grc", "Ancient Greek", "Ancient Greek")
+    raw = json.dumps({
+        "word": "ὕδωρ", "lang": "Ancient Greek", "lang_code": "grc", "pos": "noun",
+        "senses": [{"glosses": ["water"]}],
+        "sounds": [{"ipa": "/hy.dɔːr/", "note": "5th BCE Attic"}],
+    }).encode()
+    source = audit_source([raw], config)
+    record = process_dict_entry(config, msgspec.json.decode(raw, type=Entry))
+    path = tmp_path / "grc.sqlite"
+    write_sqlite_database([record], "grc", None, str(path))
+    assert audit_sqlite(path, "grc", source)["source_records_match"] is True
+    with sqlite3.connect(path) as conn:
+        conn.execute("UPDATE entries SET pronunciations=?", ('[{"ipa":"/hy.dɔːr/"}]',))
+    result = audit_sqlite(path, "grc", source)
+    assert result["source_counts_match"] is True
+    assert result["source_records_match"] is False
+
+
+def test_audit_search_probes_preserve_hindi_vowel_marks(tmp_path):
+    path = tmp_path / "hi.sqlite"
+    write_sqlite_database([{"word": "पानी", "pos": "noun", "senses": [{"gloss": "water"}]}], "hi", None, str(path))
+    result = audit_sqlite(path, "hi")
+    probe = next(p for p in result["search_probes"] if p["word"] == "पानी")
+    assert probe["fts_matches_all_records"] is True
