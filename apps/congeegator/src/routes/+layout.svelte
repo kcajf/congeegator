@@ -222,7 +222,11 @@
 			/>
 		</div>
 
-		<LanguagePicker onSelect={() => searchInput?.focus()} />
+		<LanguagePicker
+			onSelect={(focusSearch) => {
+				if (focusSearch) searchInput?.focus();
+			}}
+		/>
 	</nav>
 
 	{#if globalSync.map[searchLangState.lang]?.status === 'error' || searchLangState.error}

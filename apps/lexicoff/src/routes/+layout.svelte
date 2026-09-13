@@ -12,6 +12,7 @@
 	import { storage as sqliteClient } from '$lib/sqliteClient.svelte';
 	import type { SearchResult } from '$lib/sqliteClient.svelte';
 	import { searchLangState } from '$lib/searchLang.svelte';
+	import { globalSync } from '$lib/syncManager.svelte';
 	import { toasts } from '$lib/toasts.svelte';
 	import { prepareSearchRequest } from '$lib/searchRequest';
 	import { onMount, tick } from 'svelte';
@@ -79,7 +80,25 @@
 		}
 	});
 
+	const isInstalling = $derived(
+		Object.values(globalSync.map).some((info) => info.status === 'syncing')
+	);
+	const searchPlaceholder = $derived(
+		searchLangState.indexReady
+			? 'search...'
+			: sqliteClient.phase === 'opening'
+				? 'Opening…'
+				: sqliteClient.phase === 'error'
+					? 'Search unavailable'
+					: isInstalling
+						? 'Installing…'
+						: 'Install a language'
+	);
+
 	let searchTerm = $state('');
+	$effect(() => {
+		if (!searchLangState.indexReady) searchTerm = '';
+	});
 	let searchInput: HTMLInputElement | undefined = $state();
 
 	let searchResults = $state<SearchResult[]>([]);
@@ -259,16 +278,23 @@
 					onfocus={() => searchInput?.select()}
 					type="text"
 					id="searchInput"
-					placeholder="search..."
+					placeholder={searchPlaceholder}
+					disabled={!searchLangState.indexReady}
 					dir="auto"
-					aria-label="Search words or English definitions"
+					aria-label={searchLangState.indexReady
+						? 'Search words or English definitions'
+						: searchPlaceholder}
 					autocapitalize="off"
 					autocorrect="off"
 					autocomplete="off"
 				/>
 			</div>
 
-			<LanguagePicker onSelect={() => searchInput?.focus()} />
+			<LanguagePicker
+				onSelect={(focusSearch) => {
+					if (focusSearch) searchInput?.focus();
+				}}
+			/>
 		</nav>
 		<HistoryNavigation
 			onSelectCurrent={() => {
@@ -429,6 +455,12 @@
 		.search-container {
 			padding-left: 0.5rem;
 		}
+	}
+
+	.search-container input:disabled {
+		color: var(--text-muted);
+		cursor: default;
+		opacity: 0.7;
 	}
 
 	.search-container input {
