@@ -5,7 +5,10 @@ declare global {
 		// interface Error {}
 		// interface Locals {}
 		// interface PageData {}
-		// interface PageState {}
+		interface PageState {
+			lexicoffHistoryId?: string;
+			lexicoffReadingScroll?: { x: number; y: number };
+		}
 		// interface Platform { }
 	}
 }
