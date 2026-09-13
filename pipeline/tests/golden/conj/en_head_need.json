@@ -1,0 +1,50 @@
+{
+  "name": "need",
+  "nameNoDiacritics": "need",
+  "conjugation": [
+    "need",
+    "needing",
+    "needed",
+    [
+      "need",
+      "need",
+      "needs",
+      "need",
+      "need",
+      "need"
+    ],
+    [
+      "needed",
+      "needed",
+      "needed",
+      "needed",
+      "needed",
+      "needed"
+    ],
+    [
+      "have needed",
+      "have needed",
+      "has needed",
+      "have needed",
+      "have needed",
+      "have needed"
+    ],
+    [
+      "had needed",
+      "had needed",
+      "had needed",
+      "had needed",
+      "had needed",
+      "had needed"
+    ],
+    [
+      "will need",
+      "will need",
+      "will need",
+      "will need",
+      "will need",
+      "will need"
+    ]
+  ],
+  "gloss": "to have an absolute requirement for; to want strongly; to feel that one must have something; ..."
+}

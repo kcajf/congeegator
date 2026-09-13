@@ -1,0 +1,50 @@
+{
+  "name": "shall",
+  "nameNoDiacritics": "shall",
+  "conjugation": [
+    "",
+    "",
+    "",
+    [
+      "shall",
+      "shall",
+      "shall",
+      "shall",
+      "shall",
+      "shall"
+    ],
+    [
+      "should",
+      "should",
+      "should",
+      "should",
+      "should",
+      "should"
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ]
+  ],
+  "gloss": "used before a verb to indicate the simple future tense in the first person singular or plural; used similarly to indicate determination or obligation in the second and third persons singular or plural; used in questions with the first person singular or plural to suggest a possible future action"
+}

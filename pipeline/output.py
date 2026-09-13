@@ -10,7 +10,7 @@ from .utils import _orjson_dump
 log = logging.getLogger(__name__)
 
 
-def write_language_data(data: dict[str, Any], lang_dir: str, entries_key: str = "verbs", name_key: str = "name", pretty: bool = False, ndjson: bool = False):
+def write_language_data(data: dict[str, Any], lang_dir: str, entries_key: str = "verbs", name_key: str = "name", pretty: bool = False, ndjson: bool = False, case_sensitive_names: bool = False):
     os.makedirs(lang_dir, exist_ok=True)
 
     # full data file
@@ -39,8 +39,9 @@ def write_language_data(data: dict[str, Any], lang_dir: str, entries_key: str = 
     os.makedirs(chunks_dir)
     chunks: dict[str, dict[str, Any]] = {}
     for entry_data in data[entries_key]:
-        key = entry_data[name_key].lower()
-        letter = key[0] if key and key[0].isalnum() else "_"
+        name = entry_data[name_key]
+        key = name if case_sensitive_names else name.lower()
+        letter = name.lower()[0] if name and name[0].isalnum() else "_"
         chunks.setdefault(letter, {})[key] = entry_data
     for letter, chunk_data in chunks.items():
         with open(os.path.join(chunks_dir, f"{letter}.json"), "wb") as f:

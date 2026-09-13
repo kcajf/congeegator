@@ -7,6 +7,7 @@ class Form(msgspec.Struct, frozen=True):
     form: Optional[str] = None
     tags: set[str] = set()
     source: Optional[str] = None
+    topics: tuple[str, ...] = ()
 
 
 class FormOf(msgspec.Struct, frozen=True):

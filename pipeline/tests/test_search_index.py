@@ -307,7 +307,7 @@ verbs = [
     {'name': 'amo', 'conjugation': ['amātus sum', 'amātae sumus'], 'freq': 0},
 ]
 print(json.dumps({lang: build_search_index(verbs, lang=lang)
-                  for lang in ('pt', 'ca', 'nl', 'sv', 'la', 'fi')}, ensure_ascii=False))
+                  for lang in ('en', 'pt', 'ca', 'nl', 'sv', 'la', 'fi')}, ensure_ascii=False))
 """
     outputs = [
         subprocess.check_output(
@@ -318,3 +318,23 @@ print(json.dumps({lang: build_search_index(verbs, lang=lang)
         for seed in ('1', '2', '42')
     ]
     assert outputs[0] == outputs[1] == outputs[2]
+
+
+@pytest.mark.parametrize('name,forms,queries', [
+    ('have', ['has', 'had'], ['has', 'had']),
+    ('do', ['does', 'did'], ['does', 'did']),
+    ('go', ['went', 'will go', 'have gone'], ['went', 'will g', 'have g', 'gone']),
+    ('look up', ['looked up'], ['looked', 'look']),
+])
+def test_english_native_and_phrasal_forms_are_indexed(name, forms, queries):
+    index = build_search_index([{'name': name, 'conjugation': forms, 'freq': 5}], lang='en')
+    assert all(index[query] == [0] for query in queries)
+
+
+def test_english_short_whole_forms_survive_crowded_compound_buckets():
+    verbs = [{'name': f'a{i:03}', 'conjugation': ['has acted', 'had acted'], 'freq': 1}
+             for i in range(220)]
+    verbs += [{'name': 'have', 'conjugation': ['has', 'had'], 'freq': 6}]
+    index = build_search_index(verbs, lang='en')
+    assert index['has'][0] == index['had'][0] == 220
+    assert len(index['has']) == len(index['had']) == 200

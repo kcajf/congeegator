@@ -19,7 +19,7 @@ export function stripDiacritics(s: string): string {
 	return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
 
-const expandedLanguages = new Set(['pt', 'ca', 'nl', 'sv', 'fi', 'la']);
+const expandedLanguages = new Set(['en', 'pt', 'ca', 'nl', 'sv', 'fi', 'la']);
 
 export function prefixLookup(index: SearchIndex, query: string, lang?: string): Id[] {
 	if (lang && expandedLanguages.has(lang) && /\s/.test(query)) {
@@ -29,6 +29,24 @@ export function prefixLookup(index: SearchIndex, query: string, lang?: string): 
 			.map((part) => prefixLookup(index, part))
 			.filter((ids) => ids.length > 0)
 			.sort((a, b) => a.length - b.length);
+		if (lang === 'en') {
+			// English auxiliaries can fill every bucket (will lay: will l,
+			// will, lay). Share equally sized buckets instead of letting the
+			// first one consume the entire limit; narrower buckets still lead.
+			const ids = new Set<Id>();
+			for (let start = 0; start < buckets.length; ) {
+				let end = start + 1;
+				while (end < buckets.length && buckets[end].length === buckets[start].length) end++;
+				for (let row = 0; row < buckets[start].length; row++) {
+					for (let column = start; column < end; column++) {
+						ids.add(buckets[column][row]);
+						if (ids.size === MAX_PREFIX_IDS) return [...ids];
+					}
+				}
+				start = end;
+			}
+			return [...ids];
+		}
 		return [...new Set(buckets.flat())].slice(0, MAX_PREFIX_IDS);
 	}
 	for (let i = query.length; i > 0; i--) {
@@ -218,7 +236,7 @@ export function findMatches(
 	// build_search_index tokenises compound forms.
 	const GERMAN_AUXILIARY_INFINITIVES = new Set(['haben', 'sein']);
 	const considerConjugation = (form: string) => {
-		if (['pt', 'ca', 'nl', 'sv', 'fi', 'la'].includes(lang)) {
+		if (expandedLanguages.has(lang)) {
 			for (const variant of form.split('/')) {
 				const spelling = variant
 					.replace(/\s+\([^()]+\)(?=[\]}]*$)/, '')

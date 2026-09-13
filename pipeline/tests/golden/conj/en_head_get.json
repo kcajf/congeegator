@@ -1,0 +1,50 @@
+{
+  "name": "get",
+  "nameNoDiacritics": "get",
+  "conjugation": [
+    "get",
+    "getting",
+    "got/gotten (Australia, Canada, Ireland, New Zealand, UK, US)/getten (Geordie)",
+    [
+      "get",
+      "get",
+      "gets",
+      "get",
+      "get",
+      "get"
+    ],
+    [
+      "got",
+      "got",
+      "got",
+      "got",
+      "got",
+      "got"
+    ],
+    [
+      "have got/have gotten (Australia, Canada, Ireland, New Zealand, UK, US)/have getten (Geordie)",
+      "have got/have gotten (Australia, Canada, Ireland, New Zealand, UK, US)/have getten (Geordie)",
+      "has got/has gotten (Australia, Canada, Ireland, New Zealand, UK, US)/has getten (Geordie)",
+      "have got/have gotten (Australia, Canada, Ireland, New Zealand, UK, US)/have getten (Geordie)",
+      "have got/have gotten (Australia, Canada, Ireland, New Zealand, UK, US)/have getten (Geordie)",
+      "have got/have gotten (Australia, Canada, Ireland, New Zealand, UK, US)/have getten (Geordie)"
+    ],
+    [
+      "had got/had gotten (Australia, Canada, Ireland, New Zealand, UK, US)/had getten (Geordie)",
+      "had got/had gotten (Australia, Canada, Ireland, New Zealand, UK, US)/had getten (Geordie)",
+      "had got/had gotten (Australia, Canada, Ireland, New Zealand, UK, US)/had getten (Geordie)",
+      "had got/had gotten (Australia, Canada, Ireland, New Zealand, UK, US)/had getten (Geordie)",
+      "had got/had gotten (Australia, Canada, Ireland, New Zealand, UK, US)/had getten (Geordie)",
+      "had got/had gotten (Australia, Canada, Ireland, New Zealand, UK, US)/had getten (Geordie)"
+    ],
+    [
+      "will get",
+      "will get",
+      "will get",
+      "will get",
+      "will get",
+      "will get"
+    ]
+  ],
+  "gloss": "to obtain; to acquire; to receive; ..."
+}

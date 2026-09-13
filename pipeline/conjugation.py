@@ -336,49 +336,7 @@ IT_CONFIG = LanguageConfig(
     rare_tags=("archaic", "literary", "dialectal", "poetic"),
 )
 
-EN_PRES_HAVE = ("have", "have", "has", "have", "have", "have")
-EN_PAST_HAVE = ("had", "had", "had", "had", "had", "had")
-EN_WILL = ("will", "will", "will", "will", "will", "will")
-
-EN_EXCLUDE = ("archaic", "dialectal")
-
-EN_CONFIG = LanguageConfig(
-    code="en",
-    name="English",
-    english_wiktionary_name="English",
-    tenses=(
-        # Impersonal
-        TenseConfig("en_impers_inf", FormMatcher(("infinitive",), max_forms=1)),
-        TenseConfig("en_impers_pres_partic", FormMatcher(("participle", "present"), max_forms=1, exclude_tags=EN_EXCLUDE)),
-        TenseConfig("en_impers_past_partic", FormMatcher(("participle", "past"), max_forms=1, exclude_tags=EN_EXCLUDE)),
-        # Indicative present — explicit matchers because Wiktionary plural forms lack person tags
-        TenseConfig("en_indic_pres", (
-            FormMatcher(("first-person", "singular", "present"), pronoun="I", exclude_tags=EN_EXCLUDE),
-            FormMatcher(("second-person", "singular", "present"), pronoun="you", exclude_tags=EN_EXCLUDE),
-            FormMatcher(("third-person", "singular", "present"), pronoun="he/she/it", exclude_tags=EN_EXCLUDE),
-            FormMatcher(("plural", "present"), pronoun="we", exclude_tags=EN_EXCLUDE, max_forms=1),
-            FormMatcher(("plural", "present"), pronoun="you", exclude_tags=EN_EXCLUDE, max_forms=1),
-            FormMatcher(("plural", "present"), pronoun="they", exclude_tags=EN_EXCLUDE, max_forms=1),
-        )),
-        # Indicative past
-        TenseConfig("en_indic_past", (
-            FormMatcher(("first-person", "singular", "past"), pronoun="I", exclude_tags=EN_EXCLUDE),
-            FormMatcher(("second-person", "singular", "past"), pronoun="you", exclude_tags=EN_EXCLUDE),
-            FormMatcher(("third-person", "singular", "past"), pronoun="he/she/it", exclude_tags=EN_EXCLUDE),
-            FormMatcher(("plural", "past"), pronoun="we", exclude_tags=EN_EXCLUDE, max_forms=1),
-            FormMatcher(("plural", "past"), pronoun="you", exclude_tags=EN_EXCLUDE, max_forms=1),
-            FormMatcher(("plural", "past"), pronoun="they", exclude_tags=EN_EXCLUDE, max_forms=1),
-        )),
-        # Compound
-        repeated_tense("en", "en_indic_pres_perf", ("participle", "past"), EN_PRES_HAVE, exclude_tags=EN_EXCLUDE),
-        repeated_tense("en", "en_indic_past_perf", ("participle", "past"), EN_PAST_HAVE, exclude_tags=EN_EXCLUDE),
-        repeated_tense("en", "en_indic_fut", ("infinitive",), EN_WILL, exclude_tags=EN_EXCLUDE),
-    ),
-    tense_groups=[
-        TenseGroup("en_indic", re.compile(r"^en_indic_")),
-        TenseGroup("en_impers", re.compile(r"^en_impers_")),
-    ],
-)
+from .conjugation_english import EN_CONFIG, english_has_attested_head_paradigm, extract_english_gloss
 
 from .conjugation_romance import PT_CONFIG, CA_CONFIG
 from .conjugation_germanic import NL_CONFIG, SV_CONFIG
@@ -798,7 +756,8 @@ def entry_is_clean_verb_root(entry: Entry) -> bool:
     if "'" in entry.word:  # French "'a"
         return False
 
-    if "-" in entry.word:  # Greek '-βιβάζω'
+    english_head = english_has_attested_head_paradigm(entry)
+    if "-" in entry.word and not english_head:  # Greek '-βιβάζω'
         return False
 
     if entry.senses and all(
@@ -834,8 +793,10 @@ def entry_is_clean_verb_root(entry: Entry) -> bool:
             or (h.name == "head" and h.args.get("1") == "sv" and h.args.get("2") in {"verb", "verbs"})
             for h in entry.head_templates
         )
-    if entry.lang_code in {"la", "fi", "sv"} and lexical_head:
+    if (entry.lang_code in {"la", "fi", "sv"} and lexical_head) or english_head:
         BAD_CATEGORIES.discard(f"{entry.lang} verb forms")
+    if english_head:
+        BAD_CATEGORIES.discard("English multiword terms")
 
     for c in _cat_names(entry.categories):
         if c in BAD_CATEGORIES:
@@ -899,7 +860,7 @@ def process_entry(config: LanguageConfig, entry: Entry) -> dict[str, Any] | None
     if fr_is_aspirated(entry):
         processed["frIsAspirated"] = True
 
-    gloss = extract_gloss(entry)
+    gloss = extract_english_gloss(entry) if config.code == 'en' else extract_gloss(entry)
     if gloss:
         processed["gloss"] = gloss
 

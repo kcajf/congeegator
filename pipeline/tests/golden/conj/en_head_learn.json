@@ -1,0 +1,50 @@
+{
+  "name": "learn",
+  "nameNoDiacritics": "learn",
+  "conjugation": [
+    "learn",
+    "learning",
+    "learned/learnt",
+    [
+      "learn",
+      "learn",
+      "learns",
+      "learn",
+      "learn",
+      "learn"
+    ],
+    [
+      "learned/learnt",
+      "learned/learnt",
+      "learned/learnt",
+      "learned/learnt",
+      "learned/learnt",
+      "learned/learnt"
+    ],
+    [
+      "have learned/have learnt",
+      "have learned/have learnt",
+      "has learned/has learnt",
+      "have learned/have learnt",
+      "have learned/have learnt",
+      "have learned/have learnt"
+    ],
+    [
+      "had learned/had learnt",
+      "had learned/had learnt",
+      "had learned/had learnt",
+      "had learned/had learnt",
+      "had learned/had learnt",
+      "had learned/had learnt"
+    ],
+    [
+      "will learn",
+      "will learn",
+      "will learn",
+      "will learn",
+      "will learn",
+      "will learn"
+    ]
+  ],
+  "gloss": "to acquire, or attempt to acquire knowledge or an ability to do something; to attend a course or other educational activity; to gain knowledge from a bad experience so as to improve; ..."
+}

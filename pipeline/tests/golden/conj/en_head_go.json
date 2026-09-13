@@ -1,0 +1,50 @@
+{
+  "name": "go",
+  "nameNoDiacritics": "go",
+  "conjugation": [
+    "go",
+    "going",
+    "gone",
+    [
+      "go",
+      "go",
+      "goes",
+      "go",
+      "go",
+      "go"
+    ],
+    [
+      "went",
+      "went",
+      "went",
+      "went",
+      "went",
+      "went"
+    ],
+    [
+      "have gone",
+      "have gone",
+      "has gone",
+      "have gone",
+      "have gone",
+      "have gone"
+    ],
+    [
+      "had gone",
+      "had gone",
+      "had gone",
+      "had gone",
+      "had gone",
+      "had gone"
+    ],
+    [
+      "will go",
+      "will go",
+      "will go",
+      "will go",
+      "will go",
+      "will go"
+    ]
+  ],
+  "gloss": "to move through space; to work or function; to move or perform; ..."
+}

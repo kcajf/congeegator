@@ -35,7 +35,7 @@ def build_search_index(
     MAX_PREFIX = 6
     searchable_words = defaultdict[str, set[int]](lambda: set())
     exact_forms = defaultdict[str, set[int]](lambda: set())
-    expanded_language = lang in {"pt", "ca", "nl", "sv", "fi", "la"}
+    expanded_language = lang in {"en", "pt", "ca", "nl", "sv", "fi", "la"}
 
     GERMAN_AUXILIARY_INFINITIVES = {"haben", "sein"}
 

@@ -509,3 +509,56 @@ describe('expanded language candidate and result ranking', () => {
 		expect(rankSearchResults(results, 'é', 'pt')[0].root).toBe('ser');
 	});
 });
+
+describe('English compound and short-form search', () => {
+	it.each([
+		['have', ['has', 'had'], 'has'],
+		['do', ['does', 'did'], 'did'],
+		['go', ['went', 'will go', 'have gone'], 'went'],
+		['go', ['went', 'will go', 'have gone'], 'will go'],
+		['go', ['went', 'will go', 'have gone'], 'have gone'],
+		['look up', ['looked up'], 'looked up']
+	])('retains the whole matching English surface for %s / %s / %s', (name, conjugation, query) => {
+		const verb = makeVerb({ name, conjugation, lang: 'en' });
+		expect(findMatches(verb, query, query, 'en')).toContainEqual({
+			root: name,
+			matched: query,
+			quality: 0,
+			freq: 0
+		});
+	});
+	it('retrieves a lexical token beyond a common auxiliary prefix', () => {
+		const crowded = Array.from({ length: 200 }, (_, i) => i);
+		const index: SearchIndex = new Map([
+			['have g', crowded],
+			['have', crowded],
+			['gone', [901]],
+			['looked', [902]],
+			['up', crowded]
+		]);
+		expect(prefixLookup(index, 'have gone', 'en')[0]).toBe(901);
+		expect(prefixLookup(index, 'looked up', 'en')[0]).toBe(902);
+	});
+	it('ranks an exact short form before a frequent compound containing it', () => {
+		const results = [
+			{ root: 'be', matched: 'has been', quality: 0, freq: 7 },
+			{ root: 'have', matched: 'has', quality: 0, freq: 6 }
+		];
+		expect(rankSearchResults(results, 'has', 'en')[0].root).toBe('have');
+	});
+});
+
+it('keeps an English lexical candidate when every compound bucket is full', () => {
+	const crowded = Array.from({ length: 200 }, (_, i) => i);
+	const lexical = [901, ...Array.from({ length: 199 }, (_, i) => i + 1000)];
+	const index: SearchIndex = new Map([
+		['will l', crowded],
+		['will', crowded],
+		['lay', lexical]
+	]);
+	const ids = prefixLookup(index, 'will lay', 'en');
+	expect(ids).toContain(901);
+	expect(ids).toHaveLength(200);
+	// The six previously added languages preserve their established ordering.
+	expect(prefixLookup(index, 'will lay', 'sv')).toEqual(crowded);
+});

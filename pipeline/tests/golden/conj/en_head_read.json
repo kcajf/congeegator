@@ -1,0 +1,50 @@
+{
+  "name": "read",
+  "nameNoDiacritics": "read",
+  "conjugation": [
+    "read",
+    "reading",
+    "read",
+    [
+      "read",
+      "read",
+      "reads",
+      "read",
+      "read",
+      "read"
+    ],
+    [
+      "read",
+      "read",
+      "read",
+      "read",
+      "read",
+      "read"
+    ],
+    [
+      "have read",
+      "have read",
+      "has read",
+      "have read",
+      "have read",
+      "have read"
+    ],
+    [
+      "had read",
+      "had read",
+      "had read",
+      "had read",
+      "had read",
+      "had read"
+    ],
+    [
+      "will read",
+      "will read",
+      "will read",
+      "will read",
+      "will read",
+      "will read"
+    ]
+  ],
+  "gloss": "to look at and interpret letters or other information that is written; to be understood or physically read in a specific way; to speak aloud words or other information that is written; ..."
+}

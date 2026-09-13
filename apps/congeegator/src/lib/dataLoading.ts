@@ -12,6 +12,8 @@ export async function loadSingleVerb(
 	if (!(lang in manifest.languages)) {
 		error(404, { message: `Language ${lang} not supported` });
 	}
+	const verbLower = verb.toLowerCase();
+	const lookupNames = lang === 'en' && verb !== verbLower ? [verb, verbLower] : [verbLower];
 
 	// 1. Check IndexedDB first (Browser only)
 	if (browser) {
@@ -19,8 +21,11 @@ export async function loadSingleVerb(
 			const cached = await db.transaction('r', [db.versions, db.verbs], async () => {
 				const version = await getInstalledVersion(lang);
 				if (!version) return undefined;
-				const record = await db.verbs.get({ version: version.key, name: verb.toLowerCase() });
-				return record ? { ...record, lang, tenses: version.tenses } : undefined;
+				for (const name of lookupNames) {
+					const record = await db.verbs.get({ version: version.key, name });
+					if (record) return { ...record, lang, tenses: version.tenses };
+				}
+				return undefined;
 			});
 			if (cached) return cached;
 		} catch (err) {
@@ -30,7 +35,6 @@ export async function loadSingleVerb(
 
 	// 2. Fetch from Network (SSR or Cache Miss)
 	// This works on both Server (Cloudflare Worker) and Browser
-	const verbLower = verb.toLowerCase();
 	const url = `${getLangDataUrl(lang)}/chunks/${verbLower[0]}.json`;
 	const response = await fetcher(url);
 
@@ -39,7 +43,9 @@ export async function loadSingleVerb(
 	}
 
 	const chunk = await response.json();
-	const raw = chunk[verbLower];
+	// English can distinguish abbreviation verbs from lowercase homographs
+	// (AIM/aim). The fallback also reads older lowercase-keyed English bundles.
+	const raw = lookupNames.map((name) => chunk[name]).find(Boolean);
 	if (!raw) {
 		error(404, { message: `Verb ${verb} not found` });
 	}
