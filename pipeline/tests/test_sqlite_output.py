@@ -207,6 +207,27 @@ class TestSqliteOutput:
         finally:
             os.unlink(path)
 
+    @pytest.mark.parametrize("words,expected", [
+        ([], 0),
+        (["Haus", "Haus", "haus"], 2),
+        (["café", "cafe\u0301"], 2),
+    ])
+    def test_persisted_distinct_word_count(self, words, expected):
+        entries = [{"word": word, "pos": "noun", "senses": [{"gloss": "test"}]}
+                   for word in words]
+        path = _make_db(entries)
+        try:
+            with sqlite3.connect(path) as conn:
+                saved = conn.execute(
+                    "SELECT value FROM metadata WHERE key = 'word_count'"
+                ).fetchone()[0]
+                assert saved == str(expected)
+                assert int(saved) == conn.execute(
+                    "SELECT COUNT(DISTINCT word) FROM entries"
+                ).fetchone()[0]
+        finally:
+            os.unlink(path)
+
     def test_fts5_prefix_search(self, sample_entries):
         path = _make_db(sample_entries)
         try:

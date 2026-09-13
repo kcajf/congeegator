@@ -36,6 +36,7 @@ interface SearchResult {
 let sqlite3: any;
 let poolUtil: any;
 const openDbs = new Map<string, any>();
+const wordCounts = new Map<string, number | null>();
 const wordKeyLanguages = new Set<string>();
 const linkedEntryLanguages = new Set<string>();
 const entryColumns = new Map<string, Set<string>>();
@@ -74,6 +75,7 @@ async function shutdown() {
 			// best-effort
 		}
 		openDbs.delete(lang);
+		wordCounts.delete(lang);
 		wordKeyLanguages.delete(lang);
 		linkedEntryLanguages.delete(lang);
 		entryColumns.delete(lang);
@@ -93,6 +95,7 @@ async function openDb(lang: string, hash: string): Promise<boolean> {
 	let hasWordKey = false;
 	let hasLinkedEntries = false;
 	let columns = new Set<string>();
+	let wordCount: number | null = null;
 	try {
 		let file: File | undefined;
 		try {
@@ -139,6 +142,13 @@ async function openDb(lang: string, hash: string): Promise<boolean> {
 		hasWordKey = columns.has('word_key');
 		hasLinkedEntries = columns.has('details');
 		if (hasLinkedEntries) db.exec('SELECT form_key, entry_id FROM form_lookup LIMIT 0');
+		// Counts travel with the immutable database. Older downloads remain usable
+		// without a total; never fall back to scanning entries on the user's device.
+		const savedCount = db.selectValue("SELECT value FROM metadata WHERE key = 'word_count'");
+		if (typeof savedCount === 'string' && /^(0|[1-9]\d*)$/.test(savedCount)) {
+			const count = Number(savedCount);
+			if (Number.isSafeInteger(count)) wordCount = count;
+		}
 	} catch (error) {
 		db?.close();
 		// Discard the failed candidate, keeping the working database and raw
@@ -149,6 +159,7 @@ async function openDb(lang: string, hash: string): Promise<boolean> {
 
 	previous?.close();
 	openDbs.set(lang, db);
+	wordCounts.set(lang, wordCount);
 	entryColumns.set(lang, columns);
 	// Older downloads remain usable until the user chooses to update them.
 	if (hasWordKey) wordKeyLanguages.add(lang);
@@ -182,6 +193,7 @@ async function closeDb(lang: string) {
 	if (!db) return;
 	db.close();
 	openDbs.delete(lang);
+	wordCounts.delete(lang);
 	wordKeyLanguages.delete(lang);
 	linkedEntryLanguages.delete(lang);
 	entryColumns.delete(lang);
@@ -656,8 +668,8 @@ async function handleMessage(e: MessageEvent) {
 				result = exactHeadwords(lang, words);
 				break;
 			case 'wordCount':
-				result = [...openDbs.values()].reduce(
-					(sum, db) => sum + Number(db.selectValue('SELECT COUNT(DISTINCT word) FROM entries')),
+				result = [...wordCounts.values()].reduce<number | null>(
+					(sum, count) => (sum === null || count === null ? null : sum + count),
 					0
 				);
 				break;
