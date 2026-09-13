@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import DownloadManager from '$lib/components/DownloadManager.svelte';
+	import StorageSummary from '$lib/components/StorageSummary.svelte';
 	import { appTitle, siteUrl } from '$lib/defs';
 
 	const ua = browser ? navigator.userAgent : '';
@@ -48,7 +49,9 @@
 		</p>
 	</div>
 
-	<DownloadManager />
+	<StorageSummary>
+		<DownloadManager />
+	</StorageSummary>
 </div>
 
 <style>

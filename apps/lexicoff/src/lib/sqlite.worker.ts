@@ -631,6 +631,12 @@ async function handleMessage(e: MessageEvent) {
 		let result: unknown;
 
 		switch (type) {
+			case 'wordCount':
+				result = [...openDbs.values()].reduce(
+					(sum, db) => sum + Number(db.selectValue('SELECT COUNT(DISTINCT word) FROM entries')),
+					0
+				);
+				break;
 			case 'search':
 				result = await search(lang, query, phoneticQuery ?? '');
 				break;
