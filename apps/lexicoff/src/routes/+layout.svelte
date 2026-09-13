@@ -86,15 +86,13 @@
 		Object.values(globalSync.map).some((info) => info.status === 'syncing')
 	);
 	const searchPlaceholder = $derived(
-		searchLangState.indexReady
+		searchLangState.indexReady || sqliteClient.phase === 'opening'
 			? 'search...'
-			: sqliteClient.phase === 'opening'
-				? 'Opening…'
-				: sqliteClient.phase === 'error'
-					? 'Search unavailable'
-					: isInstalling
-						? 'Installing…'
-						: 'Install a language below'
+			: sqliteClient.phase === 'error'
+				? 'Search unavailable'
+				: isInstalling
+					? 'Installing…'
+					: 'Install a language below'
 	);
 
 	let searchTerm = $state('');

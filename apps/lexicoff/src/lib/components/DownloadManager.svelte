@@ -16,14 +16,23 @@
 	}
 
 	const languages = Object.values(manifest.languages).toSorted(compareLanguages);
+	let openingIsSlow = $state(false);
+
+	$effect(() => {
+		openingIsSlow = false;
+		if (storage.phase !== 'opening') return;
+		// Ordinary startup should not flash a notice or shift the language list.
+		const timer = setTimeout(() => (openingIsSlow = true), 3_000);
+		return () => clearTimeout(timer);
+	});
 </script>
 
 <div class="download-manager">
 	<h2>Languages</h2>
-	{#if storage.phase === 'opening'}
-		<p class="unavailable-notice">
-			Opening dictionaries… If Lexicoff is open in another tab or window, close it to continue.
-			<button class="btn" onclick={() => globalSync.retryStorage()}>Retry opening</button>
+	{#if storage.phase === 'opening' && openingIsSlow}
+		<p class="unavailable-notice" role="status">
+			Dictionaries are taking longer than usual to become available.
+			<button class="btn" onclick={() => globalSync.retryStorage()}>Retry</button>
 		</p>
 	{:else if storage.phase === 'error'}
 		<p class="unavailable-notice">
