@@ -1,0 +1,50 @@
+{
+  "name": "do",
+  "nameNoDiacritics": "do",
+  "conjugation": [
+    "do",
+    "doing",
+    "done",
+    [
+      "do",
+      "do",
+      "does",
+      "do",
+      "do",
+      "do"
+    ],
+    [
+      "did",
+      "did",
+      "did",
+      "did",
+      "did",
+      "did"
+    ],
+    [
+      "have done",
+      "have done",
+      "has done",
+      "have done",
+      "have done",
+      "have done"
+    ],
+    [
+      "had done",
+      "had done",
+      "had done",
+      "had done",
+      "had done",
+      "had done"
+    ],
+    [
+      "will do",
+      "will do",
+      "will do",
+      "will do",
+      "will do",
+      "will do"
+    ]
+  ],
+  "gloss": "a syntactic marker in a question whose main verb is not another auxiliary verb or be; to perform; to execute; ..."
+}

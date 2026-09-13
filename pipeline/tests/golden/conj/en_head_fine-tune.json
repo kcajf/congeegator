@@ -1,0 +1,50 @@
+{
+  "name": "fine-tune",
+  "nameNoDiacritics": "fine-tune",
+  "conjugation": [
+    "fine-tune",
+    "fine-tuning",
+    "fine-tuned",
+    [
+      "fine-tune",
+      "fine-tune",
+      "fine-tunes",
+      "fine-tune",
+      "fine-tune",
+      "fine-tune"
+    ],
+    [
+      "fine-tuned",
+      "fine-tuned",
+      "fine-tuned",
+      "fine-tuned",
+      "fine-tuned",
+      "fine-tuned"
+    ],
+    [
+      "have fine-tuned",
+      "have fine-tuned",
+      "has fine-tuned",
+      "have fine-tuned",
+      "have fine-tuned",
+      "have fine-tuned"
+    ],
+    [
+      "had fine-tuned",
+      "had fine-tuned",
+      "had fine-tuned",
+      "had fine-tuned",
+      "had fine-tuned",
+      "had fine-tuned"
+    ],
+    [
+      "will fine-tune",
+      "will fine-tune",
+      "will fine-tune",
+      "will fine-tune",
+      "will fine-tune",
+      "will fine-tune"
+    ]
+  ],
+  "gloss": "to make small adjustments to something in order to optimise its performance; to further train a trained model on a specialised dataset in order to adapt or optimise its performance for a particular task or purpose"
+}

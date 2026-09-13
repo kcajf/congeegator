@@ -1,0 +1,50 @@
+{
+  "name": "walk",
+  "nameNoDiacritics": "walk",
+  "conjugation": [
+    "walk",
+    "walking",
+    "walked",
+    [
+      "walk",
+      "walk",
+      "walks",
+      "walk",
+      "walk",
+      "walk"
+    ],
+    [
+      "walked",
+      "walked",
+      "walked",
+      "walked",
+      "walked",
+      "walked"
+    ],
+    [
+      "have walked",
+      "have walked",
+      "has walked",
+      "have walked",
+      "have walked",
+      "have walked"
+    ],
+    [
+      "had walked",
+      "had walked",
+      "had walked",
+      "had walked",
+      "had walked",
+      "had walked"
+    ],
+    [
+      "will walk",
+      "will walk",
+      "will walk",
+      "will walk",
+      "will walk",
+      "will walk"
+    ]
+  ],
+  "gloss": "to move on the feet by alternately setting each foot forward, with at least one foot on the ground at all times. Compare run; to \"walk free\", i.e. to win, or avoid, a criminal court case, particularly when actually guilty; of an object, to go missing or be stolen; ..."
+}

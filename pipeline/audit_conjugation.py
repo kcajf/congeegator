@@ -13,6 +13,7 @@ import zstandard
 
 from .cache import SOURCE_DATA_VERSION, SOURCE_DATA_VERSIONS
 from .conjugation import CONFIG, FormMatcher, entry_is_clean_verb_root, extract_conjugation
+from .conjugation_english import merge_english_records
 from .search import build_search_index
 from .wiktionary import Entry
 
@@ -98,11 +99,14 @@ def audit_language(config, cache_root, sample_count=12):
                         counts['different_duplicate_tables'] += 1
                         if len(duplicate_examples) < 20:
                             duplicate_examples.append(entry.word)
+                    if config.code == 'en':
+                        selected[entry.word] = merge_english_records(selected[entry.word], record)
                     continue
                 selected[entry.word] = record
-                for tense, row in zip(config.tenses, record['conjugation']):
-                    tense_filled[tense.name] += sum(bool(c) for c in ([row] if isinstance(row, str) else row))
     records = list(selected.values())
+    for record in records:
+        for tense, row in zip(config.tenses, record['conjugation']):
+            tense_filled[tense.name] += sum(bool(c) for c in ([row] if isinstance(row, str) else row))
     counts['released_roots'] = len(records)
     counts['filled_cells'] = sum(bool(c) for r in records for c in cells(r))
     counts['total_cells'] = sum(1 for r in records for _ in cells(r))
@@ -150,7 +154,7 @@ def validate_artifact(data_path, metadata, config, expected):
     chunk_records = {}
     for path in (directory / 'chunks').glob('*.json'):
         chunk_records.update(json.loads(path.read_text()))
-    if chunk_records != {r['name'].lower(): r for r in data['verbs']}:
+    if chunk_records != {(r['name'] if config.code == 'en' else r['name'].lower()): r for r in data['verbs']}:
         errors.append('SSR chunks differ from bundle')
     return {'records': len(data['verbs']), 'bytes': len(raw), 'errors': errors}
 

@@ -21,6 +21,7 @@ from wordfreq import available_languages, get_frequency_dict, get_frequency_list
 
 from .cache import CacheManager
 from .conjugation import CONFIG, LanguageConfig, extract_conjugation, make_language_static_metadata
+from .conjugation_english import merge_english_records
 from .dictionary import DICT_CONFIGS, DictLanguageConfig, process_dict_entry, make_dict_language_static_metadata
 from .gloss import extract_gloss
 from .output import generate_sitemaps, write_data_manifest, write_language_data, write_sqlite_manifest
@@ -62,6 +63,7 @@ def _generate_data_for_lang(
 
     verbs: list[dict[str, Any]] = []
     seen_verbs: set[str] = set()
+    verb_positions: dict[str, int] = {}
     dict_entries: list[dict[str, Any]] = []
     seen_dict_records: set[bytes] = set()
     duplicate_dict_records = 0
@@ -81,11 +83,16 @@ def _generate_data_for_lang(
 
             # Conjugation processing (verbs only, deduplicated)
             if conj_config is not None:
-                if entry.word not in seen_verbs:
+                if entry.word not in seen_verbs or lang_code == "en":
                     processed = extract_conjugation(conj_config, entry)
                     if processed is not None:
-                        verbs.append(processed)
-                        seen_verbs.add(entry.word)
+                        if entry.word in seen_verbs:
+                            position = verb_positions[entry.word]
+                            verbs[position] = merge_english_records(verbs[position], processed)
+                        else:
+                            verb_positions[entry.word] = len(verbs)
+                            verbs.append(processed)
+                            seen_verbs.add(entry.word)
 
             # Dictionary processing (all POS)
             if dict_config is not None:
@@ -114,7 +121,11 @@ def _generate_data_for_lang(
             if not has_frequency:
                 log.warning("%s has no wordfreq corpus; using unranked frequency 0", lang_code)
             for verb in verbs:
-                verb["freq"] = round(zipf_frequency(verb["name"], lang_code), 2) if has_frequency else 0.0
+                # wordfreq folds English case: the tournament-organizer verb
+                # TO otherwise inherits the enormous frequency of "to", and
+                # boolean AND inherits "and". Keep initialisms unranked.
+                initialism = lang_code == "en" and len(verb["name"]) > 1 and verb["name"].isupper()
+                verb["freq"] = round(zipf_frequency(verb["name"], lang_code), 2) if has_frequency and not initialism else 0.0
 
         unique_verbs = {x["name"] for x in verbs}
         if len(unique_verbs) != len(verbs):
@@ -318,7 +329,8 @@ def main():
             for lang in conj_data.keys():
                 lang_dir = os.path.join(conj_data_dir, lang)
                 log.info(f"Writing congeegator {lang_dir}")
-                write_language_data(conj_data[lang], lang_dir, entries_key="verbs", name_key="name", pretty=args.pretty)
+                write_language_data(conj_data[lang], lang_dir, entries_key="verbs", name_key="name", pretty=args.pretty,
+                                    case_sensitive_names=lang == "en")
 
         conj_manifest_path = os.path.join("apps", "congeegator", "src", "lib", "data-manifest.json")
         write_data_manifest(conj_data_dir, CONFIG, make_language_static_metadata, conj_manifest_path)

@@ -1,0 +1,50 @@
+{
+  "name": "should",
+  "nameNoDiacritics": "should",
+  "conjugation": [
+    "",
+    "",
+    "",
+    [
+      "should",
+      "should",
+      "should",
+      "should",
+      "should",
+      "should"
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ]
+  ],
+  "gloss": "used to issue an instruction; indicates that something is expected to have happened or to be the case now; used to express a conditional outcome"
+}
