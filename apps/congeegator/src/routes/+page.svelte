@@ -77,6 +77,11 @@
 	{/if}
 
 	<p>Heavily inspired by <a href="https://ilelleon.com">ilelleon.com</a>.</p>
+	<p>
+		{appTitle} is
+		<a href="https://github.com/kcajf/congeegator" target="_blank" rel="noopener">open source</a>.
+		You may also like <a href="https://lexicoff.com" target="_blank" rel="noopener">Lexicoff</a>.
+	</p>
 	<p>A vibeproject by <a href="https://jackfrigaard.com">Jack Frigaard</a>.</p>
 </section>
 
@@ -101,7 +106,7 @@
 
 <style>
 	section {
-		margin-bottom: 2rem;
+		margin-bottom: 1rem;
 	}
 
 	h2 {
