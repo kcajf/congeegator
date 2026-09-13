@@ -557,7 +557,9 @@ describe('extended dictionaries with real SQLite FTS', () => {
 			Buffer.from(entryJsonFixtures[0].encoded, 'base64'),
 			Buffer.from(entryJsonFixtures[1].encoded, 'base64')
 		);
-		const instantiate = vi.spyOn(WebAssembly, 'instantiate');
+		// Observe our decoder, not unrelated WASM initialized by Node's fetch.
+		const { ZSTDDecoder } = await import('zstddec');
+		const initializeDecoder = vi.spyOn(ZSTDDecoder.prototype, 'init');
 		try {
 			const s = setup(true, db);
 			s.files.add('/fi-aaaaaaaa.sqlite');
@@ -567,7 +569,7 @@ describe('extended dictionaries with real SQLite FTS', () => {
 				expect.arrayContaining([expect.objectContaining({ word: 'talo' })])
 			);
 			expect((await s.send('getWord', 'fi', 'koti')).result[0].forms).toEqual(['kodin']);
-			expect(instantiate).not.toHaveBeenCalled();
+			expect(initializeDecoder).not.toHaveBeenCalled();
 			for (const word of ['talo', 'talossa-9']) {
 				const response = await s.send('getWord', 'fi', word);
 				expect(response.error).toBeUndefined();
@@ -577,9 +579,9 @@ describe('extended dictionaries with real SQLite FTS', () => {
 					formDetails: entryJsonFixtures[1].value
 				});
 			}
-			expect(instantiate).toHaveBeenCalledOnce();
+			expect(initializeDecoder).toHaveBeenCalledOnce();
 		} finally {
-			instantiate.mockRestore();
+			initializeDecoder.mockRestore();
 			db.close();
 		}
 	});
