@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { compareLanguages } from '$lib/languageOrder';
 	import { pickerTouch, preventPickerSelection } from '$lib/pickerTouch';
 	import { clickOutside } from '$lib/clickOutside';
 	import { slide } from 'svelte/transition';
@@ -16,7 +17,7 @@
 	const installedLangs = $derived(
 		Object.values(manifest.languages)
 			.filter((lang) => storage.languages[lang.code]?.status === 'ready')
-			.toSorted((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }))
+			.toSorted(compareLanguages)
 	);
 
 	const hasInstalled = $derived(installedLangs.length > 0);
