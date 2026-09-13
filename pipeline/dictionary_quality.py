@@ -24,8 +24,8 @@ _BROKEN_ENTITY = re.compile(r'(?:[A-Za-z]#\d+;|&#?\d+;.*#\d+;)')
 _FORM_GRAMMAR = '''first-person second-person third-person definite indefinite
 possessive positive negative active passive middle mediopassive
 present past future imperfect perfect pluperfect aorist
-indicative subjunctive conditional optative imperative potential
-infinitive participle gerund converb supine verbal-noun
+indicative subjunctive conditional optative imperative potential dependent
+infinitive infinitive-aorist participle gerund converb supine verbal-noun
 masculine feminine neuter common-gender
 nominative accusative genitive dative ablative locative instrumental vocative
 ergative absolutive partitive illative inessive elative allative adessive
@@ -34,7 +34,8 @@ singular dual plural'''.split()
 
 
 def form_grammar(tags):
-    reading = ' '.join(tag.replace('-', ' ') for tag in _FORM_GRAMMAR if tag in tags)
+    reading = ' '.join(('aorist infinitive' if tag == 'infinitive-aorist' else tag.replace('-', ' '))
+                       for tag in _FORM_GRAMMAR if tag in tags)
     return [reading] if reading else []
 
 

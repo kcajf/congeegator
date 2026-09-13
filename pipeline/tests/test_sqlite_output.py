@@ -566,11 +566,11 @@ class TestExtendedDictionaries:
             assert json.loads(pronunciations) == entry["pronunciations"]
             assert conn.execute("SELECT rowid FROM entries_fts WHERE forms_text MATCH 'Attic'").fetchall() == []
 
-    def test_existing_dictionary_schema_remains_unchanged(self, tmp_path, sample_entries):
+    def test_existing_dictionary_adds_form_details_without_changing_search_schema(self, tmp_path, sample_entries):
         path = str(tmp_path / "fr.sqlite")
         write_sqlite_database(sample_entries, "fr", None, path)
         with sqlite3.connect(path) as conn:
             assert [r[1] for r in conn.execute("PRAGMA table_info(entries)")] == [
-                "id", "word", "word_key", "pos", "senses", "freq", "gender", "forms", "pronunciation", "etymology", "details"]
+                "id", "word", "word_key", "pos", "senses", "freq", "gender", "forms", "pronunciation", "etymology", "details", "form_details"]
             schema = conn.execute("SELECT sql FROM sqlite_master WHERE name='entries_fts'").fetchone()[0]
             assert "categories" not in schema
