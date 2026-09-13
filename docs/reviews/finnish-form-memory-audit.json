@@ -1,0 +1,1761 @@
+{
+  "source_version": "2026-09-12T210000Z",
+  "baseline_commit": "e807379",
+  "note": "Counts include five duplicate records; raw source audit excludes generation ranking and SQLite writing.",
+  "seconds": 140.89519508299418,
+  "peak_rss_bytes": 56033280,
+  "counts": {
+    "records": 266055,
+    "forms": 27696843,
+    "details": 27696843,
+    "json_bytes": 4231725773,
+    "raw_forms": 37296826,
+    "readings": 29181483
+  },
+  "pos": {
+    "noun": {
+      "records": 175377,
+      "forms": 20901846,
+      "raw_forms": 28163992
+    },
+    "prefix": {
+      "records": 125,
+      "forms": 0,
+      "raw_forms": 0
+    },
+    "adv": {
+      "records": 7307,
+      "forms": 8595,
+      "raw_forms": 16522
+    },
+    "verb": {
+      "records": 42008,
+      "forms": 2473795,
+      "raw_forms": 3044738
+    },
+    "conj": {
+      "records": 116,
+      "forms": 17,
+      "raw_forms": 20
+    },
+    "pron": {
+      "records": 1018,
+      "forms": 3629,
+      "raw_forms": 6433
+    },
+    "adj": {
+      "records": 25464,
+      "forms": 2922685,
+      "raw_forms": 3921028
+    },
+    "name": {
+      "records": 10660,
+      "forms": 1331184,
+      "raw_forms": 2063021
+    },
+    "intj": {
+      "records": 644,
+      "forms": 81,
+      "raw_forms": 110
+    },
+    "num": {
+      "records": 776,
+      "forms": 2431,
+      "raw_forms": 3671
+    },
+    "contraction": {
+      "records": 44,
+      "forms": 3,
+      "raw_forms": 3
+    },
+    "det": {
+      "records": 28,
+      "forms": 1300,
+      "raw_forms": 2034
+    },
+    "phrase": {
+      "records": 819,
+      "forms": 323,
+      "raw_forms": 611
+    },
+    "postp": {
+      "records": 336,
+      "forms": 979,
+      "raw_forms": 3200
+    },
+    "prep": {
+      "records": 41,
+      "forms": 49,
+      "raw_forms": 173
+    },
+    "suffix": {
+      "records": 579,
+      "forms": 49618,
+      "raw_forms": 70955
+    },
+    "particle": {
+      "records": 24,
+      "forms": 9,
+      "raw_forms": 9
+    },
+    "interfix": {
+      "records": 16,
+      "forms": 5,
+      "raw_forms": 5
+    },
+    "proverb": {
+      "records": 673,
+      "forms": 294,
+      "raw_forms": 301
+    }
+  },
+  "form_count_percentiles": {
+    "0.5": 158,
+    "0.9": 170,
+    "0.95": 177,
+    "0.99": 183,
+    "1": 540
+  },
+  "top": [
+    [
+      540,
+      155631,
+      "lämminruoka",
+      "noun"
+    ],
+    [
+      523,
+      121701,
+      "-tin",
+      "suffix"
+    ],
+    [
+      490,
+      242371,
+      "Äikäs",
+      "name"
+    ],
+    [
+      473,
+      12598,
+      "Klaus",
+      "name"
+    ],
+    [
+      435,
+      210821,
+      "tietön taival",
+      "noun"
+    ],
+    [
+      377,
+      155632,
+      "lämminvarasto",
+      "noun"
+    ],
+    [
+      370,
+      247123,
+      "korkeavesi",
+      "noun"
+    ],
+    [
+      363,
+      233188,
+      "vierasmies",
+      "noun"
+    ],
+    [
+      363,
+      78413,
+      "raskasvesi",
+      "noun"
+    ],
+    [
+      359,
+      96793,
+      "hienosokeri",
+      "noun"
+    ],
+    [
+      357,
+      200553,
+      "mustakappale",
+      "noun"
+    ],
+    [
+      357,
+      53820,
+      "isovarvas",
+      "noun"
+    ]
+  ],
+  "grammar": [
+    [
+      "plural",
+      14955246
+    ],
+    [
+      "singular",
+      13663684
+    ],
+    [
+      "third person",
+      7880188
+    ],
+    [
+      "possessive",
+      7450547
+    ],
+    [
+      "possessor: first person singular",
+      3939249
+    ],
+    [
+      "possessor: second person singular",
+      3939249
+    ],
+    [
+      "possessor: first person plural",
+      3939249
+    ],
+    [
+      "possessor: second person plural",
+      3939249
+    ],
+    [
+      "genitive",
+      2998978
+    ],
+    [
+      "accusative",
+      2378726
+    ],
+    [
+      "partitive",
+      2265178
+    ],
+    [
+      "inessive",
+      2256449
+    ],
+    [
+      "adessive",
+      2219147
+    ],
+    [
+      "elative",
+      2218918
+    ],
+    [
+      "abessive",
+      2218647
+    ],
+    [
+      "ablative",
+      2206475
+    ],
+    [
+      "essive",
+      2202650
+    ],
+    [
+      "allative",
+      2202016
+    ],
+    [
+      "translative",
+      2201641
+    ],
+    [
+      "illative",
+      1986973
+    ],
+    [
+      "nominative",
+      1110273
+    ],
+    [
+      "comitative",
+      957302
+    ],
+    [
+      "negative",
+      834199
+    ],
+    [
+      "present",
+      695990
+    ],
+    [
+      "indicative",
+      692722
+    ]
+  ],
+  "unique_detail_signatures": 803,
+  "top_signatures": [
+    [
+      {
+        "kind": "inflection",
+        "readings": [
+          {
+            "grammar": [
+              "third person",
+              "possessive",
+              "partitive",
+              "plural"
+            ]
+          }
+        ]
+      },
+      339338
+    ],
+    [
+      {
+        "kind": "inflection",
+        "readings": [
+          {
+            "grammar": [
+              "third person",
+              "possessive",
+              "inessive",
+              "singular"
+            ]
+          }
+        ]
+      },
+      316622
+    ],
+    [
+      {
+        "kind": "inflection",
+        "readings": [
+          {
+            "grammar": [
+              "third person",
+              "possessive",
+              "ablative",
+              "singular"
+            ]
+          }
+        ]
+      },
+      316618
+    ],
+    [
+      {
+        "kind": "inflection",
+        "readings": [
+          {
+            "grammar": [
+              "third person",
+              "possessive",
+              "adessive",
+              "singular"
+            ]
+          }
+        ]
+      },
+      316617
+    ],
+    [
+      {
+        "kind": "inflection",
+        "readings": [
+          {
+            "grammar": [
+              "third person",
+              "possessive",
+              "elative",
+              "singular"
+            ]
+          }
+        ]
+      },
+      316614
+    ],
+    [
+      {
+        "kind": "inflection",
+        "readings": [
+          {
+            "grammar": [
+              "third person",
+              "possessive",
+              "allative",
+              "singular"
+            ]
+          }
+        ]
+      },
+      316228
+    ],
+    [
+      {
+        "kind": "inflection",
+        "readings": [
+          {
+            "grammar": [
+              "third person",
+              "possessive",
+              "translative",
+              "singular"
+            ]
+          }
+        ]
+      },
+      316224
+    ],
+    [
+      {
+        "kind": "inflection",
+        "readings": [
+          {
+            "grammar": [
+              "third person",
+              "possessive",
+              "abessive",
+              "singular"
+            ]
+          }
+        ]
+      },
+      316156
+    ]
+  ],
+  "samples": {
+    "koira:noun": {
+      "forms": 158,
+      "details": [
+        {
+          "form": "koirat",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "nominative",
+                "accusative",
+                "plural"
+              ]
+            },
+            {
+              "grammar": [
+                "accusative",
+                "genitive",
+                "plural"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "koiran",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "accusative",
+                "genitive",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "koirien",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "genitive",
+                "plural"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "koirain",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "genitive",
+                "plural"
+              ],
+              "qualifiers": [
+                "rare"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "koiraa",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "partitive",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "koiria",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "partitive",
+                "plural"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "koirassa",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "inessive",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "koirissa",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "inessive",
+                "plural"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "koirasta",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "elative",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "koirista",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "elative",
+                "plural"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "koiraan",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "illative",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "koiriin",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "illative",
+                "plural"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "koiralla",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "adessive",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "koirilla",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "adessive",
+                "plural"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "koiralta",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "ablative",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "koirilta",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "ablative",
+                "plural"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "talo:noun": {
+      "forms": 158,
+      "details": [
+        {
+          "form": "talot",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "nominative",
+                "accusative",
+                "plural"
+              ]
+            },
+            {
+              "grammar": [
+                "accusative",
+                "genitive",
+                "plural"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "talon",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "accusative",
+                "genitive",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "talojen",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "genitive",
+                "plural"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "taloa",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "partitive",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "taloja",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "partitive",
+                "plural"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "talossa",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "inessive",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "taloissa",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "inessive",
+                "plural"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "talosta",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "elative",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "taloista",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "elative",
+                "plural"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "taloon",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "illative",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "taloihin",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "illative",
+                "plural"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "talolla",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "adessive",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "taloilla",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "adessive",
+                "plural"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "talolta",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "ablative",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "taloilta",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "ablative",
+                "plural"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "talolle",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "allative",
+                "singular"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "kissa:noun": {
+      "forms": 158,
+      "details": [
+        {
+          "form": "kissat",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "nominative",
+                "accusative",
+                "plural"
+              ]
+            },
+            {
+              "grammar": [
+                "accusative",
+                "genitive",
+                "plural"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "kissan",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "accusative",
+                "genitive",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "kissojen",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "genitive",
+                "plural"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "kissain",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "genitive",
+                "plural"
+              ],
+              "qualifiers": [
+                "rare"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "kissaa",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "partitive",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "kissoja",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "partitive",
+                "plural"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "kissassa",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "inessive",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "kissoissa",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "inessive",
+                "plural"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "kissasta",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "elative",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "kissoista",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "elative",
+                "plural"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "kissaan",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "illative",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "kissoihin",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "illative",
+                "plural"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "kissalla",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "adessive",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "kissoilla",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "adessive",
+                "plural"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "kissalta",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "ablative",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "kissoilta",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "ablative",
+                "plural"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "sanoa:verb": {
+      "forms": 165,
+      "details": [
+        {
+          "form": "sanon",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "first person",
+                "present",
+                "indicative",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "en sano",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "first person",
+                "negative",
+                "present",
+                "indicative",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "olen sanonut",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "first person",
+                "perfect",
+                "indicative",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "en ole sanonut",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "first person",
+                "negative",
+                "perfect",
+                "indicative",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "sanot",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "second person",
+                "present",
+                "indicative",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "et sano",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "second person",
+                "negative",
+                "present",
+                "indicative",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "olet sanonut",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "second person",
+                "perfect",
+                "indicative",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "et ole sanonut",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "second person",
+                "negative",
+                "perfect",
+                "indicative",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "sanoo",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "third person",
+                "present",
+                "indicative",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "ei sano",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "third person",
+                "negative",
+                "present",
+                "indicative",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "on sanonut",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "third person",
+                "perfect",
+                "indicative",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "ei ole sanonut",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "third person",
+                "negative",
+                "perfect",
+                "indicative",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "sanomme",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "first person",
+                "present",
+                "indicative",
+                "plural"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "emme sano",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "first person",
+                "negative",
+                "present",
+                "indicative",
+                "plural"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "olemme sanoneet",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "first person",
+                "perfect",
+                "indicative",
+                "plural"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "emme ole sanoneet",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "first person",
+                "negative",
+                "perfect",
+                "indicative",
+                "plural"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "kaunis:adj": {
+      "forms": 123,
+      "details": [
+        {
+          "form": "kauniimpi",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "comparative"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "kaunein",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "superlative"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "kaunehin",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "superlative"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "kauniit",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "nominative",
+                "accusative",
+                "plural"
+              ]
+            },
+            {
+              "grammar": [
+                "accusative",
+                "genitive",
+                "plural"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "kauniin",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "accusative",
+                "genitive",
+                "singular"
+              ]
+            },
+            {
+              "grammar": [
+                "plural",
+                "instructive"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "kauniiden",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "genitive",
+                "plural"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "kauniitten",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "genitive",
+                "plural"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "kaunisten",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "genitive",
+                "plural"
+              ],
+              "qualifiers": [
+                "rare"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "kaunista",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "partitive",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "kauniita",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "partitive",
+                "plural"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "kauniissa",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "inessive",
+                "singular"
+              ]
+            },
+            {
+              "grammar": [
+                "inessive",
+                "plural"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "kauniista",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "elative",
+                "singular"
+              ]
+            },
+            {
+              "grammar": [
+                "elative",
+                "plural"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "kauniiseen",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "illative",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "kauniisiin",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "illative",
+                "plural"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "kauniihin",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "illative",
+                "plural"
+              ],
+              "qualifiers": [
+                "rare"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "kauniilla",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "adessive",
+                "singular"
+              ]
+            },
+            {
+              "grammar": [
+                "adessive",
+                "plural"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "olla:verb": {
+      "forms": 176,
+      "details": [
+        {
+          "form": "olen",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "first person",
+                "present",
+                "indicative",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "en ole",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "first person",
+                "negative",
+                "present",
+                "indicative",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "olen ollut",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "first person",
+                "perfect",
+                "indicative",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "en ole ollut",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "first person",
+                "negative",
+                "perfect",
+                "indicative",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "olet",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "second person",
+                "present",
+                "indicative",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "et ole",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "second person",
+                "negative",
+                "present",
+                "indicative",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "olet ollut",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "second person",
+                "perfect",
+                "indicative",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "et ole ollut",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "second person",
+                "negative",
+                "perfect",
+                "indicative",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "on",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "third person",
+                "present",
+                "indicative",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "ei ole",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "third person",
+                "negative",
+                "present",
+                "indicative",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "on ollut",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "third person",
+                "perfect",
+                "indicative",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "ei ole ollut",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "third person",
+                "negative",
+                "perfect",
+                "indicative",
+                "singular"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "olemme",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "first person",
+                "present",
+                "indicative",
+                "plural"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "emme ole",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "first person",
+                "negative",
+                "present",
+                "indicative",
+                "plural"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "olemme olleet",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "first person",
+                "perfect",
+                "indicative",
+                "plural"
+              ]
+            }
+          ]
+        },
+        {
+          "form": "emme ole olleet",
+          "kind": "inflection",
+          "readings": [
+            {
+              "grammar": [
+                "first person",
+                "negative",
+                "perfect",
+                "indicative",
+                "plural"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "digest": "a9daa16be1708823c1d250178d4317362f99e8e3f1463dde2903c34325dec459",
+  "reading_tags_cache": "CacheInfo(hits=31314085, misses=578, maxsize=16384, currsize=578)"
+}

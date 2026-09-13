@@ -10,6 +10,8 @@ from itertools import groupby
 import re
 import unicodedata
 
+import msgspec
+
 from .dictionary_quality import _FORM_GRAMMAR, _LABELS, _form_variants, labels, raw_labels
 
 # Source grammar vocabulary, including distinctions that cannot be flattened to
@@ -350,30 +352,72 @@ def reading_tags(tags):
     return tuple(grammar), tuple(qualifiers), kind, tuple(sorted(t for t in unknown if not t.startswith('error-') and not t[:1].isupper()))
 
 
-def build_details(items, entry, clean_text, audit=None):
-    by_form = {}
-    for text, form, extra in items:
-        grammar, qualifiers, kind, unknown = reading_tags(tuple(sorted(form.tags)))
-        for tag in unknown: note(audit, 'unknown-tag:' + tag, entry, text)
-        qualifiers = tuple(dict.fromkeys((*qualifiers, *raw_labels(form.raw_tags, clean_text), *extra)))
-        bucket = by_form.setdefault(text, [])
-        value = (grammar, qualifiers, kind)
-        if value not in bucket: bucket.append(value)
-    output = []
-    for text, readings in by_form.items():
-        # Suppress a less-specific duplicate only within the same meaning/kind
-        # and with exactly the same qualifiers. Never transfer a qualifier.
-        unique = [r for r in readings if not any(r != other and r[1:] == other[1:] and
-                  set(r[0]) < set(other[0]) for other in readings)]
-        kinds = {r[2] for r in unique}
-        kind = next(k for k in ('inflection', 'related', 'variant', 'other') if k in kinds)
-        formatted = []
-        for grammar, qualifiers, _ in unique:
+@lru_cache(maxsize=8192)
+def _reading_summary(readings):
+    """Reuse paradigm structure, never a spelling or a mutable output object."""
+    # Most spellings have one reading. Avoid the quadratic comparison entirely
+    # in that case; repeated multi-reading patterns also share this work.
+    unique = readings if len(readings) == 1 else tuple(
+        r for r in readings if not any(
+            r != other and r[1:] == other[1:] and set(r[0]) < set(other[0])
+            for other in readings
+        )
+    )
+    kinds = {r[2] for r in unique}
+    kind = next(k for k in ('inflection', 'related', 'variant', 'other') if k in kinds)
+    formatted = tuple(dict.fromkeys((g, q) for g, q, _ in unique if g or q))
+    return kind, formatted
+
+
+@lru_cache(maxsize=8192)
+def _reading_json(readings):
+    kind, formatted = _reading_summary(readings)
+    detail = {'kind': kind}
+    if formatted:
+        result = []
+        for grammar, qualifiers in formatted:
             reading = {}
             if grammar: reading['grammar'] = list(grammar)
             if qualifiers: reading['qualifiers'] = list(qualifiers)
-            if reading and reading not in formatted: formatted.append(reading)
+            result.append(reading)
+        detail['readings'] = result
+    # The caller supplies the spelling as the first field. All JSON strings,
+    # including spellings and qualifiers, are escaped by the encoder.
+    return msgspec.json.encode(detail)[1:]
+
+
+def build_details(items, entry, clean_text, audit=None, *, raw=False):
+    by_form = {}
+    for text, form, extra in items:
+        grammar, qualifiers, kind, unknown = reading_tags(tuple(sorted(form.tags)))
+        if audit is not None:
+            for tag in unknown: note(audit, 'unknown-tag:' + tag, entry, text)
+        if form.raw_tags or extra:
+            qualifiers = tuple(dict.fromkeys((*qualifiers, *raw_labels(form.raw_tags, clean_text), *extra)))
+        value = (grammar, qualifiers, kind)
+        bucket = by_form.get(text)
+        if bucket is None:
+            by_form[text] = [value]
+        elif value not in bucket:
+            bucket.append(value)
+    if raw:
+        return msgspec.Raw(b'[' + b','.join(
+            b'{"form":' + msgspec.json.encode(text) + b',' + _reading_json(tuple(readings))
+            for text, readings in by_form.items()
+        ) + b']')
+    output = []
+    for text, readings in by_form.items():
+        kind, formatted = _reading_summary(tuple(readings))
         detail = {'form': text, 'kind': kind}
-        if formatted: detail['readings'] = formatted
+        if formatted:
+            # Keep callers' lists/dicts independent even when the immutable
+            # description is cached across spellings and dictionary entries.
+            result = []
+            for grammar, qualifiers in formatted:
+                reading = {}
+                if grammar: reading['grammar'] = list(grammar)
+                if qualifiers: reading['qualifiers'] = list(qualifiers)
+                result.append(reading)
+            detail['readings'] = result
         output.append(detail)
     return output

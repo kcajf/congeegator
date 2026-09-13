@@ -9,6 +9,8 @@ import json
 import logging
 from pathlib import Path
 import sqlite3
+import resource
+import sys
 import tempfile
 import time
 
@@ -18,6 +20,7 @@ from .conjugation import CONFIG
 from .dictionary import DICT_CONFIGS
 from .generate import generate_data_for_lang
 from .sqlite_output import write_sqlite_database
+from .packed_entries import PackedDictionaryEntries
 
 
 def main():
@@ -45,7 +48,11 @@ def main():
             "language": args.language,
             "sqlite_version": sqlite3.sqlite_version,
             "entries": len(entries),
-            "forms": sum(len(entry.get("forms", [])) for entry in entries),
+            "forms": sum(len(entry.get("forms", [])) for entry in (
+                entries.iter_for_sqlite() if isinstance(entries, PackedDictionaryEntries) else entries
+            )),
+            "packed_payload_bytes": entries.payload_bytes if isinstance(entries, PackedDictionaryEntries) else None,
+            "peak_rss_bytes": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * (1 if sys.platform == "darwin" else 1024),
             "processing_seconds": round(processed - start, 3),
             "database_seconds": round(written - processed, 3),
             "compression_seconds": round(finished - written, 3),

@@ -157,3 +157,43 @@ def test_less_specific_duplicates_only_collapse_with_identical_qualifiers():
 def test_finnish_person_and_number_belong_to_the_possessor():
     grammar = reading_tags(('first-person', 'singular-possessive', 'plural', 'genitive'))[0]
     assert grammar == ('genitive', 'plural', 'possessor: first person singular')
+
+
+def test_cached_form_readings_do_not_share_mutable_output():
+    e = Entry(word='lemma', lang_code='en', lang='English', pos='noun',
+              senses=(Sense(glosses=('test',)),), forms=(
+                  Form(form='x', tags={'plural', 'rare'}),
+                  Form(form='y', tags={'plural', 'rare'})))
+    first = process_dict_entry(CONFIGS['en'], e)
+    first['formDetails'][0]['readings'][0]['grammar'].append('changed')
+    first['formDetails'][0]['readings'][0]['qualifiers'].append('changed')
+    expected = [{'grammar': ['plural'], 'qualifiers': ['rare']}]
+    assert first['formDetails'][1]['readings'] == expected
+    assert process_dict_entry(CONFIGS['en'], e)['formDetails'][0]['readings'] == expected
+
+
+def test_raw_form_details_match_object_output_for_all_reviewed_fixtures():
+    import msgspec
+    from pathlib import Path
+
+    for path in Path(__file__).with_name('fixtures').glob('*.jsonl'):
+        for line in path.read_bytes().splitlines():
+            entry = msgspec.json.decode(line, type=Entry)
+            config = CONFIGS.get(entry.lang_code)
+            if config is None:
+                continue
+            plain = process_dict_entry(config, entry)
+            raw = process_dict_entry(config, entry, raw_form_details=True)
+            assert msgspec.json.encode(raw) == msgspec.json.encode(plain), (path.name, entry.word)
+
+
+def test_raw_details_escape_spellings_and_qualifiers():
+    import msgspec
+    from pipeline.form_quality import build_details
+
+    e = Entry(word='lemma', lang_code='en', lang='English', pos='noun',
+              senses=(Sense(glosses=('test',)),))
+    items = [('a"b\\c\nä', Form(form='unused', tags={'plural'}), ['quote"\\\n'])]
+    plain = build_details(items, e, lambda x: x)
+    raw = build_details(items, e, lambda x: x, raw=True)
+    assert msgspec.json.decode(raw) == plain
