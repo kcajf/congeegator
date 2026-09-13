@@ -1,9 +1,11 @@
 <script lang="ts">
-	import { afterNavigate, goto } from '$app/navigation';
+	import { afterNavigate, goto, replaceState } from '$app/navigation';
 	import { resolve } from '$app/paths';
+	import { page } from '$app/state';
 
 	import { dev } from '$app/environment';
 	import LanguagePicker from '$lib/components/LanguagePicker.svelte';
+	import HistoryNavigation from '$lib/components/HistoryNavigation.svelte';
 	import ToastStack from '$lib/components/ToastStack.svelte';
 	import { appTitle, brandColor } from '$lib/defs';
 	import { storage as sqliteClient } from '$lib/sqliteClient.svelte';
@@ -81,16 +83,44 @@
 
 	let searchResults = $state<SearchResult[]>([]);
 
-	afterNavigate(() => {
-		searchTerm = '';
+	afterNavigate((navigation) => {
+		if (navigation.type === 'popstate') clearSearch();
+		else searchTerm = '';
 	});
+
+	function clearSearch() {
+		const readingScroll = page.state.lexicoffReadingScroll;
+		const entryId = page.state.lexicoffHistoryId;
+		searchTerm = '';
+		// Search results temporarily replace the article and can clamp its scroll
+		// position. Restore the reading position after the article is visible again.
+		if (readingScroll) {
+			void tick().then(() => {
+				if (page.state.lexicoffHistoryId !== entryId) return;
+				window.scrollTo(readingScroll.x, readingScroll.y);
+				// Subsequent navigation should use the new reading position, not this
+				// snapshot from a completed search.
+				replaceState('', { ...page.state, lexicoffReadingScroll: undefined });
+			});
+		}
+	}
+
+	function rememberReadingPosition() {
+		if (!searchTerm.trim()) {
+			replaceState('', {
+				...page.state,
+				lexicoffReadingScroll: { x: window.scrollX, y: window.scrollY }
+			});
+		}
+	}
 
 	async function selectResult(item: SearchResult) {
 		const base = resolve('/[lang=lang]/[word]', {
 			lang: searchLangState.lang,
 			word: item.word
 		});
-		await goto(base);
+		if (page.url.pathname !== base) await goto(base);
+		else clearSearch();
 
 		searchTerm = '';
 
@@ -107,7 +137,7 @@
 			searchInput?.blur();
 			selectResult(searchResults[0]);
 		} else if (e.key === 'Escape') {
-			searchTerm = '';
+			clearSearch();
 			searchInput?.blur();
 		}
 	}
@@ -194,30 +224,55 @@
 </svelte:head>
 
 <div class="container">
-	<nav class="navbar">
-		<a href={resolve('/')} class="logo">
-			{appTitle}
-		</a>
+	<header class="app-header">
+		<nav class="navbar">
+			<a
+				href={resolve('/')}
+				class="logo"
+				aria-label="Lexicoff home"
+				onclick={(event) => {
+					if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+					if (page.url.pathname === resolve('/')) {
+						event.preventDefault();
+						clearSearch();
+						searchInput?.blur();
+					}
+				}}
+			>
+				{appTitle}
+			</a>
 
-		<div class="search-container">
-			<input
-				bind:value={searchTerm}
-				bind:this={searchInput}
-				onkeydown={handleKeydown}
-				onfocus={() => searchInput?.select()}
-				type="text"
-				id="searchInput"
-				placeholder="search..."
-				dir="auto"
-				aria-label="Search words or English definitions"
-				autocapitalize="off"
-				autocorrect="off"
-				autocomplete="off"
-			/>
-		</div>
+			<div class="search-container">
+				<input
+					value={searchTerm}
+					bind:this={searchInput}
+					onkeydown={handleKeydown}
+					oninput={(event) => {
+						rememberReadingPosition();
+						if (!event.currentTarget.value.trim()) clearSearch();
+						else searchTerm = event.currentTarget.value;
+					}}
+					onfocus={() => searchInput?.select()}
+					type="text"
+					id="searchInput"
+					placeholder="search..."
+					dir="auto"
+					aria-label="Search words or English definitions"
+					autocapitalize="off"
+					autocorrect="off"
+					autocomplete="off"
+				/>
+			</div>
 
-		<LanguagePicker onSelect={() => searchInput?.focus()} />
-	</nav>
+			<LanguagePicker onSelect={() => searchInput?.focus()} />
+		</nav>
+		<HistoryNavigation
+			onSelectCurrent={() => {
+				clearSearch();
+				searchInput?.blur();
+			}}
+		/>
+	</header>
 
 	<div class="content">
 		{#if searchResults.length > 0}
@@ -329,11 +384,15 @@
 		min-height: 100dvh;
 	}
 
-	.navbar {
+	.app-header {
 		position: sticky;
 		top: 0;
 		z-index: 10;
 		background-color: var(--brand);
+		padding-top: env(safe-area-inset-top);
+	}
+
+	.navbar {
 		padding: 0.5rem 0.75rem 0;
 		display: flex;
 		align-items: center;
@@ -355,6 +414,14 @@
 	}
 
 	@media (max-width: 600px) {
+		:global(:root) {
+			--history-bar-height: calc(53px + env(safe-area-inset-bottom));
+		}
+
+		.content {
+			padding-bottom: calc(2rem + var(--history-bar-height));
+		}
+
 		.navbar {
 			flex-wrap: wrap;
 		}
