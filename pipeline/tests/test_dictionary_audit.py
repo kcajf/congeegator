@@ -95,6 +95,17 @@ def test_read_source_preserves_unicode_and_final_unterminated_line(tmp_path):
     assert [line.rstrip(b"\n") for line in read_source(path)] == lines
 
 
+def test_audit_tracks_linked_senses_and_structured_examples():
+    result=audit_source([_line('casa',[{'glosses':['house'],'links':[['house','house']],
+        'examples':[{'text':'a casa','translation':'the house','bold_text_offsets':[[2,6]]}]}],
+        derived=[{'word':'casinha'}])],CONFIG)
+    assert result['counts']['senses_with_links']==1
+    assert result['counts']['translated_examples']==1
+    assert result['counts']['emphasized_examples']==1
+    assert result['counts']['records_with_derived']==1
+    assert result['review_flags']=={}
+
+
 def test_audit_detects_lost_pronunciation_context_even_when_counts_match(tmp_path):
     config = DictLanguageConfig("grc", "Ancient Greek", "Ancient Greek")
     raw = json.dumps({
@@ -120,3 +131,23 @@ def test_audit_search_probes_preserve_hindi_vowel_marks(tmp_path):
     result = audit_sqlite(path, "hi")
     probe = next(p for p in result["search_probes"] if p["word"] == "पानी")
     assert probe["fts_matches_all_records"] is True
+
+
+def test_audit_fingerprints_include_entry_relationships(tmp_path):
+    # Same headword and gloss can have distinct relationship data. The audit
+    # must compare the full serialized record, not only its definition count.
+    lines = [
+        _line('casa', [{'glosses': ['house']}], derived=[{'word': 'casinha'}]),
+        _line('casa', [{'glosses': ['house']}], derived=[{'word': 'casarão'}]),
+    ]
+    source = audit_source(lines, CONFIG)
+    assert source['counts']['unique_records'] == 2
+    records = [process_dict_entry(CONFIG, msgspec.json.decode(line, type=Entry)) for line in lines]
+    path = tmp_path / 'pt.sqlite'
+    write_sqlite_database(records, 'pt', None, str(path))
+    assert audit_sqlite(path, 'pt', source)['source_records_match'] is True
+    with sqlite3.connect(path) as conn:
+        conn.execute('UPDATE entries SET details = NULL WHERE id = (SELECT min(id) FROM entries)')
+    result = audit_sqlite(path, 'pt', source)
+    assert result['source_counts_match'] is True
+    assert result['source_records_match'] is False

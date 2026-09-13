@@ -91,7 +91,7 @@ DIRT_PATTERNS = {
 
 
 def _summary(record):
-    result = {k: record[k] for k in ("word", "pos", "senses", "gender", "pronunciation", "etymology") if k in record}
+    result = {k: record[k] for k in ("word", "pos", "senses", "gender", "pronunciation", "etymology", "details") if k in record}
     if record.get("forms"):
         result["form_count"] = len(record["forms"])
         result["forms_sample"] = record["forms"][:20]
@@ -107,7 +107,28 @@ def _strings(record):
     for sense in record["senses"]:
         yield "gloss", sense["gloss"]
         for example in sense.get("examples", []):
-            yield "example", example
+            if isinstance(example, str):
+                yield "example", example
+            else:
+                yield "example", example["text"]
+                for key in ("translation", "roman", "ref"):
+                    if example.get(key):
+                        yield key, example[key]
+        for key in ("tags", "topics"):
+            for label in sense.get(key, []):
+                yield key, label
+        for key in ("links", "formOf", "altOf", "synonyms", "antonyms"):
+            for link in sense.get(key, []):
+                yield "link", link["word"]
+                for field in ("label", "sense"):
+                    if link.get(field):
+                        yield field, link[field]
+    for links in record.get("details", {}).values():
+        for link in links:
+            yield "link", link["word"]
+            for field in ("label", "sense"):
+                if link.get(field):
+                    yield field, link[field]
     for form in record.get("forms", []):
         yield "form", form
     for key in ("etymology", "pronunciation"):
@@ -180,6 +201,20 @@ def audit_source(lines, config, sample_size=12):
         for key in ("forms", "gender", "pronunciation", "etymology"):
             counts[f"records_with_{key}"] += bool(record.get(key))
         counts["records_with_examples"] += any(s.get("examples") for s in record["senses"])
+        for key in ("etymologyLinks", "synonyms", "antonyms", "related", "derived"):
+            counts[f"records_with_{key}"] += bool(record.get("details", {}).get(key))
+        for sense in record["senses"]:
+            for key in ("links", "formOf", "altOf", "synonyms", "antonyms", "topics"):
+                counts[f"senses_with_{key}"] += bool(sense.get(key))
+            for example in sense.get("examples", []):
+                if isinstance(example, str):
+                    continue
+                counts["translated_examples"] += bool(example.get("translation"))
+                counts["emphasized_examples"] += bool(example.get("bold"))
+                for text_key, range_key in (("text", "bold"), ("translation", "translationBold")):
+                    for start, end in example.get(range_key, []):
+                        if not (0 <= start < end <= len(example.get(text_key, ""))):
+                            flag("invalid_emphasis", word, range_key, str([start, end]))
         fingerprint = _record_fingerprint(record)
         if fingerprint in fingerprints:
             flag("identical_record", word, "record", record["pos"])
@@ -273,6 +308,12 @@ def audit_sqlite(path, code, source_report=None):
                 finally:
                     conn.rollback()
                 result["fts_records"][table] = conn.execute(f"SELECT count(*) FROM {table}").fetchone()[0]
+            tables = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+            if "form_lookup" in tables:
+                result["form_lookup_records"] = conn.execute("SELECT count(*) FROM form_lookup").fetchone()[0]
+                result["form_lookup_orphans"] = conn.execute(
+                    "SELECT count(*) FROM form_lookup f LEFT JOIN entries e ON e.id=f.entry_id WHERE e.id IS NULL"
+                ).fetchone()[0]
             result["language"] = conn.execute("SELECT value FROM metadata WHERE key='lang'").fetchone()[0]
             result["records"] = conn.execute("SELECT count(*) FROM entries").fetchone()[0]
             result["unique_headwords"] = conn.execute("SELECT count(DISTINCT word) FROM entries").fetchone()[0]
@@ -282,14 +323,14 @@ def audit_sqlite(path, code, source_report=None):
             result["highest_frequency"] = [dict(zip(("word", "pos", "freq"), r)) for r in conn.execute("SELECT word,pos,freq FROM entries ORDER BY freq DESC, word LIMIT 20")]
             columns = {row[1] for row in conn.execute("PRAGMA table_info(entries)")}
             selected = ["word", "pos", "senses", "gender", "forms", "pronunciation", "etymology"]
-            selected += [name for name in ("form_details", "pronunciations") if name in columns]
+            selected += [name for name in ("details", "form_details", "pronunciations") if name in columns]
             fingerprints = set()
             for row in conn.execute("SELECT " + ",".join(selected) + " FROM entries"):
                 record = {}
                 for key, value in zip(selected, row):
                     if value is None:
                         continue
-                    if key in {"senses", "forms", "form_details", "pronunciations"}:
+                    if key in {"senses", "forms", "details", "form_details", "pronunciations"}:
                         value = json.loads(value)
                     record["formDetails" if key == "form_details" else key] = value
                 fingerprints.add(_record_fingerprint(record))
@@ -328,7 +369,10 @@ def main():
     parser.add_argument("--manifest", type=Path, help="Optionally verify compressed size/hash against a release manifest")
     parser.add_argument("--languages", nargs="+", default=list(COMMON_WORDS))
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--sample-size", type=int, default=12, help="Deterministic random records per language")
     args = parser.parse_args()
+    if args.sample_size < 0:
+        parser.error("--sample-size must be nonnegative")
     if args.manifest and not args.data_dir:
         parser.error("--manifest requires --data-dir")
     manifest = json.loads(args.manifest.read_text())["languages"] if args.manifest else None
@@ -345,7 +389,7 @@ def main():
         source = args.source_dir / f"en-{code}-filtered.jsonl.zst"
         if not source.exists():
             source = args.source_dir / f"en-{code}-filtered.jsonl"
-        result = audit_source(read_source(source), configs[code])
+        result = audit_source(read_source(source), configs[code], sample_size=args.sample_size)
         with source.open("rb") as f:
             result["source_sha256"] = hashlib.file_digest(f, "sha256").hexdigest()
         result["source_bytes"] = source.stat().st_size

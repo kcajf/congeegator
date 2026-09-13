@@ -24,8 +24,16 @@ CREATE TABLE entries (
     gender      TEXT,
     forms       TEXT,
     pronunciation TEXT,
-    etymology   TEXT
+    etymology   TEXT,
+    details     TEXT
 );
+
+-- Exact reverse lookup avoids scanning JSON paradigms or broad FTS matches.
+CREATE TABLE form_lookup (
+    form_key TEXT NOT NULL,
+    entry_id INTEGER NOT NULL REFERENCES entries(id),
+    PRIMARY KEY (form_key, entry_id)
+) WITHOUT ROWID;
 
 CREATE INDEX idx_word ON entries(word COLLATE NOCASE);
 CREATE INDEX idx_word_key ON entries(word_key);
@@ -65,7 +73,7 @@ EXTENDED_LANGUAGES = frozenset({
     "ko", "lt", "mk", "ms", "oc", "fa", "sa", "sh", "sk", "cy",
 })
 EXTENDED_SCHEMA_SQL = SCHEMA_SQL.replace(
-    "etymology   TEXT\n", "etymology   TEXT,\n    search_key TEXT NOT NULL,\n    form_details TEXT,\n    pronunciations TEXT\n"
+    "details     TEXT\n", "details     TEXT,\n    search_key TEXT NOT NULL,\n    form_details TEXT,\n    pronunciations TEXT\n"
 ).replace(
     "CREATE INDEX idx_freq", "CREATE INDEX idx_search_key ON entries(search_key);\nCREATE INDEX idx_freq"
 ).replace(
@@ -151,6 +159,7 @@ def write_sqlite_database(
                 forms_json,
                 entry.get("pronunciation"),
                 entry.get("etymology"),
+                orjson.dumps(entry["details"]).decode() if entry.get("details") else None,
             )
             if extended:
                 row += (
@@ -159,6 +168,11 @@ def write_sqlite_database(
                     orjson.dumps(entry["pronunciations"]).decode() if entry.get("pronunciations") else None,
                 )
             entry_rows.append(row)
+
+            conn.executemany(
+                "INSERT OR IGNORE INTO form_lookup (form_key, entry_id) VALUES (?, ?)",
+                ((dictionary_word_key(form, lang_code), i) for form in forms or []),
+            )
 
             # FTS columns
             forms_text = " ".join(forms) if forms else ""
@@ -218,10 +232,10 @@ def _flush_batch(
     fuzzy_rows: list[tuple],
     extended: bool = False,
 ) -> None:
-    columns = "id, word, word_key, pos, senses, freq, gender, forms, pronunciation, etymology"
+    columns = "id, word, word_key, pos, senses, freq, gender, forms, pronunciation, etymology, details"
     if extended:
         columns += ", search_key, form_details, pronunciations"
-    placeholders = ", ".join("?" for _ in range(13 if extended else 10))
+    placeholders = ", ".join("?" for _ in range(14 if extended else 11))
     conn.executemany(
         f"INSERT INTO entries ({columns}) VALUES ({placeholders})",
         entry_rows,

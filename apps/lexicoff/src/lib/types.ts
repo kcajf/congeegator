@@ -12,10 +12,44 @@ export interface DataManifest {
 
 export type Id = number;
 
+export interface WordLink {
+	word: string;
+	lang: string;
+	label?: string;
+	anchor?: string;
+	sense?: string;
+	tags?: string[];
+}
+
+export interface DictExample {
+	text: string;
+	translation?: string;
+	roman?: string;
+	ref?: string;
+	type?: 'quotation';
+	bold?: [number, number][];
+	translationBold?: [number, number][];
+}
+
+export interface EntryDetails {
+	etymologyLinks?: WordLink[];
+	synonyms?: WordLink[];
+	antonyms?: WordLink[];
+	related?: WordLink[];
+	derived?: WordLink[];
+}
+
 export interface DictSense {
 	gloss: string;
-	examples?: string[];
+	examples?: (string | DictExample)[];
 	tags?: string[];
+	links?: WordLink[];
+	formOf?: WordLink[];
+	altOf?: WordLink[];
+	synonyms?: WordLink[];
+	antonyms?: WordLink[];
+	topics?: string[];
+	qualifier?: string;
 }
 
 export interface DictFormDetail {
@@ -41,4 +75,6 @@ export interface DictRecord {
 	pronunciations?: DictPronunciation[];
 	pronunciation?: string;
 	etymology?: string;
+	details?: EntryDetails;
+	matchedForm?: string;
 }
