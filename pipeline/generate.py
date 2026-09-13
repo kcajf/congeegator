@@ -336,9 +336,11 @@ def write_dictionary_language(entries, config: DictLanguageConfig, data_dir: str
     lang_dir = os.path.join(data_dir, config.code)
     os.makedirs(lang_dir, exist_ok=True)
     sqlite_path = os.path.join(lang_dir, f"{config.code}.sqlite")
-    write_sqlite_database(entries, config.code, phonetic_fn=config.phonetic_fn, output_path=sqlite_path)
-    with open(sqlite_path, "rb") as f_in, open(sqlite_path + ".zst", "wb") as f_out:
-        zstandard.ZstdCompressor(level=9).copy_stream(f_in, f_out)
+    with log_timing(f"{config.code} sqlite database"):
+        write_sqlite_database(entries, config.code, phonetic_fn=config.phonetic_fn, output_path=sqlite_path)
+    with log_timing(f"{config.code} sqlite compression"):
+        with open(sqlite_path, "rb") as f_in, open(sqlite_path + ".zst", "wb") as f_out:
+            zstandard.ZstdCompressor(level=9).copy_stream(f_in, f_out)
     os.remove(sqlite_path)
 
 

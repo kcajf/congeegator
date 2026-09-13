@@ -76,6 +76,87 @@ def _make_db(entries, lang_code="fr", phonetic_fn=None):
     return path
 
 
+def test_bulk_build_preserves_normalized_forms_and_search_across_batches(monkeypatch, tmp_path):
+    from pipeline import sqlite_output
+
+    monkeypatch.setattr(sqlite_output, "BATCH_SIZE", 2)
+    path = tmp_path / "tr.sqlite"
+    entries = [
+        {"word": word, "pos": "noun", "senses": [{"gloss": gloss}],
+         "forms": ["IŞIK", "ışık", "İZ", "iz"], "freq": i}
+        for i, (word, gloss) in enumerate([
+            ("bir", "first light"), ("iki", "second light"),
+            ("üç", "third light"), ("dört", "fourth light"),
+            ("beş", "fifth light"),
+        ])
+    ]
+    write_sqlite_database(entries, "tr", None, str(path))
+    with sqlite3.connect(path) as conn:
+        assert conn.execute("PRAGMA integrity_check").fetchone() == ("ok",)
+        for table in ("entries_fts", "fuzzy"):
+            conn.execute(f"INSERT INTO {table}({table}) VALUES('integrity-check')")
+        assert conn.execute("SELECT form_key, COUNT(*) FROM form_lookup GROUP BY form_key").fetchall() == [
+            ("iz", 5), ("ışık", 5),
+        ]
+        assert conn.execute("SELECT rowid FROM entries_fts WHERE entries_fts MATCH 'light' ORDER BY rowid").fetchall() == [(i,) for i in range(5)]
+        assert conn.execute("SELECT rowid FROM fuzzy WHERE fuzzy MATCH 'dör'").fetchall() == [(3,)]
+        assert {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='index'")} >= {
+            "idx_word", "idx_word_key", "idx_freq",
+        }
+    with sqlite3.connect(f"file:{path}?mode=ro", uri=True) as conn:
+        assert conn.execute("SELECT COUNT(*) FROM entries").fetchone() == (5,)
+        assert conn.execute("PRAGMA journal_mode").fetchone() == ("delete",)
+    assert sorted(p.name for p in tmp_path.iterdir()) == ["tr.sqlite"]
+
+
+def test_failed_build_preserves_previous_database_and_removes_temporary_files(monkeypatch, tmp_path):
+    from pipeline import sqlite_output
+
+    monkeypatch.setattr(sqlite_output, "BATCH_SIZE", 1)
+    path = tmp_path / "fr.sqlite"
+    valid = {"word": "maison", "pos": "noun", "senses": [{"gloss": "house"}]}
+    write_sqlite_database([valid], "fr", None, str(path))
+    previous = path.read_bytes()
+    with pytest.raises(KeyError):
+        write_sqlite_database([valid, {"senses": []}], "fr", None, str(path))
+    assert path.read_bytes() == previous
+    assert sorted(p.name for p in tmp_path.iterdir()) == ["fr.sqlite"]
+
+
+def test_form_batches_keep_tail_rows_and_deduplicate_across_batches(tmp_path):
+    path = tmp_path / "fr.sqlite"
+    forms = [f"FORM{i}" for i in range(2001)] + ["form0"]
+    write_sqlite_database([
+        {"word": "example", "pos": "noun", "senses": [{"gloss": "example"}], "forms": forms},
+    ], "fr", None, str(path))
+    with sqlite3.connect(path) as conn:
+        assert conn.execute("SELECT COUNT(*) FROM form_lookup").fetchone() == (2001,)
+        assert conn.execute("SELECT entry_id FROM form_lookup WHERE form_key='form2000'").fetchall() == [(0,)]
+        assert conn.execute("SELECT rowid FROM entries_fts WHERE entries_fts MATCH 'form2000'").fetchall() == [(0,)]
+
+
+def test_failed_compaction_preserves_destination_and_cleans_output_scratch_file(monkeypatch, tmp_path):
+    from pipeline import sqlite_output
+
+    path = tmp_path / "fr.sqlite"
+    entry = {"word": "maison", "pos": "noun", "senses": [{"gloss": "house"}]}
+    write_sqlite_database([entry], "fr", None, str(path))
+    previous = path.read_bytes()
+    connect = sqlite3.connect
+
+    class FailingCompaction(sqlite3.Connection):
+        def execute(self, sql, parameters=()):
+            if sql.startswith("VACUUM INTO"):
+                raise sqlite3.OperationalError("simulated compaction failure")
+            return super().execute(sql, parameters)
+
+    monkeypatch.setattr(sqlite_output.sqlite3, "connect", lambda path: connect(path, factory=FailingCompaction))
+    with pytest.raises(sqlite3.OperationalError, match="compaction failure"):
+        write_sqlite_database([entry], "fr", None, str(path))
+    assert path.read_bytes() == previous
+    assert sorted(p.name for p in tmp_path.iterdir()) == ["fr.sqlite"]
+
+
 class TestSqliteOutput:
     @pytest.mark.parametrize("lang,word,query,key", [
         ("vi", "tiếng Việt", "TIẾNG VIỆT", "tiếng việt"),

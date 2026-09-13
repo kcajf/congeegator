@@ -5,6 +5,7 @@ serialization. Error tags alone never disqualify a lexical form.
 """
 import re
 import unicodedata
+from functools import lru_cache
 
 from .utils import strip_diacritics
 from .wiktionary import Entry
@@ -31,12 +32,21 @@ nominative accusative genitive dative ablative locative instrumental vocative
 ergative absolutive partitive illative inessive elative allative adessive
 essive translative comitative abessive terminative prolative
 singular dual plural'''.split()
+_FORM_GRAMMAR_TAGS = frozenset(_FORM_GRAMMAR)
 
 
 def form_grammar(tags):
+    # Paradigms repeat the same few hundred grammatical readings millions of
+    # times. Ignore unrelated tags in the cache key; never retain raw qualifiers.
+    # Return a fresh list because callers combine/mutate their label lists.
+    return list(_cached_form_grammar(_FORM_GRAMMAR_TAGS.intersection(tags)))
+
+
+@lru_cache(maxsize=8192)
+def _cached_form_grammar(tags: frozenset[str]) -> tuple[str, ...]:
     reading = ' '.join(('aorist infinitive' if tag == 'infinitive-aorist' else tag.replace('-', ' '))
                        for tag in _FORM_GRAMMAR if tag in tags)
-    return [reading] if reading else []
+    return (reading,) if reading else ()
 
 
 def labels(tags):
