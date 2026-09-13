@@ -22,7 +22,11 @@ and other entry fields retain their existing representation.
 - Pipeline audits use the same codec. No migration of installed databases is
   required; the normal manual language update installs the new generated file.
 
-Keep whole-database download compression at level 9. It still compresses the
+Keep whole-database download compression at level 9, with its optional content
+checksum enabled. The streaming download decoder verifies it before committing
+the installed file; same-length corruption fails without replacing an existing
+download. Older files without a checksum remain readable. This is corruption
+detection, not cryptographic authentication. It still compresses the
 search/index tables and SQLite layout after detail fields have been compressed.
 The download worker removes that outer layer during installation; the inner
 compressed fields remain small on disk.

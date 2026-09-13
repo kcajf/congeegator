@@ -342,7 +342,7 @@ def write_dictionary_language(entries, config: DictLanguageConfig, data_dir: str
         write_sqlite_database(entries, config.code, phonetic_fn=config.phonetic_fn, output_path=sqlite_path)
     with log_timing(f"{config.code} sqlite compression"):
         with open(sqlite_path, "rb") as f_in, open(sqlite_path + ".zst", "wb") as f_out:
-            zstandard.ZstdCompressor(level=9).copy_stream(f_in, f_out)
+            zstandard.ZstdCompressor(level=9, write_checksum=True).copy_stream(f_in, f_out)
     os.remove(sqlite_path)
 
 
