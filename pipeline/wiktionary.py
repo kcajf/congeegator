@@ -23,6 +23,12 @@ class Sense(msgspec.Struct, frozen=True):
     categories: tuple[Any, ...] = ()
     glosses: tuple[str, ...] = ()
     examples: tuple[Any, ...] = ()
+    links: tuple[tuple[str, str], ...] = ()
+    topics: tuple[str, ...] = ()
+    raw_glosses: tuple[str, ...] = ()
+    qualifier: str = ""
+    synonyms: tuple[Any, ...] = ()
+    antonyms: tuple[Any, ...] = ()
     raw_tags: tuple[str, ...] = ()
 
 
@@ -55,3 +61,8 @@ class Entry(msgspec.Struct, frozen=True):
     etymology_templates: tuple[EtymologyTemplate, ...] = ()
     categories: tuple[Any, ...] = ()
     sounds: tuple[Any, ...] = ()
+    etymology_text: str = ""
+    synonyms: tuple[Any, ...] = ()
+    antonyms: tuple[Any, ...] = ()
+    related: tuple[Any, ...] = ()
+    derived: tuple[Any, ...] = ()

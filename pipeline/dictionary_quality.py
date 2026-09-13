@@ -157,7 +157,13 @@ def enhance_record(entry, record, clean_text):
         if combined:
             sense['tags'] = combined
         if 'examples' in sense:
-            examples = [x for x in sense['examples'] if not _LINKAGE.match(x) and not _BROKEN_ENTITY.search(x)]
+            # Filter the excerpt without flattening its translation, reference,
+            # or Unicode emphasis ranges. Older records used plain strings.
+            examples = []
+            for example in sense['examples']:
+                text = example['text'] if isinstance(example, dict) else example
+                if not _LINKAGE.match(text) and not _BROKEN_ENTITY.search(text):
+                    examples.append(example)
             if examples:
                 sense['examples'] = examples
             else:

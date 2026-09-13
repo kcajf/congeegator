@@ -17,7 +17,7 @@ interface InternalResult {
 	word: string;
 	pos: string;
 	matched: string;
-	quality: number; // 0=exact, 5=alias, 10=word, 20=form, 30=phonetic, 40=gloss, 50=fuzzy
+	quality: number; // 0=exact, 5=exact form/alias, 10=word, 20=form, 30=phonetic, 40=gloss, 50=fuzzy
 	freq: number;
 	id: number;
 }
@@ -37,6 +37,7 @@ let sqlite3: any;
 let poolUtil: any;
 const openDbs = new Map<string, any>();
 const wordKeyLanguages = new Set<string>();
+const linkedEntryLanguages = new Set<string>();
 const entryColumns = new Map<string, Set<string>>();
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
@@ -74,6 +75,7 @@ async function shutdown() {
 		}
 		openDbs.delete(lang);
 		wordKeyLanguages.delete(lang);
+		linkedEntryLanguages.delete(lang);
 		entryColumns.delete(lang);
 	}
 	// Do not call removeVfs(): it deletes every installed dictionary. Worker
@@ -89,6 +91,7 @@ async function openDb(lang: string, hash: string): Promise<boolean> {
 
 	let db;
 	let hasWordKey = false;
+	let hasLinkedEntries = false;
 	let columns = new Set<string>();
 	try {
 		let file: File | undefined;
@@ -134,6 +137,8 @@ async function openDb(lang: string, hash: string): Promise<boolean> {
 			execQuery(db, 'PRAGMA table_info(entries)').map((column) => column[1] as string)
 		);
 		hasWordKey = columns.has('word_key');
+		hasLinkedEntries = columns.has('details');
+		if (hasLinkedEntries) db.exec('SELECT form_key, entry_id FROM form_lookup LIMIT 0');
 	} catch (error) {
 		db?.close();
 		// Discard the failed candidate, keeping the working database and raw
@@ -148,6 +153,9 @@ async function openDb(lang: string, hash: string): Promise<boolean> {
 	// Older downloads remain usable until the user chooses to update them.
 	if (hasWordKey) wordKeyLanguages.add(lang);
 	else wordKeyLanguages.delete(lang);
+
+	if (hasLinkedEntries) linkedEntryLanguages.add(lang);
+	else linkedEntryLanguages.delete(lang);
 
 	// Cleanup is best-effort after the replacement is usable. Failure here
 	// must not turn a successful installation into a failed one.
@@ -175,6 +183,7 @@ async function closeDb(lang: string) {
 	db.close();
 	openDbs.delete(lang);
 	wordKeyLanguages.delete(lang);
+	linkedEntryLanguages.delete(lang);
 	entryColumns.delete(lang);
 }
 
@@ -257,6 +266,29 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 		}
 	} catch {
 		// best-effort
+	}
+
+	// Exact inflections must not be lost among the capped token-prefix results.
+	if (linkedEntryLanguages.has(lang)) {
+		const rows = execQuery(
+			db,
+			`SELECT e.id, e.word, e.pos, e.freq
+			FROM form_lookup f JOIN entries e ON e.id = f.entry_id
+			WHERE f.form_key = ? ORDER BY e.freq DESC, e.id`,
+			[trimmed]
+		);
+		for (const [id, word, pos, freq] of rows) {
+			const key = `${word}:${pos}`;
+			if (seen.has(key)) continue;
+			seen.set(key, {
+				id: id as number,
+				word: word as string,
+				pos: pos as string,
+				freq: freq as number,
+				matched: query.trim(),
+				quality: 5
+			});
+		}
 	}
 
 	// Indexed aliases keep unaccented/pointed/keyboard-variant matches ahead of
@@ -490,17 +522,36 @@ async function getWord(lang: string, word: string): Promise<unknown[]> {
 	const db = openDbs.get(lang);
 	if (!db) return [];
 
-	const columns = entryColumns.get(lang);
-	const optionalColumns = ['form_details', 'pronunciations']
-		.map((column) => (columns?.has(column) ? column : `NULL AS ${column}`))
+	const linked = linkedEntryLanguages.has(lang);
+	const schemaColumns = entryColumns.get(lang);
+	const optionalColumns = ['details', 'form_details', 'pronunciations']
+		.map((column) => (schemaColumns?.has(column) ? column : `NULL AS ${column}`))
 		.join(', ');
-	const rows = execQuery(
+	const columns = `id, word, pos, senses, freq, gender, forms, pronunciation, etymology, ${optionalColumns}`;
+	let rows = execQuery(
 		db,
-		`SELECT id, word, pos, senses, freq, gender, forms, pronunciation, etymology, ${optionalColumns}
+		`SELECT ${columns}
 		FROM entries WHERE ${wordKeyLanguages.has(lang) ? 'word_key = ?' : 'word = ? COLLATE NOCASE'}
-		ORDER BY freq DESC`,
+		ORDER BY freq DESC, id`,
 		[wordKeyLanguages.has(lang) ? dictionaryWordKey(word, lang) : word]
 	);
+	// Preserve spelling distinctions such as German Haus (noun) / haus (verb).
+	// Uppercase keyboard input still falls back to the case-insensitive results.
+	const exactSpelling = rows.filter(
+		(row) => (row[1] as string).normalize('NFC') === word.normalize('NFC')
+	);
+	if (exactSpelling.length) rows = exactSpelling;
+	let matchedForm: string | undefined;
+	if (!rows.length && linked) {
+		rows = execQuery(
+			db,
+			`SELECT ${columns} FROM entries
+			WHERE id IN (SELECT entry_id FROM form_lookup WHERE form_key = ?)
+			ORDER BY freq DESC, id`,
+			[dictionaryWordKey(word, lang)]
+		);
+		if (rows.length) matchedForm = word;
+	}
 
 	return rows.map(
 		([
@@ -513,11 +564,13 @@ async function getWord(lang: string, word: string): Promise<unknown[]> {
 			forms,
 			pronunciation,
 			etymology,
+			details,
 			formDetails,
 			pronunciations
 		]) => ({
 			id: id as number,
 			word: w as string,
+			lang,
 			pos: pos as string,
 			senses: JSON.parse(senses as string),
 			freq: freq as number,
@@ -525,8 +578,10 @@ async function getWord(lang: string, word: string): Promise<unknown[]> {
 			forms: forms ? JSON.parse(forms as string) : undefined,
 			pronunciation: pronunciation as string | null,
 			etymology: etymology as string | null,
+			details: details ? JSON.parse(details as string) : undefined,
 			formDetails: formDetails ? JSON.parse(formDetails as string) : undefined,
-			pronunciations: pronunciations ? JSON.parse(pronunciations as string) : undefined
+			pronunciations: pronunciations ? JSON.parse(pronunciations as string) : undefined,
+			matchedForm
 		})
 	);
 }

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { afterNavigate, goto, replaceState } from '$app/navigation';
+	import { manifest } from '$lib/dataUtils';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 
@@ -84,8 +85,11 @@
 	let searchResults = $state<SearchResult[]>([]);
 
 	afterNavigate((navigation) => {
-		if (navigation.type === 'popstate') clearSearch();
-		else searchTerm = '';
+		const lang = page.params.lang || page.url.searchParams.get('lang');
+		if (lang && lang in manifest.languages) searchLangState.set(lang);
+		const query = page.url.searchParams.get('q') || '';
+		if (navigation.type === 'popstate' && !query) clearSearch();
+		else searchTerm = query;
 	});
 
 	function clearSearch() {
@@ -232,7 +236,7 @@
 				aria-label="Lexicoff home"
 				onclick={(event) => {
 					if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-					if (page.url.pathname === resolve('/')) {
+					if (page.url.pathname === resolve('/') && !page.url.searchParams.has('q')) {
 						event.preventDefault();
 						clearSearch();
 						searchInput?.blur();
