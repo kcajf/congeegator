@@ -44,7 +44,8 @@
 	import { storage } from '$lib/sqliteClient.svelte';
 	import {
 		entryPronunciations,
-		formUsageLabels,
+		formReadings,
+		formGroups,
 		formatUsageLabel,
 		formatPronunciationLabel
 	} from '$lib/dictionaryDisplay';
@@ -59,7 +60,7 @@
 		label = POS_LABELS[entry.pos] ?? entry.pos
 	}: { entry: DictRecord; lang: string; label?: string } = $props();
 	const pronunciations = $derived(entryPronunciations(entry));
-	const formLabels = $derived(formUsageLabels(entry));
+	const formLabels = $derived(formReadings(entry));
 	const formBatchSize = 40;
 	let formsOpen = $state(false);
 	let formLimit = $state(formBatchSize);
@@ -218,18 +219,35 @@
 		<details class="supplement forms-section" bind:open={formsOpen}>
 			<summary>Forms <span class="count">{entry.forms.length}</span></summary>
 			{#if formsOpen}
-				<ul class="forms">
-					{#each visibleForms as form, i (i)}
-						<li class="form">
-							<bdi {lang}
-								>{#if linkedForms.has(form)}<WordLink
-										link={{ word: form, lang }}
-									/>{:else}{form}{/if}</bdi
-							>{#if formLabels.get(form)}<span class="form-tags">({formLabels.get(form)})</span
-								>{/if}
-						</li>
-					{/each}
-				</ul>
+				{#each formGroups(entry, visibleForms) as group (group.label)}
+					{#if entry.formDetails?.some((detail) => detail.kind)}<h4 class="form-group">
+							{group.label}
+						</h4>{/if}
+					<ul class="forms">
+						{#each group.forms as form (form)}
+							{@const readings = formLabels.get(form) ?? []}
+							<li class="form">
+								<bdi {lang}
+									>{#if linkedForms.has(form)}<WordLink
+											link={{ word: form, lang }}
+										/>{:else}{form}{/if}</bdi
+								>{#if readings.length}<span class="form-tags">({readings[0]})</span>{/if}
+								{#if readings.length > 1}
+									<details class="form-readings">
+										<summary
+											>{readings.length - 1} more {readings.length === 2
+												? 'reading'
+												: 'readings'}</summary
+										>
+										<ul>
+											{#each readings.slice(1) as reading (reading)}<li>{reading}</li>{/each}
+										</ul>
+									</details>
+								{/if}
+							</li>
+						{/each}
+					</ul>
+				{/each}
 				{#if formLimit < entry.forms.length}
 					<button class="more-forms" onclick={() => (formLimit += formBatchSize)}>
 						Show {Math.min(formBatchSize, entry.forms.length - formLimit)} more
@@ -339,6 +357,22 @@
 	.form-tags {
 		font-size: 0.9em;
 		margin-inline-start: 0.4em;
+	}
+	.form-group {
+		margin: 0.6rem 0 0.2rem;
+		font-size: 0.9rem;
+	}
+	.form-readings {
+		font-size: 0.9em;
+		color: var(--text-muted);
+		margin-inline-start: 1rem;
+	}
+	.form-readings summary {
+		cursor: pointer;
+	}
+	.form-readings ul {
+		margin: 0.2rem 0;
+		padding-inline-start: 1rem;
 	}
 	.forms {
 		padding: 0 0 0.6rem;

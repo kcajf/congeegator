@@ -138,6 +138,10 @@ def _strings(record):
         yield "annotated_form", form["form"]
         for tag in form.get("tags", []):
             yield "form_label", tag
+    for detail in record.get("formDetails", []):
+        for reading in detail.get("readings", []):
+            for label in reading.get("grammar", []) + reading.get("qualifiers", []):
+                yield "form_label", label
     for pronunciation in record.get("pronunciations", []):
         yield "labelled_ipa", pronunciation["ipa"]
         if pronunciation.get("label"):
