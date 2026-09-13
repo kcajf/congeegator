@@ -660,6 +660,15 @@ async function handleMessage(e: MessageEvent) {
 					0
 				);
 				break;
+			case 'dictionaryBytes':
+				// Read database headers, not the browser's potentially padded origin
+				// estimate or the manifest's compressed download sizes.
+				result = [...openDbs.values()].reduce(
+					(sum, db) =>
+						sum + db.selectValue('PRAGMA page_count') * db.selectValue('PRAGMA page_size'),
+					0
+				);
+				break;
 			case 'search':
 				result = await search(lang, query, phoneticQuery ?? '');
 				break;

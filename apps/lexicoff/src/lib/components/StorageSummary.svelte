@@ -14,7 +14,8 @@
 	function formatBytes(bytes: number): string {
 		if (bytes < 1024) return `${bytes} B`;
 		if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-		return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+		if (bytes < 1024 ** 3) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+		return `${(bytes / 1024 ** 3).toFixed(1)} GB`;
 	}
 
 	$effect(() => {
@@ -24,10 +25,10 @@
 		let cancelled = false;
 		void (async () => {
 			const count = await storage.wordCount().catch(() => null);
-			const estimate = await navigator.storage?.estimate?.().catch(() => null);
+			const bytes = await storage.dictionaryBytes().catch(() => null);
 			if (!cancelled) {
 				wordCount = count;
-				usage = estimate?.usage ?? null;
+				usage = bytes;
 			}
 		})();
 		return () => {
@@ -62,7 +63,7 @@
 <p class="storage-info">
 	{#if wordCount !== null}{wordCount.toLocaleString()} words ·
 	{/if}
-	{#if usage !== null}<span title="Estimated browser storage used by Lexicoff"
+	{#if usage !== null}<span title="Storage used by installed dictionaries"
 			>{formatBytes(usage)}</span
 		> ·
 	{/if}

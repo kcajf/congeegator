@@ -680,6 +680,34 @@ describe('extended dictionaries with real SQLite FTS', () => {
 	});
 });
 
+it('totals installed database bytes across updates, removal and shutdown', async () => {
+	const s = setup();
+	const sizes = new Map([
+		['/fr-aaaaaaaa.sqlite', [100, 4096]],
+		['/fr-bbbbbbbb.sqlite', [200, 4096]],
+		['/de-aaaaaaaa.sqlite', [300, 8192]]
+	]);
+	vi.spyOn(s.pool.OpfsSAHPoolDb.prototype, 'selectValue').mockImplementation(function (
+		this: { filename: string },
+		sql: string
+	) {
+		if (sql === 'PRAGMA page_count') return sizes.get(this.filename)![0];
+		if (sql === 'PRAGMA page_size') return sizes.get(this.filename)![1];
+		return this.filename.slice(1).split('-')[0];
+	});
+	await s.start();
+	expect((await s.send('dictionaryBytes')).result).toBe(0);
+	await s.send('open', 'fr');
+	await s.send('open', 'de');
+	expect((await s.send('dictionaryBytes')).result).toBe(2_867_200);
+	await s.send('open', 'fr', 'bbbbbbbb');
+	expect((await s.send('dictionaryBytes')).result).toBe(3_276_800);
+	await s.send('close', 'de');
+	expect((await s.send('dictionaryBytes')).result).toBe(819_200);
+	await s.send('shutdown');
+	expect((await s.send('dictionaryBytes')).result).toBe(0);
+});
+
 describe('persisted dictionary word totals', () => {
 	it('reads totals on open and reuses them across requests, updates, removal and shutdown', async () => {
 		const s = setup();
