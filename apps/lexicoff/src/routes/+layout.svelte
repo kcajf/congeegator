@@ -195,7 +195,9 @@
 
 <div class="container">
 	<nav class="navbar">
-		<a href={resolve('/')} class="logo">{appTitle}</a>
+		<a href={resolve('/')} class="logo">
+			{appTitle} <span class="descriptor">("offline lexicon")</span>
+		</a>
 
 		<div class="search-container">
 			<input
@@ -319,6 +321,12 @@
 		white-space: nowrap;
 	}
 
+	.descriptor {
+		font-size: 0.8rem;
+		font-weight: normal;
+		color: var(--text-muted);
+	}
+
 	.container {
 		max-width: 50rem;
 		margin: 0 auto;
@@ -342,11 +350,26 @@
 
 	.search-container {
 		flex: 1;
+		min-width: 0;
 		display: flex;
 		flex-direction: column;
 		max-width: 30rem;
 		padding-left: 1rem;
 		padding-right: 0.5rem;
+	}
+
+	@media (max-width: 600px) {
+		.navbar {
+			flex-wrap: wrap;
+		}
+
+		.logo {
+			flex-basis: 100%;
+		}
+
+		.search-container {
+			padding-left: 0;
+		}
 	}
 
 	.search-container input {
