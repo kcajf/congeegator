@@ -342,7 +342,6 @@
 		flex: 1;
 		display: flex;
 		flex-direction: column;
-		max-width: 30rem;
 		padding-left: 1rem;
 		padding-right: 0.5rem;
 	}
