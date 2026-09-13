@@ -9,6 +9,7 @@ import pytest
 from pipeline.dictionary import DICT_CONFIGS, DictLanguageConfig, process_dict_entry
 from pipeline.dictionary_quality import form_grammar
 from pipeline.sqlite_output import write_sqlite_database
+from pipeline.entry_json import decode_entry_json
 from pipeline.wiktionary import Entry, Form, Sense
 
 
@@ -39,7 +40,7 @@ def test_azerbaijani_head_forms_and_synonym_survive_database_output(tmp_path):
     write_sqlite_database([record], 'az', None, str(path))
     with sqlite3.connect(path) as conn:
         senses, details = conn.execute('SELECT senses, form_details FROM entries').fetchone()
-    assert json.loads(details) == expected
+    assert decode_entry_json(details) == expected
     assert json.loads(senses)[0]['synonyms'] == [{'word': 'bayraq', 'lang': 'az'}]
 
 
@@ -62,7 +63,7 @@ def test_every_dictionary_stores_grammatical_form_labels(config, tmp_path):
     path = tmp_path / 'dictionary.sqlite'
     write_sqlite_database([record], config.code, None, str(path))
     with sqlite3.connect(path) as conn:
-        stored = json.loads(conn.execute('SELECT form_details FROM entries').fetchone()[0])
+        stored = decode_entry_json(conn.execute('SELECT form_details FROM entries').fetchone()[0])
     assert stored == record['formDetails']
 
 
@@ -87,7 +88,7 @@ def test_modern_greek_source_forms_keep_labels_and_exclude_table_instructions(tm
     path = tmp_path / 'el.sqlite'
     write_sqlite_database([record], 'el', None, str(path))
     with sqlite3.connect(path) as conn:
-        assert json.loads(conn.execute('SELECT form_details FROM entries').fetchone()[0]) == record['formDetails']
+        assert decode_entry_json(conn.execute('SELECT form_details FROM entries').fetchone()[0]) == record['formDetails']
         assert conn.execute('SELECT COUNT(*) FROM form_lookup WHERE form_key = ?', ('απαντώμαι',)).fetchone()[0] == 1
 
 

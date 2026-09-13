@@ -11,12 +11,15 @@ import unicodedata
 from typing import Any, Callable
 
 import orjson
+import zstandard
 
 from .utils import log_timing
+from .entry_json import ROW_COMPRESSION_LEVEL, encode_entry_json
 
 log = logging.getLogger(__name__)
 
 SCHEMA_SQL = """
+-- forms and form_details accept legacy JSON TEXT or versioned LZJ1 BLOBs.
 CREATE TABLE entries (
     id          INTEGER PRIMARY KEY,
     word        TEXT NOT NULL,
@@ -140,6 +143,7 @@ def write_sqlite_database(
     # work for an intermediate database that will never be published directly.
     conn = None
     compact_path = None
+    field_compressor = zstandard.ZstdCompressor(level=ROW_COMPRESSION_LEVEL, write_checksum=True)
     try:
         conn = sqlite3.connect("")
         # These settings apply only to this scratch build, not browser storage.
@@ -178,7 +182,7 @@ def write_sqlite_database(
             for i, entry in enumerate(entries):
                 senses_json = orjson.dumps(entry["senses"]).decode()
                 forms = entry.get("forms")
-                forms_json = orjson.dumps(forms).decode() if forms else None
+                forms_json = encode_entry_json(forms, field_compressor)
 
                 row = (
                     i,
@@ -192,7 +196,7 @@ def write_sqlite_database(
                     entry.get("pronunciation"),
                     entry.get("etymology"),
                     orjson.dumps(entry["details"]).decode() if entry.get("details") else None,
-                    orjson.dumps(entry["formDetails"]).decode() if entry.get("formDetails") else None,
+                    encode_entry_json(entry.get("formDetails"), field_compressor),
                 )
                 if extended:
                     row += (

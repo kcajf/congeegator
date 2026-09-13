@@ -6,6 +6,7 @@
  */
 
 import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
+import { decodeEntryJson } from './entryJson';
 import {
 	dictionarySearchKey,
 	dictionaryWordKey,
@@ -588,36 +589,38 @@ async function getWord(lang: string, word: string): Promise<unknown[]> {
 		if (rows.length) matchedForm = word;
 	}
 
-	return rows.map(
-		([
-			id,
-			w,
-			pos,
-			senses,
-			freq,
-			gender,
-			forms,
-			pronunciation,
-			etymology,
-			details,
-			formDetails,
-			pronunciations
-		]) => ({
-			id: id as number,
-			word: w as string,
-			lang,
-			pos: pos as string,
-			senses: JSON.parse(senses as string),
-			freq: freq as number,
-			gender: gender as string | null,
-			forms: forms ? JSON.parse(forms as string) : undefined,
-			pronunciation: pronunciation as string | null,
-			etymology: etymology as string | null,
-			details: details ? JSON.parse(details as string) : undefined,
-			formDetails: formDetails ? JSON.parse(formDetails as string) : undefined,
-			pronunciations: pronunciations ? JSON.parse(pronunciations as string) : undefined,
-			matchedForm
-		})
+	return Promise.all(
+		rows.map(
+			async ([
+				id,
+				w,
+				pos,
+				senses,
+				freq,
+				gender,
+				forms,
+				pronunciation,
+				etymology,
+				details,
+				formDetails,
+				pronunciations
+			]) => ({
+				id: id as number,
+				word: w as string,
+				lang,
+				pos: pos as string,
+				senses: JSON.parse(senses as string),
+				freq: freq as number,
+				gender: gender as string | null,
+				forms: await decodeEntryJson(forms),
+				pronunciation: pronunciation as string | null,
+				etymology: etymology as string | null,
+				details: details ? JSON.parse(details as string) : undefined,
+				formDetails: await decodeEntryJson(formDetails),
+				pronunciations: pronunciations ? JSON.parse(pronunciations as string) : undefined,
+				matchedForm
+			})
+		)
 	);
 }
 
