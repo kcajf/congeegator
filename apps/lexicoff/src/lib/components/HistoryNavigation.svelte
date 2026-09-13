@@ -22,7 +22,6 @@
 	let initialized = false;
 	let dialog: HTMLDialogElement;
 	let isOpen = $state(false);
-	let keyboardOffset = $state(0);
 	const previous = $derived(trail.entries[trail.cursor - 1]);
 	const next = $derived(trail.entries[trail.cursor + 1]);
 
@@ -85,12 +84,6 @@
 	});
 
 	onMount(() => {
-		const viewport = window.visualViewport;
-		function updateViewport() {
-			keyboardOffset = viewport
-				? Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop)
-				: 0;
-		}
 		function updateRecent(event: StorageEvent) {
 			if (event.key === RECENT_STORAGE_KEY || event.key === null) {
 				recent = readRecentWords(
@@ -99,13 +92,8 @@
 				);
 			}
 		}
-		updateViewport();
-		viewport?.addEventListener('resize', updateViewport);
-		viewport?.addEventListener('scroll', updateViewport);
 		window.addEventListener('storage', updateRecent);
 		return () => {
-			viewport?.removeEventListener('resize', updateViewport);
-			viewport?.removeEventListener('scroll', updateViewport);
 			window.removeEventListener('storage', updateRecent);
 		};
 	});
@@ -121,7 +109,7 @@
 	}
 </script>
 
-<nav class="history-bar" aria-label="Browsing history" style:--keyboard-offset="{keyboardOffset}px">
+<nav class="history-bar" aria-label="Browsing history">
 	<button
 		type="button"
 		aria-label={previous ? `Back to ${previous.label}` : 'Back'}
@@ -202,9 +190,7 @@
 						}}
 					>
 						<span class="word">{item.word}</span>
-						<span class="language"
-							>{current ? 'Current · ' : ''}{langWiktionaryName(item.lang)}</span
-						>
+						<span class="language">{langWiktionaryName(item.lang)}</span>
 					</a>
 				</li>
 			{/each}
@@ -238,7 +224,7 @@
 		font-size: 0.85rem;
 		color: var(--text);
 		border: 0;
-		border-radius: 0.3rem;
+		border-radius: 0;
 		background: transparent;
 		cursor: pointer;
 	}
@@ -269,16 +255,15 @@
 		color: var(--text);
 		background: var(--brand);
 		border: 1px solid var(--border);
-		border-radius: 0.75rem;
+		border-radius: 0;
 		padding: 0;
 		width: min(26rem, calc(100% - 2rem));
 		max-height: 70dvh;
 		overflow-y: auto;
 		overscroll-behavior: contain;
-		box-shadow: 0 0.5rem 2rem #1a1a2e26;
 	}
 	dialog::backdrop {
-		background: #1a1a2e40;
+		background: transparent;
 	}
 	.sheet-header {
 		position: sticky;
@@ -304,12 +289,13 @@
 		border-top: 1px solid var(--border);
 	}
 	a {
+		box-sizing: border-box;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		gap: 1rem;
 		min-height: 44px;
-		padding: 0.5rem 0.25rem;
+		padding: 0.35rem 0;
 		color: inherit;
 		text-decoration: none;
 	}
@@ -339,7 +325,7 @@
 			z-index: 20;
 			left: 0;
 			right: 0;
-			bottom: var(--keyboard-offset);
+			bottom: 0;
 			border-top: 1px solid var(--border);
 			border-bottom: 0;
 			padding: 4px max(0.75rem, env(safe-area-inset-right)) max(4px, env(safe-area-inset-bottom))
@@ -351,7 +337,6 @@
 			max-width: none;
 			max-height: 65dvh;
 			box-sizing: border-box;
-			border-radius: 0.8rem 0.8rem 0 0;
 			padding-bottom: env(safe-area-inset-bottom);
 		}
 	}
