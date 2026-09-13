@@ -127,6 +127,69 @@ describe('dictionary storage lifecycle', () => {
 		expect(s.databases[0].close).toHaveBeenCalledOnce();
 	});
 
+	it('imports every streamed chunk in order before removing the download', async () => {
+		const s = setup();
+		await s.start();
+		const chunks = [new Uint8Array([1, 2]), new Uint8Array([3, 4, 5])];
+		const stream = new ReadableStream<Uint8Array<ArrayBuffer>>({
+			start(controller) {
+				for (const chunk of chunks) controller.enqueue(chunk);
+				controller.close();
+			}
+		});
+		const file = new Blob(['database']);
+		vi.spyOn(file, 'stream').mockReturnValue(stream);
+		s.raw.set('fr-aaaaaaaa.sqlite', file);
+		const received: number[] = [];
+		s.pool.importDb.mockImplementationOnce(async (name, read) => {
+			let chunk;
+			while ((chunk = await read()) !== undefined) received.push(...chunk);
+			expect(s.raw.has('fr-aaaaaaaa.sqlite')).toBe(true);
+			s.files.add(name);
+		});
+
+		expect((await s.send('open')).result).toBe(true);
+		expect(received).toEqual([1, 2, 3, 4, 5]);
+		expect(stream.locked).toBe(false);
+		expect(s.raw.has('fr-aaaaaaaa.sqlite')).toBe(false);
+	});
+
+	it.each(['read', 'write'])('recovers from a stream %s failure during import', async (failure) => {
+		const s = setup();
+		s.files.add('/fr-aaaaaaaa.sqlite');
+		await s.start();
+		await s.send('open');
+		const cancel = vi.fn();
+		const stream = new ReadableStream<Uint8Array<ArrayBuffer>>({
+			pull(controller) {
+				if (failure === 'read') controller.error(new Error('Read failed'));
+				else controller.enqueue(new Uint8Array([1, 2, 3]));
+			},
+			cancel
+		});
+		const file = new Blob(['replacement']);
+		vi.spyOn(file, 'stream').mockReturnValueOnce(stream);
+		s.raw.set('fr-bbbbbbbb.sqlite', file);
+		if (failure === 'write') {
+			s.pool.importDb.mockImplementationOnce(async (_name, read) => {
+				await read();
+				throw new Error('Write failed');
+			});
+		}
+
+		expect((await s.send('open', 'fr', 'bbbbbbbb')).error).toBe(
+			failure === 'read' ? 'Read failed' : 'Write failed'
+		);
+		expect(stream.locked).toBe(false);
+		if (failure === 'write') expect(cancel).toHaveBeenCalledOnce();
+		expect(s.raw.get('fr-bbbbbbbb.sqlite')).toBe(file);
+		expect(s.files.has('/fr-aaaaaaaa.sqlite')).toBe(true);
+		expect(s.files.has('/fr-bbbbbbbb.sqlite')).toBe(false);
+		expect(s.databases[0].close).not.toHaveBeenCalled();
+		expect((await s.send('open', 'fr', 'bbbbbbbb')).result).toBe(true);
+		expect(s.databases[0].close).toHaveBeenCalledOnce();
+	});
+
 	it('does not activate a dictionary with the wrong language', async () => {
 		const s = setup();
 		s.files.add('/fr-aaaaaaaa.sqlite');

@@ -115,15 +115,17 @@ async function openDb(lang: string, hash: string): Promise<boolean> {
 		if (file) {
 			poolUtil.unlink(fname);
 			await poolUtil.reserveMinimumCapacity(poolUtil.getFileCount() + 3);
-			const source = file;
-			let offset = 0;
-			await poolUtil.importDb(fname, async (): Promise<Uint8Array | undefined> => {
-				if (offset >= source.size) return undefined;
-				const end = Math.min(offset + 65536, source.size);
-				const chunk = new Uint8Array(await source.slice(offset, end).arrayBuffer());
-				offset = end;
-				return chunk;
-			});
+			// A continuous stream avoids reopening a Blob slice for every chunk.
+			const reader = file.stream().getReader();
+			try {
+				await poolUtil.importDb(fname, async (): Promise<Uint8Array | undefined> => {
+					const { done, value } = await reader.read();
+					return done ? undefined : value;
+				});
+			} finally {
+				await reader.cancel().catch(() => {});
+				reader.releaseLock();
+			}
 		}
 
 		db = new poolUtil.OpfsSAHPoolDb(fname, 'r');
