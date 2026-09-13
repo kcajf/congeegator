@@ -217,16 +217,15 @@
 
 <style>
 	.pos-section {
-		margin: 1.5rem 0 2rem;
+		margin: 1rem 0;
+		display: flow-root;
 		scroll-margin-top: 4.5rem;
 	}
 	.pos-label {
 		font-size: 1rem;
 		color: #245f91;
-		margin: 0 0 0.8rem;
+		margin: 0 0 0.5rem;
 		font-weight: normal;
-		border-bottom: 1px solid var(--border);
-		padding-bottom: 0.4rem;
 		display: flex;
 		align-items: baseline;
 		gap: 0.6rem;
@@ -244,7 +243,7 @@
 		padding-inline-start: 1.4rem;
 	}
 	.senses > li {
-		margin: 0.9rem 0;
+		margin: 0.6rem 0;
 		padding-inline-start: 0.2rem;
 		line-height: 1.55;
 	}
@@ -263,6 +262,7 @@
 	}
 	summary {
 		cursor: pointer;
+		-webkit-tap-highlight-color: transparent;
 		color: var(--text-muted);
 	}
 	.more-examples {
@@ -272,18 +272,22 @@
 		font-size: 0.85em;
 	}
 	.supplement {
-		margin-top: 0.8rem;
+		margin: 0;
 		font-size: 0.9rem;
-		border-top: 1px solid var(--border);
-		padding-top: 0.6rem;
+		padding: 0;
 	}
 	.supplement > summary {
 		color: var(--text);
+		box-sizing: border-box;
+		min-height: 44px;
+		padding: 0.65rem 0 0.65rem 1.25rem;
+		line-height: 1.4;
 	}
 	.etymology {
 		white-space: pre-line;
 		line-height: 1.65;
-		margin: 0.6rem 0;
+		margin: 0;
+		padding-bottom: 0.6rem;
 	}
 
 	.pronunciations {
@@ -302,8 +306,8 @@
 		margin-inline-start: 0.4em;
 	}
 	.forms {
-		padding: 0;
-		margin: 0.6rem 0;
+		padding: 0 0 0.6rem;
+		margin: 0;
 		list-style: none;
 		line-height: 1.6;
 	}

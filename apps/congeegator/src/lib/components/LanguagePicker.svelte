@@ -139,7 +139,7 @@
 	}
 
 	.option.highlighted {
-		background-color: #ded6e3;
+		background-color: #eaf2fa;
 	}
 
 	.option.active {
@@ -153,8 +153,9 @@
 		position: absolute;
 		top: 100%;
 		right: 0;
-		background: #f2efef;
-		padding: 0.15rem 0 0.4rem;
+		background: #fff;
+		border: 1px solid #ddd;
+		padding: 0;
 		box-sizing: border-box;
 		width: max-content;
 		min-width: 100%;
@@ -173,12 +174,12 @@
 	}
 
 	.dropdown::-webkit-scrollbar-track {
-		background: #f2efef;
+		background: #fff;
 	}
 
 	.dropdown::-webkit-scrollbar-thumb {
 		background: #999;
-		border: 2px solid #f2efef;
+		border: 2px solid #fff;
 		border-radius: 5px;
 	}
 </style>

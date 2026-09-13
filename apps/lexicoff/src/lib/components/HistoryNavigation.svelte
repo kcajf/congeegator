@@ -2,7 +2,7 @@
 	import { afterNavigate, replaceState } from '$app/navigation';
 	import { page, navigating } from '$app/state';
 	import { resolve } from '$app/paths';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { manifest, langWiktionaryName } from '$lib/dataUtils';
 	import { searchLangState } from '$lib/searchLang.svelte';
 	import {
@@ -41,7 +41,9 @@
 		}
 	}
 
-	afterNavigate((navigation) => {
+	afterNavigate(async (navigation) => {
+		// Initial afterNavigate runs before the router accepts replaceState calls.
+		if (navigation.type === 'enter') await tick();
 		if (!initialized) {
 			trail = readTrail(readStorage('sessionStorage', TRAIL_STORAGE_KEY));
 			recent = readRecentWords(
@@ -178,7 +180,10 @@
 				{@const current = page.params.lang === item.lang && page.params.word === item.word}
 				<li>
 					<a
-						href={resolve('/[lang=lang]/[word]', { lang: item.lang, word: item.word })}
+						href={resolve('/[lang=lang]/[word]', {
+							lang: item.lang,
+							word: encodeURIComponent(item.word)
+						})}
 						aria-current={current ? 'page' : undefined}
 						onclick={(event) => {
 							if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
@@ -205,12 +210,17 @@
 
 <style>
 	.history-bar {
-		display: flex;
+		display: none;
 		align-items: center;
 		gap: 0.2rem;
 		padding: 0.15rem 0.75rem;
 		background: var(--brand);
 		border-bottom: 1px solid var(--border);
+	}
+	@media (display-mode: standalone) {
+		.history-bar {
+			display: flex;
+		}
 	}
 	button {
 		display: inline-flex;

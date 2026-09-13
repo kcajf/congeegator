@@ -28,7 +28,8 @@
 		<h2>About</h2>
 		<p>
 			{appTitle} ("offline lexicon") is an offline-first dictionary app. Search for words in any supported
-			language, view definitions, examples, and inflected forms. Download languages for offline use.
+			language, view definitions, examples, etymology, inflected forms and more. Download languages for
+			offline use.
 		</p>
 		{#if !isStandalone}
 			<p>
@@ -47,6 +48,12 @@
 			>
 			via <a href="https://kaikki.org" target="_blank" rel="noopener">kaikki.org</a>.
 		</p>
+		<p>
+			{appTitle} is
+			<a href="https://github.com/kcajf/congeegator" target="_blank" rel="noopener">open source</a>.
+			You may also like
+			<a href="https://congeegator.com" target="_blank" rel="noopener">Congeegator</a>.
+		</p>
 	</div>
 
 	<StorageSummary>
@@ -56,10 +63,16 @@
 
 <style>
 	.home {
-		padding: 1rem 0;
+		padding: 0.75rem 0 1rem;
+	}
+
+	.about h2 {
+		font-size: 1rem;
+		margin-top: 0;
 	}
 
 	.about p {
+		margin: 0.3rem 0;
 		line-height: 1.5;
 		font-size: 0.9rem;
 	}
