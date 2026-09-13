@@ -174,6 +174,146 @@
       "code": "la",
       "name": "Latina",
       "englishWiktionaryName": "Latin"
+    },
+    "grc": {
+      "dataHash": "15d22d25",
+      "dataSize": 21157787,
+      "code": "grc",
+      "name": "Ancient Greek",
+      "englishWiktionaryName": "Ancient Greek"
+    },
+    "az": {
+      "dataHash": "622a0f8a",
+      "dataSize": 6052108,
+      "code": "az",
+      "name": "azərbaycanca",
+      "englishWiktionaryName": "Azerbaijani"
+    },
+    "eu": {
+      "dataHash": "1683a40c",
+      "dataSize": 1827806,
+      "code": "eu",
+      "name": "euskara",
+      "englishWiktionaryName": "Basque"
+    },
+    "br": {
+      "dataHash": "1f40d612",
+      "dataSize": 232397,
+      "code": "br",
+      "name": "brezhoneg",
+      "englishWiktionaryName": "Breton"
+    },
+    "et": {
+      "dataHash": "f4bee95b",
+      "dataSize": 2256550,
+      "code": "et",
+      "name": "eesti",
+      "englishWiktionaryName": "Estonian"
+    },
+    "ka": {
+      "dataHash": "ae16db94",
+      "dataSize": 6265119,
+      "code": "ka",
+      "name": "ქართული",
+      "englishWiktionaryName": "Georgian"
+    },
+    "he": {
+      "dataHash": "f3ee4f51",
+      "dataSize": 3576446,
+      "code": "he",
+      "name": "עברית",
+      "englishWiktionaryName": "Hebrew"
+    },
+    "hi": {
+      "dataHash": "1e9cbbbf",
+      "dataSize": 6322464,
+      "code": "hi",
+      "name": "हिन्दी",
+      "englishWiktionaryName": "Hindi"
+    },
+    "is": {
+      "dataHash": "0a5b9a05",
+      "dataSize": 3666246,
+      "code": "is",
+      "name": "íslenska",
+      "englishWiktionaryName": "Icelandic"
+    },
+    "ga": {
+      "dataHash": "1544ca9c",
+      "dataSize": 5663812,
+      "code": "ga",
+      "name": "Gaeilge",
+      "englishWiktionaryName": "Irish"
+    },
+    "ko": {
+      "dataHash": "8b014ffa",
+      "dataSize": 8402512,
+      "code": "ko",
+      "name": "한국어",
+      "englishWiktionaryName": "Korean"
+    },
+    "lt": {
+      "dataHash": "66f0d006",
+      "dataSize": 3537622,
+      "code": "lt",
+      "name": "lietuvių",
+      "englishWiktionaryName": "Lithuanian"
+    },
+    "mk": {
+      "dataHash": "ab71353d",
+      "dataSize": 11987982,
+      "code": "mk",
+      "name": "македонски",
+      "englishWiktionaryName": "Macedonian"
+    },
+    "ms": {
+      "dataHash": "573f9d2a",
+      "dataSize": 2161713,
+      "code": "ms",
+      "name": "Bahasa Melayu",
+      "englishWiktionaryName": "Malay"
+    },
+    "oc": {
+      "dataHash": "815614f3",
+      "dataSize": 851833,
+      "code": "oc",
+      "name": "occitan",
+      "englishWiktionaryName": "Occitan"
+    },
+    "fa": {
+      "dataHash": "db8fc53b",
+      "dataSize": 3422005,
+      "code": "fa",
+      "name": "فارسی",
+      "englishWiktionaryName": "Persian"
+    },
+    "sa": {
+      "dataHash": "87eabb9e",
+      "dataSize": 3877890,
+      "code": "sa",
+      "name": "संस्कृतम्",
+      "englishWiktionaryName": "Sanskrit"
+    },
+    "sh": {
+      "dataHash": "06474e3c",
+      "dataSize": 10271439,
+      "code": "sh",
+      "name": "srpskohrvatski / српскохрватски",
+      "englishWiktionaryName": "Serbo-Croatian"
+    },
+    "sk": {
+      "dataHash": "5152eae7",
+      "dataSize": 2947356,
+      "code": "sk",
+      "name": "slovenčina",
+      "englishWiktionaryName": "Slovak"
+    },
+    "cy": {
+      "dataHash": "3943f8fe",
+      "dataSize": 3547165,
+      "code": "cy",
+      "name": "Cymraeg",
+      "englishWiktionaryName": "Welsh"
     }
   }
 }

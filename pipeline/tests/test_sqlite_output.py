@@ -9,7 +9,7 @@ import unicodedata
 import pytest
 import zstandard
 
-from pipeline.sqlite_output import dictionary_word_key, write_sqlite_database
+from pipeline.sqlite_output import dictionary_search_key, dictionary_word_key, write_sqlite_database
 from pipeline.utils import to_phonetic_el
 
 
@@ -393,3 +393,83 @@ class TestSqliteOutput:
             assert zstandard.ZstdDecompressor().decompress(compressed) == original
         finally:
             os.unlink(path)
+
+
+class TestExtendedDictionaries:
+    @pytest.mark.parametrize("lang,word,query,form,form_query", [
+        ("grc", "ὕδωρ", "υδω", "ῠ̔́δᾰτος", "υδατο"),
+        ("hi", "पानी", "पान", "पानियों", "पानिय"),
+        ("sa", "गृह", "गृ", "गृ॒हेण॑", "गृ॒हे"),
+        ("he", "שלום", "שָׁלוֹ", "שְׁלוֹמִי", "שלומי"),
+        ("fa", "کتاب", "كتاب", "کتاب‌ها", "کتابها"),
+        ("az", "işıq", "İŞ", "işıqlar", "İŞIQL"),
+        ("ko", "먹다", "먹", "먹습니다", "먹습"),
+        ("ka", "წყალი", "წყა", "წყლები", "წყლე"),
+    ])
+    def test_real_fts_preserves_scripts_and_matches_prefixes(self, tmp_path, lang, word, query, form, form_query):
+        path = str(tmp_path / f"{lang}.sqlite")
+        write_sqlite_database([{"word": word, "pos": "noun", "senses": [{"gloss": "water"}],
+                                "forms": [form]}], lang, None, path)
+        with sqlite3.connect(path) as conn:
+            # These are precisely the quoted prefix queries sent by the browser.
+            # Default unicode61 split Indic/Hebrew marks and raised phrase errors.
+            for column, text in [("word", query), ("forms_text", form_query)]:
+                key = dictionary_search_key(unicodedata.normalize("NFD", text), lang)
+                assert conn.execute(f"SELECT rowid FROM entries_fts WHERE {column} MATCH ?",
+                                    (f'"{key}"*',)).fetchall() == [(0,)]
+            assert conn.execute("PRAGMA integrity_check").fetchone()[0] == "ok"
+
+    def test_indic_vowels_and_virama_are_not_erased(self, tmp_path):
+        path = str(tmp_path / "hi.sqlite")
+        words = ["पान", "पानी", "पता", "पिता", "कर्म", "क्रम"]
+        write_sqlite_database([{"word": word, "pos": "noun", "senses": [{"gloss": "example"}]}
+                               for word in words], "hi", None, path)
+        with sqlite3.connect(path) as conn:
+            for i, word in enumerate(words):
+                assert conn.execute("SELECT rowid FROM entries_fts WHERE word MATCH ?",
+                                    (f'"{word}"',)).fetchall() == [(i,)]
+
+    def test_aliases_never_merge_greek_homographs(self, tmp_path):
+        path = str(tmp_path / "grc.sqlite")
+        words = ["ἄλλα", "ἀλλά"]
+        write_sqlite_database([{"word": word, "pos": "adv", "senses": [{"gloss": gloss}]}
+                               for word, gloss in zip(words, ["other things", "but"])], "grc", None, path)
+        with sqlite3.connect(path) as conn:
+            assert conn.execute("SELECT word FROM entries WHERE search_key = 'αλλα' ORDER BY id").fetchall() == [(w,) for w in words]
+            for word in words:
+                assert conn.execute("SELECT word FROM entries WHERE word_key = ?", (word,)).fetchall() == [(word,)]
+            plan = conn.execute("EXPLAIN QUERY PLAN SELECT id FROM entries WHERE search_key = ?", ("αλλα",)).fetchall()
+            assert any("idx_search_key" in row[3] for row in plan)
+            assert conn.execute("SELECT rowid FROM entries_fts WHERE phonetic MATCH 'id*'").fetchall() == []
+
+    def test_persian_variants_and_spaced_forms_without_collapsing_madda(self, tmp_path):
+        path = str(tmp_path / "fa.sqlite")
+        words = ["خانه‌ها", "آب", "اب"]
+        write_sqlite_database([{"word": word, "pos": "noun", "senses": [{"gloss": "example"}]}
+                               for word in words], "fa", None, path)
+        with sqlite3.connect(path) as conn:
+            for query in ['"خانهها"*', '"خانه" "ها"*']:
+                assert conn.execute("SELECT rowid FROM entries_fts WHERE word MATCH ?", (query,)).fetchall() == [(0,)]
+            assert dictionary_search_key("آب", "fa") != dictionary_search_key("اب", "fa")
+            assert dictionary_search_key("كِتاب", "fa") == "کتاب"
+
+    def test_optional_labels_round_trip_and_are_not_indexed_as_forms(self, tmp_path):
+        path = str(tmp_path / "grc.sqlite")
+        entry = {"word": "ὕδωρ", "pos": "noun", "senses": [{"gloss": "water"}],
+                 "forms": ["ὕδατος"], "formDetails": [{"form": "ὕδατος", "tags": ["Attic"]}],
+                 "pronunciations": [{"ipa": "/hý.dɔːr/", "label": "5th BCE Attic"}]}
+        write_sqlite_database([entry], "grc", None, path)
+        with sqlite3.connect(path) as conn:
+            details, pronunciations = conn.execute("SELECT form_details, pronunciations FROM entries").fetchone()
+            assert json.loads(details) == entry["formDetails"]
+            assert json.loads(pronunciations) == entry["pronunciations"]
+            assert conn.execute("SELECT rowid FROM entries_fts WHERE forms_text MATCH 'Attic'").fetchall() == []
+
+    def test_existing_dictionary_schema_remains_unchanged(self, tmp_path, sample_entries):
+        path = str(tmp_path / "fr.sqlite")
+        write_sqlite_database(sample_entries, "fr", None, path)
+        with sqlite3.connect(path) as conn:
+            assert [r[1] for r in conn.execute("PRAGMA table_info(entries)")] == [
+                "id", "word", "word_key", "pos", "senses", "freq", "gender", "forms", "pronunciation", "etymology"]
+            schema = conn.execute("SELECT sql FROM sqlite_master WHERE name='entries_fts'").fetchone()[0]
+            assert "categories" not in schema

@@ -23,4 +23,4 @@ rich = ">=14.2.0,<15"
 pytest = ">=8,<9"
 
 [pypi-dependencies]
-wordfreq = ">=3,<4"
+wordfreq = { version = ">=3,<4", extras = ["mecab"] }

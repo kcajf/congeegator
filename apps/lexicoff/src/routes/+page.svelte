@@ -17,7 +17,7 @@
 	<title>{appTitle} - Offline Dictionary</title>
 	<meta
 		name="description"
-		content="Free offline dictionary for French, Greek, German, Spanish, Italian, and English. Powered by Wiktionary."
+		content="Free multilingual offline dictionary with definitions, examples, pronunciations, and inflected forms. Powered by Wiktionary."
 	/>
 	<link rel="canonical" href={siteUrl} />
 </svelte:head>
@@ -41,7 +41,7 @@
 			</p>
 		{/if}
 		<p>
-			Data sourced from <a href="https://en.wiktionary.org" target="_blank" rel="noopener"
+			Dictionary data comes from <a href="https://en.wiktionary.org" target="_blank" rel="noopener"
 				>English Wiktionary</a
 			>
 			via <a href="https://kaikki.org" target="_blank" rel="noopener">kaikki.org</a>.

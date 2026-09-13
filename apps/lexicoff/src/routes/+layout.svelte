@@ -208,6 +208,8 @@
 				type="text"
 				id="searchInput"
 				placeholder="search..."
+				dir="auto"
+				aria-label="Search words or English definitions"
 				autocapitalize="off"
 				autocorrect="off"
 				autocomplete="off"
@@ -235,13 +237,13 @@
 							class="result-link"
 						>
 							{#if item.matched !== item.word}
-								{item.matched}
-								<span class="root-hint">({item.word})</span>
+								<bdi lang={searchLangState.lang}>{item.matched}</bdi>
+								<span class="root-hint">(<bdi lang={searchLangState.lang}>{item.word}</bdi>)</span>
 							{:else}
-								{item.word}
+								<bdi lang={searchLangState.lang}>{item.word}</bdi>
 							{/if}
 							{#if item.glosses.length > 0}
-								<span class="result-glosses">
+								<span class="result-glosses" dir="ltr" lang="en">
 									{#each item.glosses as gloss, i (i)}
 										{#if i > 0}
 											&middot;

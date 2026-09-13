@@ -6,13 +6,18 @@
  */
 
 import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
-import { dictionaryWordKey, prefixMatch, searchTokens } from './searchNormalization';
+import {
+	dictionarySearchKey,
+	dictionaryWordKey,
+	prefixMatch,
+	searchTokens
+} from './searchNormalization';
 
 interface InternalResult {
 	word: string;
 	pos: string;
 	matched: string;
-	quality: number; // 0=exact, 10=word, 20=form, 30=phonetic, 40=gloss, 50=fuzzy
+	quality: number; // 0=exact, 5=alias, 10=word, 20=form, 30=phonetic, 40=gloss, 50=fuzzy
 	freq: number;
 	id: number;
 }
@@ -32,6 +37,7 @@ let sqlite3: any;
 let poolUtil: any;
 const openDbs = new Map<string, any>();
 const wordKeyLanguages = new Set<string>();
+const entryColumns = new Map<string, Set<string>>();
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
 async function init() {
@@ -68,6 +74,7 @@ async function shutdown() {
 		}
 		openDbs.delete(lang);
 		wordKeyLanguages.delete(lang);
+		entryColumns.delete(lang);
 	}
 	// Do not call removeVfs(): it deletes every installed dictionary. Worker
 	// termination releases the OPFS handles and the ownership lock instead.
@@ -82,6 +89,7 @@ async function openDb(lang: string, hash: string): Promise<boolean> {
 
 	let db;
 	let hasWordKey = false;
+	let columns = new Set<string>();
 	try {
 		let file: File | undefined;
 		try {
@@ -122,9 +130,10 @@ async function openDb(lang: string, hash: string): Promise<boolean> {
 		);
 		db.exec('SELECT rowid FROM entries_fts LIMIT 0');
 		db.exec('SELECT rowid FROM fuzzy LIMIT 0');
-		hasWordKey = execQuery(db, 'PRAGMA table_info(entries)').some(
-			(column) => column[1] === 'word_key'
+		columns = new Set(
+			execQuery(db, 'PRAGMA table_info(entries)').map((column) => column[1] as string)
 		);
+		hasWordKey = columns.has('word_key');
 	} catch (error) {
 		db?.close();
 		// Discard the failed candidate, keeping the working database and raw
@@ -135,6 +144,7 @@ async function openDb(lang: string, hash: string): Promise<boolean> {
 
 	previous?.close();
 	openDbs.set(lang, db);
+	entryColumns.set(lang, columns);
 	// Older downloads remain usable until the user chooses to update them.
 	if (hasWordKey) wordKeyLanguages.add(lang);
 	else wordKeyLanguages.delete(lang);
@@ -165,6 +175,7 @@ async function closeDb(lang: string) {
 	db.close();
 	openDbs.delete(lang);
 	wordKeyLanguages.delete(lang);
+	entryColumns.delete(lang);
 }
 
 function deleteFromPool(lang: string) {
@@ -195,6 +206,8 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 	const seen = new Map<string, InternalResult>();
 
 	const trimmed = dictionaryWordKey(query.trim(), lang);
+	const hasSearchKey = entryColumns.get(lang)?.has('search_key') ?? false;
+	const lookup = hasSearchKey ? dictionarySearchKey(trimmed, lang) : trimmed;
 	const glossQuery = dictionaryWordKey(query.trim(), 'en');
 	if (!trimmed) return [];
 
@@ -204,7 +217,7 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 
 	// Keep letters, combining marks and numbers; separate punctuation so e.g.
 	// "self-service" → "self service" (matching the FTS5 unicode61 tokenizer).
-	const tokens = searchTokens(trimmed);
+	const tokens = searchTokens(lookup);
 	const sanitized = tokens.join(' ');
 	if (!sanitized) return [];
 
@@ -244,6 +257,28 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 		}
 	} catch {
 		// best-effort
+	}
+
+	// Indexed aliases keep unaccented/pointed/keyboard-variant matches ahead of
+	// capped prefix results, while exact spellings always retain priority.
+	if (hasSearchKey) {
+		for (const [id, word, pos, freq] of execQuery(
+			db,
+			'SELECT id, word, pos, freq FROM entries WHERE search_key = ? ORDER BY id',
+			[lookup]
+		)) {
+			const key = `${word}:${pos}`;
+			if (!seen.has(key)) {
+				seen.set(key, {
+					word: word as string,
+					pos: pos as string,
+					matched: word as string,
+					quality: 5,
+					freq: freq as number,
+					id: id as number
+				});
+			}
+		}
 	}
 
 	// Per-column FTS5 queries (highlight() doesn't work with content='')
@@ -455,25 +490,45 @@ async function getWord(lang: string, word: string): Promise<unknown[]> {
 	const db = openDbs.get(lang);
 	if (!db) return [];
 
+	const columns = entryColumns.get(lang);
+	const optionalColumns = ['form_details', 'pronunciations']
+		.map((column) => (columns?.has(column) ? column : `NULL AS ${column}`))
+		.join(', ');
 	const rows = execQuery(
 		db,
-		`SELECT id, word, pos, senses, freq, gender, forms, pronunciation, etymology
+		`SELECT id, word, pos, senses, freq, gender, forms, pronunciation, etymology, ${optionalColumns}
 		FROM entries WHERE ${wordKeyLanguages.has(lang) ? 'word_key = ?' : 'word = ? COLLATE NOCASE'}
 		ORDER BY freq DESC`,
 		[wordKeyLanguages.has(lang) ? dictionaryWordKey(word, lang) : word]
 	);
 
-	return rows.map(([id, w, pos, senses, freq, gender, forms, pronunciation, etymology]) => ({
-		id: id as number,
-		word: w as string,
-		pos: pos as string,
-		senses: JSON.parse(senses as string),
-		freq: freq as number,
-		gender: gender as string | null,
-		forms: forms ? JSON.parse(forms as string) : undefined,
-		pronunciation: pronunciation as string | null,
-		etymology: etymology as string | null
-	}));
+	return rows.map(
+		([
+			id,
+			w,
+			pos,
+			senses,
+			freq,
+			gender,
+			forms,
+			pronunciation,
+			etymology,
+			formDetails,
+			pronunciations
+		]) => ({
+			id: id as number,
+			word: w as string,
+			pos: pos as string,
+			senses: JSON.parse(senses as string),
+			freq: freq as number,
+			gender: gender as string | null,
+			forms: forms ? JSON.parse(forms as string) : undefined,
+			pronunciation: pronunciation as string | null,
+			etymology: etymology as string | null,
+			formDetails: formDetails ? JSON.parse(formDetails as string) : undefined,
+			pronunciations: pronunciations ? JSON.parse(pronunciations as string) : undefined
+		})
+	);
 }
 
 async function listOpfsFiles(): Promise<[string, string][]> {
@@ -484,7 +539,7 @@ async function listOpfsFiles(): Promise<[string, string][]> {
 	// Check SAH pool for already-imported databases
 	const poolFiles = poolUtil.getFileNames() as string[];
 	for (const name of poolFiles) {
-		const match = name.match(/^\/([a-z]{2})-([a-f0-9]{8})\.sqlite$/);
+		const match = name.match(/^\/([a-z]{2,3})-([a-f0-9]{8})\.sqlite$/);
 		if (match) results.push([match[1], match[2]]);
 	}
 
@@ -496,7 +551,7 @@ async function listOpfsFiles(): Promise<[string, string][]> {
 		// @ts-expect-error — entries() not in all TS libs
 		for await (const [name] of dir.entries()) {
 			const n = name as string;
-			const match = n.match(/^([a-z]{2})-([a-f0-9]{8})\.sqlite$/);
+			const match = n.match(/^([a-z]{2,3})-([a-f0-9]{8})\.sqlite$/);
 			if (match && !seen.has(`${match[1]}-${match[2]}`)) {
 				const file = await (await dir.getFileHandle(n)).getFile();
 				// createWritable() commits on close. An interrupted first write

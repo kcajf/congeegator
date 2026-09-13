@@ -37,7 +37,7 @@
 {#if hasInstalled}
 	<div class="picker-container" use:clickOutside={() => (isOpen = false)}>
 		<button class="trigger" onclick={() => (isOpen = !isOpen)}>
-			{langName(currentLang)}
+			<bdi lang={currentLang}>{langName(currentLang)}</bdi>
 			<svg class="chevron" class:open={isOpen} width="10" height="6" viewBox="0 0 10 6" fill="none">
 				<path
 					d="M1 1L5 5L9 1"
@@ -57,7 +57,7 @@
 						class:active={lang.code === currentLang}
 						onclick={() => select(lang.code)}
 					>
-						{lang.name}
+						<bdi lang={lang.code}>{lang.name}</bdi>
 					</button>
 				{/each}
 			</div>
