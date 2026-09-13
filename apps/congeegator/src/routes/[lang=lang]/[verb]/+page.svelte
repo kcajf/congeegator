@@ -169,9 +169,6 @@
 		{/each}
 	</div>
 	{#if data.verb.gloss}<p class="gloss">{data.verb.gloss}</p>{/if}
-	{#if coverage}<p class="coverage-note">
-			{coverage}
-		</p>{/if}
 
 	{#each tenseGroups as tenseGroup (tenseGroup.name)}
 		{#if tenseGroup.tenseIndices.some((i) => !isTenseEmpty(data.verb.conjugation[i]))}
@@ -253,6 +250,9 @@
 			{/if}
 		</div>
 	{/if}
+	{#if coverage}<p class="coverage-note">
+			{coverage}
+		</p>{/if}
 {:else}
 	<h1>Verb not found</h1>
 {/if}
@@ -383,6 +383,7 @@
 	.coverage-note {
 		font-size: 0.9rem;
 		color: #666;
+		margin-top: 1.5rem;
 		margin-bottom: 1.5rem;
 	}
 
