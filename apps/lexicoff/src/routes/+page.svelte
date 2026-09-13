@@ -26,8 +26,8 @@
 	<div class="about">
 		<h2>About</h2>
 		<p>
-			{appTitle} is an offline-first dictionary app. Search for words in any supported language, view
-			definitions, examples, and inflected forms. Download languages for offline use.
+			{appTitle} ("offline lexicon") is an offline-first dictionary app. Search for words in any supported
+			language, view definitions, examples, and inflected forms. Download languages for offline use.
 		</p>
 		{#if !isStandalone}
 			<p>

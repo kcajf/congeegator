@@ -196,7 +196,7 @@
 <div class="container">
 	<nav class="navbar">
 		<a href={resolve('/')} class="logo">
-			{appTitle} <span class="descriptor">("offline lexicon")</span>
+			{appTitle}
 		</a>
 
 		<div class="search-container">
@@ -319,12 +319,6 @@
 		text-decoration: none;
 		color: var(--text);
 		white-space: nowrap;
-	}
-
-	.descriptor {
-		font-size: 0.8rem;
-		font-weight: normal;
-		color: var(--text-muted);
 	}
 
 	.container {
