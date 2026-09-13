@@ -209,6 +209,10 @@ def write_sqlite_database(
 
         # Insert metadata
         conn.execute("INSERT INTO metadata (key, value) VALUES (?, ?)", ("lang", lang_code))
+        # Compute once for the immutable download, never in the browser search queue.
+        word_count = conn.execute("SELECT COUNT(DISTINCT word) FROM entries").fetchone()[0]
+        conn.execute("INSERT INTO metadata (key, value) VALUES (?, ?)",
+                     ("word_count", str(word_count)))
 
         conn.execute("PRAGMA journal_mode=DELETE")
         conn.commit()

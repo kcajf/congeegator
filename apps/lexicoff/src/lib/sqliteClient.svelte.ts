@@ -184,9 +184,9 @@ class DictionaryStorage {
 		await connection.request('deleteFromPool', { lang });
 	}
 
-	async wordCount(): Promise<number> {
+	async wordCount(): Promise<number | null> {
 		const connection = await this.connect();
-		return (await connection.request('wordCount')) as number;
+		return (await connection.request('wordCount')) as number | null;
 	}
 
 	async search(lang: string, query: string, phoneticQuery?: string): Promise<SearchResult[]> {

@@ -616,3 +616,61 @@ describe('extended dictionaries with real SQLite FTS', () => {
 		expect(s.raw.has('grc-cccccccc.sqlite')).toBe(false);
 	});
 });
+
+describe('persisted dictionary word totals', () => {
+	it('reads totals on open and reuses them across requests, updates, removal and shutdown', async () => {
+		const s = setup();
+		const saved = new Map([
+			['/fr-aaaaaaaa.sqlite', '3'],
+			['/fr-bbbbbbbb.sqlite', '5'],
+			['/de-aaaaaaaa.sqlite', '7']
+		]);
+		s.files.add('/fr-aaaaaaaa.sqlite');
+		s.files.add('/de-aaaaaaaa.sqlite');
+		const query = vi
+			.spyOn(s.pool.OpfsSAHPoolDb.prototype, 'selectValue')
+			.mockImplementation(function (this: { filename: string }, sql: string) {
+				if (sql.includes("key = 'word_count'")) return saved.get(this.filename)!;
+				if (sql.includes("key = 'lang'")) return this.filename.slice(1).split('-')[0];
+				throw new Error(`Unexpected database query: ${sql}`);
+			});
+		await s.start();
+		expect((await s.send('wordCount')).result).toBe(0);
+		await s.send('open', 'fr');
+		await s.send('open', 'de');
+		query.mockClear();
+		expect((await s.send('wordCount')).result).toBe(10);
+		expect((await s.send('wordCount')).result).toBe(10);
+		expect(query).not.toHaveBeenCalled();
+		s.files.add('/fr-bbbbbbbb.sqlite');
+		await s.send('open', 'fr', 'bbbbbbbb');
+		expect((await s.send('wordCount')).result).toBe(12);
+		await s.send('close', 'de');
+		expect((await s.send('wordCount')).result).toBe(5);
+		await s.send('shutdown');
+		expect((await s.send('wordCount')).result).toBe(0);
+		await s.send('open', 'fr', 'bbbbbbbb');
+		expect((await s.send('wordCount')).result).toBe(5);
+	});
+
+	it.each(['', '-1', '1.5', 'NaN', '9007199254740992', undefined])(
+		'leaves missing or invalid metadata (%s) unknown without scanning entries',
+		async (saved) => {
+			const s = setup();
+			s.files.add('/fr-aaaaaaaa.sqlite');
+			const query = vi
+				.spyOn(s.pool.OpfsSAHPoolDb.prototype, 'selectValue')
+				.mockImplementation((sql) => {
+					if (sql.includes("key = 'word_count'")) return saved as string;
+					if (sql.includes("key = 'lang'")) return 'fr';
+					throw new Error(`Unexpected database query: ${sql}`);
+				});
+			await s.start();
+			expect((await s.send('open')).result).toBe(true);
+			query.mockClear();
+			expect((await s.send('wordCount')).result).toBeNull();
+			expect((await s.send('wordCount')).result).toBeNull();
+			expect(query).not.toHaveBeenCalled();
+		}
+	);
+});
