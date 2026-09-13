@@ -150,3 +150,22 @@ def test_frequency_corpora_are_released_when_generation_fails(monkeypatch):
     with pytest.raises(RuntimeError, match="frequency failure"):
         generate.generate_data_for_lang("en", None, DictLanguageConfig("pt", "pt", "Portuguese"), False)
     assert corpus.cache_info().currsize == 0
+
+
+def test_dictionary_download_has_verified_checksum(tmp_path):
+    import io
+    import zstandard
+
+    config = DictLanguageConfig("eo", "Esperanto", "Esperanto")
+    generate.write_dictionary_language(
+        [{"word": "domo", "pos": "noun", "senses": [{"gloss": "house"}], "freq": 0}],
+        config, str(tmp_path),
+    )
+    payload = (tmp_path / "eo/eo.sqlite.zst").read_bytes()
+    assert zstandard.get_frame_parameters(payload).has_checksum
+    decoded = io.BytesIO()
+    zstandard.ZstdDecompressor().copy_stream(io.BytesIO(payload), decoded)
+    assert decoded.getvalue().startswith(b"SQLite format 3\0")
+    corrupted = payload[:-1] + bytes([payload[-1] ^ 1])
+    with pytest.raises(zstandard.ZstdError, match="checksum"):
+        zstandard.ZstdDecompressor().copy_stream(io.BytesIO(corrupted), io.BytesIO())

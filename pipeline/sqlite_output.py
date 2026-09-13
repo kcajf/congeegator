@@ -3,6 +3,7 @@
 Produces a single .sqlite file per language with FTS5 full-text search.
 """
 
+from collections.abc import Sequence
 import logging
 import os
 import sqlite3
@@ -11,12 +12,18 @@ import unicodedata
 from typing import Any, Callable
 
 import orjson
+import msgspec
+import zstandard
+
+from .packed_entries import PackedDictionaryEntries, PreparedDictionaryEntry
 
 from .utils import log_timing
+from .entry_json import ROW_COMPRESSION_LEVEL, encode_entry_json
 
 log = logging.getLogger(__name__)
 
 SCHEMA_SQL = """
+-- forms and form_details accept JSON TEXT or versioned LZJ1 BLOBs.
 CREATE TABLE entries (
     id          INTEGER PRIMARY KEY,
     word        TEXT NOT NULL,
@@ -126,8 +133,16 @@ def _search_text(text: str, lang_code: str) -> str:
     return key if alias == key else f"{key} {alias}"
 
 
+def _json_column(value) -> str | None:
+    if isinstance(value, msgspec.Raw):
+        raw = bytes(value)
+        # Match the ordinary object path's treatment of absent/empty metadata.
+        return None if raw in (b"null", b"[]", b"{}") else raw.decode()
+    return orjson.dumps(value).decode() if value else None
+
+
 def write_sqlite_database(
-    entries: list[dict[str, Any]],
+    entries: Sequence[dict[str, Any]],
     lang_code: str,
     phonetic_fn: Callable[[str], str] | None,
     output_path: str,
@@ -140,6 +155,7 @@ def write_sqlite_database(
     # work for an intermediate database that will never be published directly.
     conn = None
     compact_path = None
+    field_compressor = zstandard.ZstdCompressor(level=ROW_COMPRESSION_LEVEL, write_checksum=True)
     try:
         conn = sqlite3.connect("")
         # These settings apply only to this scratch build, not browser storage.
@@ -175,10 +191,18 @@ def write_sqlite_database(
             fts_rows = []
             fuzzy_rows = []
 
-            for i, entry in enumerate(entries):
+            rows = entries.iter_for_sqlite() if isinstance(entries, PackedDictionaryEntries) else (
+                PreparedDictionaryEntry(
+                    entry,
+                    encode_entry_json(entry.get("forms"), field_compressor),
+                    encode_entry_json(entry.get("formDetails"), field_compressor),
+                ) for entry in entries
+            )
+            for i, prepared in enumerate(rows):
+                entry = prepared.entry
                 senses_json = orjson.dumps(entry["senses"]).decode()
                 forms = entry.get("forms")
-                forms_json = orjson.dumps(forms).decode() if forms else None
+                forms_json = prepared.forms
 
                 row = (
                     i,
@@ -191,13 +215,13 @@ def write_sqlite_database(
                     forms_json,
                     entry.get("pronunciation"),
                     entry.get("etymology"),
-                    orjson.dumps(entry["details"]).decode() if entry.get("details") else None,
-                    orjson.dumps(entry["formDetails"]).decode() if entry.get("formDetails") else None,
+                    _json_column(entry.get("details")),
+                    prepared.form_details,
                 )
                 if extended:
                     row += (
                         dictionary_search_key(entry["word"], lang_code),
-                        orjson.dumps(entry["pronunciations"]).decode() if entry.get("pronunciations") else None,
+                        _json_column(entry.get("pronunciations")),
                     )
                 entry_rows.append(row)
 

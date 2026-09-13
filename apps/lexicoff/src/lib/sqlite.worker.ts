@@ -6,6 +6,7 @@
  */
 
 import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
+import { decodeEntryJson } from './entryJson';
 import {
 	dictionarySearchKey,
 	dictionaryWordKey,
@@ -37,8 +38,6 @@ let sqlite3: any;
 let poolUtil: any;
 const openDbs = new Map<string, any>();
 const wordCounts = new Map<string, number | null>();
-const wordKeyLanguages = new Set<string>();
-const linkedEntryLanguages = new Set<string>();
 const entryColumns = new Map<string, Set<string>>();
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
@@ -76,8 +75,6 @@ async function shutdown() {
 		}
 		openDbs.delete(lang);
 		wordCounts.delete(lang);
-		wordKeyLanguages.delete(lang);
-		linkedEntryLanguages.delete(lang);
 		entryColumns.delete(lang);
 	}
 	// Do not call removeVfs(): it deletes every installed dictionary. Worker
@@ -92,8 +89,6 @@ async function openDb(lang: string, hash: string): Promise<boolean> {
 	if (previous?.filename === fname) return true;
 
 	let db;
-	let hasWordKey = false;
-	let hasLinkedEntries = false;
 	let columns = new Set<string>();
 	let wordCount: number | null = null;
 	try {
@@ -134,18 +129,16 @@ async function openDb(lang: string, hash: string): Promise<boolean> {
 		}
 		// Opening a SQLite file alone does not verify the dictionary schema.
 		db.exec(
-			'SELECT id, word, pos, senses, freq, gender, forms, pronunciation, etymology FROM entries LIMIT 0'
+			'SELECT id, word, word_key, pos, senses, freq, gender, forms, pronunciation, etymology, details, form_details FROM entries LIMIT 0'
 		);
 		db.exec('SELECT rowid FROM entries_fts LIMIT 0');
 		db.exec('SELECT rowid FROM fuzzy LIMIT 0');
 		columns = new Set(
 			execQuery(db, 'PRAGMA table_info(entries)').map((column) => column[1] as string)
 		);
-		hasWordKey = columns.has('word_key');
-		hasLinkedEntries = columns.has('details');
-		if (hasLinkedEntries) db.exec('SELECT form_key, entry_id FROM form_lookup LIMIT 0');
-		// Counts travel with the immutable database. Older downloads remain usable
-		// without a total; never fall back to scanning entries on the user's device.
+		db.exec('SELECT form_key, entry_id FROM form_lookup LIMIT 0');
+		// Counts travel with the immutable database; never fall back to scanning
+		// entries on the user's device when metadata is missing or invalid.
 		const savedCount = db.selectValue("SELECT value FROM metadata WHERE key = 'word_count'");
 		if (typeof savedCount === 'string' && /^(0|[1-9]\d*)$/.test(savedCount)) {
 			const count = Number(savedCount);
@@ -163,13 +156,6 @@ async function openDb(lang: string, hash: string): Promise<boolean> {
 	openDbs.set(lang, db);
 	wordCounts.set(lang, wordCount);
 	entryColumns.set(lang, columns);
-	// Older downloads remain usable until the user chooses to update them.
-	if (hasWordKey) wordKeyLanguages.add(lang);
-	else wordKeyLanguages.delete(lang);
-
-	if (hasLinkedEntries) linkedEntryLanguages.add(lang);
-	else linkedEntryLanguages.delete(lang);
-
 	// Cleanup is best-effort after the replacement is usable. Failure here
 	// must not turn a successful installation into a failed one.
 	try {
@@ -196,8 +182,6 @@ async function closeDb(lang: string) {
 	db.close();
 	openDbs.delete(lang);
 	wordCounts.delete(lang);
-	wordKeyLanguages.delete(lang);
-	linkedEntryLanguages.delete(lang);
 	entryColumns.delete(lang);
 }
 
@@ -261,8 +245,8 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 	try {
 		const exactRows = execQuery(
 			db,
-			`SELECT id, word, pos, freq FROM entries WHERE ${wordKeyLanguages.has(lang) ? 'word_key = ?' : 'word = ? COLLATE NOCASE'} ORDER BY id`,
-			[wordKeyLanguages.has(lang) ? trimmed : query.trim()]
+			`SELECT id, word, pos, freq FROM entries WHERE word_key = ? ORDER BY id`,
+			[trimmed]
 		);
 		for (const [id, word, pos, freq] of exactRows) {
 			const key = `${word}:${pos}`;
@@ -283,7 +267,7 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 	}
 
 	// Exact inflections must not be lost among the capped token-prefix results.
-	if (linkedEntryLanguages.has(lang)) {
+	{
 		const rows = execQuery(
 			db,
 			`SELECT e.id, e.word, e.pos, e.freq
@@ -557,18 +541,17 @@ async function getWord(lang: string, word: string): Promise<unknown[]> {
 	const db = openDbs.get(lang);
 	if (!db) return [];
 
-	const linked = linkedEntryLanguages.has(lang);
 	const schemaColumns = entryColumns.get(lang);
-	const optionalColumns = ['details', 'form_details', 'pronunciations']
+	const optionalColumns = ['pronunciations']
 		.map((column) => (schemaColumns?.has(column) ? column : `NULL AS ${column}`))
 		.join(', ');
-	const columns = `id, word, pos, senses, freq, gender, forms, pronunciation, etymology, ${optionalColumns}`;
+	const columns = `id, word, pos, senses, freq, gender, forms, pronunciation, etymology, details, form_details, ${optionalColumns}`;
 	let rows = execQuery(
 		db,
 		`SELECT ${columns}
-		FROM entries WHERE ${wordKeyLanguages.has(lang) ? 'word_key = ?' : 'word = ? COLLATE NOCASE'}
+		FROM entries WHERE word_key = ?
 		ORDER BY freq DESC, id`,
-		[wordKeyLanguages.has(lang) ? dictionaryWordKey(word, lang) : word]
+		[dictionaryWordKey(word, lang)]
 	);
 	// Preserve spelling distinctions such as German Haus (noun) / haus (verb).
 	// Uppercase keyboard input still falls back to the case-insensitive results.
@@ -577,7 +560,7 @@ async function getWord(lang: string, word: string): Promise<unknown[]> {
 	);
 	if (exactSpelling.length) rows = exactSpelling;
 	let matchedForm: string | undefined;
-	if (!rows.length && linked) {
+	if (!rows.length) {
 		rows = execQuery(
 			db,
 			`SELECT ${columns} FROM entries
@@ -588,36 +571,38 @@ async function getWord(lang: string, word: string): Promise<unknown[]> {
 		if (rows.length) matchedForm = word;
 	}
 
-	return rows.map(
-		([
-			id,
-			w,
-			pos,
-			senses,
-			freq,
-			gender,
-			forms,
-			pronunciation,
-			etymology,
-			details,
-			formDetails,
-			pronunciations
-		]) => ({
-			id: id as number,
-			word: w as string,
-			lang,
-			pos: pos as string,
-			senses: JSON.parse(senses as string),
-			freq: freq as number,
-			gender: gender as string | null,
-			forms: forms ? JSON.parse(forms as string) : undefined,
-			pronunciation: pronunciation as string | null,
-			etymology: etymology as string | null,
-			details: details ? JSON.parse(details as string) : undefined,
-			formDetails: formDetails ? JSON.parse(formDetails as string) : undefined,
-			pronunciations: pronunciations ? JSON.parse(pronunciations as string) : undefined,
-			matchedForm
-		})
+	return Promise.all(
+		rows.map(
+			async ([
+				id,
+				w,
+				pos,
+				senses,
+				freq,
+				gender,
+				forms,
+				pronunciation,
+				etymology,
+				details,
+				formDetails,
+				pronunciations
+			]) => ({
+				id: id as number,
+				word: w as string,
+				lang,
+				pos: pos as string,
+				senses: JSON.parse(senses as string),
+				freq: freq as number,
+				gender: gender as string | null,
+				forms: await decodeEntryJson(forms),
+				pronunciation: pronunciation as string | null,
+				etymology: etymology as string | null,
+				details: details ? JSON.parse(details as string) : undefined,
+				formDetails: await decodeEntryJson(formDetails),
+				pronunciations: pronunciations ? JSON.parse(pronunciations as string) : undefined,
+				matchedForm
+			})
+		)
 	);
 }
 

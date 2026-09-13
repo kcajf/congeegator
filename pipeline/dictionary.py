@@ -448,7 +448,7 @@ def entry_is_valid(entry: Entry) -> bool:
     return True
 
 
-def process_dict_entry(config: DictLanguageConfig, entry: Entry, audit=None) -> dict[str, Any] | None:
+def process_dict_entry(config: DictLanguageConfig, entry: Entry, audit=None, *, raw_form_details=False) -> dict[str, Any] | None:
     if not entry_is_valid(entry):
         return None
     senses = extract_senses(entry)
@@ -465,7 +465,7 @@ def process_dict_entry(config: DictLanguageConfig, entry: Entry, audit=None) -> 
     form_items = list(extract_form_items(entry, audit))
     if form_items:
         processed["forms"] = list(dict.fromkeys(text for text, _, _ in form_items))
-        processed["formDetails"] = build_details(form_items, entry, _clean_text, audit)
+        processed["formDetails"] = build_details(form_items, entry, _clean_text, audit, raw=raw_form_details)
     pronunciation = extract_pronunciation(entry)
     if pronunciation:
         processed["pronunciation"] = pronunciation

@@ -24,6 +24,7 @@ from .conjugation import CONFIG, LanguageConfig, extract_conjugation, make_langu
 from .dictionary import DICT_CONFIGS, DictLanguageConfig, process_dict_entry, make_dict_language_static_metadata
 from .gloss import extract_gloss
 from .output import generate_sitemaps, write_data_manifest, write_language_data, write_sqlite_manifest
+from .packed_entries import PackedDictionaryEntries
 from .search import build_search_index
 from .sqlite_output import write_sqlite_database
 from .utils import log_timing, strip_diacritics
@@ -62,7 +63,7 @@ def _generate_data_for_lang(
 
     verbs: list[dict[str, Any]] = []
     seen_verbs: set[str] = set()
-    dict_entries: list[dict[str, Any]] = []
+    dict_entries = PackedDictionaryEntries()
     seen_dict_records: set[bytes] = set()
     duplicate_dict_records = 0
 
@@ -89,9 +90,10 @@ def _generate_data_for_lang(
 
             # Dictionary processing (all POS)
             if dict_config is not None:
-                dict_entry = process_dict_entry(dict_config, entry)
+                dict_entry = process_dict_entry(dict_config, entry, raw_form_details=True)
                 if dict_entry is not None:
-                    fingerprint = hashlib.sha256(msgspec.json.encode(dict_entry)).digest()
+                    encoded = msgspec.json.encode(dict_entry)
+                    fingerprint = hashlib.sha256(encoded).digest()
                     if fingerprint not in seen_dict_records:
                         seen_dict_records.add(fingerprint)
                         dict_entries.append(dict_entry)
@@ -138,10 +140,10 @@ def _generate_data_for_lang(
             has_frequency = lang_code in available_languages()
             if not has_frequency:
                 log.warning("%s has no wordfreq corpus; using unranked frequency 0", lang_code)
-            for entry in dict_entries:
-                entry["freq"] = round(zipf_frequency(entry["word"], lang_code), 2) if has_frequency else 0.0
-
-        dict_entries = sorted(dict_entries, key=lambda x: -x["freq"])
+            dict_entries.sort_by_frequency(
+                lambda word: round(zipf_frequency(word, lang_code), 2) if has_frequency else 0.0
+            )
+        log.info("%s packed dictionary payload: %.1f MiB", lang_code, dict_entries.payload_bytes / 1024**2)
 
         dict_data = {
             "entries": dict_entries,
@@ -340,7 +342,7 @@ def write_dictionary_language(entries, config: DictLanguageConfig, data_dir: str
         write_sqlite_database(entries, config.code, phonetic_fn=config.phonetic_fn, output_path=sqlite_path)
     with log_timing(f"{config.code} sqlite compression"):
         with open(sqlite_path, "rb") as f_in, open(sqlite_path + ".zst", "wb") as f_out:
-            zstandard.ZstdCompressor(level=9).copy_stream(f_in, f_out)
+            zstandard.ZstdCompressor(level=9, write_checksum=True).copy_stream(f_in, f_out)
     os.remove(sqlite_path)
 
 

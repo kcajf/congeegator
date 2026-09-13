@@ -1,4 +1,4 @@
-import { zstdCompressSync } from 'node:zlib';
+import { constants, zstdCompressSync } from 'node:zlib';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 
 const realFetch = globalThis.fetch;
@@ -13,9 +13,11 @@ beforeEach(() => {
 });
 afterEach(() => vi.unstubAllGlobals());
 
-async function setup() {
+async function setup(checksum = false) {
 	const original = new TextEncoder().encode('dictionary content '.repeat(10000));
-	const compressed = zstdCompressSync(original);
+	const compressed = zstdCompressSync(original, {
+		params: { [constants.ZSTD_c_checksumFlag]: checksum ? 1 : 0 }
+	});
 	data.dataSize = compressed.length;
 	let committed = new Uint8Array();
 	let chunks: Uint8Array[] = [];
@@ -122,4 +124,23 @@ it('deduplicates concurrent downloads of the same language', async () => {
 	await Promise.all([s.download(), s.download()]);
 	expect(s.fetchMock).toHaveBeenCalledOnce();
 	expect(s.messages().filter((m) => m.type === 'COMPLETE')).toHaveLength(1);
+});
+
+it('rejects same-length checksum corruption without replacing an installed file and can retry', async () => {
+	const s = await setup(true);
+	await s.download();
+	expect(s.messages().at(-1)).toMatchObject({ type: 'COMPLETE' });
+	const previous = s.bytes();
+	const corrupted = Buffer.from(s.compressed);
+	corrupted[corrupted.length - 1] ^= 1;
+	s.fetchMock.mockResolvedValueOnce(new Response(corrupted));
+	s.writable.close.mockClear();
+	await s.download();
+	expect(s.messages().at(-1)).toMatchObject({ type: 'ERROR' });
+	expect(s.writable.abort).toHaveBeenCalledOnce();
+	expect(s.writable.close).not.toHaveBeenCalled();
+	expect(s.bytes()).toBe(previous);
+	await s.download();
+	expect(s.messages().at(-1)).toMatchObject({ type: 'COMPLETE' });
+	expect(Buffer.from(s.bytes()).equals(s.original)).toBe(true);
 });
