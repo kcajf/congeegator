@@ -1,0 +1,81 @@
+{
+  "name": "dir",
+  "nameNoDiacritics": "dir",
+  "conjugation": [
+    "dir",
+    "dient",
+    "dit",
+    [
+      "dic",
+      "dius",
+      "diu",
+      "diem",
+      "dieu",
+      "diuen"
+    ],
+    [
+      "deia",
+      "deies",
+      "deia",
+      "dèiem",
+      "dèieu",
+      "deien"
+    ],
+    [
+      "diguí",
+      "digueres",
+      "digué",
+      "diguérem",
+      "diguéreu",
+      "digueren"
+    ],
+    [
+      "vaig dir",
+      "vas dir/vares dir",
+      "va dir",
+      "vam dir/vàrem dir",
+      "vau dir/vàreu dir",
+      "van dir/varen dir"
+    ],
+    [
+      "diré",
+      "diràs",
+      "dirà",
+      "direm",
+      "direu",
+      "diran"
+    ],
+    [
+      "diria",
+      "diries",
+      "diria",
+      "diríem",
+      "diríeu",
+      "dirien"
+    ],
+    [
+      "digui",
+      "diguis",
+      "digui",
+      "diguem",
+      "digueu",
+      "diguin"
+    ],
+    [
+      "digués",
+      "diguessis",
+      "digués",
+      "diguéssim",
+      "diguéssiu",
+      "diguessin"
+    ],
+    [
+      "digues",
+      "digui",
+      "diguem",
+      "digueu",
+      "diguin"
+    ]
+  ],
+  "gloss": "to say, to pronounce; to say, to tell; to call, to refer to as; ..."
+}

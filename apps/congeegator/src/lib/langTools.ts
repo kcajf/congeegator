@@ -184,10 +184,22 @@ export function formatForm(form: string): string {
 }
 
 export function stripFormMarkers(raw: string): string {
-	return raw.replace(/[([{}\])]/g, '');
+	return raw.replace(/\s+\([^()]+\)(?=[\]}]*(?:\/|$))/g, '').replace(/[([{}\])]/g, '');
 }
 
 export function parseAndFormatForm(raw: string): FormSegment[] {
+	// Trailing usage notes belong to their own variant. Keep them literal and
+	// avoid abbreviation across regions (e.g. falámos (Portugal)/falamos (Brazil)).
+	const qualifier = /\s+(\([^()]+\))(?=[\]}]*$)/;
+	if (raw.split('/').some((part) => qualifier.test(part))) {
+		return raw.split('/').flatMap((part, index) => {
+			const note = part.match(qualifier)?.[1];
+			const segments = parseAndFormatForm(part.replace(qualifier, ''));
+			if (index > 0 && segments.length) segments[0].separator = '/';
+			if (note) segments.push({ text: ` ${note}`, markers: [] });
+			return segments;
+		});
+	}
 	// Fast path: no marker characters
 	if (!/[([{}\])]/.test(raw)) {
 		return [{ text: formatForm(raw), markers: [] }];

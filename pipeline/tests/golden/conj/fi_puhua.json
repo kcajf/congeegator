@@ -1,0 +1,170 @@
+{
+  "name": "puhua",
+  "nameNoDiacritics": "puhua",
+  "conjugation": [
+    [
+      "puhun",
+      "puhut",
+      "puhuu",
+      "puhumme",
+      "puhutte",
+      "puhuvat",
+      "puhutaan"
+    ],
+    [
+      "en puhu",
+      "et puhu",
+      "ei puhu",
+      "emme puhu",
+      "ette puhu",
+      "eivät puhu",
+      "ei puhuta"
+    ],
+    [
+      "puhuin",
+      "puhuit",
+      "puhui",
+      "puhuimme",
+      "puhuitte",
+      "puhuivat",
+      "puhuttiin"
+    ],
+    [
+      "en puhunut",
+      "et puhunut",
+      "ei puhunut",
+      "emme puhuneet",
+      "ette puhuneet",
+      "eivät puhuneet",
+      "ei puhuttu"
+    ],
+    [
+      "olen puhunut",
+      "olet puhunut",
+      "on puhunut",
+      "olemme puhuneet",
+      "olette puhuneet",
+      "ovat puhuneet",
+      "on puhuttu"
+    ],
+    [
+      "en ole puhunut",
+      "et ole puhunut",
+      "ei ole puhunut",
+      "emme ole puhuneet",
+      "ette ole puhuneet",
+      "eivät ole puhuneet",
+      "ei ole puhuttu"
+    ],
+    [
+      "olin puhunut",
+      "olit puhunut",
+      "oli puhunut",
+      "olimme puhuneet",
+      "olitte puhuneet",
+      "olivat puhuneet",
+      "oli puhuttu"
+    ],
+    [
+      "en ollut puhunut",
+      "et ollut puhunut",
+      "ei ollut puhunut",
+      "emme olleet puhuneet",
+      "ette olleet puhuneet",
+      "eivät olleet puhuneet",
+      "ei ollut puhuttu"
+    ],
+    [
+      "puhuisin",
+      "puhuisit",
+      "puhuisi",
+      "puhuisimme",
+      "puhuisitte",
+      "puhuisivat",
+      "puhuttaisiin"
+    ],
+    [
+      "en puhuisi",
+      "et puhuisi",
+      "ei puhuisi",
+      "emme puhuisi",
+      "ette puhuisi",
+      "eivät puhuisi",
+      "ei puhuttaisi"
+    ],
+    [
+      "olisin puhunut",
+      "olisit puhunut",
+      "olisi puhunut",
+      "olisimme puhuneet",
+      "olisitte puhuneet",
+      "olisivat puhuneet",
+      "olisi puhuttu"
+    ],
+    [
+      "en olisi puhunut",
+      "et olisi puhunut",
+      "ei olisi puhunut",
+      "emme olisi puhuneet",
+      "ette olisi puhuneet",
+      "eivät olisi puhuneet",
+      "ei olisi puhuttu"
+    ],
+    [
+      "puhunen",
+      "puhunet",
+      "puhunee",
+      "puhunemme",
+      "puhunette",
+      "puhunevat",
+      "puhuttaneen"
+    ],
+    [
+      "en puhune",
+      "et puhune",
+      "ei puhune",
+      "emme puhune",
+      "ette puhune",
+      "eivät puhune",
+      "ei puhuttane"
+    ],
+    [
+      "lienen puhunut",
+      "lienet puhunut",
+      "lienee puhunut",
+      "lienemme puhuneet",
+      "lienette puhuneet",
+      "lienevät puhuneet",
+      "lienee puhuttu"
+    ],
+    [
+      "en liene puhunut",
+      "et liene puhunut",
+      "ei liene puhunut",
+      "emme liene puhuneet",
+      "ette liene puhuneet",
+      "eivät liene puhuneet",
+      "ei liene puhuttu"
+    ],
+    [
+      "puhu",
+      "puhukoon",
+      "puhukaamme",
+      "puhukaa",
+      "puhukoot",
+      "puhuttakoon"
+    ],
+    [
+      "älä puhu",
+      "älköön puhuko",
+      "älkäämme puhuko",
+      "älkää puhuko",
+      "älkööt puhuko",
+      "älköön puhuttako"
+    ],
+    "puhua",
+    "puhuva",
+    "puhuttava"
+  ],
+  "gloss": "to speak, talk; to speak"
+}

@@ -1,0 +1,207 @@
+{
+  "name": "sequor",
+  "nameNoDiacritics": "sequor",
+  "conjugation": [
+    [
+      "sequor",
+      "sequeris/sequere",
+      "sequitur",
+      "sequimur",
+      "sequiminī",
+      "sequuntur"
+    ],
+    [
+      "sequēbar",
+      "sequēbāris/sequēbāre",
+      "sequēbātur",
+      "sequēbāmur",
+      "sequēbāminī",
+      "sequēbantur"
+    ],
+    [
+      "sequar",
+      "sequēris/sequēre",
+      "sequētur",
+      "sequēmur",
+      "sequēminī",
+      "sequentur"
+    ],
+    [
+      "secūtus sum (masculine)/secūta sum (feminine)/secūtum sum (neuter)/sequūtus sum (masculine)/sequūta sum (feminine)/sequūtum sum (neuter)",
+      "secūtus es (masculine)/secūta es (feminine)/secūtum es (neuter)/sequūtus es (masculine)/sequūta es (feminine)/sequūtum es (neuter)",
+      "secūtus est (masculine)/secūta est (feminine)/secūtum est (neuter)/sequūtus est (masculine)/sequūta est (feminine)/sequūtum est (neuter)",
+      "secūtī sumus (masculine)/secūtae sumus (feminine)/secūta sumus (neuter)/sequūtī sumus (masculine)/sequūtae sumus (feminine)/sequūta sumus (neuter)",
+      "secūtī estis (masculine)/secūtae estis (feminine)/secūta estis (neuter)/sequūtī estis (masculine)/sequūtae estis (feminine)/sequūta estis (neuter)",
+      "secūtī sunt (masculine)/secūtae sunt (feminine)/secūta sunt (neuter)/sequūtī sunt (masculine)/sequūtae sunt (feminine)/sequūta sunt (neuter)"
+    ],
+    [
+      "secūtus eram (masculine)/secūta eram (feminine)/secūtum eram (neuter)/sequūtus eram (masculine)/sequūta eram (feminine)/sequūtum eram (neuter)",
+      "secūtus erās (masculine)/secūta erās (feminine)/secūtum erās (neuter)/sequūtus erās (masculine)/sequūta erās (feminine)/sequūtum erās (neuter)",
+      "secūtus erat (masculine)/secūta erat (feminine)/secūtum erat (neuter)/sequūtus erat (masculine)/sequūta erat (feminine)/sequūtum erat (neuter)",
+      "secūtī erāmus (masculine)/secūtae erāmus (feminine)/secūta erāmus (neuter)/sequūtī erāmus (masculine)/sequūtae erāmus (feminine)/sequūta erāmus (neuter)",
+      "secūtī erātis (masculine)/secūtae erātis (feminine)/secūta erātis (neuter)/sequūtī erātis (masculine)/sequūtae erātis (feminine)/sequūta erātis (neuter)",
+      "secūtī erant (masculine)/secūtae erant (feminine)/secūta erant (neuter)/sequūtī erant (masculine)/sequūtae erant (feminine)/sequūta erant (neuter)"
+    ],
+    [
+      "secūtus erō (masculine)/secūta erō (feminine)/secūtum erō (neuter)/sequūtus erō (masculine)/sequūta erō (feminine)/sequūtum erō (neuter)",
+      "secūtus eris (masculine)/secūta eris (feminine)/secūtum eris (neuter)/sequūtus eris (masculine)/sequūta eris (feminine)/sequūtum eris (neuter)",
+      "secūtus erit (masculine)/secūta erit (feminine)/secūtum erit (neuter)/sequūtus erit (masculine)/sequūta erit (feminine)/sequūtum erit (neuter)",
+      "secūtī erimus (masculine)/secūtae erimus (feminine)/secūta erimus (neuter)/sequūtī erimus (masculine)/sequūtae erimus (feminine)/sequūta erimus (neuter)",
+      "secūtī eritis (masculine)/secūtae eritis (feminine)/secūta eritis (neuter)/sequūtī eritis (masculine)/sequūtae eritis (feminine)/sequūta eritis (neuter)",
+      "secūtī erunt (masculine)/secūtae erunt (feminine)/secūta erunt (neuter)/sequūtī erunt (masculine)/sequūtae erunt (feminine)/sequūta erunt (neuter)"
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "sequar",
+      "sequāris/sequāre",
+      "sequātur",
+      "sequāmur",
+      "sequāminī",
+      "sequantur"
+    ],
+    [
+      "sequerer",
+      "sequerēris/sequerēre",
+      "sequerētur",
+      "sequerēmur",
+      "sequerēminī",
+      "sequerentur"
+    ],
+    [
+      "secūtus sim (masculine)/secūta sim (feminine)/secūtum sim (neuter)/sequūtus sim (masculine)/sequūta sim (feminine)/sequūtum sim (neuter)",
+      "secūtus sīs (masculine)/secūta sīs (feminine)/secūtum sīs (neuter)/sequūtus sīs (masculine)/sequūta sīs (feminine)/sequūtum sīs (neuter)",
+      "secūtus sit (masculine)/secūta sit (feminine)/secūtum sit (neuter)/sequūtus sit (masculine)/sequūta sit (feminine)/sequūtum sit (neuter)",
+      "secūtī sīmus (masculine)/secūtae sīmus (feminine)/secūta sīmus (neuter)/sequūtī sīmus (masculine)/sequūtae sīmus (feminine)/sequūta sīmus (neuter)",
+      "secūtī sītis (masculine)/secūtae sītis (feminine)/secūta sītis (neuter)/sequūtī sītis (masculine)/sequūtae sītis (feminine)/sequūta sītis (neuter)",
+      "secūtī sint (masculine)/secūtae sint (feminine)/secūta sint (neuter)/sequūtī sint (masculine)/sequūtae sint (feminine)/sequūta sint (neuter)"
+    ],
+    [
+      "secūtus essem (masculine)/secūta essem (feminine)/secūtum essem (neuter)/sequūtus essem (masculine)/sequūta essem (feminine)/sequūtum essem (neuter)",
+      "secūtus essēs (masculine)/secūta essēs (feminine)/secūtum essēs (neuter)/sequūtus essēs (masculine)/sequūta essēs (feminine)/sequūtum essēs (neuter)",
+      "secūtus esset (masculine)/secūta esset (feminine)/secūtum esset (neuter)/sequūtus esset (masculine)/sequūta esset (feminine)/sequūtum esset (neuter)",
+      "secūtī essēmus (masculine)/secūtae essēmus (feminine)/secūta essēmus (neuter)/sequūtī essēmus (masculine)/sequūtae essēmus (feminine)/sequūta essēmus (neuter)",
+      "secūtī essētis (masculine)/secūtae essētis (feminine)/secūta essētis (neuter)/sequūtī essētis (masculine)/sequūtae essētis (feminine)/sequūta essētis (neuter)",
+      "secūtī essent (masculine)/secūtae essent (feminine)/secūta essent (neuter)/sequūtī essent (masculine)/sequūtae essent (feminine)/sequūta essent (neuter)"
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "sequere",
+      "sequiminī"
+    ],
+    [
+      "sequitor",
+      "sequitor",
+      "",
+      "sequuntor"
+    ],
+    [
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      ""
+    ],
+    "sequī",
+    "secūtum esse/sequūtum esse",
+    "secūtūrum esse/sequūtūrum esse",
+    "",
+    "",
+    "",
+    "sequēns",
+    "secūtus/sequūtus",
+    "",
+    "secūtūrus/sequūtūrus",
+    "sequendus",
+    [
+      "sequendī",
+      "sequendō",
+      "sequendum",
+      "sequendō"
+    ],
+    [
+      "secūtum/sequūtum",
+      "secūtū/sequūtū"
+    ]
+  ],
+  "gloss": "to follow, to come or go after, to pursue; to accede or conform to, follow, comply with; to attend, accompany; ..."
+}

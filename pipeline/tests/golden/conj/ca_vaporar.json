@@ -1,0 +1,81 @@
+{
+  "name": "vaporar",
+  "nameNoDiacritics": "vaporar",
+  "conjugation": [
+    "vaporar",
+    "vaporant",
+    "vaporat",
+    [
+      "vaporo",
+      "vapores",
+      "vapora",
+      "vaporem",
+      "vaporeu",
+      "vaporen"
+    ],
+    [
+      "vaporava",
+      "vaporaves",
+      "vaporava",
+      "vaporàvem",
+      "vaporàveu",
+      "vaporaven"
+    ],
+    [
+      "vaporí",
+      "vaporares",
+      "vaporà",
+      "vaporàrem",
+      "vaporàreu",
+      "vaporaren"
+    ],
+    [
+      "vaig vaporar",
+      "vas vaporar/vares vaporar",
+      "va vaporar",
+      "vam vaporar/vàrem vaporar",
+      "vau vaporar/vàreu vaporar",
+      "van vaporar/varen vaporar"
+    ],
+    [
+      "vaporaré",
+      "vaporaràs",
+      "vaporarà",
+      "vaporarem",
+      "vaporareu",
+      "vaporaran"
+    ],
+    [
+      "vaporaria",
+      "vaporaries",
+      "vaporaria",
+      "vaporaríem",
+      "vaporaríeu",
+      "vaporarien"
+    ],
+    [
+      "vapori",
+      "vaporis",
+      "vapori",
+      "vaporem",
+      "vaporeu",
+      "vaporin"
+    ],
+    [
+      "vaporés",
+      "vaporessis",
+      "vaporés",
+      "vaporéssim",
+      "vaporéssiu",
+      "vaporessin"
+    ],
+    [
+      "vapora",
+      "vapori",
+      "vaporem",
+      "vaporeu",
+      "vaporin"
+    ]
+  ],
+  "gloss": "to steam"
+}

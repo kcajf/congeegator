@@ -1,0 +1,81 @@
+{
+  "name": "anar",
+  "nameNoDiacritics": "anar",
+  "conjugation": [
+    "anar",
+    "anant",
+    "anat",
+    [
+      "vaig",
+      "vas",
+      "va",
+      "anem",
+      "aneu",
+      "van"
+    ],
+    [
+      "anava",
+      "anaves",
+      "anava",
+      "anàvem",
+      "anàveu",
+      "anaven"
+    ],
+    [
+      "aní",
+      "anares",
+      "anà",
+      "anàrem",
+      "anàreu",
+      "anaren"
+    ],
+    [
+      "vaig anar",
+      "vas anar/vares anar",
+      "va anar",
+      "vam anar/vàrem anar",
+      "vau anar/vàreu anar",
+      "van anar/varen anar"
+    ],
+    [
+      "aniré",
+      "aniràs",
+      "anirà",
+      "anirem",
+      "anireu",
+      "aniran"
+    ],
+    [
+      "aniria",
+      "aniries",
+      "aniria",
+      "aniríem",
+      "aniríeu",
+      "anirien"
+    ],
+    [
+      "vagi",
+      "vagis",
+      "vagi",
+      "anem",
+      "aneu",
+      "vagin"
+    ],
+    [
+      "anés",
+      "anessis",
+      "anés",
+      "anéssim",
+      "anéssiu",
+      "anessin"
+    ],
+    [
+      "ves",
+      "vagi",
+      "anem",
+      "aneu",
+      "vagin"
+    ]
+  ],
+  "gloss": "to go; to go away, to leave requires a reflexive pronoun according the subject, and the appropriate form of the adverbial pronoun en"
+}

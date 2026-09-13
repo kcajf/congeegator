@@ -1,0 +1,25 @@
+{
+  "name": "eten",
+  "nameNoDiacritics": "eten",
+  "conjugation": [
+    [
+      "eet",
+      "eet",
+      "eet",
+      "eet",
+      "eten"
+    ],
+    [
+      "at",
+      "at",
+      "at",
+      "at",
+      "aten"
+    ],
+    "eet",
+    "eten",
+    "etend",
+    "gegeten"
+  ],
+  "gloss": "to eat"
+}

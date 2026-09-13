@@ -1,0 +1,81 @@
+{
+  "name": "témer",
+  "nameNoDiacritics": "temer",
+  "conjugation": [
+    "témer",
+    "tement",
+    "temut",
+    [
+      "temo",
+      "tems",
+      "tem",
+      "temem",
+      "temeu",
+      "temen"
+    ],
+    [
+      "temia",
+      "temies",
+      "temia",
+      "temíem",
+      "temíeu",
+      "temien"
+    ],
+    [
+      "temí",
+      "temeres",
+      "temé",
+      "temérem",
+      "teméreu",
+      "temeren"
+    ],
+    [
+      "vaig témer",
+      "vas témer/vares témer",
+      "va témer",
+      "vam témer/vàrem témer",
+      "vau témer/vàreu témer",
+      "van témer/varen témer"
+    ],
+    [
+      "temeré",
+      "temeràs",
+      "temerà",
+      "temerem",
+      "temereu",
+      "temeran"
+    ],
+    [
+      "temeria",
+      "temeries",
+      "temeria",
+      "temeríem",
+      "temeríeu",
+      "temerien"
+    ],
+    [
+      "temi",
+      "temis",
+      "temi",
+      "temem",
+      "temeu",
+      "temin"
+    ],
+    [
+      "temés",
+      "temessis",
+      "temés",
+      "teméssim",
+      "teméssiu",
+      "temessin"
+    ],
+    [
+      "tem",
+      "temi",
+      "temem",
+      "temeu",
+      "temin"
+    ]
+  ],
+  "gloss": "to fear, to dread; to be afraid, to fear"
+}

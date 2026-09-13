@@ -1,0 +1,170 @@
+{
+  "name": "haluta",
+  "nameNoDiacritics": "haluta",
+  "conjugation": [
+    [
+      "haluan",
+      "haluat",
+      "haluaa",
+      "haluamme",
+      "haluatte",
+      "haluavat",
+      "halutaan"
+    ],
+    [
+      "en halua",
+      "et halua",
+      "ei halua",
+      "emme halua",
+      "ette halua",
+      "eivät halua",
+      "ei haluta"
+    ],
+    [
+      "halusin",
+      "halusit",
+      "halusi",
+      "halusimme",
+      "halusitte",
+      "halusivat",
+      "haluttiin"
+    ],
+    [
+      "en halunnut",
+      "et halunnut",
+      "ei halunnut",
+      "emme halunneet",
+      "ette halunneet",
+      "eivät halunneet",
+      "ei haluttu"
+    ],
+    [
+      "olen halunnut",
+      "olet halunnut",
+      "on halunnut",
+      "olemme halunneet",
+      "olette halunneet",
+      "ovat halunneet",
+      "on haluttu"
+    ],
+    [
+      "en ole halunnut",
+      "et ole halunnut",
+      "ei ole halunnut",
+      "emme ole halunneet",
+      "ette ole halunneet",
+      "eivät ole halunneet",
+      "ei ole haluttu"
+    ],
+    [
+      "olin halunnut",
+      "olit halunnut",
+      "oli halunnut",
+      "olimme halunneet",
+      "olitte halunneet",
+      "olivat halunneet",
+      "oli haluttu"
+    ],
+    [
+      "en ollut halunnut",
+      "et ollut halunnut",
+      "ei ollut halunnut",
+      "emme olleet halunneet",
+      "ette olleet halunneet",
+      "eivät olleet halunneet",
+      "ei ollut haluttu"
+    ],
+    [
+      "haluaisin",
+      "haluaisit",
+      "haluaisi",
+      "haluaisimme",
+      "haluaisitte",
+      "haluaisivat",
+      "haluttaisiin"
+    ],
+    [
+      "en haluaisi",
+      "et haluaisi",
+      "ei haluaisi",
+      "emme haluaisi",
+      "ette haluaisi",
+      "eivät haluaisi",
+      "ei haluttaisi"
+    ],
+    [
+      "olisin halunnut",
+      "olisit halunnut",
+      "olisi halunnut",
+      "olisimme halunneet",
+      "olisitte halunneet",
+      "olisivat halunneet",
+      "olisi haluttu"
+    ],
+    [
+      "en olisi halunnut",
+      "et olisi halunnut",
+      "ei olisi halunnut",
+      "emme olisi halunneet",
+      "ette olisi halunneet",
+      "eivät olisi halunneet",
+      "ei olisi haluttu"
+    ],
+    [
+      "halunnen",
+      "halunnet",
+      "halunnee",
+      "halunnemme",
+      "halunnette",
+      "halunnevat",
+      "haluttaneen"
+    ],
+    [
+      "en halunne",
+      "et halunne",
+      "ei halunne",
+      "emme halunne",
+      "ette halunne",
+      "eivät halunne",
+      "ei haluttane"
+    ],
+    [
+      "lienen halunnut",
+      "lienet halunnut",
+      "lienee halunnut",
+      "lienemme halunneet",
+      "lienette halunneet",
+      "lienevät halunneet",
+      "lienee haluttu"
+    ],
+    [
+      "en liene halunnut",
+      "et liene halunnut",
+      "ei liene halunnut",
+      "emme liene halunneet",
+      "ette liene halunneet",
+      "eivät liene halunneet",
+      "ei liene haluttu"
+    ],
+    [
+      "halua",
+      "halutkoon",
+      "halutkaamme",
+      "halutkaa",
+      "halutkoot",
+      "haluttakoon"
+    ],
+    [
+      "älä halua",
+      "älköön halutko",
+      "älkäämme halutko",
+      "älkää halutko",
+      "älkööt halutko",
+      "älköön haluttako"
+    ],
+    "haluta",
+    "haluava",
+    "haluttava"
+  ],
+  "gloss": "to want, desire, wish, crave"
+}

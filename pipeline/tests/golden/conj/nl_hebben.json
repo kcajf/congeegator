@@ -1,0 +1,25 @@
+{
+  "name": "hebben",
+  "nameNoDiacritics": "hebben",
+  "conjugation": [
+    [
+      "heb",
+      "hebt/heb",
+      "hebt/heeft",
+      "heeft",
+      "hebben"
+    ],
+    [
+      "had",
+      "had",
+      "had",
+      "had",
+      "hadden"
+    ],
+    "heb",
+    "hebben",
+    "hebbend",
+    "gehad"
+  ],
+  "gloss": "to have, to possess, own, hold; to be afflicted with a disease; must, to be obliged to, to be to"
+}

@@ -1,0 +1,170 @@
+{
+  "name": "saada",
+  "nameNoDiacritics": "saada",
+  "conjugation": [
+    [
+      "saan",
+      "saat",
+      "saa",
+      "saamme",
+      "saatte",
+      "saavat",
+      "saadaan"
+    ],
+    [
+      "en saa",
+      "et saa",
+      "ei saa",
+      "emme saa",
+      "ette saa",
+      "eivät saa",
+      "ei saada"
+    ],
+    [
+      "sain",
+      "sait",
+      "sai",
+      "saimme",
+      "saitte",
+      "saivat",
+      "saatiin"
+    ],
+    [
+      "en saanut",
+      "et saanut",
+      "ei saanut",
+      "emme saaneet",
+      "ette saaneet",
+      "eivät saaneet",
+      "ei saatu"
+    ],
+    [
+      "olen saanut",
+      "olet saanut",
+      "on saanut",
+      "olemme saaneet",
+      "olette saaneet",
+      "ovat saaneet",
+      "on saatu"
+    ],
+    [
+      "en ole saanut",
+      "et ole saanut",
+      "ei ole saanut",
+      "emme ole saaneet",
+      "ette ole saaneet",
+      "eivät ole saaneet",
+      "ei ole saatu"
+    ],
+    [
+      "olin saanut",
+      "olit saanut",
+      "oli saanut",
+      "olimme saaneet",
+      "olitte saaneet",
+      "olivat saaneet",
+      "oli saatu"
+    ],
+    [
+      "en ollut saanut",
+      "et ollut saanut",
+      "ei ollut saanut",
+      "emme olleet saaneet",
+      "ette olleet saaneet",
+      "eivät olleet saaneet",
+      "ei ollut saatu"
+    ],
+    [
+      "saisin",
+      "saisit",
+      "saisi",
+      "saisimme",
+      "saisitte",
+      "saisivat",
+      "saataisiin"
+    ],
+    [
+      "en saisi",
+      "et saisi",
+      "ei saisi",
+      "emme saisi",
+      "ette saisi",
+      "eivät saisi",
+      "ei saataisi"
+    ],
+    [
+      "olisin saanut",
+      "olisit saanut",
+      "olisi saanut",
+      "olisimme saaneet",
+      "olisitte saaneet",
+      "olisivat saaneet",
+      "olisi saatu"
+    ],
+    [
+      "en olisi saanut",
+      "et olisi saanut",
+      "ei olisi saanut",
+      "emme olisi saaneet",
+      "ette olisi saaneet",
+      "eivät olisi saaneet",
+      "ei olisi saatu"
+    ],
+    [
+      "saanen",
+      "saanet",
+      "saanee",
+      "saanemme",
+      "saanette",
+      "saanevat",
+      "saataneen"
+    ],
+    [
+      "en saane",
+      "et saane",
+      "ei saane",
+      "emme saane",
+      "ette saane",
+      "eivät saane",
+      "ei saatane"
+    ],
+    [
+      "lienen saanut",
+      "lienet saanut",
+      "lienee saanut",
+      "lienemme saaneet",
+      "lienette saaneet",
+      "lienevät saaneet",
+      "lienee saatu"
+    ],
+    [
+      "en liene saanut",
+      "et liene saanut",
+      "ei liene saanut",
+      "emme liene saaneet",
+      "ette liene saaneet",
+      "eivät liene saaneet",
+      "ei liene saatu"
+    ],
+    [
+      "saa",
+      "saakoon",
+      "saakaamme",
+      "saakaa",
+      "saakoot",
+      "saatakoon"
+    ],
+    [
+      "älä saa",
+      "älköön saako",
+      "älkäämme saako",
+      "älkää saako",
+      "älkööt saako",
+      "älköön saatako"
+    ],
+    "saada",
+    "saava",
+    "saatava"
+  ],
+  "gloss": "to get, receive; to get as one's task or responsibility to, be assigned to do; to get, make, produce, yield; ..."
+}

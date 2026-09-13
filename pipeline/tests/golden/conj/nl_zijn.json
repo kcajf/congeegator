@@ -1,0 +1,25 @@
+{
+  "name": "zijn",
+  "nameNoDiacritics": "zijn",
+  "conjugation": [
+    [
+      "ben",
+      "bent/ben",
+      "bent/is",
+      "is",
+      "zijn"
+    ],
+    [
+      "was",
+      "was",
+      "was",
+      "was",
+      "waren"
+    ],
+    "wees/ben",
+    "zijn",
+    "zijnd",
+    "geweest"
+  ],
+  "gloss": "to be, to exist; used to connect a noun to an adjective that describes it; note: The perfect tense of most other verbs is formed using hebben; ..."
+}

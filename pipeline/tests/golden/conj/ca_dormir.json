@@ -1,0 +1,81 @@
+{
+  "name": "dormir",
+  "nameNoDiacritics": "dormir",
+  "conjugation": [
+    "dormir",
+    "dormint",
+    "dormit",
+    [
+      "dormo",
+      "dorms",
+      "dorm",
+      "dormim",
+      "dormiu",
+      "dormen"
+    ],
+    [
+      "dormia",
+      "dormies",
+      "dormia",
+      "dormíem",
+      "dormíeu",
+      "dormien"
+    ],
+    [
+      "dormí",
+      "dormires",
+      "dormí",
+      "dormírem",
+      "dormíreu",
+      "dormiren"
+    ],
+    [
+      "vaig dormir",
+      "vas dormir/vares dormir",
+      "va dormir",
+      "vam dormir/vàrem dormir",
+      "vau dormir/vàreu dormir",
+      "van dormir/varen dormir"
+    ],
+    [
+      "dormiré",
+      "dormiràs",
+      "dormirà",
+      "dormirem",
+      "dormireu",
+      "dormiran"
+    ],
+    [
+      "dormiria",
+      "dormiries",
+      "dormiria",
+      "dormiríem",
+      "dormiríeu",
+      "dormirien"
+    ],
+    [
+      "dormi",
+      "dormis",
+      "dormi",
+      "dormim",
+      "dormiu",
+      "dormin"
+    ],
+    [
+      "dormís",
+      "dormissis",
+      "dormís",
+      "dormíssim",
+      "dormíssiu",
+      "dormissin"
+    ],
+    [
+      "dorm",
+      "dormi",
+      "dormim",
+      "dormiu",
+      "dormin"
+    ]
+  ],
+  "gloss": "to sleep"
+}

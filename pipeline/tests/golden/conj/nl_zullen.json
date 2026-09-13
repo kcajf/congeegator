@@ -1,0 +1,25 @@
+{
+  "name": "zullen",
+  "nameNoDiacritics": "zullen",
+  "conjugation": [
+    [
+      "zal",
+      "zult/zal/zul",
+      "zult/zal",
+      "zal",
+      "zullen"
+    ],
+    [
+      "zou",
+      "zou",
+      "zou",
+      "zou",
+      "zouden"
+    ],
+    "zal",
+    "zullen",
+    "zullend",
+    ""
+  ],
+  "gloss": "used to indicate intent or disposition to perform an action in the future: will, shall, be going to, may, might"
+}

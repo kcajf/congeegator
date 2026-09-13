@@ -1,0 +1,81 @@
+{
+  "name": "servir",
+  "nameNoDiacritics": "servir",
+  "conjugation": [
+    "servir",
+    "servint",
+    "servit",
+    [
+      "serveixo",
+      "serveixes",
+      "serveix",
+      "servim",
+      "serviu",
+      "serveixen"
+    ],
+    [
+      "servia",
+      "servies",
+      "servia",
+      "servíem",
+      "servíeu",
+      "servien"
+    ],
+    [
+      "serví",
+      "servires",
+      "serví",
+      "servírem",
+      "servíreu",
+      "serviren"
+    ],
+    [
+      "vaig servir",
+      "vas servir/vares servir",
+      "va servir",
+      "vam servir/vàrem servir",
+      "vau servir/vàreu servir",
+      "van servir/varen servir"
+    ],
+    [
+      "serviré",
+      "serviràs",
+      "servirà",
+      "servirem",
+      "servireu",
+      "serviran"
+    ],
+    [
+      "serviria",
+      "serviries",
+      "serviria",
+      "serviríem",
+      "serviríeu",
+      "servirien"
+    ],
+    [
+      "serveixi",
+      "serveixis",
+      "serveixi",
+      "servim",
+      "serviu",
+      "serveixin"
+    ],
+    [
+      "servís",
+      "servissis",
+      "servís",
+      "servíssim",
+      "servíssiu",
+      "servissin"
+    ],
+    [
+      "serveix",
+      "serveixi",
+      "servim",
+      "serviu",
+      "serveixin"
+    ]
+  ],
+  "gloss": "to serve; to be useful, to be good for"
+}

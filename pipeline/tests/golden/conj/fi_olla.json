@@ -1,0 +1,170 @@
+{
+  "name": "olla",
+  "nameNoDiacritics": "olla",
+  "conjugation": [
+    [
+      "olen",
+      "olet",
+      "on",
+      "olemme",
+      "olette",
+      "ovat",
+      "ollaan"
+    ],
+    [
+      "en ole",
+      "et ole",
+      "ei ole",
+      "emme ole",
+      "ette ole",
+      "eivät ole",
+      "ei olla"
+    ],
+    [
+      "olin",
+      "olit",
+      "oli",
+      "olimme",
+      "olitte",
+      "olivat",
+      "oltiin"
+    ],
+    [
+      "en ollut",
+      "et ollut",
+      "ei ollut",
+      "emme olleet",
+      "ette olleet",
+      "eivät olleet",
+      "ei oltu"
+    ],
+    [
+      "olen ollut",
+      "olet ollut",
+      "on ollut",
+      "olemme olleet",
+      "olette olleet",
+      "ovat olleet",
+      "on oltu"
+    ],
+    [
+      "en ole ollut",
+      "et ole ollut",
+      "ei ole ollut",
+      "emme ole olleet",
+      "ette ole olleet",
+      "eivät ole olleet",
+      "ei ole oltu"
+    ],
+    [
+      "olin ollut",
+      "olit ollut",
+      "oli ollut",
+      "olimme olleet",
+      "olitte olleet",
+      "olivat olleet",
+      "oli oltu"
+    ],
+    [
+      "en ollut ollut",
+      "et ollut ollut",
+      "ei ollut ollut",
+      "emme olleet olleet",
+      "ette olleet olleet",
+      "eivät olleet olleet",
+      "ei ollut oltu"
+    ],
+    [
+      "olisin",
+      "olisit",
+      "olisi",
+      "olisimme",
+      "olisitte",
+      "olisivat",
+      "oltaisiin"
+    ],
+    [
+      "en olisi",
+      "et olisi",
+      "ei olisi",
+      "emme olisi",
+      "ette olisi",
+      "eivät olisi",
+      "ei oltaisi"
+    ],
+    [
+      "olisin ollut",
+      "olisit ollut",
+      "olisi ollut",
+      "olisimme olleet",
+      "olisitte olleet",
+      "olisivat olleet",
+      "olisi oltu"
+    ],
+    [
+      "en olisi ollut",
+      "et olisi ollut",
+      "ei olisi ollut",
+      "emme olisi olleet",
+      "ette olisi olleet",
+      "eivät olisi olleet",
+      "ei olisi oltu"
+    ],
+    [
+      "lienen",
+      "lienet",
+      "lienee",
+      "lienemme",
+      "lienette",
+      "lienevät",
+      "oltaneen"
+    ],
+    [
+      "en liene",
+      "et liene",
+      "ei liene",
+      "emme liene",
+      "ette liene",
+      "eivät liene",
+      "ei oltane"
+    ],
+    [
+      "lienen ollut",
+      "lienet ollut",
+      "lienee ollut",
+      "lienemme olleet",
+      "lienette olleet",
+      "lienevät olleet",
+      "lienee oltu"
+    ],
+    [
+      "en liene ollut",
+      "et liene ollut",
+      "ei liene ollut",
+      "emme liene olleet",
+      "ette liene olleet",
+      "eivät liene olleet",
+      "ei liene oltu"
+    ],
+    [
+      "ole",
+      "olkoon",
+      "olkaamme",
+      "olkaa",
+      "olkoot",
+      "oltakoon"
+    ],
+    [
+      "älä ole",
+      "älköön olko",
+      "älkäämme olko",
+      "älkää olko",
+      "älkööt olko",
+      "älköön oltako"
+    ],
+    "olla",
+    "oleva",
+    "oltava"
+  ],
+  "gloss": "to be; to be, constitute, make up, form; to have; ..."
+}

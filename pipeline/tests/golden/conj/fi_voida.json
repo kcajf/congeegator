@@ -1,0 +1,170 @@
+{
+  "name": "voida",
+  "nameNoDiacritics": "voida",
+  "conjugation": [
+    [
+      "voin",
+      "voit",
+      "voi",
+      "voimme",
+      "voitte",
+      "voivat",
+      "voidaan"
+    ],
+    [
+      "en voi",
+      "et voi",
+      "ei voi",
+      "emme voi",
+      "ette voi",
+      "eivät voi",
+      "ei voida"
+    ],
+    [
+      "voin",
+      "voit",
+      "voi",
+      "voimme",
+      "voitte",
+      "voivat",
+      "voitiin"
+    ],
+    [
+      "en voinut",
+      "et voinut",
+      "ei voinut",
+      "emme voineet",
+      "ette voineet",
+      "eivät voineet",
+      "ei voitu"
+    ],
+    [
+      "olen voinut",
+      "olet voinut",
+      "on voinut",
+      "olemme voineet",
+      "olette voineet",
+      "ovat voineet",
+      "on voitu"
+    ],
+    [
+      "en ole voinut",
+      "et ole voinut",
+      "ei ole voinut",
+      "emme ole voineet",
+      "ette ole voineet",
+      "eivät ole voineet",
+      "ei ole voitu"
+    ],
+    [
+      "olin voinut",
+      "olit voinut",
+      "oli voinut",
+      "olimme voineet",
+      "olitte voineet",
+      "olivat voineet",
+      "oli voitu"
+    ],
+    [
+      "en ollut voinut",
+      "et ollut voinut",
+      "ei ollut voinut",
+      "emme olleet voineet",
+      "ette olleet voineet",
+      "eivät olleet voineet",
+      "ei ollut voitu"
+    ],
+    [
+      "voisin",
+      "voisit",
+      "voisi",
+      "voisimme",
+      "voisitte",
+      "voisivat",
+      "voitaisiin"
+    ],
+    [
+      "en voisi",
+      "et voisi",
+      "ei voisi",
+      "emme voisi",
+      "ette voisi",
+      "eivät voisi",
+      "ei voitaisi"
+    ],
+    [
+      "olisin voinut",
+      "olisit voinut",
+      "olisi voinut",
+      "olisimme voineet",
+      "olisitte voineet",
+      "olisivat voineet",
+      "olisi voitu"
+    ],
+    [
+      "en olisi voinut",
+      "et olisi voinut",
+      "ei olisi voinut",
+      "emme olisi voineet",
+      "ette olisi voineet",
+      "eivät olisi voineet",
+      "ei olisi voitu"
+    ],
+    [
+      "voinen",
+      "voinet",
+      "voinee",
+      "voinemme",
+      "voinette",
+      "voinevat",
+      "voitaneen"
+    ],
+    [
+      "en voine",
+      "et voine",
+      "ei voine",
+      "emme voine",
+      "ette voine",
+      "eivät voine",
+      "ei voitane"
+    ],
+    [
+      "lienen voinut",
+      "lienet voinut",
+      "lienee voinut",
+      "lienemme voineet",
+      "lienette voineet",
+      "lienevät voineet",
+      "lienee voitu"
+    ],
+    [
+      "en liene voinut",
+      "et liene voinut",
+      "ei liene voinut",
+      "emme liene voineet",
+      "ette liene voineet",
+      "eivät liene voineet",
+      "ei liene voitu"
+    ],
+    [
+      "voi",
+      "voikoon",
+      "voikaamme",
+      "voikaa",
+      "voikoot",
+      "voitakoon"
+    ],
+    [
+      "älä voi",
+      "älköön voiko",
+      "älkäämme voiko",
+      "älkää voiko",
+      "älkööt voiko",
+      "älköön voitako"
+    ],
+    "voida",
+    "voiva",
+    "voitava"
+  ],
+  "gloss": "can, to be able to, to be capable; can, may, might, to be possible; could; ..."
+}
