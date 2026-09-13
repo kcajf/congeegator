@@ -1,5 +1,6 @@
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 import { DatabaseSync } from 'node:sqlite';
+import entryJsonFixtures from './fixtures/entry-json.json';
 import { dictionarySearchKey, dictionaryWordKey } from './searchNormalization';
 
 const mocks = vi.hoisted(() => ({ init: vi.fn() }));
@@ -541,6 +542,47 @@ describe('extended dictionaries with real SQLite FTS', () => {
 		}
 		return db;
 	}
+
+	it('searches compressed rows without initializing a decoder and decodes only word pages', async () => {
+		const forms = entryJsonFixtures[0].value as string[];
+		const db = database('fi', [
+			{ word: 'talo', gloss: 'house', forms },
+			{ word: 'koti', gloss: 'home', forms: ['kodin'] }
+		]);
+		db.exec(
+			'ALTER TABLE entries ADD COLUMN details TEXT; CREATE TABLE form_lookup(form_key TEXT, entry_id INTEGER, PRIMARY KEY(form_key, entry_id)) WITHOUT ROWID'
+		);
+		for (const form of forms) db.prepare('INSERT INTO form_lookup VALUES (?, 0)').run(form);
+		db.prepare('UPDATE entries SET forms=?, form_details=? WHERE id=0').run(
+			Buffer.from(entryJsonFixtures[0].encoded, 'base64'),
+			Buffer.from(entryJsonFixtures[1].encoded, 'base64')
+		);
+		const instantiate = vi.spyOn(WebAssembly, 'instantiate');
+		try {
+			const s = setup(true, db);
+			s.files.add('/fi-aaaaaaaa.sqlite');
+			await s.start();
+			await s.send('open', 'fi');
+			expect((await s.send('search', 'fi', 'talossa-9')).result).toEqual(
+				expect.arrayContaining([expect.objectContaining({ word: 'talo' })])
+			);
+			expect((await s.send('getWord', 'fi', 'koti')).result[0].forms).toEqual(['kodin']);
+			expect(instantiate).not.toHaveBeenCalled();
+			for (const word of ['talo', 'talossa-9']) {
+				const response = await s.send('getWord', 'fi', word);
+				expect(response.error).toBeUndefined();
+				expect(response.result[0]).toMatchObject({
+					word: 'talo',
+					forms,
+					formDetails: entryJsonFixtures[1].value
+				});
+			}
+			expect(instantiate).toHaveBeenCalledOnce();
+		} finally {
+			instantiate.mockRestore();
+			db.close();
+		}
+	});
 
 	it('links only exact headwords, not forms, case fallbacks, or missing words', async () => {
 		const db = database('az', [

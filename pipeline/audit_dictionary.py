@@ -25,6 +25,7 @@ import unicodedata
 import msgspec
 import zstandard
 
+from .entry_json import decode_entry_json
 from .dictionary import DICT_CONFIGS, process_dict_entry
 from .sqlite_output import dictionary_search_key
 from .wiktionary import Entry
@@ -335,7 +336,7 @@ def audit_sqlite(path, code, source_report=None):
                     if value is None:
                         continue
                     if key in {"senses", "forms", "details", "form_details", "pronunciations"}:
-                        value = json.loads(value)
+                        value = decode_entry_json(value)
                     record["formDetails" if key == "form_details" else key] = value
                 fingerprints.add(_record_fingerprint(record))
             result["records_sha256"] = hashlib.sha256(b"".join(sorted(fingerprints))).hexdigest()
