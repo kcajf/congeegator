@@ -23,8 +23,6 @@
 </svelte:head>
 
 <div class="home">
-	<DownloadManager />
-
 	<div class="about">
 		<h2>About</h2>
 		<p>
@@ -49,22 +47,13 @@
 			via <a href="https://kaikki.org" target="_blank" rel="noopener">kaikki.org</a>.
 		</p>
 	</div>
+
+	<DownloadManager />
 </div>
 
 <style>
 	.home {
 		padding: 1rem 0;
-	}
-
-	h1 {
-		margin: 0 0 0.25rem;
-		font-size: 1.8rem;
-	}
-
-	.tagline {
-		color: var(--text-muted);
-		margin: 0 0 2rem;
-		font-size: 0.95rem;
 	}
 
 	.about p {
