@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { compareLanguages } from '$lib/languageOrder';
 	import { pickerTouch, preventPickerSelection } from '$lib/pickerTouch';
 	import { clickOutside } from '$lib/clickOutside';
 	import { slide } from 'svelte/transition';
@@ -58,7 +59,7 @@
 
 	{#if isOpen}
 		<div class="dropdown" bind:this={dropdown} transition:slide={{ duration: 100 }}>
-			{#each Object.values(manifest.languages).toSorted( (a, b) => a.name.localeCompare( b.name, undefined, { sensitivity: 'base' } ) ) as lang (lang.code)}
+			{#each Object.values(manifest.languages).toSorted(compareLanguages) as lang (lang.code)}
 				<button
 					class="option"
 					data-language={lang.code}

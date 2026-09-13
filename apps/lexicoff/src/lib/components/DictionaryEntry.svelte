@@ -114,21 +114,23 @@
 			Found under <WordLink link={{ word: entry.word, lang }} />
 		</p>
 	{/if}
-	<h2 class="pos-label">
-		{label}{#if entry.gender}<span class="gender">{genderLabel(entry.gender)}</span>{/if}
-	</h2>
-	{#if pronunciations.length > 0}
-		<ul class="pronunciations" aria-label="Pronunciation">
-			{#each pronunciations as pronunciation, i (i)}
-				<li>
-					<bdi dir="ltr">{pronunciation.ipa}</bdi>{#if pronunciation.label}
-						<span class="pronunciation-label">
-							({formatPronunciationLabel(pronunciation.label)})</span
-						>{/if}
-				</li>
-			{/each}
-		</ul>
-	{/if}
+	<div class="entry-heading">
+		<h2 class="pos-label">
+			{label}{#if entry.gender}<span class="gender">{genderLabel(entry.gender)}</span>{/if}
+		</h2>
+		{#if pronunciations.length > 0}
+			<ul class="pronunciations" aria-label="Pronunciation">
+				{#each pronunciations as pronunciation, i (i)}
+					<li>
+						<bdi dir="ltr">{pronunciation.ipa}</bdi>{#if pronunciation.label}
+							<span class="pronunciation-label">
+								({formatPronunciationLabel(pronunciation.label)})</span
+							>{/if}
+					</li>
+				{/each}
+			</ul>
+		{/if}
+	</div>
 	<ol class="senses">
 		{#each entry.senses as sense, i (i)}
 			<li>
@@ -244,10 +246,17 @@
 		display: flow-root;
 		scroll-margin-top: 4.5rem;
 	}
+	.entry-heading {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 0.25rem 0.75rem;
+		margin-bottom: 0.5rem;
+	}
 	.pos-label {
 		font-size: 1rem;
 		color: #245f91;
-		margin: 0 0 0.5rem;
+		margin: 0;
 		font-weight: normal;
 		display: flex;
 		align-items: baseline;
@@ -314,14 +323,17 @@
 	}
 
 	.pronunciations {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.25rem 0.75rem;
 		list-style: none;
 		padding: 0;
-		margin: 0.25rem 0 0.5rem;
+		margin: 0;
 		color: var(--text-muted);
 		font-size: 0.9rem;
 	}
 	.pronunciations li {
-		margin: 0.2rem 0;
+		margin: 0;
 	}
 	.pronunciation-label,
 	.form-tags {

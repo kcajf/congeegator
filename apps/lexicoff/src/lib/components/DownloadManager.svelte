@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { compareLanguages } from '$lib/languageOrder';
 	import { manifest } from '$lib/dataUtils';
 	import { globalSync, triggerLangSync, deleteLang } from '$lib/syncManager.svelte';
 	import { storage } from '$lib/sqliteClient.svelte';
@@ -14,9 +15,7 @@
 		return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 	}
 
-	const languages = Object.values(manifest.languages).toSorted((a, b) =>
-		a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
-	);
+	const languages = Object.values(manifest.languages).toSorted(compareLanguages);
 </script>
 
 <div class="download-manager">
