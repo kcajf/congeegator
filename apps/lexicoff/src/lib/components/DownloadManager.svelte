@@ -14,13 +14,17 @@
 		return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 	}
 
+	const hasInstalled = $derived(
+		Object.keys(manifest.languages).some((code) => storage.languages[code]?.status === 'ready')
+	);
+
 	const languages = Object.values(manifest.languages).toSorted((a, b) =>
 		a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
 	);
 </script>
 
 <div class="download-manager">
-	<h2>Languages</h2>
+	<h2>{storage.phase === 'ready' && !hasInstalled ? 'Add a language' : 'Languages'}</h2>
 	{#if storage.phase === 'opening'}
 		<p class="unavailable-notice">
 			Opening dictionaries… If Lexicoff is open in another tab or window, close it to continue.
