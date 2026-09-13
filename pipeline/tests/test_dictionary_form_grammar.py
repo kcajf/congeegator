@@ -12,6 +12,18 @@ from pipeline.sqlite_output import write_sqlite_database
 from pipeline.wiktionary import Entry, Form, Sense
 
 
+def test_cached_readings_preserve_order_and_do_not_share_mutable_results():
+    tags = {'plural', 'past', 'first-person', 'unrelated-source-tag'}
+    result = form_grammar(tags)
+    assert result == ['first person past plural']
+    result.append('caller label')
+    assert form_grammar(tuple(reversed(sorted(tags)))) == ['first person past plural']
+    tags.remove('past')
+    tags.add('present')
+    assert form_grammar(tags) == ['first person present plural']
+    assert form_grammar({'unrelated-source-tag'}) == []
+
+
 def test_azerbaijani_head_forms_and_synonym_survive_database_output(tmp_path):
     source = (Path(__file__).parent / 'fixtures/dictionary_az_flag.jsonl').read_bytes()
     entry = msgspec.json.decode(source, type=Entry)

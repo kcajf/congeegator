@@ -22,6 +22,10 @@ _UNEXPANDED_MARKUP = re.compile(
 
 def _clean_text(text: str) -> str | None:
     text = text.strip()
+    # Most inflected forms are letters only. None of the rejected markup can
+    # occur in such a string; avoid running the regex millions of times.
+    if text.isalpha():
+        return text
     return text if text and not _UNEXPANDED_MARKUP.search(text) else None
 
 # POS types to include
@@ -96,6 +100,12 @@ DICT_CONFIGS: list[DictLanguageConfig] = [
     DictLanguageConfig(code="sk", name="slovenčina", english_wiktionary_name="Slovak"),
     DictLanguageConfig(code="cy", name="Cymraeg", english_wiktionary_name="Welsh"),
 ]
+
+
+_LANGUAGE_ANCHORS = {c.english_wiktionary_name: c.code for c in DICT_CONFIGS}
+_NON_LEXICAL_FORM_TAGS = frozenset({
+    "table-tags", "inflection-template", "class", "romanization", "classifier", "auxiliary",
+})
 
 
 def extract_senses(entry: Entry) -> list[dict[str, Any]]:
@@ -206,7 +216,7 @@ def extract_form_items(entry: Entry, audit=None):
             continue
         if form.form == entry.word:
             continue
-        if form.tags & {"table-tags", "inflection-template", "class", "romanization", "classifier", "auxiliary"}:
+        if not form.tags.isdisjoint(_NON_LEXICAL_FORM_TAGS):
             continue
         if "canonical" in form.tags:
             # Canonical forms may be stressed/macronized spellings, but often
@@ -294,10 +304,9 @@ def word_link(target: str, lang: str, label: str | None = None) -> dict | None:
     # Namespaces and interwiki links are not dictionary headwords.
     if not word or any(c in word for c in ":/<>[]{},()") or len(word) > 200:
         return None
-    names = {c.english_wiktionary_name: c.code for c in DICT_CONFIGS}
     language_anchor = anchor.replace("_", " ")
-    if language_anchor in names:
-        lang = names[language_anchor]
+    if language_anchor in _LANGUAGE_ANCHORS:
+        lang = _LANGUAGE_ANCHORS[language_anchor]
         anchor = ""
     elif anchor and anchor not in {"Noun", "Verb", "Adjective", "Adverb", "Pronoun", "Etymology"}:
         # Unknown language/section: preserve the original anchor on Wiktionary.
