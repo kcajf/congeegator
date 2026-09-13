@@ -6,7 +6,9 @@ import msgspec
 
 from .utils import _cat_names, strip_diacritics, to_phonetic_el
 from .wiktionary import Entry
-from .dictionary_quality import enhance_record, trusted_persian_head, form_grammar, labels, raw_labels, QUALITY_LANGUAGES
+from .dictionary_quality import enhance_record, trusted_persian_head, labels
+
+from .form_quality import source_forms, normalize, build_details
 
 log = logging.getLogger(__name__)
 
@@ -194,9 +196,12 @@ def extract_gender(entry: Entry) -> Optional[str]:
     return None
 
 
-def extract_form_items(entry: Entry):
+def extract_form_items(entry: Entry, audit=None):
     """Yield cleaned spellings with their original grammatical metadata."""
-    for form in entry.forms:
+    table_labels = []
+    for form in source_forms(entry, audit):
+        if 'table-tags' in form.tags:
+            table_labels = labels((form.form or '').split())
         if form.form is None:
             continue
         if form.form == entry.word:
@@ -247,32 +252,13 @@ def extract_form_items(entry: Entry):
             text = text[5:]
         if entry.lang_code == "ro" and form.tags & {"feminine", "masculine"} and text.startswith("equivalent "):
             text = text[11:]
-        variants = greek_form_variants(text) if entry.lang_code == "el" else [text]
-        for variant in variants:
-            yield variant, form
-
-
-def greek_form_variants(text: str) -> list[str]:
-    # Prose instructions and abbreviated endings are not searchable spellings.
-    if re.search(r"[A-Za-z]", text):
-        return []
-    variants = []
-    for part in re.split(r"\s+-\s+|,\s*", text):
-        part = part.strip().lstrip("- ").strip("{} ")
-        if not part or part in {"—", "–", "-"} or part.startswith(("‑", "‐")):
-            continue
-        if part in {"η", "ο"} and part != text:
-            continue
-        if any("\u0370" <= c <= "\u03ff" or "\u1f00" <= c <= "\u1fff" for c in part):
-            # The future particle applies to each alternative in the same cell.
-            if text.startswith("θα ") and not part.startswith("θα "):
-                part = "θα " + part
-            variants.append(part)
-    return variants
+        for variant, extra in normalize(entry, form, text, _clean_text, audit):
+            if variant and variant != entry.word:
+                yield variant, form, extra + (table_labels if form.source else [])
 
 
 def extract_forms(entry: Entry) -> list[str]:
-    return list(dict.fromkeys(text for text, _ in extract_form_items(entry)))
+    return list(dict.fromkeys(text for text, _, _ in extract_form_items(entry)))
 
 
 def extract_pronunciation(entry: Entry) -> Optional[str]:
@@ -453,7 +439,7 @@ def entry_is_valid(entry: Entry) -> bool:
     return True
 
 
-def process_dict_entry(config: DictLanguageConfig, entry: Entry) -> dict[str, Any] | None:
+def process_dict_entry(config: DictLanguageConfig, entry: Entry, audit=None) -> dict[str, Any] | None:
     if not entry_is_valid(entry):
         return None
     senses = extract_senses(entry)
@@ -467,16 +453,10 @@ def process_dict_entry(config: DictLanguageConfig, entry: Entry) -> dict[str, An
     gender = extract_gender(entry)
     if gender:
         processed["gender"] = gender
-    form_items = list(extract_form_items(entry))
+    form_items = list(extract_form_items(entry, audit))
     if form_items:
-        processed["forms"] = list(dict.fromkeys(text for text, _ in form_items))
-        details = {}
-        for text, form in form_items:
-            tags = form_grammar(form.tags) + labels(form.tags) + raw_labels(form.raw_tags, _clean_text)
-            if tags:
-                details[text] = list(dict.fromkeys(details.get(text, []) + tags))
-        if details and entry.lang_code not in QUALITY_LANGUAGES:
-            processed["formDetails"] = [{"form": text, "tags": tags} for text, tags in details.items()]
+        processed["forms"] = list(dict.fromkeys(text for text, _, _ in form_items))
+        processed["formDetails"] = build_details(form_items, entry, _clean_text, audit)
     pronunciation = extract_pronunciation(entry)
     if pronunciation:
         processed["pronunciation"] = pronunciation
