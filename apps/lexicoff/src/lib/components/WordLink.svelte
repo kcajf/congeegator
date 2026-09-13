@@ -3,37 +3,28 @@
 	import { resolve } from '$app/paths';
 	import { manifest } from '$lib/dataUtils';
 	import { storage } from '$lib/sqliteClient.svelte';
+	import { linkLanguage, localLinkLanguage } from '$lib/linkLanguage';
 	import type { WordLink } from '$lib/types';
 	let { link, text }: { link: WordLink; text?: string } = $props();
 	const label = $derived(text ?? linkLabel(link));
-	const language = $derived(manifest.languages[link.lang]);
-	const local = $derived(!!language && storage.languages[link.lang]?.status === 'ready');
-	const historicalNames: Record<string, string> = {
-		fro: 'Old French',
-		frm: 'Middle French',
-		gmh: 'Middle High German',
-		goh: 'Old High German',
-		ang: 'Old English',
-		enm: 'Middle English',
-		ofs: 'Old Frisian',
-		nds: 'Low German',
-		is: 'Icelandic',
-		fo: 'Faroese',
-		no: 'Norwegian',
-		'la-lat': 'Latin',
-		xum: 'Umbrian'
-	};
-	const languageName = $derived(language?.englishWiktionaryName || historicalNames[link.lang]);
-	const anchor = $derived(link.anchor || languageName || '');
+	const target = $derived(linkLanguage(link.lang));
+	const language = $derived(manifest.languages[target.code]);
+	const local = $derived(
+		localLinkLanguage(
+			link,
+			(code) => !!manifest.languages[code] && storage.languages[code]?.status === 'ready'
+		)
+	);
+	const languageName = $derived(target.name || language?.englishWiktionaryName);
+	const anchor = $derived(link.anchor || target.section || language?.englishWiktionaryName || '');
 	const externalUrl = $derived(
 		`https://en.wiktionary.org/wiki/${encodeURIComponent(link.word)}${anchor ? '#' + encodeURIComponent(anchor) : ''}`
 	);
 </script>
 
 {#if local}
-	<a
-		href={resolve('/[lang=lang]/[word]', { lang: link.lang, word: link.word })}
-		title={languageName}>{label}</a
+	<a href={resolve('/[lang=lang]/[word]', { lang: local, word: link.word })} title={languageName}
+		>{label}</a
 	>
 {:else}
 	<!-- eslint-disable svelte/no-navigation-without-resolve -- generated Wiktionary URL -->

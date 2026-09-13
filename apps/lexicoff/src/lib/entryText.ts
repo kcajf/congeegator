@@ -17,6 +17,8 @@ const isLetter = (text: string) => /[\p{L}\p{M}\p{N}]/u.test(text);
 export function linkedText(text: string, links: WordLink[] = [], uniqueOnly = false): TextPart[] {
 	const labels = new Map<string, WordLink | null>();
 	for (const link of links) {
+		// Older bundles misread surf dispatchers (+suf, +deverbal, …) as languages.
+		if (link.lang.startsWith('+')) continue;
 		const label = linkLabel(link);
 		if (uniqueOnly && label && text.split(label).length > 2) continue;
 		const previous = labels.get(label);

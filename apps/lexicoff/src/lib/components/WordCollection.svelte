@@ -2,11 +2,16 @@
 	import { linkLabel } from '$lib/entryText';
 	import type { WordLink } from '$lib/types';
 	import WordList from './WordList.svelte';
-	let { label, links, hint }: { label: string; links: WordLink[]; hint?: string } = $props();
+	let {
+		label,
+		links,
+		hint,
+		filterable = true
+	}: { label: string; links: WordLink[]; hint?: string; filterable?: boolean } = $props();
 	let open = $state(false);
 	let filter = $state('');
 	const filtered = $derived(
-		filter.trim()
+		filterable && filter.trim()
 			? links.filter((link) =>
 					`${link.word} ${link.label || ''} ${link.sense || ''}`
 						.toLocaleLowerCase()
@@ -39,7 +44,7 @@
 	<summary>{label} <span>{links.length}</span></summary>
 	{#if open}
 		{#if hint}<p class="hint">{hint}</p>{/if}
-		{#if links.length > 30}<input
+		{#if filterable && links.length > 30}<input
 				aria-label={`Filter ${label.toLowerCase()}`}
 				placeholder={`Filter ${label.toLowerCase()}…`}
 				bind:value={filter}

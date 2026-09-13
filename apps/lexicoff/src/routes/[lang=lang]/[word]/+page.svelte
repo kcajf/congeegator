@@ -249,8 +249,8 @@
 					/>{/if}
 				{#if entry.forms?.length}<WordCollection
 						label="Forms"
+						filterable={false}
 						links={entry.forms.map((word) => ({ word, lang: data.lang }))}
-						hint="You can search these forms to find this word."
 					/>{/if}
 			</section>
 		{/each}
@@ -259,9 +259,6 @@
 	<footer>
 		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external URL -->
 		<a href={wiktionaryUrl} target="_blank" rel="noopener">Full entry on Wiktionary ↗</a>
-		<p>
-			Links marked ↗ open Wiktionary. Download a linked word’s language to explore it here offline.
-		</p>
 	</footer>
 </article>
 
@@ -391,11 +388,6 @@
 		padding-top: 1rem;
 		border-top: 1px solid var(--border);
 		font-size: 0.8rem;
-	}
-	footer p {
-		color: var(--text-muted);
-		line-height: 1.5;
-		max-width: 30rem;
 	}
 	.empty-entry {
 		padding: 1.2rem 0;

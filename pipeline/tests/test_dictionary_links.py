@@ -14,6 +14,16 @@ def entry(**kw):
     return Entry(**(dict(word='manchen', lang_code='de', lang='German', pos='pron') | kw))
 
 
+def test_surface_dispatchers_do_not_become_language_codes():
+    value = entry(etymology_templates=(
+        EtymologyTemplate('surf', {'1': '+suf', '2': 'de', '3': 'bewegen', '4': 'ung'}, 'bewegen + -ung'),
+        EtymologyTemplate('surf', {'1': '+it-deverbal', '2': 'ruttare'}, 'From ruttare'),
+        EtymologyTemplate('surface analysis', {'1': '+bor+', '2': 'it', '3': 'la', '4': 'antiquitas'}, 'From Latin antiquitas'),
+        EtymologyTemplate('surf', {'1': 'de', '2': 'Haus', '3': 'Tür'}, 'Haus + Tür'),
+    ))
+    assert extract_etymology_links(value) == [{'word': 'Haus', 'lang': 'de'}, {'word': 'Tür', 'lang': 'de'}]
+
+
 def test_form_of_overrides_unanchored_english_link_and_retains_grammar():
     senses = extract_senses(entry(senses=(Sense(
         glosses=('inflection of manch:', 'dative plural'),

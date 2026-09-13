@@ -322,6 +322,10 @@ def extract_etymology_links(entry: Entry) -> list[dict]:
     for template in entry.etymology_templates:
         args = template.args
         name = template.name.removesuffix("+")
+        # surf can dispatch to another template with a different argument layout.
+        # +suf, +it-deverbal, +bor+, etc. are instructions, not language codes.
+        if name in {"surf", "surface analysis"} and args.get("1", "").startswith("+"):
+            continue
         terms = []
         if name in borrowing:
             terms.append((args.get("2", ""), args.get("3", ""), args.get("alt") or args.get("4")))

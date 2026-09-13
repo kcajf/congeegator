@@ -2,6 +2,14 @@ import { describe, expect, it } from 'vitest';
 import { boldText, linkedText, linkLabel } from './entryText';
 
 describe('linked dictionary text', () => {
+	it('leaves misparsed surface-analysis dispatchers plain in existing bundles', () => {
+		expect(
+			linkedText('From bewegen and ung.', [
+				{ word: 'bewegen', lang: '+suf' },
+				{ word: 'ung', lang: '+suf' }
+			])
+		).toEqual([{ text: 'From bewegen and ung.' }]);
+	});
 	it('uses display labels, longest matches and complete word boundaries', () => {
 		const links = [
 			{ word: 'house', lang: 'en' },
