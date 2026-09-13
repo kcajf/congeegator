@@ -1,4 +1,5 @@
 <script lang="ts">
+	import ExternalLinkIcon from '$lib/components/ExternalLinkIcon.svelte';
 	import { resolve } from '$app/paths';
 	import { storage } from '$lib/sqliteClient.svelte';
 	import { appTitle, siteUrl } from '$lib/defs';
@@ -46,17 +47,8 @@
 
 <article class="word-page">
 	<header>
-		<p class="language">{langWiktionaryName(data.lang)}</p>
 		<h1><bdi lang={data.lang}>{data.word}</bdi></h1>
 	</header>
-
-	{#if sections.length > 1}
-		<nav class="entry-nav" aria-label="Entry sections">
-			{#each sections as { entry, label } (entry.id)}
-				<a href={`#entry-${entry.id}`}>{label}</a>
-			{/each}
-		</nav>
-	{/if}
 
 	{#if !data.entries.length}
 		<section class="empty-entry">
@@ -73,7 +65,9 @@
 						>Search similar words</a
 					>{:else}<a href={`${resolve('/')}?lang=${data.lang}`}>Download dictionary</a>{/if}
 				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external URL -->
-				<a href={wiktionaryUrl} target="_blank" rel="noopener">Look up on Wiktionary ↗</a>
+				<a href={wiktionaryUrl} target="_blank" rel="noopener"
+					>Look up on Wiktionary <ExternalLinkIcon /></a
+				>
 				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 			</div>
 		</section>
@@ -85,10 +79,14 @@
 		{/each}
 	{/key}
 
-	<footer>
-		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external URL -->
-		<a href={wiktionaryUrl} target="_blank" rel="noopener">Full entry on Wiktionary ↗</a>
-	</footer>
+	{#if data.entries.length}
+		<footer>
+			<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external URL -->
+			<a href={wiktionaryUrl} target="_blank" rel="noopener"
+				>Full entry on Wiktionary <ExternalLinkIcon /></a
+			>
+		</footer>
+	{/if}
 </article>
 
 <style>
@@ -100,29 +98,11 @@
 	header {
 		margin-bottom: 1rem;
 	}
-	.language {
-		margin: 0 0 0.25rem;
-		color: var(--text-muted);
-		font-size: 0.8rem;
-	}
 	h1 {
 		font-size: 2.3rem;
 		margin: 0;
 		display: inline;
 		line-height: 1.2;
-	}
-	.entry-nav {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.4rem;
-		margin-bottom: 1.5rem;
-	}
-	.entry-nav a {
-		padding: 0.3rem 0.65rem;
-		border: 1px solid var(--border);
-		border-radius: 1rem;
-		font-size: 0.8rem;
-		text-decoration: none;
 	}
 	a {
 		color: #245f91;
@@ -133,16 +113,15 @@
 		outline-offset: 3px;
 	}
 	footer {
-		margin-top: 2rem;
-		padding-top: 1rem;
-		border-top: 1px solid var(--border);
+		margin-top: 1rem;
 		font-size: 0.8rem;
 	}
 	.empty-entry {
-		padding: 1.2rem 0;
+		padding: 0 0 1rem;
 	}
 	.empty-entry h2 {
 		font-size: 1.1rem;
+		margin: 0 0 0.5rem;
 	}
 	.empty-entry p {
 		color: var(--text-muted);
@@ -150,8 +129,10 @@
 	}
 	.empty-actions {
 		display: flex;
-		gap: 1rem;
-		flex-wrap: wrap;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.6rem;
+		line-height: 1.5;
 		font-size: 0.9rem;
 	}
 </style>

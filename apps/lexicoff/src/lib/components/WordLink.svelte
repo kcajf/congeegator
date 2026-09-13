@@ -1,4 +1,5 @@
 <script lang="ts">
+	import ExternalLinkIcon from './ExternalLinkIcon.svelte';
 	import { linkLabel } from '$lib/entryText';
 	import { resolve } from '$app/paths';
 	import { manifest } from '$lib/dataUtils';
@@ -23,8 +24,9 @@
 </script>
 
 {#if local}
-	<a href={resolve('/[lang=lang]/[word]', { lang: local, word: link.word })} title={languageName}
-		>{label}</a
+	<a
+		href={resolve('/[lang=lang]/[word]', { lang: local, word: encodeURIComponent(link.word) })}
+		title={languageName}>{label}</a
 	>
 {:else}
 	<!-- eslint-disable svelte/no-navigation-without-resolve -- generated Wiktionary URL -->
@@ -33,7 +35,9 @@
 		target="_blank"
 		rel="noopener"
 		title={`${languageName ? languageName + ' · ' : ''}Open on Wiktionary`}
-		>{label}<span class="external" aria-label=" (Wiktionary, opens in a new tab)">↗</span></a
+		>{label}<span class="external" aria-label=" (Wiktionary, opens in a new tab)"
+			><ExternalLinkIcon /></span
+		></a
 	>
 	<!-- eslint-enable svelte/no-navigation-without-resolve -->
 {/if}

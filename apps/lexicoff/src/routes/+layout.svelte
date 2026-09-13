@@ -9,6 +9,8 @@
 	import HistoryNavigation from '$lib/components/HistoryNavigation.svelte';
 	import ToastStack from '$lib/components/ToastStack.svelte';
 	import { appTitle, brandColor } from '$lib/defs';
+	import lexicoffIcon from '$lib/assets/lexicoff-icon.svg';
+	import '$lib/disclosures.css';
 	import { storage as sqliteClient } from '$lib/sqliteClient.svelte';
 	import type { SearchResult } from '$lib/sqliteClient.svelte';
 	import { searchLangState } from '$lib/searchLang.svelte';
@@ -92,7 +94,7 @@
 					? 'Search unavailable'
 					: isInstalling
 						? 'Installing…'
-						: 'Install a language'
+						: 'Install a language below'
 	);
 
 	let searchTerm = $state('');
@@ -140,7 +142,7 @@
 	async function selectResult(item: SearchResult) {
 		const base = resolve('/[lang=lang]/[word]', {
 			lang: searchLangState.lang,
-			word: item.word
+			word: encodeURIComponent(item.word)
 		});
 		if (page.url.pathname !== base) await goto(base);
 		else clearSearch();
@@ -262,7 +264,7 @@
 					}
 				}}
 			>
-				{appTitle}
+				<img src={lexicoffIcon} alt="" />
 			</a>
 
 			<div class="search-container">
@@ -312,7 +314,7 @@
 						<a
 							href={resolve('/[lang=lang]/[word]', {
 								lang: searchLangState.lang,
-								word: item.word
+								word: encodeURIComponent(item.word)
 							})}
 							onclick={(e) => {
 								e.preventDefault();
@@ -381,7 +383,7 @@
 	}
 
 	:global(:root) {
-		--brand: #f0f3fb;
+		--brand: #fafafa;
 		--text: #1a1a2e;
 		--text-muted: #666;
 		--border: #ddd;
@@ -401,11 +403,17 @@
 	}
 
 	.logo {
-		font-size: 1.3rem;
-		font-weight: bold;
+		display: flex;
+		align-items: center;
+		flex-shrink: 0;
 		text-decoration: none;
 		color: var(--text);
-		white-space: nowrap;
+	}
+
+	.logo img {
+		display: block;
+		height: 2rem;
+		width: auto;
 	}
 
 	.container {
@@ -420,6 +428,7 @@
 		z-index: 10;
 		background-color: var(--brand);
 		padding-top: env(safe-area-inset-top);
+		padding-bottom: 0.5rem;
 	}
 
 	.navbar {
@@ -443,7 +452,7 @@
 		padding-right: 0.5rem;
 	}
 
-	@media (max-width: 600px) {
+	@media (max-width: 600px) and (display-mode: standalone) {
 		:global(:root) {
 			--history-bar-height: calc(53px + env(safe-area-inset-bottom));
 		}
@@ -451,7 +460,9 @@
 		.content {
 			padding-bottom: calc(2rem + var(--history-bar-height));
 		}
+	}
 
+	@media (max-width: 600px) {
 		.search-container {
 			padding-left: 0.5rem;
 		}

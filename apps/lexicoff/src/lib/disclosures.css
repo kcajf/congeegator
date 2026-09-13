@@ -1,0 +1,27 @@
+.word-page summary {
+	position: relative;
+	display: block;
+	list-style: none;
+	padding-inline-start: 1.25rem;
+}
+
+.word-page summary::-webkit-details-marker {
+	display: none;
+}
+
+.word-page summary::before {
+	content: '';
+	position: absolute;
+	inset-inline-start: 0.25rem;
+	top: 50%;
+	width: 0.35rem;
+	height: 0.35rem;
+	border-right: 1.5px solid currentColor;
+	border-bottom: 1.5px solid currentColor;
+	color: var(--text-muted);
+	transform: translateY(-50%) rotate(-45deg);
+}
+
+.word-page details[open] > summary::before {
+	transform: translateY(-70%) rotate(45deg);
+}

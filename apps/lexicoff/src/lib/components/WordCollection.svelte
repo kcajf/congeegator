@@ -43,29 +43,39 @@
 <details bind:open>
 	<summary>{label} <span>{links.length}</span></summary>
 	{#if open}
-		{#if hint}<p class="hint">{hint}</p>{/if}
-		{#if filterable && links.length > 30}<input
-				aria-label={`Filter ${label.toLowerCase()}`}
-				placeholder={`Filter ${label.toLowerCase()}…`}
-				bind:value={filter}
-				type="search"
-			/>{/if}
-		{#if filtered.length}{#each groups as [sense, words] (sense)}
-				{#if sense}<h3>{sense}</h3>{/if}
-				<WordList links={words} label="" />
-			{/each}{:else}<p class="hint">No matching words.</p>{/if}
+		<div class="collection-content">
+			{#if hint}<p class="hint">{hint}</p>{/if}
+			{#if filterable && links.length > 30}<input
+					aria-label={`Filter ${label.toLowerCase()}`}
+					placeholder={`Filter ${label.toLowerCase()}…`}
+					bind:value={filter}
+					type="search"
+				/>{/if}
+			{#if filtered.length}{#each groups as [sense, words] (sense)}
+					{#if sense}<h3>{sense}</h3>{/if}
+					<WordList links={words} label="" />
+				{/each}{:else}<p class="hint">No matching words.</p>{/if}
+		</div>
 	{/if}
 </details>
 
 <style>
+	.collection-content {
+		display: flow-root;
+	}
+
 	details {
-		margin-top: 0.8rem;
+		margin: 0;
 		font-size: 0.9rem;
-		border-top: 1px solid var(--border);
-		padding-top: 0.6rem;
+		padding: 0;
 	}
 	summary {
 		cursor: pointer;
+		-webkit-tap-highlight-color: transparent;
+		box-sizing: border-box;
+		min-height: 44px;
+		padding: 0.65rem 0 0.65rem 1.25rem;
+		line-height: 1.4;
 	}
 	summary span {
 		color: var(--text-muted);
