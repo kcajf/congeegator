@@ -16,9 +16,11 @@ and other entry fields retain their existing representation.
 - The browser bundles the existing `zstddec` dependency into its query worker;
   WASM initialization waits until the first compressed detail field is read.
   It is included in the existing offline worker asset, without a runtime fetch.
-- New readers accept old plaintext databases. Old readers cannot read compressed
-  fields: publish the updated app and newly generated manifest together, retaining
-  existing immutable data URLs for older app versions.
+- The worker requires the current word-key, form-detail and reverse-lookup
+  schema. Old-schema query fallbacks are removed. TEXT/NULL/BLOB dispatch remains
+  required for current small/non-beneficial fields, not as a schema migration.
+  Publish the reader and newly generated manifest together; existing immutable
+  data URLs remain available to older app versions.
 - Pipeline audits use the same codec. No migration of installed databases is
   required; the normal manual language update installs the new generated file.
 
@@ -69,7 +71,7 @@ bytes. Retaining outer level 9 is worthwhile for a file downloaded many times.
 ## Validation
 
 The Python-generated shared fixture is decoded by the real Zstandard WASM in
-frontend tests. Coverage includes legacy TEXT, compressed forms and grammar
+frontend tests. Coverage includes current small TEXT fields, compressed forms and grammar
 labels, Unicode, corrupt/truncated frames, length limits, native SQLite BLOB
 round trips, audit fingerprints, and unchanged FTS/reverse-form results. Worker
 tests also assert search and plaintext reads do not initialize the decoder.
@@ -80,3 +82,13 @@ labels, read a legacy plaintext row, terminate/restart the worker, and reopen
 the persisted database. All passed. On this tiny fixture, first word access
 (including decoder initialization) took 3 ms and median warm access took 0.2 ms
 over 20 reads. These timings do not predict large-word or mobile performance.
+
+
+## Integrated generator representation
+
+The generator now prepares these stored columns during extraction and retains
+them alongside small JSON metadata and msgspec ranking structs. SQLite copies
+them without recompression. Only the forms needed by the search indexes are
+decoded during insertion; `form_details` remains compressed from extraction
+through browser storage. Repeated grammatical readings are cached as raw JSON
+before field compression. See [the memory investigation](../finnish-extraction-memory.md).

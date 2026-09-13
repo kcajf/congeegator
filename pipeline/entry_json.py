@@ -28,7 +28,7 @@ def encode_entry_json(value, compressor: zstandard.ZstdCompressor) -> str | byte
 
 
 def decode_entry_json(value: str | bytes):
-    """Read both legacy TEXT and compressed fields in pipeline audits/tools."""
+    """Read current TEXT and compressed fields in pipeline audits/tools."""
     if isinstance(value, bytes):
         if len(value) < 9 or value[:4] != MAGIC:
             raise ValueError("Unsupported dictionary JSON encoding")

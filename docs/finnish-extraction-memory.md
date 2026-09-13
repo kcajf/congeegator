@@ -66,21 +66,35 @@ Across all 27.7 million details, there are only **803 distinct detail descriptio
 once the spelling is removed**. The old representation repeatedly allocated that
 small vocabulary of grammatical descriptions as millions of mutable containers.
 
-## Changes
+## Combined extraction and storage design
 
-- Keep extracted records as compressed JSON bytes with small `msgspec.Struct`
-  ranking metadata. Reuse the encoding already needed for duplicate detection.
-  Tiny records skip compression. Sort only the metadata, preserving source order
-  for frequency ties and hence SQLite entry IDs.
-- Cache immutable reading summaries and their encoded JSON suffixes. Construct
-  per-form JSON by adding an encoder-escaped spelling to the cached description.
-  The regular object-returning extractor remains available for audits and callers.
-- During SQLite writing, decode forms and senses needed for reverse lookup and
-  search, but retain `formDetails`, `details` and `pronunciations` as `msgspec.Raw`.
-  Copy completed JSON into the existing TEXT columns without decode/re-encode.
-- Preserve all dictionary records, forms, readings, qualifier boundaries and
-  SQLite/browser schemas. Packed-record iteration returns independent snapshots;
-  it is not an API for mutating stored entries.
+The final design combines this investigation with the
+[entry compression work](reviews/entry-compression.md):
+
+1. Extract a single source record into typed source structs and small working
+   objects. Cache immutable reading summaries and their encoded JSON suffixes.
+   Add encoder-escaped spellings to produce `msgspec.Raw` form-detail JSON,
+   avoiding millions of repeated grammar dictionaries and lists.
+2. Encode and compress `forms` and `form_details` once, using the final LZJ1
+   Zstandard level-6, checksummed field format. Retain those stored values plus
+   small metadata JSON and scalar ranking structs in memory. Do not compress an
+   intermediate copy of the whole record. Frequency sorting touches metadata
+   only, preserves ties in source order, and hence preserves SQLite entry IDs.
+3. SQLite writing decodes forms needed for FTS and reverse lookup, then copies
+   the already stored forms/details columns directly. Grammar details are never
+   decompressed during construction. Other completed JSON metadata uses
+   `msgspec.Raw` to avoid decode/re-encode.
+4. Compress the complete SQLite file at level 9 with a content checksum. The
+   streaming download worker removes this outer layer and checks corruption.
+   Inner compressed fields remain small in browser storage.
+5. The query worker searches ordinary indexes without initializing a decoder.
+   Only a word-page read decompresses its large fields. Small/non-beneficial
+   fields remain TEXT in the current format. Old-schema query fallbacks have
+   been removed; current optional language-specific columns remain supported.
+
+All records, forms, reading boundaries and search associations are retained.
+Ordinary packed-record sequence iteration returns independent fully decoded
+snapshots for audits/callers; mutation does not modify stored entries.
 
 This still stores the compressed language in memory. It is a much smaller
 representation, not a constant-memory guarantee for arbitrarily large datasets.
@@ -101,9 +115,10 @@ are primarily decoded. `array_like` would change the wire shape and is not
 appropriate for the existing Wiktionary or browser JSON schemas. `cache_hash`
 would add memory for hashes we do not repeatedly calculate.
 
-The new private packed metadata contains only strings, bytes, booleans and floats.
-Using `msgspec.Struct, gc=False` makes it 48 bytes locally versus 64 bytes for a
-slotted dataclass. Its primitive-only fields cannot form reference cycles. It
+The new private packed metadata contains only scalar/string/byte values.
+A four-field prototype using `msgspec.Struct, gc=False` was 48 bytes locally
+versus 64 bytes for a slotted dataclass; the final struct also holds the stored
+field references. Its primitive-only fields cannot form reference cycles. It
 remains mutable so frequency ranking can be populated without replacing records.
 
 A three-repeat decode-only probe of 1,000 Finnish source lines, each decoded five
@@ -147,9 +162,9 @@ and extended schemas, raw JSON equality across all source fixtures, and JSON
 escaping. Existing golden extraction and form-quality checks remain unchanged.
 
 
-### Complete packed-generation run
+### Intermediate whole-record packing benchmark
 
-On the same local Mac (Python 3.14.7, msgspec 0.21.1, SQLite 3.53.3,
+Before integrating field storage, on the same local Mac (Python 3.14.7, msgspec 0.21.1, SQLite 3.53.3,
 Zstandard 0.25.0), generating both Finnish app datasets and the complete SQLite
 file measured:
 
@@ -171,5 +186,49 @@ reflects the current form metadata, not a change to the schema in this branch.
 This is a local completion measurement, not a promise of CI timing. The lockfile
 uses Python 3.14.2, SQLite 3.51.2 and msgspec 0.20.0. All 720 pipeline tests also
 pass against an isolated installation of msgspec 0.20.0, and both app manifest
-metadata checks pass. The final SQLite schema and data delivery architecture
-remain unchanged.
+metadata checks pass. That intermediate run used plain SQLite fields. The final combined design adds
+versioned BLOB storage for large fields and keeps full-language delivery.
+
+
+The raw-JSON extraction path was also checked against every accepted Finnish
+source record under CI's msgspec 0.20.0. All 266,055 records produced the same
+SHA-256 shown above. That streaming extraction/hash check took 81.1 seconds and
+49.2 MB peak resident memory; it does not retain the language, extract
+conjugations, rank frequencies, or build SQLite. The reading-JSON cache had
+27,696,005 hits and 838 misses (some source patterns simplify to the same output).
+
+
+### Final combined generation and storage
+
+The complete combined run used Python 3.14.7, CI-pinned msgspec 0.20.0,
+SQLite 3.53.3 and Zstandard 0.25.0 on the local Mac. It measured:
+
+| Metric | Intermediate plain SQLite fields | Final compressed fields |
+| --- | ---: | ---: |
+| Extraction, packing, both apps' indexes and ranking | 126.7 s | 126.3 s |
+| SQLite construction and validation | 109.8 s | 40.3 s |
+| Outer compression | 28.8 s | 9.9 s |
+| Total | 265.3 s | 176.5 s |
+| Retained dictionary payload | 369.6 MiB | 364.8 MiB |
+| Whole-process peak RSS | 3.50 GiB | 2.11 GiB |
+| Installed SQLite bytes | 5,826,543,616 | 1,415,987,200 |
+| Download bytes | 409,153,214 | 306,261,933 |
+
+In the final run, extraction itself took 111.0 s and peaked at 745,521,152 bytes
+(711 MiB). The later Congeegator search-index stage took 14.0 s and raised the
+process high-water mark to 2.11 GiB. The dictionary-object blowup is resolved;
+the next distinct memory hotspot is that conjugation search-index construction.
+These are single desktop runs (the staging build briefly overlapped the start of
+the final run), not isolated multi-run CPU comparisons or Linux runner timings.
+
+Full database comparison checked every one of the 266,050 entry rows, decoding
+only the changed storage representation for comparison. All fields matched.
+All 27,696,833 `form_lookup` rows, metadata and every row of both FTS indexes'
+internal data/index/docsize/config tables matched exactly. This check took 50.3 s.
+No form, reading or search association was dropped to obtain the savings.
+
+Final checks: 731 Python tests with msgspec 0.20.0, 153 frontend tests, frontend
+lint, Svelte typecheck and staging build pass. Tests include the actual Zstandard
+WASM decoding Python fixtures and checksum corruption/retry in the streaming
+download worker. The older-schema fallbacks are removed, while basic and extended
+current schemas and TEXT/NULL/BLOB fields remain tested.

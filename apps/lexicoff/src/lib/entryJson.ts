@@ -1,4 +1,4 @@
-/** JSON TEXT for old/small values, or LZJ1 + decoded length + Zstandard BLOB.
+/** JSON TEXT for small/non-beneficial values, or LZJ1 + decoded length + Zstandard BLOB.
  * Only word-page fields use this codec. Keep aligned with pipeline/entry_json.py.
  */
 import { ZSTDDecoder } from 'zstddec';

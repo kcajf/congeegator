@@ -9,7 +9,7 @@ import orjson
 import pytest
 import zstandard
 
-from pipeline.entry_json import encode_entry_json, decode_entry_json, MAGIC, MAX_COMPRESS_BYTES
+from pipeline.entry_json import encode_entry_json, decode_entry_json, MAGIC, MAX_COMPRESS_BYTES, ROW_COMPRESSION_LEVEL
 from pipeline.sqlite_output import write_sqlite_database
 from pipeline.audit_dictionary import audit_sqlite
 
@@ -71,3 +71,11 @@ def test_compressed_database_keeps_search_and_audit_working(tmp_path):
     assert report['integrity_check'] == ['ok']
     assert report['fts_integrity'] == {'entries_fts': 'ok', 'fuzzy': 'ok'}
     assert report['form_lookup_orphans'] == 0
+
+
+@pytest.mark.parametrize('value', [None, [], {}, ['talossa'], ['ä' * 80] * 50,
+    [{'form': 'talossa', 'kind': 'inflection', 'readings': [{'grammar': ['inessive', 'singular']}]}] * 50])
+def test_completed_raw_json_uses_identical_storage_without_parsing(value):
+    import msgspec
+    compressor = zstandard.ZstdCompressor(level=ROW_COMPRESSION_LEVEL, write_checksum=True)
+    assert encode_entry_json(msgspec.Raw(msgspec.json.encode(value)), compressor) == encode_entry_json(value, compressor)

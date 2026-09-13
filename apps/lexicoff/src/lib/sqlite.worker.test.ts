@@ -6,7 +6,7 @@ import { dictionarySearchKey, dictionaryWordKey } from './searchNormalization';
 const mocks = vi.hoisted(() => ({ init: vi.fn() }));
 vi.mock('@sqlite.org/sqlite-wasm', () => ({ default: mocks.init }));
 
-function setup(hasWordKey = false, realDb?: DatabaseSync) {
+function setup(realDb?: DatabaseSync) {
 	const files = new Set<string>();
 	const raw = new Map<string, Blob>();
 	const databases: {
@@ -37,7 +37,7 @@ function setup(hasWordKey = false, realDb?: DatabaseSync) {
 						}
 					return;
 				}
-				if (request.sql === 'PRAGMA table_info(entries)' && hasWordKey) {
+				if (request.sql === 'PRAGMA table_info(entries)') {
 					request.callback([2, 'word_key', 'TEXT', 1, null, 0]);
 				}
 			});
@@ -272,7 +272,7 @@ it('removes all versions of a language, including interrupted replacements', asy
 
 describe('multilingual dictionary search', () => {
 	it('keeps the first same-POS etymology in exact previews while retaining all detail records', async () => {
-		const s = setup(true);
+		const s = setup();
 		s.files.add('/vi-aaaaaaaa.sqlite');
 		await s.start();
 		await s.send('open', 'vi');
@@ -298,7 +298,7 @@ describe('multilingual dictionary search', () => {
 	});
 
 	it('uses indexed Turkish keys for exact and detail lookup, with English gloss casing', async () => {
-		const s = setup(true);
+		const s = setup();
 		s.files.add('/tr-aaaaaaaa.sqlite');
 		await s.start();
 		await s.send('open', 'tr');
@@ -318,7 +318,7 @@ describe('multilingual dictionary search', () => {
 	});
 
 	it('keeps decomposed Vietnamese words intact in FTS queries', async () => {
-		const s = setup(true);
+		const s = setup();
 		s.files.add('/vi-aaaaaaaa.sqlite');
 		await s.start();
 		await s.send('open', 'vi');
@@ -328,24 +328,11 @@ describe('multilingual dictionary search', () => {
 			'"tiếng" "việt"*'
 		]);
 	});
-
-	it('retains exact matching with the original spelling in older downloaded dictionaries', async () => {
-		const s = setup(false);
-		s.files.add('/de-aaaaaaaa.sqlite');
-		await s.start();
-		await s.send('open', 'de');
-		await s.send('search', 'de', 'Über');
-		const requests = s.databases[0].exec.mock.calls.map(([request]) => request);
-		expect(requests.find((r) => r.sql?.includes('WHERE word = ? COLLATE NOCASE'))?.bind).toEqual([
-			'Über'
-		]);
-		expect(requests.some((r) => r.sql?.includes('WHERE word_key'))).toBe(false);
-	});
 });
 
 describe('linked entry compatibility and reverse forms', () => {
 	async function openLinked() {
-		const s = setup(true);
+		const s = setup();
 		// The fake database advertises the added schema at open time.
 		const Base = s.pool.OpfsSAHPoolDb;
 		s.pool.OpfsSAHPoolDb = class extends Base {
@@ -419,34 +406,6 @@ describe('linked entry compatibility and reverse forms', () => {
 		});
 	});
 
-	it('keeps old downloads readable without querying added columns or tables', async () => {
-		const s = setup(true);
-		s.files.add('/fr-aaaaaaaa.sqlite');
-		await s.start();
-		await s.send('open');
-		s.databases[0].exec.mockImplementation((request) => {
-			if (request.sql?.includes('FROM entries WHERE'))
-				request.callback([
-					1,
-					'maison',
-					'noun',
-					'[{"gloss":"house","examples":["une maison"]}]',
-					4,
-					'f',
-					'["maisons"]',
-					null,
-					'From Latin'
-				]);
-		});
-		const response = await s.send('getWord', 'fr', 'maison');
-		expect(response.result[0].senses[0].examples).toEqual(['une maison']);
-		expect(response.result[0].details).toBeUndefined();
-		expect(
-			s.databases[0].exec.mock.calls.some(
-				([request]) => request.sql?.includes('form_lookup') || request.sql?.includes(', details')
-			)
-		).toBe(false);
-	});
 	it('ranks exact forms ahead of prefix results and shows the matched form', async () => {
 		const s = await openLinked();
 		s.databases[0].exec.mockImplementation((request) => {
@@ -505,7 +464,8 @@ describe('extended dictionaries with real SQLite FTS', () => {
 			CREATE TABLE metadata (key TEXT, value TEXT);
 			CREATE TABLE entries (id INTEGER PRIMARY KEY, word TEXT, word_key TEXT, pos TEXT, senses TEXT,
 				freq REAL, gender TEXT, forms TEXT, pronunciation TEXT, etymology TEXT,
-				search_key TEXT, form_details TEXT, pronunciations TEXT);
+				search_key TEXT, form_details TEXT, pronunciations TEXT, details TEXT);
+			CREATE TABLE form_lookup (form_key TEXT, entry_id INTEGER, PRIMARY KEY(form_key, entry_id)) WITHOUT ROWID;
 			CREATE VIRTUAL TABLE entries_fts USING fts5(word, forms_text, gloss_text, phonetic,
 				content='', tokenize="unicode61 remove_diacritics 2 categories 'L* N* Co M*'", detail='column');
 			CREATE VIRTUAL TABLE fuzzy USING fts5(word, phonetic, content='', tokenize='trigram');
@@ -514,7 +474,7 @@ describe('extended dictionaries with real SQLite FTS', () => {
 		for (const [id, entry] of entries.entries()) {
 			const word = dictionaryWordKey(entry.word, lang);
 			const alias = dictionarySearchKey(entry.word, lang);
-			db.prepare('INSERT INTO entries VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').run(
+			db.prepare('INSERT INTO entries VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').run(
 				id,
 				entry.word,
 				word,
@@ -526,6 +486,7 @@ describe('extended dictionaries with real SQLite FTS', () => {
 				null,
 				null,
 				alias,
+				null,
 				null,
 				null
 			);
@@ -549,9 +510,6 @@ describe('extended dictionaries with real SQLite FTS', () => {
 			{ word: 'talo', gloss: 'house', forms },
 			{ word: 'koti', gloss: 'home', forms: ['kodin'] }
 		]);
-		db.exec(
-			'ALTER TABLE entries ADD COLUMN details TEXT; CREATE TABLE form_lookup(form_key TEXT, entry_id INTEGER, PRIMARY KEY(form_key, entry_id)) WITHOUT ROWID'
-		);
 		for (const form of forms) db.prepare('INSERT INTO form_lookup VALUES (?, 0)').run(form);
 		db.prepare('UPDATE entries SET forms=?, form_details=? WHERE id=0').run(
 			Buffer.from(entryJsonFixtures[0].encoded, 'base64'),
@@ -561,7 +519,7 @@ describe('extended dictionaries with real SQLite FTS', () => {
 		const { ZSTDDecoder } = await import('zstddec');
 		const initializeDecoder = vi.spyOn(ZSTDDecoder.prototype, 'init');
 		try {
-			const s = setup(true, db);
+			const s = setup(db);
 			s.files.add('/fi-aaaaaaaa.sqlite');
 			await s.start();
 			await s.send('open', 'fi');
@@ -593,7 +551,7 @@ describe('extended dictionaries with real SQLite FTS', () => {
 			{ word: 'Bayraq', gloss: 'name' }
 		]);
 		try {
-			const s = setup(true, db);
+			const s = setup(db);
 			s.files.add('/az-aaaaaaaa.sqlite');
 			await s.start();
 			await s.send('open', 'az');
@@ -618,7 +576,7 @@ describe('extended dictionaries with real SQLite FTS', () => {
 			const db = database(lang, [{ word, gloss, forms: [form] }]);
 			try {
 				const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
-				const s = setup(true, db);
+				const s = setup(db);
 				s.files.add(`/${lang}-aaaaaaaa.sqlite`);
 				await s.start();
 				expect((await s.send('open', lang)).result).toBe(true);
@@ -641,10 +599,6 @@ describe('extended dictionaries with real SQLite FTS', () => {
 			{ word: 'ἄλλα', gloss: 'other things' },
 			{ word: 'ἀλλά', gloss: 'but' }
 		]);
-		db.exec('ALTER TABLE entries ADD COLUMN details TEXT');
-		db.exec(
-			'CREATE TABLE form_lookup (form_key TEXT, entry_id INTEGER, PRIMARY KEY(form_key, entry_id)) WITHOUT ROWID'
-		);
 		db.prepare('INSERT INTO form_lookup VALUES (?, 0)').run(dictionaryWordKey('ἄλλων', 'grc'));
 		const details = { related: [{ word: 'ἄλλος', lang: 'grc' }] };
 		db.prepare('UPDATE entries SET details=? WHERE id=0').run(JSON.stringify(details));
@@ -655,7 +609,7 @@ describe('extended dictionaries with real SQLite FTS', () => {
 			JSON.stringify(pronunciations)
 		);
 		try {
-			const s = setup(true, db);
+			const s = setup(db);
 			s.files.add('/grc-aaaaaaaa.sqlite');
 			await s.start();
 			await s.send('open', 'grc');
@@ -684,27 +638,29 @@ describe('extended dictionaries with real SQLite FTS', () => {
 		}
 	});
 
-	it('loads old databases without word keys or new optional columns', async () => {
+	it('rejects a database missing required current-schema columns', async () => {
 		const db = database('fr', [{ word: 'maison', gloss: 'house' }]);
-		for (const column of ['word_key', 'search_key', 'form_details', 'pronunciations']) {
-			db.exec(`ALTER TABLE entries DROP COLUMN ${column}`);
-		}
+		db.exec('ALTER TABLE entries DROP COLUMN word_key');
 		try {
-			const s = setup(false, db);
+			const s = setup(db);
 			s.files.add('/fr-aaaaaaaa.sqlite');
 			await s.start();
-			await s.send('open');
-			expect((await s.send('search', 'fr', 'Maison')).result).toMatchObject([
-				{ word: 'maison', quality: 0 }
-			]);
-			expect((await s.send('getWord', 'fr', 'Maison')).result).toMatchObject([
-				{
-					word: 'maison',
-					senses: [{ gloss: 'house' }],
-					formDetails: undefined,
-					pronunciations: undefined
-				}
-			]);
+			expect((await s.send('open')).error).toContain('word_key');
+		} finally {
+			db.close();
+		}
+	});
+
+	it('accepts the current basic schema without language-specific extra columns', async () => {
+		const db = database('fr', [{ word: 'maison', gloss: 'house' }]);
+		for (const column of ['search_key', 'pronunciations'])
+			db.exec(`ALTER TABLE entries DROP COLUMN ${column}`);
+		try {
+			const s = setup(db);
+			s.files.add('/fr-aaaaaaaa.sqlite');
+			await s.start();
+			expect((await s.send('open')).result).toBe(true);
+			expect((await s.send('getWord', 'fr', 'maison')).result).toMatchObject([{ word: 'maison' }]);
 		} finally {
 			db.close();
 		}

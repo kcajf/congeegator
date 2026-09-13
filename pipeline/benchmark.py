@@ -42,7 +42,7 @@ def main():
         written = time.perf_counter()
         compressed = path.with_suffix(".sqlite.zst")
         with path.open("rb") as source, compressed.open("wb") as target:
-            zstandard.ZstdCompressor(level=9).copy_stream(source, target)
+            zstandard.ZstdCompressor(level=9, write_checksum=True).copy_stream(source, target)
         finished = time.perf_counter()
         print(json.dumps({
             "language": args.language,

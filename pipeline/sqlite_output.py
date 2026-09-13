@@ -23,7 +23,7 @@ from .entry_json import ROW_COMPRESSION_LEVEL, encode_entry_json
 log = logging.getLogger(__name__)
 
 SCHEMA_SQL = """
--- forms and form_details accept legacy JSON TEXT or versioned LZJ1 BLOBs.
+-- forms and form_details accept JSON TEXT or versioned LZJ1 BLOBs.
 CREATE TABLE entries (
     id          INTEGER PRIMARY KEY,
     word        TEXT NOT NULL,

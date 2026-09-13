@@ -1,0 +1,37 @@
+{
+  "source_version": "2026-09-12T210000Z",
+  "runtime": {
+    "python": "3.14.7",
+    "msgspec": "0.20.0",
+    "sqlite": "3.53.3",
+    "zstandard": "0.25.0"
+  },
+  "benchmark": {
+    "processing_seconds": 126.2535163750872,
+    "database_seconds": 40.3207241659984,
+    "compression_seconds": 9.93015791696962,
+    "total_seconds": 176.50439845805522,
+    "peak_rss_bytes": 2262466560,
+    "payload_bytes": 382474938,
+    "counts": {
+      "entries": 266050,
+      "form_lookup": 27696833
+    },
+    "database_bytes": 1415987200,
+    "compressed_bytes": 306261933
+  },
+  "comparison": {
+    "entries": 266050,
+    "form_lookup": 27696833,
+    "metadata": 2,
+    "entries_fts_data": 16503,
+    "entries_fts_idx": 16374,
+    "entries_fts_docsize": 266050,
+    "entries_fts_config": 4,
+    "fuzzy_data": 487,
+    "fuzzy_idx": 467,
+    "fuzzy_docsize": 266050,
+    "fuzzy_config": 4,
+    "seconds": 50.30149149999488
+  }
+}
