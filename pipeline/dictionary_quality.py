@@ -19,6 +19,24 @@ _SK_PATTERNS = frozenset('žena ulica dlaň kosť chlap hrdina dub stroj mesto s
 _LINKAGE = re.compile(r'^(?:Near-synonyms?|Synonyms?|Antonyms?|Hypernyms?|Hyponyms?|Coordinate terms?):')
 _BROKEN_ENTITY = re.compile(r'(?:[A-Za-z]#\d+;|&#?\d+;.*#\d+;)')
 
+# Only grammatical source tags belong here; extractor bookkeeping must never
+# become a label. Keep each reading together when a spelling has several uses.
+_FORM_GRAMMAR = '''first-person second-person third-person definite indefinite
+possessive positive negative active passive middle mediopassive
+present past future imperfect perfect pluperfect aorist
+indicative subjunctive conditional optative imperative potential
+infinitive participle gerund converb supine verbal-noun
+masculine feminine neuter common-gender
+nominative accusative genitive dative ablative locative instrumental vocative
+ergative absolutive partitive illative inessive elative allative adessive
+essive translative comitative abessive terminative prolative
+singular dual plural'''.split()
+
+
+def form_grammar(tags):
+    reading = ' '.join(tag.replace('-', ' ') for tag in _FORM_GRAMMAR if tag in tags)
+    return [reading] if reading else []
+
 
 def labels(tags):
     # Wiktextract uses capitalized tags for named regions, periods and scripts.
@@ -179,7 +197,7 @@ def enhance_record(entry, record, clean_text):
         if text not in accepted:
             continue
         variants, extra = _form_variants(entry, form, text)
-        source_labels = labels(form.tags) + raw_labels(form.raw_tags, clean_text) + (table_labels if form.source else []) + extra
+        source_labels = form_grammar(form.tags) + labels(form.tags) + raw_labels(form.raw_tags, clean_text) + (table_labels if form.source else []) + extra
         for variant in variants:
             if not variant or variant == entry.word:
                 continue

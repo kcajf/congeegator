@@ -308,11 +308,11 @@
 		line-height: 1.6;
 	}
 	.form {
-		display: inline;
+		display: block;
+		margin-block: 0.2rem;
 		overflow-wrap: anywhere;
 	}
-	.form + .form::before {
-		content: ' · ';
+	.form-tags {
 		color: var(--text-muted);
 	}
 	.count {
