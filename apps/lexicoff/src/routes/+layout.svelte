@@ -253,7 +253,9 @@
 </script>
 
 <svelte:head>
+	<link rel="icon" href="/favicon.ico" sizes="any" />
 	<link rel="icon" type="image/svg+xml" href={lexicoffIcon} />
+	<link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
 	<meta name="theme-color" content={brandColor} />
 	<meta name="application-name" content={appTitle} />
 
