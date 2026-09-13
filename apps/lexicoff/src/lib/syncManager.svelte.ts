@@ -54,7 +54,12 @@ function runDownloadWorker(lang: string, type: 'download' | 'delete'): Promise<s
 }
 
 async function changeLanguage(lang: string, remove: boolean) {
-	if (!browser || !manifest.languages[lang] || globalSync.map[lang]?.status === 'syncing') return;
+	if (
+		!browser ||
+		(!remove && !manifest.languages[lang]) ||
+		globalSync.map[lang]?.status === 'syncing'
+	)
+		return;
 	globalSync.map[lang] = { hash: storage.languages[lang]?.hash ?? '', status: 'syncing' };
 	try {
 		await storage.connect();
