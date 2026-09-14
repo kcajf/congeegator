@@ -314,6 +314,69 @@
       "code": "cy",
       "name": "Cymraeg",
       "englishWiktionaryName": "Welsh"
+    },
+    "nn": {
+      "dataHash": "9b7cae87",
+      "dataSize": 7565264,
+      "code": "nn",
+      "name": "norsk nynorsk",
+      "englishWiktionaryName": "Norwegian Nynorsk"
+    },
+    "lv": {
+      "dataHash": "e5ddb041",
+      "dataSize": 12709416,
+      "code": "lv",
+      "name": "latviešu",
+      "englishWiktionaryName": "Latvian"
+    },
+    "bg": {
+      "dataHash": "fe38bb1e",
+      "dataSize": 13555967,
+      "code": "bg",
+      "name": "български",
+      "englishWiktionaryName": "Bulgarian"
+    },
+    "mt": {
+      "dataHash": "e994bd8f",
+      "dataSize": 3502217,
+      "code": "mt",
+      "name": "Malti",
+      "englishWiktionaryName": "Maltese"
+    },
+    "tl": {
+      "dataHash": "c9fdcb69",
+      "dataSize": 10296073,
+      "code": "tl",
+      "name": "Tagalog",
+      "englishWiktionaryName": "Tagalog"
+    },
+    "gd": {
+      "dataHash": "043657b0",
+      "dataSize": 2734527,
+      "code": "gd",
+      "name": "Gàidhlig",
+      "englishWiktionaryName": "Scottish Gaelic"
+    },
+    "fo": {
+      "dataHash": "a55f39a9",
+      "dataSize": 2313074,
+      "code": "fo",
+      "name": "føroyskt",
+      "englishWiktionaryName": "Faroese"
+    },
+    "ang": {
+      "dataHash": "d913976d",
+      "dataSize": 11028961,
+      "code": "ang",
+      "name": "Old English",
+      "englishWiktionaryName": "Old English"
+    },
+    "non": {
+      "dataHash": "a98ba150",
+      "dataSize": 2365275,
+      "code": "non",
+      "name": "Old Norse",
+      "englishWiktionaryName": "Old Norse"
     }
   }
 }

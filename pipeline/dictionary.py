@@ -99,6 +99,15 @@ DICT_CONFIGS: list[DictLanguageConfig] = [
     DictLanguageConfig(code="sh", name="srpskohrvatski / српскохрватски", english_wiktionary_name="Serbo-Croatian"),
     DictLanguageConfig(code="sk", name="slovenčina", english_wiktionary_name="Slovak"),
     DictLanguageConfig(code="cy", name="Cymraeg", english_wiktionary_name="Welsh"),
+    DictLanguageConfig(code="nn", name="norsk nynorsk", english_wiktionary_name="Norwegian Nynorsk"),
+    DictLanguageConfig(code="lv", name="latviešu", english_wiktionary_name="Latvian"),
+    DictLanguageConfig(code="bg", name="български", english_wiktionary_name="Bulgarian"),
+    DictLanguageConfig(code="mt", name="Malti", english_wiktionary_name="Maltese"),
+    DictLanguageConfig(code="tl", name="Tagalog", english_wiktionary_name="Tagalog"),
+    DictLanguageConfig(code="gd", name="Gàidhlig", english_wiktionary_name="Scottish Gaelic"),
+    DictLanguageConfig(code="fo", name="føroyskt", english_wiktionary_name="Faroese"),
+    DictLanguageConfig(code="ang", name="Old English", english_wiktionary_name="Old English"),
+    DictLanguageConfig(code="non", name="Old Norse", english_wiktionary_name="Old Norse"),
 ]
 
 

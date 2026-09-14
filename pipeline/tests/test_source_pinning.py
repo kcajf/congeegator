@@ -36,10 +36,11 @@ def test_language_catalogue():
     additions = {"pt", "ca", "ro", "gl", "nl", "sv", "da", "nb", "pl", "ru", "uk", "cs", "fi", "hu", "tr", "id", "vi", "eo", "la"}
     additions |= set("grc az eu br et ka he hi is ga ko lt mk ms oc fa sa sh sk cy".split())
     assert {c.code for c in CONFIG} == existing | {"pt", "ca", "nl", "sv", "la", "fi"}
-    assert len(DICT_CONFIGS) == 45
+    additions |= set("nn lv bg mt tl gd fo ang non".split())
+    assert len(DICT_CONFIGS) == 54
     assert {c.code for c in DICT_CONFIGS} == existing | additions
     assert set(pin.configured_languages()) == existing | additions
-    assert len(pin.configured_languages()) == 45
+    assert len(pin.configured_languages()) == 54
 
 
 @pytest.mark.parametrize("compressed", [False, True])
