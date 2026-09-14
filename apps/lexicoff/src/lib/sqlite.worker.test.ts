@@ -1,10 +1,23 @@
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 import { DatabaseSync } from 'node:sqlite';
+import { zstdCompressSync } from 'node:zlib';
 import entryJsonFixtures from './fixtures/entry-json.json';
 import { dictionarySearchKey, dictionaryWordKey } from './searchNormalization';
 
 const mocks = vi.hoisted(() => ({ init: vi.fn() }));
 vi.mock('@sqlite.org/sqlite-wasm', () => ({ default: mocks.init }));
+
+function dictionaryBytes() {
+	const data = new Uint8Array(512);
+	data.set(new TextEncoder().encode('SQLite format 3\0'));
+	const header = new DataView(data.buffer);
+	header.setUint16(16, 512);
+	header.setUint32(28, 1);
+	return data;
+}
+function dictionaryFile() {
+	return new Blob([dictionaryBytes()]);
+}
 
 function setup(realDb?: DatabaseSync) {
 	const files = new Set<string>();
@@ -19,10 +32,11 @@ function setup(realDb?: DatabaseSync) {
 		getFileCount: () => files.size,
 		reserveMinimumCapacity: vi.fn(async () => {}),
 		importDb: vi.fn(async (name: string, read: () => Promise<Uint8Array | undefined>) => {
-			while (await read()) {
-				/* consume the input */
-			}
+			let bytes = 0;
+			let chunk;
+			while ((chunk = await read())) bytes += chunk.length;
 			files.add(name);
+			return bytes;
 		}),
 		unlink: vi.fn((name: string) => files.delete(name)),
 		removeVfs: vi.fn(),
@@ -114,15 +128,15 @@ describe('dictionary storage lifecycle', () => {
 		s.files.add('/fr-aaaaaaaa.sqlite');
 		await s.start();
 		await s.send('open');
-		s.raw.set('fr-bbbbbbbb.sqlite', new Blob(['replacement']));
+		s.raw.set('fr-bbbbbbbb.sqlite', dictionaryFile());
 		s.pool.reserveMinimumCapacity.mockRejectedValueOnce(new Error('Quota exceeded'));
-		expect((await s.send('open', 'fr', 'bbbbbbbb')).error).toBe('Quota exceeded');
+		expect((await s.send('open', 'fr', 'bbbbbbbb')).error).toContain('Not enough browser storage');
 		expect(s.databases[0].close).not.toHaveBeenCalled();
 		expect(s.files.has('/fr-aaaaaaaa.sqlite')).toBe(true);
 		expect(s.databases[0].close).not.toHaveBeenCalled();
-		s.raw.set('de-cccccccc.sqlite', new Blob(['database']));
+		s.raw.set('de-cccccccc.sqlite', dictionaryFile());
 		expect((await s.send('open', 'de', 'cccccccc')).result).toBe(true);
-		s.raw.set('fr-bbbbbbbb.sqlite', new Blob(['replacement']));
+		s.raw.set('fr-bbbbbbbb.sqlite', dictionaryFile());
 		expect((await s.send('open', 'fr', 'bbbbbbbb')).result).toBe(true);
 		expect(s.files.has('/fr-aaaaaaaa.sqlite')).toBe(false);
 		expect(s.databases[0].close).toHaveBeenCalledOnce();
@@ -131,14 +145,15 @@ describe('dictionary storage lifecycle', () => {
 	it('imports every streamed chunk in order before removing the download', async () => {
 		const s = setup();
 		await s.start();
-		const chunks = [new Uint8Array([1, 2]), new Uint8Array([3, 4, 5])];
+		const data = dictionaryBytes();
+		const chunks = [data.subarray(0, 128), data.subarray(128)];
 		const stream = new ReadableStream<Uint8Array<ArrayBuffer>>({
 			start(controller) {
 				for (const chunk of chunks) controller.enqueue(chunk);
 				controller.close();
 			}
 		});
-		const file = new Blob(['database']);
+		const file = dictionaryFile();
 		vi.spyOn(file, 'stream').mockReturnValue(stream);
 		s.raw.set('fr-aaaaaaaa.sqlite', file);
 		const received: number[] = [];
@@ -147,10 +162,11 @@ describe('dictionary storage lifecycle', () => {
 			while ((chunk = await read()) !== undefined) received.push(...chunk);
 			expect(s.raw.has('fr-aaaaaaaa.sqlite')).toBe(true);
 			s.files.add(name);
+			return received.length;
 		});
 
 		expect((await s.send('open')).result).toBe(true);
-		expect(received).toEqual([1, 2, 3, 4, 5]);
+		expect(received).toEqual([...data]);
 		expect(stream.locked).toBe(false);
 		expect(s.raw.has('fr-aaaaaaaa.sqlite')).toBe(false);
 	});
@@ -164,11 +180,11 @@ describe('dictionary storage lifecycle', () => {
 		const stream = new ReadableStream<Uint8Array<ArrayBuffer>>({
 			pull(controller) {
 				if (failure === 'read') controller.error(new Error('Read failed'));
-				else controller.enqueue(new Uint8Array([1, 2, 3]));
+				else controller.enqueue(dictionaryBytes());
 			},
 			cancel
 		});
-		const file = new Blob(['replacement']);
+		const file = dictionaryFile();
 		vi.spyOn(file, 'stream').mockReturnValueOnce(stream);
 		s.raw.set('fr-bbbbbbbb.sqlite', file);
 		if (failure === 'write') {
@@ -197,7 +213,7 @@ describe('dictionary storage lifecycle', () => {
 		await s.start();
 		await s.send('open');
 		vi.spyOn(s.pool.OpfsSAHPoolDb.prototype, 'selectValue').mockReturnValue('de');
-		s.raw.set('fr-bbbbbbbb.sqlite', new Blob(['wrong dictionary']));
+		s.raw.set('fr-bbbbbbbb.sqlite', dictionaryFile());
 		expect((await s.send('open', 'fr', 'bbbbbbbb')).error).toMatch('does not match');
 		expect(s.files.has('/fr-aaaaaaaa.sqlite')).toBe(true);
 		expect(s.files.has('/fr-bbbbbbbb.sqlite')).toBe(false);
@@ -207,7 +223,7 @@ describe('dictionary storage lifecycle', () => {
 	it('treats raw-file cleanup failure as a successful installation', async () => {
 		const s = setup();
 		await s.start();
-		s.raw.set('fr-aaaaaaaa.sqlite', new Blob(['database']));
+		s.raw.set('fr-aaaaaaaa.sqlite', dictionaryFile());
 		s.dir.removeEntry.mockRejectedValueOnce(new Error('cleanup failed'));
 		expect((await s.send('open')).result).toBe(true);
 		expect(s.databases[0].close).not.toHaveBeenCalled();
@@ -218,7 +234,7 @@ describe('dictionary storage lifecycle', () => {
 		await s.start();
 		s.raw.set('fr-aaaaaaaa.sqlite', new Blob());
 		s.raw.set('de-bbbbbbbb.sqlite', new Blob(['complete']));
-		expect((await s.send('list')).result).toEqual([['de', 'bbbbbbbb']]);
+		expect((await s.send('list')).result).toEqual([['de', 'bbbbbbbb', true]]);
 		expect(s.raw.has('fr-aaaaaaaa.sqlite')).toBe(false);
 	});
 
@@ -251,7 +267,7 @@ it('does not scan an already-installed dictionary on startup', async () => {
 it('reimports an interrupted installation without a full-database scan', async () => {
 	const s = setup();
 	s.files.add('/fr-aaaaaaaa.sqlite');
-	s.raw.set('fr-aaaaaaaa.sqlite', new Blob(['complete source']));
+	s.raw.set('fr-aaaaaaaa.sqlite', dictionaryFile());
 	const query = vi.spyOn(s.pool.OpfsSAHPoolDb.prototype, 'selectValue');
 	await s.start();
 	expect((await s.send('open')).result).toBe(true);
@@ -669,12 +685,12 @@ describe('extended dictionaries with real SQLite FTS', () => {
 	it('discovers both imported and raw three-letter language downloads', async () => {
 		const s = setup();
 		s.files.add('/grc-aaaaaaaa.sqlite');
-		s.raw.set('grc-bbbbbbbb.sqlite', new Blob(['dictionary']));
+		s.raw.set('grc-bbbbbbbb.sqlite', dictionaryFile());
 		s.raw.set('grc-cccccccc.sqlite', new Blob());
 		await s.start();
 		expect((await s.send('list')).result).toEqual([
 			['grc', 'aaaaaaaa'],
-			['grc', 'bbbbbbbb']
+			['grc', 'bbbbbbbb', true]
 		]);
 		expect(s.raw.has('grc-cccccccc.sqlite')).toBe(false);
 	});
@@ -764,4 +780,51 @@ describe('persisted dictionary word totals', () => {
 			expect(query).not.toHaveBeenCalled();
 		}
 	);
+});
+
+it('imports compressed downloads without staging an uncompressed copy', async () => {
+	const s = setup();
+	const bytes = dictionaryBytes();
+	s.raw.set('fr-aaaaaaaa.sqlite.zst', new Blob([zstdCompressSync(bytes)]));
+	await s.start();
+	expect((await s.send('list')).result).toEqual([['fr', 'aaaaaaaa', true]]);
+	expect((await s.send('hasDownload')).result).toBe(true);
+	expect((await s.send('open')).result).toBe(true);
+	expect(s.pool.importDb).toHaveBeenCalledOnce();
+	expect(s.raw.size).toBe(0);
+	expect(s.files.has('/fr-aaaaaaaa.sqlite')).toBe(true);
+});
+it('keeps a compressed download retryable after a quota failure and preserves the installed version', async () => {
+	const s = setup();
+	s.files.add('/fr-bbbbbbbb.sqlite');
+	await s.start();
+	await s.send('open', 'fr', 'bbbbbbbb');
+	const file = new Blob([zstdCompressSync(dictionaryBytes())]);
+	s.raw.set('fr-aaaaaaaa.sqlite.zst', file);
+	s.pool.importDb.mockRejectedValueOnce(new DOMException('Quota exceeded', 'QuotaExceededError'));
+	expect((await s.send('open')).error).toContain('Not enough browser storage');
+	expect(s.raw.get('fr-aaaaaaaa.sqlite.zst')).toBe(file);
+	expect(s.files.has('/fr-bbbbbbbb.sqlite')).toBe(true);
+	expect((await s.send('open')).result).toBe(true);
+});
+it('replaces an open damaged dictionary when explicitly reinstalling the same version', async () => {
+	const s = setup();
+	s.files.add('/fr-aaaaaaaa.sqlite');
+	await s.start();
+	await s.send('open');
+	s.raw.set('fr-aaaaaaaa.sqlite.zst', new Blob([zstdCompressSync(dictionaryBytes())]));
+	expect((await s.send('open')).result).toBe(true);
+	expect(s.databases[0].close).toHaveBeenCalledOnce();
+	expect(s.pool.importDb).toHaveBeenCalledOnce();
+	expect(s.databases).toHaveLength(2);
+});
+it('does not delete an installed dictionary when its storage handle becomes unavailable', async () => {
+	const s = setup();
+	s.files.add('/fr-aaaaaaaa.sqlite');
+	vi.spyOn(s.pool.OpfsSAHPoolDb.prototype, 'selectValue').mockImplementationOnce(() => {
+		throw new Error('AccessHandle is closed');
+	});
+	await s.start();
+	expect(await s.send('open')).toMatchObject({ error: 'AccessHandle is closed', fatal: true });
+	expect(s.files.has('/fr-aaaaaaaa.sqlite')).toBe(true);
 });

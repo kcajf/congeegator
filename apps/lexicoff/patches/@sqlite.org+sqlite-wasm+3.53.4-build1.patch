@@ -26,7 +26,35 @@ diff --git a/node_modules/@sqlite.org/sqlite-wasm/dist/index.mjs b/node_modules/
  				}
  				/**
  				Given an SAH, returns the client-specified name of
-@@ -16950,7 +16954,7 @@
+@@ -16538,21 +16542,22 @@
+ 								util.affirmDbHeader(chunk);
+ 								checkedHeader = true;
+ 							}
+-							sah.write(chunk, { at: HEADER_OFFSET_DATA + nWrote });
++							const written = sah.write(chunk, { at: HEADER_OFFSET_DATA + nWrote });
++							if (written !== chunk.byteLength) toss("Incomplete dictionary write: expected", chunk.byteLength, "bytes but wrote", written);
+ 							nWrote += chunk.byteLength;
+ 						}
+ 						if (nWrote < 512 || 0 !== nWrote % 512) toss("Input size", nWrote, "is not correct for an SQLite database.");
+ 						if (!checkedHeader) {
+ 							const header = /* @__PURE__ */ new Uint8Array(20);
+-							sah.read(header, { at: 0 });
++							sah.read(header, { at: HEADER_OFFSET_DATA });
+ 							util.affirmDbHeader(header);
+ 						}
+-						sah.write(new Uint8Array([1, 1]), { at: 4114 });
++						if (sah.write(new Uint8Array([1, 1]), { at: 4114 }) !== 2) toss("Incomplete dictionary header write");
++						this.setAssociatedPath(sah, name, capi.SQLITE_OPEN_MAIN_DB);
+ 					} catch (e) {
+-						this.setAssociatedPath(sah, "", 0);
++						try { this.setAssociatedPath(sah, "", 0); } catch (_) { /* Preserve the write failure. */ }
+ 						throw e;
+ 					}
+-					this.setAssociatedPath(sah, name, capi.SQLITE_OPEN_MAIN_DB);
+ 					return nWrote;
+ 				}
+ 				//! Documented elsewhere in this file.
+@@ -16950,7 +16955,7 @@
  						thePool.log("VFS initialized.");
  						return poolUtil;
  					}).catch(async (e) => {

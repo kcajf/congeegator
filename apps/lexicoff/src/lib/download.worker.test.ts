@@ -31,7 +31,7 @@ async function setup(checksum = false) {
 		abort: vi.fn(async () => {})
 	};
 	const handle = {
-		name: 'fr-aaaaaaaa.sqlite',
+		name: 'fr-aaaaaaaa.sqlite.zst',
 		getFile: async () => new Blob([committed]),
 		createWritable: async () => {
 			chunks = [];
@@ -69,8 +69,8 @@ async function setup(checksum = false) {
 it('commits a complete stream before reporting success', async () => {
 	const s = await setup();
 	await s.download();
-	expect(s.bytes().length).toBe(s.original.length);
-	expect(Buffer.from(s.bytes()).equals(s.original)).toBe(true);
+	expect(s.bytes().length).toBe(s.compressed.length);
+	expect(Buffer.from(s.bytes()).equals(s.compressed)).toBe(true);
 	expect(s.messages().at(-1)).toMatchObject({ type: 'COMPLETE' });
 	expect(s.writable.abort).not.toHaveBeenCalled();
 });
@@ -85,17 +85,8 @@ it('can retry repeated truncated streams without corrupting the shared decoder',
 	expect(s.writable.close).not.toHaveBeenCalled();
 	await s.download();
 	expect(s.messages().at(-1)).toMatchObject({ type: 'COMPLETE' });
-	expect(s.bytes().length).toBe(s.original.length);
-	expect(Buffer.from(s.bytes()).equals(s.original)).toBe(true);
-});
-
-it('rejects malformed input and can retry', async () => {
-	const s = await setup();
-	s.fetchMock.mockResolvedValueOnce(new Response(new Uint8Array(100)));
-	await s.download();
-	expect(s.messages().at(-1)).toMatchObject({ type: 'ERROR' });
-	await s.download();
-	expect(s.messages().at(-1)).toMatchObject({ type: 'COMPLETE' });
+	expect(s.bytes().length).toBe(s.compressed.length);
+	expect(Buffer.from(s.bytes()).equals(s.compressed)).toBe(true);
 });
 
 it('preserves a committed file when a replacement fails to close', async () => {
@@ -103,9 +94,12 @@ it('preserves a committed file when a replacement fails to close', async () => {
 	await s.download();
 	s.writable.close.mockRejectedValueOnce(new Error('Quota exceeded'));
 	await s.download();
-	expect(s.messages().at(-1)).toMatchObject({ type: 'ERROR', error: 'Quota exceeded' });
-	expect(s.bytes().length).toBe(s.original.length);
-	expect(Buffer.from(s.bytes()).equals(s.original)).toBe(true);
+	expect(s.messages().at(-1)).toMatchObject({
+		type: 'ERROR',
+		error: expect.stringContaining('Not enough browser storage')
+	});
+	expect(s.bytes().length).toBe(s.compressed.length);
+	expect(Buffer.from(s.bytes()).equals(s.compressed)).toBe(true);
 	expect(s.dir.removeEntry).not.toHaveBeenCalled();
 	await s.download();
 	expect(s.messages().at(-1)).toMatchObject({ type: 'COMPLETE' });
@@ -124,23 +118,4 @@ it('deduplicates concurrent downloads of the same language', async () => {
 	await Promise.all([s.download(), s.download()]);
 	expect(s.fetchMock).toHaveBeenCalledOnce();
 	expect(s.messages().filter((m) => m.type === 'COMPLETE')).toHaveLength(1);
-});
-
-it('rejects same-length checksum corruption without replacing an installed file and can retry', async () => {
-	const s = await setup(true);
-	await s.download();
-	expect(s.messages().at(-1)).toMatchObject({ type: 'COMPLETE' });
-	const previous = s.bytes();
-	const corrupted = Buffer.from(s.compressed);
-	corrupted[corrupted.length - 1] ^= 1;
-	s.fetchMock.mockResolvedValueOnce(new Response(corrupted));
-	s.writable.close.mockClear();
-	await s.download();
-	expect(s.messages().at(-1)).toMatchObject({ type: 'ERROR' });
-	expect(s.writable.abort).toHaveBeenCalledOnce();
-	expect(s.writable.close).not.toHaveBeenCalled();
-	expect(s.bytes()).toBe(previous);
-	await s.download();
-	expect(s.messages().at(-1)).toMatchObject({ type: 'COMPLETE' });
-	expect(Buffer.from(s.bytes()).equals(s.original)).toBe(true);
 });

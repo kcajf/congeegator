@@ -5,7 +5,7 @@ vi.mock('./dataUtils', () => ({
 
 class FakeWorker {
 	static instances: FakeWorker[] = [];
-	static files: [string, string][] = [];
+	static files: [string, string, boolean?][] = [];
 	static damaged = new Set<string>();
 	holdOpen = false;
 	holdList = false;
@@ -153,4 +153,74 @@ it('reports discovery errors instead of leaving opening pending', async () => {
 	worker.reply(undefined, 'Cannot list files');
 	await rejected;
 	expect(storage.phase).toBe('error');
+});
+
+it('does not import unfinished downloads during startup and opens installed languages first', async () => {
+	FakeWorker.files = [
+		['fr', 'current', true],
+		['fr', 'previous'],
+		['de', 'german', true]
+	];
+	const storage = await start();
+	expect(storage.languages.fr).toEqual({ hash: 'previous', status: 'ready' });
+	expect(storage.languages.de).toMatchObject({ hash: 'german', status: 'error' });
+	expect(
+		FakeWorker.instances[0].postMessage.mock.calls
+			.filter(([m]) => m.type === 'open')
+			.map(([m]) => m.query)
+	).toEqual(['previous']);
+});
+it('closes a failed storage connection instead of repeatedly sending queries to it', async () => {
+	FakeWorker.files = [['fr', 'current']];
+	const storage = await start();
+	const worker = FakeWorker.instances[0];
+	const query = expect(storage.search('fr', 'test')).rejects.toThrow('AccessHandle is closed');
+	await vi.advanceTimersByTimeAsync(0);
+	worker.onmessage?.(
+		new MessageEvent('message', {
+			data: {
+				id: worker.postMessage.mock.lastCall![0].id,
+				error: 'AccessHandle is closed',
+				fatal: true
+			}
+		})
+	);
+	await query;
+	expect(storage.phase).toBe('error');
+	expect(worker.terminate).toHaveBeenCalledOnce();
+	const restarted = storage.restart();
+	FakeWorker.instances[1].ready();
+	await restarted;
+	expect(storage.languages.fr.status).toBe('ready');
+});
+it('makes a query failure actionable on the affected dictionary', async () => {
+	FakeWorker.files = [['fr', 'current']];
+	const storage = await start();
+	const query = expect(storage.search('fr', 'test')).rejects.toThrow('malformed');
+	await vi.advanceTimersByTimeAsync(0);
+	FakeWorker.instances[0].reply(undefined, 'database disk image is malformed');
+	await query;
+	expect(storage.languages.fr.status).toBe('error');
+	expect(storage.phase).toBe('ready');
+});
+it('bounds waiting for a storage lock with a retryable error', async () => {
+	const { storage } = await import('./sqliteClient.svelte');
+	const opened = expect(storage.connect()).rejects.toThrow('Close other Lexicoff tabs');
+	await vi.advanceTimersByTimeAsync(30000);
+	await opened;
+	expect(storage.phase).toBe('error');
+});
+it('does not time out an import while it continues reporting progress', async () => {
+	const storage = await start();
+	const worker = FakeWorker.instances[0];
+	worker.holdOpen = true;
+	const install = storage.openDb('fr', 'current');
+	await vi.advanceTimersByTimeAsync(120000);
+	worker.onmessage?.(
+		new MessageEvent('message', { data: { type: 'INSTALL_PROGRESS', lang: 'fr' } })
+	);
+	await vi.advanceTimersByTimeAsync(120000);
+	expect(worker.terminate).not.toHaveBeenCalled();
+	worker.reply(true);
+	await install;
 });

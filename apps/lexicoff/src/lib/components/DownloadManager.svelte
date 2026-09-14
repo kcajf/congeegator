@@ -60,15 +60,19 @@
 					{#if isSyncing}
 						<div class="progress-area">
 							<span class="progress-text">
-								{#if info.receivedBytes != null && info.totalBytes}
+								{#if info.stage === 'installing'}
+									Installing…
+								{:else if info.receivedBytes != null && info.totalBytes}
 									{formatBytes(info.receivedBytes)} / {formatBytes(info.totalBytes)}
 								{:else}
 									Syncing...
 								{/if}
 							</span>
-							<div class="progress-bar">
-								<div class="progress-fill" style="width: {info.percent ?? 0}%"></div>
-							</div>
+							{#if info.stage !== 'installing'}
+								<div class="progress-bar">
+									<div class="progress-fill" style="width: {info.percent ?? 0}%"></div>
+								</div>
+							{/if}
 						</div>
 					{:else if isError}
 						<button class="btn btn-install" onclick={() => triggerLangSync(lang.code)}>
