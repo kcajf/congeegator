@@ -18,19 +18,19 @@ it('decompresses with bounded output even for highly compressed input', async ()
 		expect(chunk.length).toBeLessThanOrEqual(131072);
 		chunks.push(chunk);
 	}
-	expect(Buffer.concat(chunks)).toEqual(original);
+	expect(Buffer.concat(chunks).equals(original)).toBe(true);
 });
 it('rejects truncation, malformed data and checksum corruption, then permits a retry', async () => {
 	const damaged = Buffer.from(compressed);
 	damaged[damaged.length - 1] ^= 1;
 	for (const bytes of [compressed.subarray(0, -1), new Uint8Array(100), damaged]) {
 		await expect(decode(bytes)).rejects.toThrow();
-		expect(await decode(compressed)).toEqual(original);
+		expect((await decode(compressed)).equals(original)).toBe(true);
 	}
 });
 it('releases a partially consumed decoder so another install can succeed', async () => {
 	const iterator = decompressDatabase(new Blob([compressed]));
 	expect((await iterator.next()).value?.length).toBeGreaterThan(0);
 	await iterator.return(undefined);
-	expect(await decode(compressed)).toEqual(original);
+	expect((await decode(compressed)).equals(original)).toBe(true);
 });
