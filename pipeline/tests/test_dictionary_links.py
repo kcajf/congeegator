@@ -58,7 +58,8 @@ def test_alternative_and_definition_targets_are_distinct():
 def test_anchors_and_display_labels():
     assert word_link('ψηφοφορία#Greek', 'en', 'voting') == {'word':'ψηφοφορία','lang':'el','label':'voting'}
     assert word_link('recipe#Noun', 'en')['lang'] == 'en'
-    assert word_link('word#Old_English', 'en') == {'word':'word','lang':'','anchor':'Old_English'}
+    assert word_link('word#Old_English', 'en') == {'word':'word','lang':'ang'}
+    assert word_link('word#Old_French', 'en') == {'word':'word','lang':'','anchor':'Old_French'}
     for target in ('w:Politics','Category:Politics','https://example.com','{{bad}}','-','*root'):
         assert word_link(target,'en') is None
 

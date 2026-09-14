@@ -86,6 +86,7 @@ INDEX_STATEMENTS = (
 EXTENDED_LANGUAGES = frozenset({
     "grc", "az", "eu", "br", "et", "ka", "he", "hi", "is", "ga",
     "ko", "lt", "mk", "ms", "oc", "fa", "sa", "sh", "sk", "cy",
+    "nn", "lv", "bg", "mt", "tl", "gd", "fo", "ang", "non",
 })
 EXTENDED_SCHEMA_SQL = SCHEMA_SQL.replace(
     "form_details TEXT\n", "form_details TEXT,\n    search_key TEXT NOT NULL,\n    pronunciations TEXT\n"

@@ -34,6 +34,15 @@ from .wiktionary import Entry
 # Common nouns, verbs and adjectives, with diacritics and non-Latin scripts.
 # These are presence/definition/search probes, not a vocabulary coverage estimate.
 COMMON_WORDS = {
+    "nn": ["hus", "vatn", "vera", "eta", "god", "eg", "ikkje", "ein", "ei", "eit"],
+    "lv": ["māja", "ūdens", "būt", "ēst", "labs"],
+    "bg": ["къща", "вода", "съм", "ям", "добър"],
+    "mt": ["dar", "ilma", "kien", "kiel", "tajjeb"],
+    "tl": ["bahay", "tubig", "kumain", "mabuti", "ako"],
+    "gd": ["taigh", "uisge", "bi", "ith", "math"],
+    "fo": ["hús", "vatn", "vera", "eta", "góður"],
+    "ang": ["hus", "wæter", "beon", "etan", "god"],
+    "non": ["hús", "vatn", "vera", "eta", "góðr"],
     "pt": ["casa", "água", "ser", "comer", "bom"],
     "ca": ["casa", "aigua", "ésser", "menjar", "bo"],
     "ro": ["casă", "apă", "fi", "mânca", "bun"],

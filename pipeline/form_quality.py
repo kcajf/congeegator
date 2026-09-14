@@ -105,6 +105,26 @@ def note(audit, reason, entry, text):
 def rejected_reason(entry, form, text):
     code = entry.lang_code
     table = form.source in {'conjugation', 'declension', 'inflection'}
+    if code == 'lv':
+        if any(head.name == 'lv-part' and '|#default=' in head.expansion for head in entry.head_templates):
+            # The broken template also invents clean-looking comparative and
+            # adverb forms. Keep the definition, not this unreliable paradigm.
+            return 'broken-paradigm'
+        if text == 'conjugation' and form.tags & {'first-person', 'second-person', 'third-person'}:
+            return 'table-header'
+        if text == 'declension' and 'irregular' in form.tags:
+            return 'table-header'
+        if '|' in text and '=' in text:
+            return 'unexpanded-template'
+        if table and form.source == 'conjugation' and text in {'es', 'tu', 'viņš', 'viņa', 'mēs', 'jūs', 'viņi', 'viņas'}:
+            return 'table-pronoun'
+    if code == 'nn' and (re.fullmatch(r'since \d{4}', text) or
+                         text.startswith('Forms in [brackets] were considered')):
+        return 'usage-note'
+    if code == 'tl' and text in {'superseded', 'pre-2007'} and 'alternative' in form.tags:
+        return 'usage-note'
+    if code == 'bg' and table and '+' in text:
+        return 'unexpanded-template'
     if text in {'[please provide]', '[Term?]', 'Term?', '?', '—', '–', '- —'}:
         return 'placeholder'
     if code == 'fi' and (text == 'Rare. Only used with substantive adjectives.' or
@@ -254,6 +274,12 @@ def normalize(entry, form, text, clean_text, audit=None):
         note(audit, 'reviewed-source-cleanup', entry, text)
     for value in variants:
         qualifiers = list(extra)
+        if code == 'nn' and value.startswith('(alternative case) '):
+            value = value.removeprefix('(alternative case) ')
+            qualifiers.append('alternative case')
+        if code == 'gd' and value.endswith(' (archaic)'):
+            value = value.removesuffix(' (archaic)')
+            qualifiers.append('archaic')
         if code == 'el':
             found = list(greek_variants(value, entry.pos in {'affix', 'suffix', 'prefix', 'combining_form'}))
             if not found: note(audit, 'unresolved-greek-cell', entry, value)

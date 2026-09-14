@@ -10,8 +10,8 @@ from functools import lru_cache
 from .utils import strip_diacritics
 from .wiktionary import Entry
 
-QUALITY_LANGUAGES = frozenset('grc az eu br et ka he hi is ga ko lt mk ms oc fa sa sh sk cy'.split())
-_GENDERLESS = frozenset('az eu et ka ko ms fa'.split())
+QUALITY_LANGUAGES = frozenset('grc az eu br et ka he hi is ga ko lt mk ms oc fa sa sh sk cy nn lv bg mt tl gd fo ang non'.split())
+_GENDERLESS = frozenset('az eu et ka ko ms fa tl'.split())
 _GENDERS = {'masculine': 'm', 'feminine': 'f', 'neuter': 'n', 'common-gender': 'c'}
 # These are source usage/variety labels, not a guessed classification of words.
 _LABELS = frozenset('''formal informal colloquial literary archaic dated rare uncommon vulgar slang figurative figuratively transitive intransitive obsolete nonstandard dialectal regional misspelling historical poetic humorous offensive derogatory proscribed alternative abbreviation initialism clipping pronunciation-spelling reconstructed hypothetical conjectural honorific polite impolite non-polite familiar humble diminutive augmentative relational perfective imperfective reflexive uncountable plural-only singular-only animate inanimate not-comparable comparative superlative mutation lenition nasalization eclipsis aspirate-mutation soft-mutation mixed-mutation no-mutation biblical Biblical Modern-Hebrew Modern-Israeli Tiberian Ashkenazi Sephardi reconstructed-Biblical Classical-Persian Dari Iranian Iran Tajik Tehrani Kabuli Hazaragi Vedic Classical-Sanskrit Epic Sanskrit Buddhist Epic-Sanskrit Attic Ionic Doric Aeolic Aeolian Koine Byzantine Homeric Epic-Greek New-Attic Old-Attic poetic dialectal Arcadian Cypriot Boeotian Laconian Thessalian Lesbian Cretan Pamphylian Macedonian Northwest-Greek North South Northern Southern Western Eastern Classical North-Azerbaijani South-Azerbaijani Tabriz Zaqatala Bilasuvar Gadabay Ordubad Zangilan Baku Salyan Nakhchivan Qazakh Kurdamir Barda Kalbajar Agdam Jalilabad Khojavend Iranian Azerbaijani Bosnia Croatia Serbia Montenegro Kajkavian Torlakian Ijekavian Ekavian Chakavian Ikavian Dalmatia Burgenland Bosnian Croatian Serbian Indonesia Malaysia Singapore Brunei Medan Penang Riau Pahang Sabah Jakarta Johore Sarawak-Malay Javanese Old-Lithuanian Aukštaitian North-Korea South-Korea Jeju Seoul Gyeongsang Hamgyong Pyongan Chungcheong Jeolla Munster Ulster Connacht North-Wales South-Wales Gascony Languedoc Limousin Provençal Mistralian Vivaro-Alpine Niçard Auvergnat Biscayan Navarro-Lapurdian Navarrese Lapurdian Souletin Gipuzkoan Upper-Navarrese Lower-Navarrese Standard Arabic Cyrillic Latin Roman Jawi Hanja Hangul Devanagari Urdu Bengali Brahmi Khmer Sinhala Tibetan Telugu Tamil Kannada Malayalam Gujarati Gurmukhi Newa Grantha Sharada Balinese Javanese-script Thai Myanmar Mongolian Yañalif'''.split())
@@ -94,6 +94,13 @@ def _gender(entry):
     # must not add a gender to the noun being defined.
     tags = {t for f in entry.forms if 'canonical' in f.tags for t in f.tags}
     genders = {_GENDERS[t] for t in tags if t in _GENDERS}
+    if entry.lang_code == 'nn':
+        # Multiple noun heads can be flattened into one canonical form, losing
+        # all but its final gender (e.g. smell n / smell m). The template names
+        # explicitly identify each head's gender; positional arguments do not.
+        for head in entry.head_templates:
+            if match := re.fullmatch(r'nn-noun-([mfn])[0-9u]*', head.name):
+                genders.add(match[1])
     if not genders:
         for head in entry.head_templates:
             key = {'grc-noun': '3', 'sa-noun': '1', 'sh-noun': '2', 'mk-noun': '1'}.get(head.name)
