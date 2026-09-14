@@ -32,6 +32,13 @@ describe('main-thread search request preparation', () => {
 		expect(prepareSearchRequest('el', 'SPITI').phoneticQuery).toBe('spiti');
 	});
 
+	it.each(['fr', 'ru', 'ar', 'he', 'unknown'])(
+		'does not enable phonetic search for %s before an index is supported',
+		(lang) => {
+			expect(prepareSearchRequest(lang, 'spiti').phoneticQuery).toBe('');
+		}
+	);
+
 	it('preserves decomposed Vietnamese input without generating a Greek phonetic query', () => {
 		const input = 'NƯỚC'.normalize('NFD');
 		const request = prepareSearchRequest('vi', input);

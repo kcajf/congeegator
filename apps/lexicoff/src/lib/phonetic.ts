@@ -114,7 +114,12 @@ export function toPhoneticEl(s: string): string {
 	return s;
 }
 
+// Register a language only once its generated databases include a matching
+// phonetic index. Keep these transforms aligned with pipeline phonetic_fn.
+const phoneticTransforms: Readonly<Record<string, ((text: string) => string) | undefined>> = {
+	el: toPhoneticEl
+};
+
 export function toPhonetic(lang: string, s: string): string {
-	if (lang === 'el') return toPhoneticEl(s);
-	return s;
+	return phoneticTransforms[lang]?.(s) ?? '';
 }
