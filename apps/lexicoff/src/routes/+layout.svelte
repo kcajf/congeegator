@@ -385,9 +385,12 @@
 			{:else if searchStatus === 'complete'}
 				<div class="no-results" role="status">No matches found</div>
 			{/if}
-		{:else}
-			{@render children()}
 		{/if}
+		<!-- Keep the article mounted while search temporarily replaces it, so its
+		     disclosure state is still available when navigation captures a snapshot. -->
+		<div hidden={!!searchTerm.trim()}>
+			{@render children()}
+		</div>
 	</div>
 </div>
 

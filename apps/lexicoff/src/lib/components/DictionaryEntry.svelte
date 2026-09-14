@@ -1,4 +1,16 @@
 <script module lang="ts">
+	export type EntryViewState = {
+		etymologyOpen: boolean;
+		formsOpen: boolean;
+		formLimit: number;
+		examplesOpen: Record<number, boolean>;
+		readingsOpen: Record<string, boolean>;
+		relatedOpen: boolean;
+		relatedFilter: string;
+		derivedOpen: boolean;
+		derivedFilter: string;
+	};
+
 	export const POS_LABELS: Record<string, string> = {
 		noun: 'Noun',
 		verb: 'Verb',
@@ -62,9 +74,29 @@
 	const pronunciations = $derived(entryPronunciations(entry));
 	const formLabels = $derived(formReadings(entry));
 	const formBatchSize = 40;
-	let formsOpen = $state(false);
-	let formLimit = $state(formBatchSize);
-	const visibleForms = $derived(formsOpen ? (entry.forms?.slice(0, formLimit) ?? []) : []);
+	let view = $state<EntryViewState>({
+		etymologyOpen: false,
+		formsOpen: false,
+		formLimit: formBatchSize,
+		examplesOpen: {},
+		readingsOpen: {},
+		relatedOpen: false,
+		relatedFilter: '',
+		derivedOpen: false,
+		derivedFilter: ''
+	});
+
+	export function capture(): EntryViewState {
+		return $state.snapshot(view);
+	}
+
+	export function restore(saved: EntryViewState) {
+		// Copy so subsequent interaction cannot mutate the saved history entry.
+		view = structuredClone(saved);
+	}
+	const visibleForms = $derived(
+		view.formsOpen ? (entry.forms?.slice(0, view.formLimit) ?? []) : []
+	);
 	let linkedForms = $state<Set<string>>(new Set());
 	$effect(() => {
 		const words = visibleForms.filter((form) => form !== entry.word);
@@ -172,7 +204,7 @@
 				{#if sense.examples?.length}
 					<Example example={sense.examples[0]} {lang} />
 					{#if sense.examples.length > 1}
-						<details class="more-examples">
+						<details class="more-examples" bind:open={view.examplesOpen[i]}>
 							<summary
 								>{sense.examples.length - 1} more {sense.examples.length === 2
 									? 'example'
@@ -200,7 +232,7 @@
 		/>{/if}
 
 	{#if entry.etymology}
-		<details class="supplement">
+		<details class="supplement" bind:open={view.etymologyOpen}>
 			<summary>Etymology</summary>
 			<p class="etymology" dir="auto">
 				<LinkedText text={entry.etymology} links={entry.details?.etymologyLinks} uniqueOnly />
@@ -210,15 +242,19 @@
 	{#if entry.details?.related?.length}<WordCollection
 			label="Related words"
 			links={entry.details.related}
+			bind:open={view.relatedOpen}
+			bind:filter={view.relatedFilter}
 		/>{/if}
 	{#if entry.details?.derived?.length}<WordCollection
 			label="Derived words"
 			links={entry.details.derived}
+			bind:open={view.derivedOpen}
+			bind:filter={view.derivedFilter}
 		/>{/if}
 	{#if entry.forms?.length}
-		<details class="supplement forms-section" bind:open={formsOpen}>
+		<details class="supplement forms-section" bind:open={view.formsOpen}>
 			<summary>Forms <span class="count">{entry.forms.length}</span></summary>
-			{#if formsOpen}
+			{#if view.formsOpen}
 				{#each formGroups(entry, visibleForms) as group (group.label)}
 					{#if entry.formDetails?.some((detail) => detail.kind)}<h4 class="form-group">
 							{group.label}
@@ -233,7 +269,7 @@
 										/>{:else}{form}{/if}</bdi
 								>{#if readings.length}<span class="form-tags">({readings[0]})</span>{/if}
 								{#if readings.length > 1}
-									<details class="form-readings">
+									<details class="form-readings" bind:open={view.readingsOpen[form]}>
 										<summary
 											>{readings.length - 1} more {readings.length === 2
 												? 'reading'
@@ -248,9 +284,9 @@
 						{/each}
 					</ul>
 				{/each}
-				{#if formLimit < entry.forms.length}
-					<button class="more-forms" onclick={() => (formLimit += formBatchSize)}>
-						Show {Math.min(formBatchSize, entry.forms.length - formLimit)} more
+				{#if view.formLimit < entry.forms.length}
+					<button class="more-forms" onclick={() => (view.formLimit += formBatchSize)}>
+						Show {Math.min(formBatchSize, entry.forms.length - view.formLimit)} more
 					</button>
 				{/if}
 			{/if}
