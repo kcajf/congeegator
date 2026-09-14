@@ -171,7 +171,7 @@
 
 	.progress-fill {
 		height: 100%;
-		background: #3d85c6;
+		background: var(--accent);
 		transition: width 0.2s ease;
 	}
 
@@ -182,7 +182,7 @@
 
 	.error-text {
 		font-size: 0.8rem;
-		color: #c00;
+		color: var(--danger);
 	}
 
 	.btn {
@@ -197,12 +197,12 @@
 	}
 
 	.btn:hover {
-		background: #e8ecf4;
+		background: var(--hover);
 	}
 
 	.btn-install {
-		border-color: #3d85c6;
-		color: #3d85c6;
+		border-color: var(--accent);
+		color: var(--accent);
 	}
 
 	.btn-remove {

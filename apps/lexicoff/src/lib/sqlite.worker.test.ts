@@ -1,6 +1,8 @@
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 import { DatabaseSync } from 'node:sqlite';
 import { zstdCompressSync } from 'node:zlib';
+import { prepareSearchRequest } from './searchRequest';
+import { toPhoneticEl } from './phonetic';
 import entryJsonFixtures from './fixtures/entry-json.json';
 import { dictionarySearchKey, dictionaryWordKey } from './searchNormalization';
 
@@ -92,7 +94,15 @@ function setup(realDb?: DatabaseSync) {
 	async function send(type: string, lang = 'fr', query = 'aaaaaaaa', words: string[] = []) {
 		const current = id++;
 		await worker.onmessage({
-			data: { id: current, type, lang, query, word: query, hash: query, words }
+			data: {
+				id: current,
+				type,
+				lang,
+				word: query,
+				hash: query,
+				words,
+				...prepareSearchRequest(lang, query)
+			}
 		} as MessageEvent);
 		return postMessage.mock.calls.map(([m]) => m).find((m) => m.id === current);
 	}
@@ -514,12 +524,46 @@ describe('extended dictionaries with real SQLite FTS', () => {
 				word === alias ? word : `${word} ${alias}`,
 				dictionarySearchKey(entry.forms?.join(' ') ?? '', lang),
 				entry.gloss,
-				''
+				lang === 'el' ? [entry.word, ...(entry.forms ?? [])].map(toPhoneticEl).join(' ') : ''
 			);
 			db.prepare('INSERT INTO fuzzy(rowid, word, phonetic) VALUES (?, ?, ?)').run(id, alias, '');
 		}
 		return db;
 	}
+
+	it('ranks an exact romanized Greek headword above prefix and definition matches', async () => {
+		const db = database('el', [
+			...Array.from({ length: 60 }, (_, i) => ({ word: `σπιτικός${i}`, gloss: 'domestic' })),
+			{ word: 'λέξη', gloss: 'spiti example' },
+			{ word: 'σπίτι', gloss: 'house', forms: ['σπίτια'] }
+		]);
+		const s = setup(db);
+		s.files.add('/el-aaaaaaaa.sqlite');
+		await s.start();
+		await s.send('open', 'el');
+		for (const query of ['spiti', 'SPITI', 'σπίτι']) {
+			const response = await s.send('search', 'el', query);
+			expect(response.error).toBeUndefined();
+			expect(response.result[0]).toMatchObject({
+				word: 'σπίτι',
+				quality: query === 'σπίτι' ? 0 : 5
+			});
+		}
+	});
+
+	it('keeps English definitions above partial phonetic coincidences', async () => {
+		const db = database('el', [
+			{ word: 'ανγκρύα', gloss: 'phonetic coincidence' },
+			{ word: 'θυμωμένος', gloss: 'angry' }
+		]);
+		const s = setup(db);
+		s.files.add('/el-aaaaaaaa.sqlite');
+		await s.start();
+		await s.send('open', 'el');
+		const response = await s.send('search', 'el', 'angry');
+		expect(response.error).toBeUndefined();
+		expect(response.result.map((r: { word: string }) => r.word)).toEqual(['θυμωμένος', 'ανγκρύα']);
+	});
 
 	it('searches compressed rows without initializing a decoder and decodes only word pages', async () => {
 		const forms = entryJsonFixtures[0].value as string[];

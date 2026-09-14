@@ -6,7 +6,7 @@ export type SearchResult = {
 	word: string;
 	pos: string;
 	matched: string;
-	quality: number; // 0=exact, 5=exact form/alias, 10=word, 20=form, 30=phonetic, 40=gloss, 50=fuzzy
+	quality: number; // 0=exact, 5=exact form/alias/phonetic, 10=word, 20=form, 30=phonetic, 40=gloss, 50=fuzzy
 	freq: number;
 	glosses: string[];
 	matchedGlossIdx?: number;
