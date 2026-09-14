@@ -83,21 +83,6 @@ async function shutdown() {
 	// termination releases the OPFS handles and the ownership lock instead.
 }
 
-/** Legacy uncompressed downloads remain retryable after upgrading. */
-async function* readDatabase(file: Blob): AsyncGenerator<Uint8Array> {
-	const reader = file.stream().getReader();
-	try {
-		for (;;) {
-			const { done, value } = await reader.read();
-			if (done) return;
-			yield value;
-		}
-	} finally {
-		await reader.cancel().catch(() => {});
-		reader.releaseLock();
-	}
-}
-
 async function openDb(lang: string, hash: string): Promise<boolean> {
 	if (!poolUtil) return false;
 
@@ -110,19 +95,12 @@ async function openDb(lang: string, hash: string): Promise<boolean> {
 	let wordCount: number | null = null;
 	try {
 		let file: File | undefined;
-		let compressed = false;
 		try {
 			const root = await navigator.storage.getDirectory();
 			const dir = await root.getDirectoryHandle('lexicoff');
-			try {
-				file = await (await dir.getFileHandle(`${lang}-${hash}.sqlite.zst`)).getFile();
-				compressed = true;
-			} catch (error) {
-				if (!(error instanceof DOMException && error.name === 'NotFoundError')) throw error;
-				file = await (await dir.getFileHandle(`${lang}-${hash}.sqlite`)).getFile();
-			}
+			file = await (await dir.getFileHandle(`${lang}-${hash}.sqlite.zst`)).getFile();
 			if (file.size === 0) {
-				await dir.removeEntry(`${lang}-${hash}.sqlite${compressed ? '.zst' : ''}`);
+				await dir.removeEntry(`${lang}-${hash}.sqlite.zst`);
 				file = undefined;
 			}
 		} catch (error) {
@@ -140,7 +118,7 @@ async function openDb(lang: string, hash: string): Promise<boolean> {
 			poolUtil.unlink(fname);
 			await poolUtil.reserveMinimumCapacity(poolUtil.getFileCount() + 3);
 			imported = true;
-			const chunks = compressed ? decompressDatabase(file) : readDatabase(file);
+			const chunks = decompressDatabase(file);
 			let expectedBytes = 0;
 			let receivedBytes = 0;
 			let lastProgress = 0;
@@ -695,7 +673,12 @@ async function listOpfsFiles(): Promise<[string, string, boolean?][]> {
 		// @ts-expect-error — entries() not in all TS libs
 		for await (const [name] of dir.entries()) {
 			const n = name as string;
-			const match = n.match(/^([a-z]{2,3})-([a-f0-9]{8})\.sqlite(?:\.zst)?$/);
+			// Discard obsolete staging files instead of resuming their imports.
+			if (/^[a-z]{2,3}-[a-f0-9]{8}\.sqlite$/.test(n)) {
+				await dir.removeEntry(n);
+				continue;
+			}
+			const match = n.match(/^([a-z]{2,3})-([a-f0-9]{8})\.sqlite\.zst$/);
 			if (match) {
 				const file = await (await dir.getFileHandle(n)).getFile();
 				// createWritable() commits on close. An interrupted first write
