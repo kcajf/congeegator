@@ -8,7 +8,6 @@
 		relatedOpen: boolean;
 		relatedFilter: string;
 		derivedOpen: boolean;
-		derivedFilter: string;
 	};
 
 	export const POS_LABELS: Record<string, string> = {
@@ -82,8 +81,7 @@
 		readingsOpen: {},
 		relatedOpen: false,
 		relatedFilter: '',
-		derivedOpen: false,
-		derivedFilter: ''
+		derivedOpen: false
 	});
 
 	export function capture(): EntryViewState {
@@ -253,8 +251,8 @@
 	{#if entry.details?.derived?.length}<WordCollection
 			label="Derived words"
 			links={entry.details.derived}
+			filterable={false}
 			bind:open={view.derivedOpen}
-			bind:filter={view.derivedFilter}
 		/>{/if}
 	{#if entry.forms?.length}
 		<details class="supplement forms-section" bind:open={view.formsOpen}>
