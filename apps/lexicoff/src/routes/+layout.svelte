@@ -537,10 +537,15 @@
 		padding: 0.5rem 0;
 	}
 
-	.result-link:hover,
-	.result-link:focus {
+	.result-link:focus-visible {
 		background-color: #e8ecf4;
 		outline: none;
+	}
+
+	@media (hover: hover) and (pointer: fine) {
+		.result-link:hover {
+			background-color: #e8ecf4;
+		}
 	}
 
 	.result-glosses {
