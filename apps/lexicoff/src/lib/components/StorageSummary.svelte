@@ -100,7 +100,7 @@
 		color: var(--text);
 	}
 	.link-btn:focus-visible {
-		outline: 2px solid #3d85c6;
+		outline: 2px solid var(--accent);
 		outline-offset: 3px;
 	}
 	.link-btn:disabled {
@@ -108,7 +108,7 @@
 		cursor: not-allowed;
 	}
 	.error {
-		color: #c00;
+		color: var(--danger);
 		font-size: 0.85rem;
 	}
 </style>

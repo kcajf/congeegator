@@ -240,11 +240,11 @@
 	}
 	button:hover:not(:disabled),
 	a:hover {
-		background: #e8ecf4;
+		background: var(--hover);
 	}
 	button:focus-visible,
 	a:focus-visible {
-		outline: 2px solid #3d85c6;
+		outline: 2px solid var(--accent);
 		outline-offset: -2px;
 	}
 	button:disabled {

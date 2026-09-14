@@ -90,7 +90,7 @@
 		margin-left: 0.2rem;
 	}
 	summary:focus-visible {
-		outline: 2px solid #245f91;
+		outline: 2px solid var(--link);
 		outline-offset: 3px;
 	}
 	h3 {

@@ -8,9 +8,11 @@
 	import LanguagePicker from '$lib/components/LanguagePicker.svelte';
 	import HistoryNavigation from '$lib/components/HistoryNavigation.svelte';
 	import ToastStack from '$lib/components/ToastStack.svelte';
-	import { appTitle, brandColor } from '$lib/defs';
+	import { appTitle } from '$lib/defs';
 	import lexicoffIcon from '$lib/assets/lexicoff-icon.svg';
 	import '$lib/disclosures.css';
+	import '$lib/theme.css';
+	import { theme } from '$lib/theme.svelte';
 	import { storage as sqliteClient } from '$lib/sqliteClient.svelte';
 	import type { SearchResult } from '$lib/sqliteClient.svelte';
 	import { searchLangState } from '$lib/searchLang.svelte';
@@ -38,6 +40,8 @@
 	let { children }: LayoutProps = $props();
 
 	const webManifestLink = $derived(pwaInfo?.webManifest?.linkTag ?? '');
+
+	onMount(() => theme.initialize());
 
 	onMount(async () => {
 		void sqliteClient.connect().catch(() => {});
@@ -259,7 +263,6 @@
 	<link rel="icon" href="/favicon.ico" sizes="any" />
 	<link rel="icon" type="image/svg+xml" href={lexicoffIcon} />
 	<link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
-	<meta name="theme-color" content={brandColor} />
 	<meta name="application-name" content={appTitle} />
 
 	{#if webManifestLink}
@@ -284,7 +287,8 @@
 					}
 				}}
 			>
-				<img src={lexicoffIcon} alt="" />
+				<span class="logo-mark" style:mask-image={`url("${lexicoffIcon}")`} aria-hidden="true"
+				></span>
 			</a>
 
 			<div class="search-container">
@@ -409,13 +413,6 @@
 		touch-action: manipulation;
 	}
 
-	:global(:root) {
-		--brand: #fafafa;
-		--text: #1a1a2e;
-		--text-muted: #666;
-		--border: #ddd;
-	}
-
 	@media (max-width: 600px) {
 		:global(html) {
 			font-size: 105%;
@@ -437,10 +434,14 @@
 		color: var(--text);
 	}
 
-	.logo img {
+	.logo-mark {
+		background: currentColor;
+		mask-size: contain;
+		mask-repeat: no-repeat;
+		mask-position: center;
 		display: block;
 		height: 2rem;
-		width: auto;
+		width: calc(2rem * 400 / 304);
 	}
 
 	.container {
@@ -501,6 +502,7 @@
 	}
 
 	.search-container input {
+		color: var(--text);
 		appearance: none;
 		background-color: transparent;
 		padding: 0.5rem 0.2rem;
@@ -514,6 +516,15 @@
 		transition:
 			width 0.3s ease,
 			border-color 0.3s ease;
+	}
+
+	.search-container input::placeholder {
+		color: var(--text-muted);
+		opacity: 1;
+	}
+
+	.search-container input:focus-visible {
+		border-bottom-color: var(--accent);
 	}
 
 	.results-list {
@@ -541,27 +552,27 @@
 	}
 
 	.result-link:focus-visible {
-		background-color: #e8ecf4;
+		background-color: var(--hover);
 		outline: none;
 	}
 
 	@media (hover: hover) and (pointer: fine) {
 		.result-link:hover {
-			background-color: #e8ecf4;
+			background-color: var(--hover);
 		}
 	}
 
 	.result-glosses {
 		display: block;
 		font-size: 0.78em;
-		color: #858585;
+		color: var(--text-muted);
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
 	}
 
 	.root-hint {
-		color: #858585;
+		color: var(--text-muted);
 		font-size: 0.85em;
 	}
 
@@ -569,7 +580,7 @@
 		position: fixed;
 		top: 0.5rem;
 		right: 0.5rem;
-		background: #c00;
+		background: var(--danger);
 		color: white;
 		border: none;
 		padding: 0.3rem 0.6rem;

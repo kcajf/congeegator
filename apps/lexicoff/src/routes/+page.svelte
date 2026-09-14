@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import DownloadManager from '$lib/components/DownloadManager.svelte';
+	import ThemePicker from '$lib/components/ThemePicker.svelte';
 	import StorageSummary from '$lib/components/StorageSummary.svelte';
 	import { appTitle, siteUrl } from '$lib/defs';
 
@@ -58,6 +59,10 @@
 
 	<StorageSummary>
 		<DownloadManager />
+		<section class="settings" aria-labelledby="settings-heading">
+			<h2 id="settings-heading">Settings</h2>
+			<ThemePicker />
+		</section>
 	</StorageSummary>
 </div>
 
@@ -77,7 +82,16 @@
 		font-size: 0.9rem;
 	}
 
+	.settings {
+		margin-top: 1.25rem;
+	}
+
+	.settings h2 {
+		font-size: 1rem;
+		margin: 0 0 0.75rem;
+	}
+
 	a {
-		color: #3d85c6;
+		color: var(--accent);
 	}
 </style>
