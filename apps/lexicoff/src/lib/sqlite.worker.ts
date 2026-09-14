@@ -6,6 +6,7 @@
  */
 
 import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
+import { toPhonetic } from './phonetic';
 import { decodeEntryJson } from './entryJson';
 import { decompressDatabase } from './decompressDatabase';
 import { checkInstallSpace, storageConnectionFailed, storageErrorMessage } from './storageErrors';
@@ -20,7 +21,7 @@ interface InternalResult {
 	word: string;
 	pos: string;
 	matched: string;
-	quality: number; // 0=exact, 5=exact form/alias, 10=word, 20=form, 30=phonetic, 40=gloss, 50=fuzzy
+	quality: number; // 0=exact, 5=exact form/alias/phonetic, 10=word, 20=form, 30=phonetic, 40=gloss, 50=fuzzy
 	freq: number;
 	id: number;
 }
@@ -399,13 +400,38 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 		}
 	}
 
-	// Phonetic search (quality 30) — only if phoneticQuery differs from query
-	if (phoneticQuery && phoneticQuery !== trimmed) {
+	// The request supplies a phonetic query only for languages with a phonetic index.
+	// Already-phonetic Latin input (e.g. spiti) must still search that index.
+	if (phoneticQuery) {
 		const phoneticTokens = searchTokens(phoneticQuery);
 		const phonetic = phoneticTokens.join(' ');
 		const phoneticFts = prefixMatch(phoneticTokens);
 		if (phonetic) {
 			try {
+				// Fetch whole-token matches separately so the prefix limit cannot hide an
+				// exact phonetic headword behind many longer words or inflections.
+				const exactPhoneticRows = execQuery(
+					db,
+					`SELECT e.id, e.word, e.pos, e.freq
+					FROM entries e
+					JOIN (SELECT rowid FROM entries_fts WHERE phonetic MATCH ?) AS fts ON e.id = fts.rowid`,
+					[phoneticTokens.map((token) => `"${token}"`).join(' ')]
+				);
+				for (const [id, word, pos, freq] of exactPhoneticRows) {
+					if (toPhonetic(lang, word as string) !== phoneticQuery) continue;
+					const key = `${word}:${pos}`;
+					const existing = seen.get(key);
+					if (!existing || existing.quality > 5) {
+						seen.set(key, {
+							word: word as string,
+							pos: pos as string,
+							matched: word as string,
+							quality: 5,
+							freq: freq as number,
+							id: id as number
+						});
+					}
+				}
 				const phoneticRows = execQuery(
 					db,
 					`SELECT e.id, e.word, e.pos, e.freq
