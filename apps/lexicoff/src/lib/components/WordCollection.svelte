@@ -6,10 +6,17 @@
 		label,
 		links,
 		hint,
-		filterable = true
-	}: { label: string; links: WordLink[]; hint?: string; filterable?: boolean } = $props();
-	let open = $state(false);
-	let filter = $state('');
+		filterable = true,
+		open = $bindable(false),
+		filter = $bindable('')
+	}: {
+		label: string;
+		links: WordLink[];
+		hint?: string;
+		filterable?: boolean;
+		open?: boolean;
+		filter?: string;
+	} = $props();
 	const filtered = $derived(
 		filterable && filter.trim()
 			? links.filter((link) =>

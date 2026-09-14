@@ -4,10 +4,41 @@
 	import { storage } from '$lib/sqliteClient.svelte';
 	import { appTitle, siteUrl } from '$lib/defs';
 	import { langWiktionaryName } from '$lib/dataUtils';
-	import DictionaryEntry, { POS_LABELS } from '$lib/components/DictionaryEntry.svelte';
-	import type { PageProps } from './$types';
+	import DictionaryEntry, {
+		POS_LABELS,
+		type EntryViewState
+	} from '$lib/components/DictionaryEntry.svelte';
+	import { flushSync } from 'svelte';
+	import { page } from '$app/state';
+	import type { PageProps, Snapshot } from './$types';
 
 	let { data }: PageProps = $props();
+	const entryComponents: Record<number, ReturnType<typeof DictionaryEntry> | undefined> = {};
+
+	export const snapshot: Snapshot<{
+		entries: Record<number, EntryViewState>;
+		scroll: { x: number; y: number };
+	}> = {
+		capture: () => ({
+			entries: Object.fromEntries(
+				data.entries.flatMap(({ id }) => {
+					const component = entryComponents[id];
+					return component ? [[id, component.capture()]] : [];
+				})
+			),
+			scroll: page.state.lexicoffReadingScroll ?? { x: window.scrollX, y: window.scrollY }
+		}),
+		restore: ({ entries, scroll }) => {
+			flushSync(() => {
+				for (const { id } of data.entries) {
+					if (entries[id]) entryComponents[id]?.restore(entries[id]);
+				}
+			});
+			// Kit restores scroll before snapshots. Reapply after expanding the page
+			// so the browser does not clamp the position to its collapsed height.
+			window.scrollTo(scroll.x, scroll.y);
+		}
+	};
 
 	const wiktionaryUrl = $derived(
 		`https://en.wiktionary.org/wiki/${encodeURIComponent(data.word)}#${encodeURIComponent(langWiktionaryName(data.lang).replaceAll(' ', '_'))}`
@@ -75,7 +106,7 @@
 
 	{#key `${data.lang}/${data.word}`}
 		{#each sections as { entry, label } (entry.id)}
-			<DictionaryEntry {entry} {label} lang={data.lang} />
+			<DictionaryEntry bind:this={entryComponents[entry.id]} {entry} {label} lang={data.lang} />
 		{/each}
 	{/key}
 
