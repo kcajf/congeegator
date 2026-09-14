@@ -481,7 +481,8 @@
 
 	@media (max-width: 600px) and (display-mode: standalone) {
 		:global(:root) {
-			--history-bar-height: calc(53px + env(safe-area-inset-bottom));
+			/* 44px controls, 4px top padding, 1px border, and the bar's bottom padding. */
+			--history-bar-height: calc(49px + max(4px, env(safe-area-inset-bottom)));
 		}
 
 		.content {

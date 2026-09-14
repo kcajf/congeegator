@@ -5,6 +5,7 @@
 	import { onMount, tick } from 'svelte';
 	import { manifest, langWiktionaryName } from '$lib/dataUtils';
 	import { searchLangState } from '$lib/searchLang.svelte';
+	import { trackViewport } from '$lib/viewport.svelte';
 	import {
 		TRAIL_STORAGE_KEY,
 		RECENT_STORAGE_KEY,
@@ -17,6 +18,7 @@
 	} from '$lib/navigationHistory';
 
 	let { onSelectCurrent }: { onSelectCurrent: () => void } = $props();
+	const viewport = trackViewport();
 	let trail = $state(emptyTrail());
 	let recent = $state<RecentWord[]>([]);
 	let initialized = false;
@@ -111,7 +113,7 @@
 	}
 </script>
 
-<nav class="history-bar" aria-label="Browsing history">
+<nav class="history-bar" class:keyboard-open={viewport.keyboardOpen} aria-label="Browsing history">
 	<button
 		type="button"
 		aria-label={previous ? `Back to ${previous.label}` : 'Back'}
@@ -330,6 +332,10 @@
 		font-size: 0.85rem;
 	}
 	@media (max-width: 600px) {
+		.history-bar.keyboard-open {
+			visibility: hidden;
+		}
+
 		.history-bar {
 			position: fixed;
 			z-index: 20;

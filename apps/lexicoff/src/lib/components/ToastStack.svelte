@@ -1,36 +1,21 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
 	import { toasts } from '$lib/toasts.svelte';
+	import { trackViewport } from '$lib/viewport.svelte';
 
 	// Offset toasts above the mobile virtual keyboard using the visualViewport API.
 	// On iOS Safari, position:fixed bottom:0 renders behind the keyboard since the
 	// layout viewport doesn't shrink — visualViewport.height does.
-	let bottomOffset = $state(0);
-
-	$effect(() => {
-		if (typeof window === 'undefined' || !window.visualViewport) return;
-
-		const vv = window.visualViewport;
-
-		function update() {
-			bottomOffset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-		}
-
-		vv.addEventListener('resize', update);
-		vv.addEventListener('scroll', update);
-
-		return () => {
-			vv.removeEventListener('resize', update);
-			vv.removeEventListener('scroll', update);
-		};
-	});
+	const viewport = trackViewport();
 </script>
 
 {#if toasts.list.length > 0}
 	<div
 		class="toast-stack"
 		aria-live="polite"
-		style:bottom="calc({bottomOffset}px + var(--history-bar-height, 0px))"
+		style:bottom="calc({viewport.bottomOffset}px + {viewport.keyboardOpen
+			? '0px'
+			: 'var(--history-bar-height, 0px)'})"
 	>
 		{#each toasts.list as toast (toast.id)}
 			<div
