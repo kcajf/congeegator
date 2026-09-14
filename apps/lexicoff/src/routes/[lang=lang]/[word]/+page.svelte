@@ -136,11 +136,11 @@
 		line-height: 1.2;
 	}
 	a {
-		color: #245f91;
+		color: var(--link);
 		text-underline-offset: 0.16em;
 	}
 	a:focus-visible {
-		outline: 2px solid #245f91;
+		outline: 2px solid var(--link);
 		outline-offset: 3px;
 	}
 	footer {

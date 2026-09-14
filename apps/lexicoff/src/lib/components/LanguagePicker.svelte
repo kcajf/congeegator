@@ -131,7 +131,7 @@
 		border: none;
 		background: transparent;
 		cursor: pointer;
-		color: #333;
+		color: var(--text);
 	}
 
 	.trigger bdi {
@@ -143,7 +143,7 @@
 	.chevron {
 		flex-shrink: 0;
 		transition: transform 0.15s ease;
-		color: #999;
+		color: var(--text-muted);
 	}
 
 	.chevron.open {
@@ -162,7 +162,7 @@
 		font-size: 1rem;
 		font-family: inherit;
 		cursor: pointer;
-		color: #333;
+		color: var(--text);
 	}
 
 	@media (max-width: 768px) {
@@ -172,11 +172,11 @@
 	}
 
 	.option:hover {
-		background-color: #f0f0f0;
+		background-color: var(--hover);
 	}
 
 	.option.highlighted {
-		background-color: #eaf2fa;
+		background-color: var(--hover);
 	}
 
 	.option.active {
@@ -190,7 +190,7 @@
 		position: absolute;
 		top: 100%;
 		right: 0;
-		background: #fff;
+		background: var(--surface);
 		border: 1px solid var(--border);
 		padding: 0;
 		box-sizing: border-box;
@@ -204,19 +204,19 @@
 		overflow-x: hidden;
 		overflow-y: auto;
 		scrollbar-gutter: stable;
-		scrollbar-color: #999 #f2efef;
+		scrollbar-color: var(--text-muted) var(--surface);
 	}
 	.dropdown::-webkit-scrollbar {
 		width: 10px;
 	}
 
 	.dropdown::-webkit-scrollbar-track {
-		background: #fff;
+		background: var(--surface);
 	}
 
 	.dropdown::-webkit-scrollbar-thumb {
-		background: #999;
-		border: 2px solid #fff;
+		background: var(--text-muted);
+		border: 2px solid var(--surface);
 		border-radius: 5px;
 	}
 </style>

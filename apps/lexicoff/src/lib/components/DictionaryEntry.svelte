@@ -314,7 +314,7 @@
 	}
 	.pos-label {
 		font-size: 1rem;
-		color: #245f91;
+		color: var(--link);
 		margin: 0;
 		font-weight: normal;
 		display: flex;
@@ -436,7 +436,7 @@
 	}
 	.more-forms {
 		font: inherit;
-		color: #245f91;
+		color: var(--link);
 		background: transparent;
 		border: 1px solid var(--border);
 		border-radius: 0.25rem;
@@ -449,7 +449,7 @@
 	}
 	summary:focus-visible,
 	.more-forms:focus-visible {
-		outline: 2px solid #245f91;
+		outline: 2px solid var(--link);
 		outline-offset: 3px;
 	}
 </style>

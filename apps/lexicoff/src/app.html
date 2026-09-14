@@ -3,6 +3,24 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+		<meta name="color-scheme" content="light dark" />
+		<meta name="theme-color" content="#fafafa" />
+		<script>
+			// Apply the saved choice before the first paint, including offline launches.
+			try {
+				const saved = localStorage.getItem('lexicoff-theme');
+				if (saved === 'light' || saved === 'dark') {
+					document.documentElement.style.colorScheme = saved;
+				}
+			} catch {
+				// Follow the system when storage is unavailable.
+			}
+			const dark =
+				document.documentElement.style.colorScheme === 'dark' ||
+				(!document.documentElement.style.colorScheme &&
+					matchMedia('(prefers-color-scheme: dark)').matches);
+			document.querySelector('meta[name="theme-color"]').content = dark ? '#191b20' : '#fafafa';
+		</script>
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">

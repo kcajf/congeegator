@@ -44,9 +44,9 @@
 
 <style>
 	a {
-		color: var(--link, #245f91);
+		color: var(--link);
 		text-decoration: underline;
-		text-decoration-color: #245f9145;
+		text-decoration-color: var(--link-underline);
 		text-underline-offset: 0.16em;
 		overflow-wrap: anywhere;
 	}

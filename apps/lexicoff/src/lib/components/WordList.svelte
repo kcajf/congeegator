@@ -64,7 +64,7 @@
 		border: 0;
 		padding: 0.25rem 0.4rem;
 		background: transparent;
-		color: var(--link, #245f91);
+		color: var(--link);
 		font: inherit;
 		cursor: pointer;
 		text-decoration: underline;

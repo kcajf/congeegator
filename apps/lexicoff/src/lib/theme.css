@@ -1,0 +1,13 @@
+:root {
+	color-scheme: light dark;
+	--brand: light-dark(#fafafa, #191b20);
+	--surface: light-dark(#fff, #22252c);
+	--text: light-dark(#1a1a2e, #e7e7ec);
+	--text-muted: light-dark(#666, #a8adb8);
+	--border: light-dark(#ddd, #3c414c);
+	--hover: light-dark(#e8ecf4, #2b3341);
+	--link: light-dark(#245f91, #91bfe8);
+	--link-underline: light-dark(#245f9145, #91bfe866);
+	--accent: light-dark(#3d85c6, #91bfe8);
+	--danger: light-dark(#c00, #ff9696);
+}
