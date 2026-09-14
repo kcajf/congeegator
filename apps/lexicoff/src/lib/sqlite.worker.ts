@@ -7,6 +7,8 @@
 
 import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
 import { decodeEntryJson } from './entryJson';
+import { decompressDatabase } from './decompressDatabase';
+import { checkInstallSpace, storageConnectionFailed, storageErrorMessage } from './storageErrors';
 import {
 	dictionarySearchKey,
 	dictionaryWordKey,
@@ -85,10 +87,10 @@ async function openDb(lang: string, hash: string): Promise<boolean> {
 	if (!poolUtil) return false;
 
 	const fname = `/${lang}-${hash}.sqlite`;
-	const previous = openDbs.get(lang);
-	if (previous?.filename === fname) return true;
+	let previous = openDbs.get(lang);
 
 	let db;
+	let imported = false;
 	let columns = new Set<string>();
 	let wordCount: number | null = null;
 	try {
@@ -96,9 +98,9 @@ async function openDb(lang: string, hash: string): Promise<boolean> {
 		try {
 			const root = await navigator.storage.getDirectory();
 			const dir = await root.getDirectoryHandle('lexicoff');
-			file = await (await dir.getFileHandle(`${lang}-${hash}.sqlite`)).getFile();
+			file = await (await dir.getFileHandle(`${lang}-${hash}.sqlite.zst`)).getFile();
 			if (file.size === 0) {
-				await dir.removeEntry(`${lang}-${hash}.sqlite`);
+				await dir.removeEntry(`${lang}-${hash}.sqlite.zst`);
 				file = undefined;
 			}
 		} catch (error) {
@@ -107,19 +109,54 @@ async function openDb(lang: string, hash: string): Promise<boolean> {
 		// The raw download is retained until validation succeeds. If it still
 		// exists, a previous import may have stopped halfway: start it again.
 		// With no raw file, this is an already-completed installation.
+		if (!file && previous?.filename === fname) return true;
 		if (file) {
+			if (previous?.filename === fname) {
+				await closeDb(lang);
+				previous = undefined;
+			}
 			poolUtil.unlink(fname);
 			await poolUtil.reserveMinimumCapacity(poolUtil.getFileCount() + 3);
-			// A continuous stream avoids reopening a Blob slice for every chunk.
-			const reader = file.stream().getReader();
+			imported = true;
+			const chunks = decompressDatabase(file);
+			let expectedBytes = 0;
+			let receivedBytes = 0;
+			let lastProgress = 0;
 			try {
-				await poolUtil.importDb(fname, async (): Promise<Uint8Array | undefined> => {
-					const { done, value } = await reader.read();
-					return done ? undefined : value;
-				});
+				const written = await poolUtil.importDb(
+					fname,
+					async (): Promise<Uint8Array | undefined> => {
+						const { done, value } = await chunks.next();
+						if (done) {
+							if (receivedBytes !== expectedBytes)
+								throw new Error('Incomplete dictionary. Remove it and retry the download.');
+							return undefined;
+						}
+						if (!receivedBytes) {
+							if (
+								value.length < 100 ||
+								new TextDecoder().decode(value.subarray(0, 16)) !== 'SQLite format 3\0'
+							)
+								throw new Error('Invalid dictionary file. Remove it and retry the download.');
+							const header = new DataView(value.buffer, value.byteOffset, value.byteLength);
+							const pageSize = header.getUint16(16) === 1 ? 65536 : header.getUint16(16);
+							expectedBytes = pageSize * header.getUint32(28);
+							if (!expectedBytes || pageSize < 512 || pageSize & (pageSize - 1))
+								throw new Error('Invalid dictionary size');
+							await checkInstallSpace(expectedBytes + 4096);
+						}
+						receivedBytes += value.length;
+						if (performance.now() - lastProgress > 150) {
+							self.postMessage({ type: 'INSTALL_PROGRESS', lang });
+							lastProgress = performance.now();
+						}
+						if (receivedBytes > expectedBytes) throw new Error('Invalid dictionary size');
+						return value;
+					}
+				);
+				if (written !== expectedBytes) throw new Error('Incomplete dictionary write');
 			} finally {
-				await reader.cancel().catch(() => {});
-				reader.releaseLock();
+				await chunks.return(undefined);
 			}
 		}
 
@@ -145,10 +182,19 @@ async function openDb(lang: string, hash: string): Promise<boolean> {
 			if (Number.isSafeInteger(count)) wordCount = count;
 		}
 	} catch (error) {
-		db?.close();
-		// Discard the failed candidate, keeping the working database and raw
-		// download so that a retry can import again.
-		poolUtil.unlink(fname);
+		try {
+			db?.close();
+		} catch {
+			/* Preserve the original failure. */
+		}
+		// Never delete an existing installation because a transient read failed.
+		if (imported) {
+			try {
+				poolUtil.unlink(fname);
+			} catch {
+				/* A closed handle cannot be cleaned up until restart. */
+			}
+		}
 		throw error;
 	}
 
@@ -168,7 +214,8 @@ async function openDb(lang: string, hash: string): Promise<boolean> {
 		const dir = await root.getDirectoryHandle('lexicoff');
 		// @ts-expect-error — entries() not in all TS libs
 		for await (const [name] of dir.entries()) {
-			if (name.startsWith(`${lang}-`) && name.endsWith('.sqlite')) await dir.removeEntry(name);
+			if (name.startsWith(`${lang}-`) && /\.sqlite(?:\.zst)?$/.test(name))
+				await dir.removeEntry(name);
 		}
 	} catch {
 		// A later startup can retry cleanup.
@@ -606,10 +653,10 @@ async function getWord(lang: string, word: string): Promise<unknown[]> {
 	);
 }
 
-async function listOpfsFiles(): Promise<[string, string][]> {
+async function listOpfsFiles(): Promise<[string, string, boolean?][]> {
 	if (!poolUtil) return [];
 
-	const results: [string, string][] = [];
+	const results: [string, string, boolean?][] = [];
 
 	// Check SAH pool for already-imported databases
 	const poolFiles = poolUtil.getFileNames() as string[];
@@ -619,15 +666,20 @@ async function listOpfsFiles(): Promise<[string, string][]> {
 	}
 
 	// Check raw OPFS for downloaded-but-not-yet-imported files, clean up partial downloads
-	const seen = new Set(results.map(([lang, hash]) => `${lang}-${hash}`));
+
 	try {
 		const root = await navigator.storage.getDirectory();
 		const dir = await root.getDirectoryHandle('lexicoff');
 		// @ts-expect-error — entries() not in all TS libs
 		for await (const [name] of dir.entries()) {
 			const n = name as string;
-			const match = n.match(/^([a-z]{2,3})-([a-f0-9]{8})\.sqlite$/);
-			if (match && !seen.has(`${match[1]}-${match[2]}`)) {
+			// Discard obsolete staging files instead of resuming their imports.
+			if (/^[a-z]{2,3}-[a-f0-9]{8}\.sqlite$/.test(n)) {
+				await dir.removeEntry(n);
+				continue;
+			}
+			const match = n.match(/^([a-z]{2,3})-([a-f0-9]{8})\.sqlite\.zst$/);
+			if (match) {
 				const file = await (await dir.getFileHandle(n)).getFile();
 				// createWritable() commits on close. An interrupted first write
 				// leaves an empty handle, not an installed database.
@@ -635,7 +687,9 @@ async function listOpfsFiles(): Promise<[string, string][]> {
 					await dir.removeEntry(n);
 					continue;
 				}
-				results.push([match[1], match[2]]);
+				const existing = results.find(([lang, hash]) => lang === match[1] && hash === match[2]);
+				if (existing) existing[2] = true;
+				else results.push([match[1], match[2], true]);
 			}
 		}
 	} catch {
@@ -678,6 +732,11 @@ async function handleMessage(e: MessageEvent) {
 			case 'open':
 				result = await openDb(lang, query);
 				break;
+			case 'hasDownload':
+				result = (await listOpfsFiles()).some(
+					([code, hash, pending]) => code === lang && hash === query && pending
+				);
+				break;
 			case 'close':
 				await closeDb(lang);
 				result = true;
@@ -697,7 +756,7 @@ async function handleMessage(e: MessageEvent) {
 
 		self.postMessage({ id, result });
 	} catch (err) {
-		self.postMessage({ id, error: err instanceof Error ? err.message : String(err) });
+		self.postMessage({ id, error: storageErrorMessage(err), fatal: storageConnectionFailed(err) });
 	}
 }
 

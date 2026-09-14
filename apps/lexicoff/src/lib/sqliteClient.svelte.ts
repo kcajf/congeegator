@@ -27,28 +27,58 @@ class Connection {
 	private tail: Promise<unknown> = Promise.resolve();
 	private active?: {
 		id: number;
+		type: string;
 		resolve: (value: unknown) => void;
 		reject: (error: Error) => void;
 		timer: ReturnType<typeof setTimeout>;
 	};
+	private readyTimer?: ReturnType<typeof setTimeout>;
 	private rejectReady!: (error: Error) => void;
 	private ready: Promise<void>;
 
 	constructor(private onFailure: (error: Error) => void) {
 		this.ready = new Promise((resolve, reject) => {
 			this.rejectReady = reject;
+			this.readyTimer = setTimeout(
+				() =>
+					this.close(
+						new Error(
+							'Dictionary storage is busy or unavailable. Close other Lexicoff tabs and retry storage.'
+						)
+					),
+				30_000
+			);
 			this.worker.onmessage = ({ data }) => {
 				if (data.type === 'READY') {
+					clearTimeout(this.readyTimer);
 					if (data.sahPoolAvailable) resolve();
 					else this.close(new Error('Dictionary storage could not be opened.'));
 					return;
 				}
 				const pending = this.active;
+				if (data.type === 'INSTALL_PROGRESS' && pending?.type === 'open') {
+					clearTimeout(pending.timer);
+					pending.timer = setTimeout(
+						() =>
+							this.close(
+								new Error('Dictionary installation stopped responding. Retry storage to reopen it.')
+							),
+						180_000
+					);
+					return;
+				}
 				if (!pending || pending.id !== data.id) return;
 				clearTimeout(pending.timer);
 				this.active = undefined;
-				if (data.error) pending.reject(new Error(data.error));
-				else pending.resolve(data.result);
+				if (data.error) {
+					pending.reject(new Error(data.error));
+					if (data.fatal)
+						this.close(
+							new Error(
+								'Dictionary storage connection was lost. Retry storage to reopen your dictionaries.'
+							)
+						);
+				} else pending.resolve(data.result);
 			};
 		});
 		this.worker.onerror = () =>
@@ -75,7 +105,7 @@ class Connection {
 						this.close(new Error('Dictionary operation timed out. Retry storage to reopen it.')),
 					type === 'open' ? 180_000 : type === 'shutdown' ? 2_000 : 30_000
 				);
-				this.active = { id, resolve, reject, timer };
+				this.active = { id, type, resolve, reject, timer };
 				try {
 					this.worker.postMessage({ id, type, ...data });
 				} catch (error) {
@@ -90,6 +120,7 @@ class Connection {
 	close(error: Error) {
 		if (this.error) return;
 		this.error = error;
+		clearTimeout(this.readyTimer);
 		this.worker.terminate();
 		this.rejectReady(error);
 		if (this.active) {
@@ -127,15 +158,27 @@ class DictionaryStorage {
 				this.error = error.message;
 			});
 			this.connection = connection;
-			const files = (await connection.request('list')) as [string, string][];
+			const files = (await connection.request('list')) as [string, string, boolean?][];
 			for (const lang of new Set(files.map(([lang]) => lang))) {
 				// Interrupted future updates can leave both a replacement and the
 				// previous download. Prefer the current hash; fall back if it fails.
 				const currentHash = manifest.languages[lang]?.dataHash;
 				const candidates = files
 					.filter(([code]) => code === lang)
-					.sort((a, b) => Number(b[1] === currentHash) - Number(a[1] === currentHash));
-				for (const [, hash] of candidates) {
+					.sort(
+						(a, b) =>
+							Number(!!a[2]) - Number(!!b[2]) ||
+							Number(b[1] === currentHash) - Number(a[1] === currentHash)
+					);
+				for (const [, hash, pending] of candidates) {
+					if (pending) {
+						this.languages[lang] ??= {
+							hash,
+							status: 'error',
+							errorMessage: 'Installation unfinished. Retry to finish, or remove the download.'
+						};
+						continue;
+					}
 					try {
 						await this.openLanguage(connection, lang, hash);
 						break;
@@ -172,6 +215,10 @@ class DictionaryStorage {
 		this.languages[lang] = { hash, status: 'ready' };
 	}
 
+	async hasDownload(lang: string, hash: string): Promise<boolean> {
+		return (await (await this.connect()).request('hasDownload', { lang, query: hash })) as boolean;
+	}
+
 	async openDb(lang: string, hash: string) {
 		await this.openLanguage(await this.connect(), lang, hash);
 	}
@@ -194,20 +241,45 @@ class DictionaryStorage {
 		return (await connection.request('dictionaryBytes')) as number;
 	}
 
+	private async queryLanguage(
+		connection: Connection,
+		type: string,
+		lang: string,
+		data: Record<string, unknown>
+	) {
+		try {
+			return await connection.request(type, { lang, ...data });
+		} catch (error) {
+			if (this.connection === connection && this.languages[lang]) {
+				this.languages[lang] = {
+					...this.languages[lang],
+					status: 'error',
+					errorMessage: 'Dictionary could not be read. Retry its installation or remove it.'
+				};
+			}
+			throw error;
+		}
+	}
+
 	async search(lang: string, query: string, phoneticQuery?: string): Promise<SearchResult[]> {
 		const connection = await this.connect();
-		return (await connection.request('search', { lang, query, phoneticQuery })) as SearchResult[];
+		return (await this.queryLanguage(connection, 'search', lang, {
+			query,
+			phoneticQuery
+		})) as SearchResult[];
 	}
 
 	async exactHeadwords(lang: string, words: string[]): Promise<string[]> {
 		if (!words.length) return [];
 		const connection = await this.connect();
-		return (await connection.request('exactHeadwords', { lang, words })) as string[];
+		return (await this.queryLanguage(connection, 'exactHeadwords', lang, { words })) as string[];
 	}
 
 	async getWord(lang: string, word: string): Promise<DictRecord[]> {
 		const connection = await this.connect();
-		const raw = (await connection.request('getWord', { lang, word })) as RawDictRecord[];
+		const raw = (await this.queryLanguage(connection, 'getWord', lang, {
+			word
+		})) as RawDictRecord[];
 		return raw.map((r) => ({
 			...r,
 			lang,

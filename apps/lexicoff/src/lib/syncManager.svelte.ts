@@ -1,6 +1,7 @@
 import { browser } from '$app/environment';
 import { storage } from './sqliteClient.svelte';
 import { manifest } from './dataUtils';
+import { storageErrorMessage } from './storageErrors';
 
 let worker: Worker | undefined;
 
@@ -10,6 +11,7 @@ export interface LangSyncInfo {
 	receivedBytes?: number;
 	totalBytes?: number;
 	percent?: number | null;
+	stage?: 'downloading' | 'installing';
 	errorMessage?: string;
 }
 
@@ -67,14 +69,17 @@ async function changeLanguage(lang: string, remove: boolean) {
 			await storage.removeDb(lang);
 			await runDownloadWorker(lang, 'delete');
 		} else {
-			const hash = await runDownloadWorker(lang, 'download');
+			const hash = (await storage.hasDownload(lang, manifest.languages[lang].dataHash))
+				? manifest.languages[lang].dataHash
+				: await runDownloadWorker(lang, 'download');
+			globalSync.map[lang] = { ...globalSync.map[lang], stage: 'installing', percent: null };
 			await storage.openDb(lang, hash || manifest.languages[lang].dataHash);
 		}
 		delete globalSync.map[lang];
 	} catch (error) {
 		globalSync.map[lang] = {
 			...(storage.languages[lang] ?? { hash: '', status: 'error' }),
-			errorMessage: error instanceof Error ? error.message : String(error)
+			errorMessage: storageErrorMessage(error)
 		};
 	}
 }

@@ -29,6 +29,7 @@ function setupClient() {
 	const languages: Record<string, { hash: string; status: 'ready' }> = {};
 	return {
 		languages,
+		hasDownload: vi.fn().mockResolvedValue(false),
 		connect: vi.fn().mockResolvedValue(undefined),
 		openDb: vi.fn(async (lang: string, hash: string) => {
 			languages[lang] = { hash, status: 'ready' };
@@ -86,7 +87,10 @@ it('turns an import rejection into an error and lets Retry succeed', async () =>
 	const w = await worker();
 	w.message({ type: 'COMPLETE', lang: 'fr', hash: 'bbbbbbbb' });
 	await first;
-	expect(sync.globalSync.map.fr).toMatchObject({ status: 'error', errorMessage: 'Quota exceeded' });
+	expect(sync.globalSync.map.fr).toMatchObject({
+		status: 'error',
+		errorMessage: expect.stringContaining('Not enough browser storage')
+	});
 	const retry = sync.triggerLangSync('fr');
 	await vi.waitFor(() => expect(w.postMessage).toHaveBeenCalledTimes(2));
 	w.message({ type: 'COMPLETE', lang: 'fr', hash: 'bbbbbbbb' });
@@ -135,5 +139,14 @@ it('recreates a crashed download worker on retry', async () => {
 	DownloadWorker.instances[1].message({ type: 'COMPLETE', lang: 'fr', hash: 'bbbbbbbb' });
 	await retry;
 	expect(sync.globalSync.map.fr).toBeUndefined();
+	expect(client.languages.fr.status).toBe('ready');
+});
+
+it('retries a completed download without downloading it again', async () => {
+	client.hasDownload.mockResolvedValue(true);
+	const sync = await start();
+	await sync.triggerLangSync('fr');
+	expect(DownloadWorker.instances).toHaveLength(0);
+	expect(client.openDb).toHaveBeenCalledWith('fr', 'bbbbbbbb');
 	expect(client.languages.fr.status).toBe('ready');
 });
