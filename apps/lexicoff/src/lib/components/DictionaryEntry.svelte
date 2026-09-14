@@ -203,7 +203,12 @@
 		<details class="supplement">
 			<summary>Etymology</summary>
 			<p class="etymology" dir="auto">
-				<LinkedText text={entry.etymology} links={entry.details?.etymologyLinks} uniqueOnly />
+				<LinkedText
+					text={entry.etymology}
+					links={entry.details?.etymologyLinks}
+					uniqueOnly
+					verifyLocalLinks
+				/>
 			</p>
 		</details>
 	{/if}

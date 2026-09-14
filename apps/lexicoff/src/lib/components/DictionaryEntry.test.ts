@@ -3,7 +3,9 @@ import { describe, expect, it, vi } from 'vitest';
 import DictionaryEntry from './DictionaryEntry.svelte';
 import type { DictRecord } from '../types';
 
-vi.mock('$lib/sqliteClient.svelte', () => ({ storage: { languages: {} } }));
+vi.mock('$lib/sqliteClient.svelte', () => ({
+	storage: { languages: { grc: { status: 'ready' } } }
+}));
 
 const entry: DictRecord = {
 	id: 1,
@@ -116,4 +118,25 @@ describe('dictionary entry display', () => {
 		expect(body).not.toContain('Filter forms');
 		expect(body).not.toContain('[object Object]');
 	});
+});
+
+it('keeps unverified local etymology destinations plain while preserving external links', () => {
+	const { body } = render(DictionaryEntry, {
+		props: {
+			entry: {
+				...entry,
+				etymology: 'From σπίτιν, ultimately hospitium.',
+				details: {
+					etymologyLinks: [
+						{ word: 'σπίτιν', lang: 'gkm' },
+						{ word: 'hospitium', lang: 'la' }
+					]
+				}
+			},
+			lang: 'el'
+		}
+	});
+	expect(body.replace(/<!--.*?-->/g, '')).toContain('From σπίτιν, ultimately');
+	expect(body).not.toContain(encodeURIComponent('σπίτιν'));
+	expect(body).toContain('https://en.wiktionary.org/wiki/hospitium');
 });
