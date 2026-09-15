@@ -5,6 +5,7 @@ on:
     paths:
       - 'apps/lexicoff/**'
       - 'pipeline/**'
+      - 'shared/**'
       - 'pixi.toml'
 
 jobs:

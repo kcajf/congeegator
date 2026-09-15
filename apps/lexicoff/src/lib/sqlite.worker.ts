@@ -6,6 +6,7 @@
  */
 
 import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
+import { romanizationKeys } from './romanizations';
 import { toPhonetic } from './phonetic';
 import { decodeEntryJson } from './entryJson';
 import { decompressDatabase } from './decompressDatabase';
@@ -34,6 +35,7 @@ interface SearchResult {
 	freq: number;
 	glosses: string[];
 	matchedGlossIdx?: number;
+	romanizations?: string[];
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -41,6 +43,7 @@ let sqlite3: any;
 let poolUtil: any;
 const openDbs = new Map<string, any>();
 const wordCounts = new Map<string, number | null>();
+const romanizationVersions = new Map<string, boolean>();
 const entryColumns = new Map<string, Set<string>>();
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
@@ -79,6 +82,7 @@ async function shutdown() {
 		openDbs.delete(lang);
 		wordCounts.delete(lang);
 		entryColumns.delete(lang);
+		romanizationVersions.delete(lang);
 	}
 	// Do not call removeVfs(): it deletes every installed dictionary. Worker
 	// termination releases the OPFS handles and the ownership lock instead.
@@ -94,6 +98,7 @@ async function openDb(lang: string, hash: string): Promise<boolean> {
 	let imported = false;
 	let columns = new Set<string>();
 	let wordCount: number | null = null;
+	let hasRomanizedSearch = false;
 	try {
 		let file: File | undefined;
 		try {
@@ -175,6 +180,10 @@ async function openDb(lang: string, hash: string): Promise<boolean> {
 			execQuery(db, 'PRAGMA table_info(entries)').map((column) => column[1] as string)
 		);
 		db.exec('SELECT form_key, entry_id FROM form_lookup LIMIT 0');
+		hasRomanizedSearch =
+			columns.has('romanizations') &&
+			db.selectValue("SELECT value FROM metadata WHERE key = 'romanization_version'") === '1';
+		if (hasRomanizedSearch) db.exec('SELECT key, entry_id FROM romanized_lookup LIMIT 0');
 		// Counts travel with the immutable database; never fall back to scanning
 		// entries on the user's device when metadata is missing or invalid.
 		const savedCount = db.selectValue("SELECT value FROM metadata WHERE key = 'word_count'");
@@ -203,6 +212,7 @@ async function openDb(lang: string, hash: string): Promise<boolean> {
 	openDbs.set(lang, db);
 	wordCounts.set(lang, wordCount);
 	entryColumns.set(lang, columns);
+	romanizationVersions.set(lang, hasRomanizedSearch);
 	// Cleanup is best-effort after the replacement is usable. Failure here
 	// must not turn a successful installation into a failed one.
 	try {
@@ -231,6 +241,7 @@ async function closeDb(lang: string) {
 	openDbs.delete(lang);
 	wordCounts.delete(lang);
 	entryColumns.delete(lang);
+	romanizationVersions.delete(lang);
 }
 
 function deleteFromPool(lang: string) {
@@ -494,6 +505,42 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 		}
 	}
 
+	// Exact headword aliases are uncapped and independent of broad prefix matches.
+	// The dictionary, not merely the app version, must advertise this index.
+	if (romanizationVersions.get(lang)) {
+		for (const { key } of romanizationKeys(lang, query)) {
+			for (const prefix of [false, true]) {
+				if (prefix && key.length < 2) continue;
+				const rows = execQuery(
+					db,
+					`SELECT e.id, e.word, e.pos, e.freq, e.romanizations
+					 FROM romanized_lookup r JOIN entries e ON e.id = r.entry_id
+					 WHERE ${prefix ? 'r.key >= ? AND r.key < ? ORDER BY r.key, r.entry_id LIMIT 50' : 'r.key = ? ORDER BY r.entry_id'}`,
+					prefix ? [key, key + '\uffff'] : [key]
+				);
+				for (const [id, word, pos, freq, readings] of rows) {
+					const resultKey = `${word}:${pos}`;
+					const originalMatch = (JSON.parse(readings as string) as string[]).some(
+						(reading) =>
+							reading.toLowerCase().normalize('NFC') === query.trim().toLowerCase().normalize('NFC')
+					);
+					const matchQuality = prefix ? 40 : originalMatch ? 5 : 6;
+					const existing = seen.get(resultKey);
+					if (!existing || existing.quality > matchQuality) {
+						seen.set(resultKey, {
+							id: id as number,
+							word: word as string,
+							pos: pos as string,
+							freq: freq as number,
+							matched: word as string,
+							quality: matchQuality
+						});
+					}
+				}
+			}
+		}
+	}
+
 	// Deduplicate by word (collapse POS), sort by quality then freq
 	const byWord = new Map<string, InternalResult>();
 	for (const r of seen.values()) {
@@ -551,6 +598,16 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 		.slice(0, 50);
 
 	if (top.length === 0) return [];
+	const romanizationsById = new Map<number, string[]>();
+	if (entryColumns.get(lang)?.has('romanizations')) {
+		for (const [id, value] of execQuery(
+			db,
+			`SELECT id, romanizations FROM entries WHERE id IN (${top.map(() => '?').join(',')})`,
+			top.map((r) => r.id)
+		)) {
+			if (value) romanizationsById.set(id as number, JSON.parse(value as string));
+		}
+	}
 
 	return top.map((r): SearchResult => {
 		const allGlosses = sensesMap.get(r.id) ?? [];
@@ -584,7 +641,8 @@ async function search(lang: string, query: string, phoneticQuery: string): Promi
 			quality: r.quality,
 			freq: r.freq,
 			glosses,
-			matchedGlossIdx
+			matchedGlossIdx,
+			romanizations: romanizationsById.get(r.id)
 		};
 	});
 }
@@ -615,7 +673,7 @@ async function getWord(lang: string, word: string): Promise<unknown[]> {
 	if (!db) return [];
 
 	const schemaColumns = entryColumns.get(lang);
-	const optionalColumns = ['pronunciations']
+	const optionalColumns = ['pronunciations', 'romanizations']
 		.map((column) => (schemaColumns?.has(column) ? column : `NULL AS ${column}`))
 		.join(', ');
 	const columns = `id, word, pos, senses, freq, gender, forms, pronunciation, etymology, details, form_details, ${optionalColumns}`;
@@ -658,7 +716,8 @@ async function getWord(lang: string, word: string): Promise<unknown[]> {
 				etymology,
 				details,
 				formDetails,
-				pronunciations
+				pronunciations,
+				romanizations
 			]) => ({
 				id: id as number,
 				word: w as string,
@@ -673,6 +732,7 @@ async function getWord(lang: string, word: string): Promise<unknown[]> {
 				details: details ? JSON.parse(details as string) : undefined,
 				formDetails: await decodeEntryJson(formDetails),
 				pronunciations: pronunciations ? JSON.parse(pronunciations as string) : undefined,
+				romanizations: romanizations ? JSON.parse(romanizations as string) : undefined,
 				matchedForm
 			})
 		)

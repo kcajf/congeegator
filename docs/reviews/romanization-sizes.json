@@ -1,0 +1,447 @@
+{
+  "full_dictionaries": {
+    "sample_size": 1000000,
+    "seed": 260915,
+    "download_zstd_level": 9,
+    "row_zstd_level": 6,
+    "languages": {
+      "he": {
+        "source_version": "2026-09-13T130000Z",
+        "eligible_source_entries": 18001,
+        "sampled_source_entries": 18001,
+        "accepted_entries": 17981,
+        "entries_with_head_readings": 17492,
+        "standalone_form_entries": 2192,
+        "standalone_form_entries_with_head_readings": 2061,
+        "head_readings": 17818,
+        "forms_with_readings": 354,
+        "form_readings": 357,
+        "unmatched_or_ambiguous_form_readings": 56,
+        "variants": {
+          "baseline": {
+            "sqlite_bytes": 24952832,
+            "download_bytes": 7813119
+          },
+          "headwords_display": {
+            "sqlite_bytes": 25165824,
+            "download_bytes": 7888022,
+            "index_rows": 0
+          },
+          "headwords_indexed": {
+            "sqlite_bytes": 25493504,
+            "download_bytes": 8040094,
+            "index_rows": 17818
+          },
+          "all_forms_display": {
+            "sqlite_bytes": 25182208,
+            "download_bytes": 7893195,
+            "index_rows": 0
+          },
+          "all_forms_indexed": {
+            "sqlite_bytes": 25509888,
+            "download_bytes": 8045689,
+            "index_rows": 18156
+          }
+        }
+      },
+      "hi": {
+        "source_version": "2026-09-13T130000Z",
+        "eligible_source_entries": 39154,
+        "sampled_source_entries": 39154,
+        "accepted_entries": 39134,
+        "entries_with_head_readings": 39089,
+        "standalone_form_entries": 13118,
+        "standalone_form_entries_with_head_readings": 13113,
+        "head_readings": 39291,
+        "forms_with_readings": 265080,
+        "form_readings": 265556,
+        "unmatched_or_ambiguous_form_readings": 2,
+        "variants": {
+          "baseline": {
+            "sqlite_bytes": 55427072,
+            "download_bytes": 11910173
+          },
+          "headwords_display": {
+            "sqlite_bytes": 56066048,
+            "download_bytes": 12053772,
+            "index_rows": 0
+          },
+          "headwords_indexed": {
+            "sqlite_bytes": 56803328,
+            "download_bytes": 12391411,
+            "index_rows": 39289
+          },
+          "all_forms_display": {
+            "sqlite_bytes": 57982976,
+            "download_bytes": 13867899,
+            "index_rows": 0
+          },
+          "all_forms_indexed": {
+            "sqlite_bytes": 65060864,
+            "download_bytes": 15884936,
+            "index_rows": 304619
+          }
+        }
+      },
+      "ka": {
+        "source_version": "2026-09-13T130000Z",
+        "eligible_source_entries": 27033,
+        "sampled_source_entries": 27033,
+        "accepted_entries": 27020,
+        "entries_with_head_readings": 26974,
+        "standalone_form_entries": 4189,
+        "standalone_form_entries_with_head_readings": 4189,
+        "head_readings": 26987,
+        "forms_with_readings": 550320,
+        "form_readings": 551343,
+        "unmatched_or_ambiguous_form_readings": 330,
+        "variants": {
+          "baseline": {
+            "sqlite_bytes": 59604992,
+            "download_bytes": 15322146
+          },
+          "headwords_display": {
+            "sqlite_bytes": 60080128,
+            "download_bytes": 15469616,
+            "index_rows": 0
+          },
+          "headwords_indexed": {
+            "sqlite_bytes": 60637184,
+            "download_bytes": 15722681,
+            "index_rows": 26987
+          },
+          "all_forms_display": {
+            "sqlite_bytes": 62521344,
+            "download_bytes": 18075180,
+            "index_rows": 0
+          },
+          "all_forms_indexed": {
+            "sqlite_bytes": 75874304,
+            "download_bytes": 21616441,
+            "index_rows": 578330
+          }
+        }
+      },
+      "uk": {
+        "source_version": "2026-09-12T210000Z",
+        "eligible_source_entries": 59803,
+        "sampled_source_entries": 59803,
+        "accepted_entries": 59740,
+        "entries_with_head_readings": 59464,
+        "standalone_form_entries": 29200,
+        "standalone_form_entries_with_head_readings": 29134,
+        "head_readings": 59993,
+        "forms_with_readings": 412132,
+        "form_readings": 412132,
+        "unmatched_or_ambiguous_form_readings": 4,
+        "variants": {
+          "baseline": {
+            "sqlite_bytes": 80871424,
+            "download_bytes": 22989617
+          },
+          "headwords_display": {
+            "sqlite_bytes": 81821696,
+            "download_bytes": 23335785,
+            "index_rows": 0
+          },
+          "headwords_indexed": {
+            "sqlite_bytes": 83017728,
+            "download_bytes": 23874436,
+            "index_rows": 59993
+          },
+          "all_forms_display": {
+            "sqlite_bytes": 84295680,
+            "download_bytes": 26355585,
+            "index_rows": 0
+          },
+          "all_forms_indexed": {
+            "sqlite_bytes": 94257152,
+            "download_bytes": 29333904,
+            "index_rows": 472078
+          }
+        }
+      },
+      "ko": {
+        "source_version": "2026-09-13T130000Z",
+        "eligible_source_entries": 53069,
+        "sampled_source_entries": 53069,
+        "accepted_entries": 52500,
+        "entries_with_head_readings": 52257,
+        "standalone_form_entries": 12978,
+        "standalone_form_entries_with_head_readings": 12964,
+        "head_readings": 52612,
+        "forms_with_readings": 346143,
+        "form_readings": 346145,
+        "unmatched_or_ambiguous_form_readings": 51,
+        "variants": {
+          "baseline": {
+            "sqlite_bytes": 51904512,
+            "download_bytes": 12692045
+          },
+          "headwords_display": {
+            "sqlite_bytes": 52559872,
+            "download_bytes": 12927502,
+            "index_rows": 0
+          },
+          "headwords_indexed": {
+            "sqlite_bytes": 53493760,
+            "download_bytes": 13355605,
+            "index_rows": 52609
+          },
+          "all_forms_display": {
+            "sqlite_bytes": 54296576,
+            "download_bytes": 14535406,
+            "index_rows": 0
+          },
+          "all_forms_indexed": {
+            "sqlite_bytes": 63127552,
+            "download_bytes": 17031960,
+            "index_rows": 398719
+          }
+        }
+      }
+    }
+  },
+  "random_samples": {
+    "sample_size": 5000,
+    "seed": 260915,
+    "download_zstd_level": 9,
+    "row_zstd_level": 6,
+    "languages": {
+      "ru": {
+        "source_version": "2026-09-12T210000Z",
+        "eligible_source_entries": 442501,
+        "sampled_source_entries": 5000,
+        "accepted_entries": 4996,
+        "entries_with_head_readings": 4874,
+        "standalone_form_entries": 4334,
+        "standalone_form_entries_with_head_readings": 4214,
+        "head_readings": 4949,
+        "forms_with_readings": 12148,
+        "form_readings": 12164,
+        "unmatched_or_ambiguous_form_readings": 0,
+        "variants": {
+          "baseline": {
+            "sqlite_bytes": 4947968,
+            "download_bytes": 1286268
+          },
+          "headwords_display": {
+            "sqlite_bytes": 5013504,
+            "download_bytes": 1286558,
+            "index_rows": 0
+          },
+          "headwords_indexed": {
+            "sqlite_bytes": 5144576,
+            "download_bytes": 1331998,
+            "index_rows": 4949
+          },
+          "all_forms_display": {
+            "sqlite_bytes": 5095424,
+            "download_bytes": 1382899,
+            "index_rows": 0
+          },
+          "all_forms_indexed": {
+            "sqlite_bytes": 5488640,
+            "download_bytes": 1504862,
+            "index_rows": 17011
+          }
+        }
+      },
+      "uk": {
+        "source_version": "2026-09-12T210000Z",
+        "eligible_source_entries": 59803,
+        "sampled_source_entries": 5000,
+        "accepted_entries": 4994,
+        "entries_with_head_readings": 4971,
+        "standalone_form_entries": 2482,
+        "standalone_form_entries_with_head_readings": 2477,
+        "head_readings": 5010,
+        "forms_with_readings": 33863,
+        "form_readings": 33863,
+        "unmatched_or_ambiguous_form_readings": 0,
+        "variants": {
+          "baseline": {
+            "sqlite_bytes": 7094272,
+            "download_bytes": 2201822
+          },
+          "headwords_display": {
+            "sqlite_bytes": 7159808,
+            "download_bytes": 2177673,
+            "index_rows": 0
+          },
+          "headwords_indexed": {
+            "sqlite_bytes": 7274496,
+            "download_bytes": 2230609,
+            "index_rows": 5010
+          },
+          "all_forms_display": {
+            "sqlite_bytes": 7372800,
+            "download_bytes": 2419922,
+            "index_rows": 0
+          },
+          "all_forms_indexed": {
+            "sqlite_bytes": 8192000,
+            "download_bytes": 2674621,
+            "index_rows": 38865
+          }
+        }
+      },
+      "ka": {
+        "source_version": "2026-09-13T130000Z",
+        "eligible_source_entries": 27033,
+        "sampled_source_entries": 5000,
+        "accepted_entries": 5000,
+        "entries_with_head_readings": 4991,
+        "standalone_form_entries": 787,
+        "standalone_form_entries_with_head_readings": 787,
+        "head_readings": 4992,
+        "forms_with_readings": 101303,
+        "form_readings": 101538,
+        "unmatched_or_ambiguous_form_readings": 103,
+        "variants": {
+          "baseline": {
+            "sqlite_bytes": 11386880,
+            "download_bytes": 3150267
+          },
+          "headwords_display": {
+            "sqlite_bytes": 11485184,
+            "download_bytes": 3140216,
+            "index_rows": 0
+          },
+          "headwords_indexed": {
+            "sqlite_bytes": 11616256,
+            "download_bytes": 3194445,
+            "index_rows": 4992
+          },
+          "all_forms_display": {
+            "sqlite_bytes": 11943936,
+            "download_bytes": 3626421,
+            "index_rows": 0
+          },
+          "all_forms_indexed": {
+            "sqlite_bytes": 14417920,
+            "download_bytes": 4307648,
+            "index_rows": 106530
+          }
+        }
+      },
+      "hi": {
+        "source_version": "2026-09-13T130000Z",
+        "eligible_source_entries": 39154,
+        "sampled_source_entries": 5000,
+        "accepted_entries": 4997,
+        "entries_with_head_readings": 4993,
+        "standalone_form_entries": 1676,
+        "standalone_form_entries_with_head_readings": 1676,
+        "head_readings": 5028,
+        "forms_with_readings": 34367,
+        "form_readings": 34371,
+        "unmatched_or_ambiguous_form_readings": 0,
+        "variants": {
+          "baseline": {
+            "sqlite_bytes": 7503872,
+            "download_bytes": 1811032
+          },
+          "headwords_display": {
+            "sqlite_bytes": 7602176,
+            "download_bytes": 1782884,
+            "index_rows": 0
+          },
+          "headwords_indexed": {
+            "sqlite_bytes": 7716864,
+            "download_bytes": 1832580,
+            "index_rows": 5028
+          },
+          "all_forms_display": {
+            "sqlite_bytes": 7831552,
+            "download_bytes": 2016321,
+            "index_rows": 0
+          },
+          "all_forms_indexed": {
+            "sqlite_bytes": 8765440,
+            "download_bytes": 2289129,
+            "index_rows": 39369
+          }
+        }
+      },
+      "ko": {
+        "source_version": "2026-09-13T130000Z",
+        "eligible_source_entries": 53069,
+        "sampled_source_entries": 5000,
+        "accepted_entries": 4949,
+        "entries_with_head_readings": 4933,
+        "standalone_form_entries": 1229,
+        "standalone_form_entries_with_head_readings": 1229,
+        "head_readings": 4971,
+        "forms_with_readings": 29141,
+        "form_readings": 29141,
+        "unmatched_or_ambiguous_form_readings": 0,
+        "variants": {
+          "baseline": {
+            "sqlite_bytes": 5029888,
+            "download_bytes": 1386365
+          },
+          "headwords_display": {
+            "sqlite_bytes": 5128192,
+            "download_bytes": 1383894,
+            "index_rows": 0
+          },
+          "headwords_indexed": {
+            "sqlite_bytes": 5242880,
+            "download_bytes": 1426107,
+            "index_rows": 4971
+          },
+          "all_forms_display": {
+            "sqlite_bytes": 5259264,
+            "download_bytes": 1530646,
+            "index_rows": 0
+          },
+          "all_forms_indexed": {
+            "sqlite_bytes": 6029312,
+            "download_bytes": 1753795,
+            "index_rows": 34111
+          }
+        }
+      },
+      "he": {
+        "source_version": "2026-09-13T130000Z",
+        "eligible_source_entries": 18001,
+        "sampled_source_entries": 5000,
+        "accepted_entries": 4996,
+        "entries_with_head_readings": 4875,
+        "standalone_form_entries": 635,
+        "standalone_form_entries_with_head_readings": 599,
+        "head_readings": 4943,
+        "forms_with_readings": 95,
+        "form_readings": 95,
+        "unmatched_or_ambiguous_form_readings": 18,
+        "variants": {
+          "baseline": {
+            "sqlite_bytes": 7143424,
+            "download_bytes": 2340962
+          },
+          "headwords_display": {
+            "sqlite_bytes": 7208960,
+            "download_bytes": 2327940,
+            "index_rows": 0
+          },
+          "headwords_indexed": {
+            "sqlite_bytes": 7323648,
+            "download_bytes": 2372322,
+            "index_rows": 4943
+          },
+          "all_forms_display": {
+            "sqlite_bytes": 7208960,
+            "download_bytes": 2329351,
+            "index_rows": 0
+          },
+          "all_forms_indexed": {
+            "sqlite_bytes": 7323648,
+            "download_bytes": 2374304,
+            "index_rows": 5034
+          }
+        }
+      }
+    }
+  }
+}

@@ -9,6 +9,7 @@ class Form(msgspec.Struct, frozen=True):
     source: Optional[str] = None
     links: tuple[Any, ...] = ()
     raw_tags: tuple[str, ...] = ()
+    roman: Optional[str] = None
 
 
 class FormOf(msgspec.Struct, frozen=True):

@@ -2,7 +2,7 @@ name: Deploy
 on:
   push:
     branches: [main]
-    paths: ['apps/**', 'pipeline/**', 'pixi.toml', 'pixi.lock']
+    paths: ['apps/**', 'pipeline/**', 'shared/**', 'pixi.toml', 'pixi.lock']
   workflow_dispatch:
 
 jobs:

@@ -27,6 +27,7 @@ class _SqliteMetadata(msgspec.Struct, frozen=True):
     # These smaller columns are also copied verbatim, without parsing their
     # nested objects just to encode them again. They retain JSON TEXT storage.
     details: msgspec.Raw = msgspec.Raw(b"null")
+    romanizations: msgspec.Raw = msgspec.Raw(b"null")
     pronunciations: msgspec.Raw = msgspec.Raw(b"null")
 
 

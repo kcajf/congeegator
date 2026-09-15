@@ -70,6 +70,7 @@ export interface DictPronunciation {
 }
 
 export interface DictRecord {
+	romanizations?: string[];
 	id: Id;
 	word: string;
 	lang: string;

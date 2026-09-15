@@ -5,6 +5,7 @@ on:
     paths:
       - 'apps/congeegator/**'
       - 'pipeline/**'
+      - 'shared/**'
       - 'pixi.toml'
 
 jobs:
