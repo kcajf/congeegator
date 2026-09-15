@@ -156,7 +156,7 @@
 		</h2>
 		{#if pronunciations.length > 0}
 			<ul class="pronunciations" aria-label="Pronunciation">
-				{#each pronunciations as pronunciation, i (i)}
+				{#each pronunciations.slice(0, 3) as pronunciation, i (i)}
 					<li>
 						<bdi dir="ltr">{pronunciation.ipa}</bdi>{#if pronunciation.label}
 							<span class="pronunciation-label">
@@ -167,6 +167,22 @@
 			</ul>
 		{/if}
 	</div>
+	{#if pronunciations.length > 3}
+		<details class="additional-pronunciations">
+			<summary>More pronunciations ({pronunciations.length - 3})</summary>
+			<ul class="pronunciations" aria-label="Additional pronunciations">
+				{#each pronunciations.slice(3) as pronunciation, i (i)}
+					<li>
+						<bdi dir="ltr">{pronunciation.ipa}</bdi>{#if pronunciation.label}
+							<span class="pronunciation-label">
+								({formatPronunciationLabel(pronunciation.label)})</span
+							>
+						{/if}
+					</li>
+				{/each}
+			</ul>
+		</details>
+	{/if}
 	{#if entry.details?.readings?.length}
 		<div class="readings">
 			{#each entry.details.readings.slice(0, 4) as reading, i (i)}
@@ -409,6 +425,8 @@
 	}
 
 	.pronunciations {
+		min-width: 0;
+		max-width: 100%;
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0.25rem 0.75rem;
@@ -419,6 +437,8 @@
 		font-size: 0.9rem;
 	}
 	.pronunciations li {
+		max-width: 100%;
+		overflow-wrap: anywhere;
 		margin: 0;
 	}
 	.pronunciation-label,
