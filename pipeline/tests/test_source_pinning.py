@@ -41,7 +41,7 @@ def test_language_catalogue():
     assert len(DICT_CONFIGS) == 69
     assert {c.code for c in DICT_CONFIGS} == existing | additions
     assert set(pin.configured_languages()) == existing | additions
-    assert len(pin.configured_languages()) == 54
+    assert len(pin.configured_languages()) == 69
 
 
 @pytest.mark.parametrize("compressed", [False, True])

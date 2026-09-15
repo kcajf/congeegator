@@ -169,13 +169,13 @@
 	</div>
 	{#if entry.details?.readings?.length}
 		<div class="readings">
-			{#each entry.details.readings.slice(0, 4) as reading}
+			{#each entry.details.readings.slice(0, 4) as reading, i (i)}
 				<p><bdi>{reading.text}</bdi> <span class="pronunciation-label">({reading.label})</span></p>
 			{/each}
 			{#if entry.details.readings.length > 4}
 				<details>
 					<summary>More readings ({entry.details.readings.length - 4})</summary>
-					{#each entry.details.readings.slice(4) as reading}
+					{#each entry.details.readings.slice(4) as reading, i (i)}
 						<p>
 							<bdi>{reading.text}</bdi> <span class="pronunciation-label">({reading.label})</span>
 						</p>

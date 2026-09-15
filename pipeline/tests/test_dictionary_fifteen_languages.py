@@ -72,3 +72,13 @@ def test_arabic_search_keeps_hamza_and_display_spelling():
     assert dictionary_search_key('كِتَـاب', 'ar') == 'كتاب'
     assert dictionary_search_key('آب', 'ar') != dictionary_search_key('اب', 'ar')
     assert any('كِتَاب' in r.get('forms', []) for r in records('ar', 'كتاب'))
+
+
+def test_native_navajo_greeting_survives_incorrect_source_category():
+    assert any('hello' in s['gloss'] for r in records('nv', 'yáʼátʼééh') for s in r['senses'])
+
+
+def test_corrupt_chinese_reading_is_omitted_without_losing_definition():
+    result = records('zh', '鿦')
+    assert result
+    assert all('\x06' not in reading['text'] for r in result for reading in r.get('details', {}).get('readings', []))

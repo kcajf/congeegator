@@ -386,8 +386,8 @@
       "englishWiktionaryName": "Arabic"
     },
     "zh": {
-      "dataHash": "1017251f",
-      "dataSize": 135108649,
+      "dataHash": "6a241adc",
+      "dataSize": 135108428,
       "code": "zh",
       "name": "中文",
       "englishWiktionaryName": "Chinese"
@@ -407,8 +407,8 @@
       "englishWiktionaryName": "Asturian"
     },
     "nv": {
-      "dataHash": "5aa45bef",
-      "dataSize": 2461319,
+      "dataHash": "82f2f014",
+      "dataSize": 2672807,
       "code": "nv",
       "name": "Diné bizaad",
       "englishWiktionaryName": "Navajo"

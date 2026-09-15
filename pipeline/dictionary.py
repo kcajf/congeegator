@@ -1,5 +1,6 @@
 import logging
 import re
+import unicodedata
 from typing import Any, Callable, Optional
 
 import msgspec
@@ -471,6 +472,13 @@ def entry_is_valid(entry: Entry) -> bool:
     }
     for c in _cat_names(entry.categories):
         if c in BAD_CATEGORIES:
+            # The pinned extract mislabels native Latin Navajo heads containing
+            # modifier-letter apostrophes (including the ordinary greeting).
+            if c == "Navajo terms in nonstandard scripts" and all(
+                not char.isalpha() or "LATIN" in unicodedata.name(char, "") or char == "ʼ"
+                for char in entry.word
+            ):
+                continue
             if c == "Persian terms in nonstandard scripts" and trusted_persian_head(entry):
                 continue
             return False
@@ -513,7 +521,7 @@ def process_dict_entry(config: DictLanguageConfig, entry: Entry, audit=None, *, 
     if entry.lang_code in {"ar", "zh", "ja", "ast", "nv", "sq", "te", "sw", "hy", "th", "ceb", "ta", "bn", "pa", "ur"}:
         readings = []
         def add_reading(text, label):
-            if text := _clean_text(text):
+            if (text := _clean_text(text)) and not re.search(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", text):
                 item = {"text": text, "label": label}
                 if item not in readings:
                     readings.append(item)
