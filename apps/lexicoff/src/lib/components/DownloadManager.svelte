@@ -16,6 +16,14 @@
 	}
 
 	const languages = Object.values(manifest.languages).toSorted(compareLanguages);
+	let languageFilter = $state('');
+	const visibleLanguages = $derived(
+		languages.filter((language) =>
+			`${language.name} ${language.englishWiktionaryName} ${language.code}`
+				.toLocaleLowerCase()
+				.includes(languageFilter.trim().toLocaleLowerCase())
+		)
+	);
 	let openingIsSlow = $state(false);
 
 	$effect(() => {
@@ -29,6 +37,14 @@
 
 <div class="download-manager">
 	<h2>Languages</h2>
+	<input
+		class="language-filter"
+		type="search"
+		bind:value={languageFilter}
+		placeholder="Find a language"
+		aria-label="Find a language"
+		dir="auto"
+	/>
 	{#if storage.phase === 'opening' && openingIsSlow}
 		<p class="unavailable-notice" role="status">
 			Dictionaries are taking longer than usual to become available.
@@ -41,7 +57,7 @@
 		</p>
 	{/if}
 	<div class="lang-list">
-		{#each languages as lang (lang.code)}
+		{#each visibleLanguages as lang (lang.code)}
 			{@const info = globalSync.map[lang.code] ?? storage.languages[lang.code]}
 			{@const isSyncing = info?.status === 'syncing'}
 			{@const isReady = info?.status === 'ready'}
@@ -98,11 +114,24 @@
 					{/if}
 				</div>
 			</div>
+		{:else}
+			<p>No languages match your search.</p>
 		{/each}
 	</div>
 </div>
 
 <style>
+	.language-filter {
+		box-sizing: border-box;
+		width: 100%;
+		padding: 0.65rem;
+		margin: 0.25rem 0 0.5rem;
+		border: 1px solid var(--border);
+		border-radius: 0.4rem;
+		background: var(--surface);
+		color: var(--text);
+		font: inherit;
+	}
 	h2 {
 		font-size: 1.1rem;
 		margin: 0.5rem 0;

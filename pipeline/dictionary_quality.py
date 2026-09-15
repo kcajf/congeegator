@@ -10,7 +10,7 @@ from functools import lru_cache
 from .utils import strip_diacritics
 from .wiktionary import Entry
 
-QUALITY_LANGUAGES = frozenset('grc az eu br et ka he hi is ga ko lt mk ms oc fa sa sh sk cy nn lv bg mt tl gd fo ang non'.split())
+QUALITY_LANGUAGES = frozenset('grc az eu br et ka he hi is ga ko lt mk ms oc fa sa sh sk cy nn lv bg mt tl gd fo ang non ar zh ja ast nv sq te sw hy th ceb ta bn pa ur'.split())
 _GENDERLESS = frozenset('az eu et ka ko ms fa tl'.split())
 _GENDERS = {'masculine': 'm', 'feminine': 'f', 'neuter': 'n', 'common-gender': 'c'}
 # These are source usage/variety labels, not a guessed classification of words.

@@ -47,6 +47,9 @@
 		adj_noun: 'Adjectival noun',
 		adj_verb: 'Adjectival verb',
 		adnominal: 'Adnominal',
+		character: 'Character',
+		stem: 'Stem',
+		'soft-redirect': 'See also',
 		name: 'Proper noun'
 	};
 </script>
@@ -164,6 +167,23 @@
 			</ul>
 		{/if}
 	</div>
+	{#if entry.details?.readings?.length}
+		<div class="readings">
+			{#each entry.details.readings.slice(0, 4) as reading}
+				<p><bdi>{reading.text}</bdi> <span class="pronunciation-label">({reading.label})</span></p>
+			{/each}
+			{#if entry.details.readings.length > 4}
+				<details>
+					<summary>More readings ({entry.details.readings.length - 4})</summary>
+					{#each entry.details.readings.slice(4) as reading}
+						<p>
+							<bdi>{reading.text}</bdi> <span class="pronunciation-label">({reading.label})</span>
+						</p>
+					{/each}
+				</details>
+			{/if}
+		</div>
+	{/if}
 	<ol class="senses">
 		{#each entry.senses as sense, i (i)}
 			<li>
@@ -300,6 +320,13 @@
 </section>
 
 <style>
+	.readings {
+		margin: 0.5rem 0;
+		overflow-wrap: anywhere;
+	}
+	.readings p {
+		margin: 0.25rem 0;
+	}
 	.pos-section {
 		margin: 1rem 0;
 		display: flow-root;

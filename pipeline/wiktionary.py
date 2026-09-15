@@ -9,6 +9,7 @@ class Form(msgspec.Struct, frozen=True):
     source: Optional[str] = None
     links: tuple[Any, ...] = ()
     raw_tags: tuple[str, ...] = ()
+    ruby: tuple[tuple[str, str], ...] = ()
 
 
 class FormOf(msgspec.Struct, frozen=True):
@@ -54,6 +55,7 @@ class Entry(msgspec.Struct, frozen=True):
     lang_code: str
     lang: str
     word: str
+    redirects: tuple[str, ...] = ()
     forms: tuple[Form, ...] = ()
     senses: tuple[Sense, ...] = ()
     head_templates: tuple[HeadTemplate, ...] = ()
