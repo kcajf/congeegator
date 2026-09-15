@@ -162,6 +162,11 @@
 			</ul>
 		{/if}
 	</div>
+	{#if entry.romanizations?.length}
+		<p class="romanizations" aria-label="Romanization">
+			<bdi dir="ltr">{entry.romanizations.join('; ')}</bdi>
+		</p>
+	{/if}
 	<ol class="senses">
 		{#each entry.senses as sense, i (i)}
 			<li>
@@ -298,6 +303,11 @@
 </section>
 
 <style>
+	.romanizations {
+		margin: 0.25rem 0 0.5rem;
+		color: var(--text-muted);
+		font-style: italic;
+	}
 	.pos-section {
 		margin: 1rem 0;
 		display: flow-root;

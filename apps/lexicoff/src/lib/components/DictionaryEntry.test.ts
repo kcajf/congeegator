@@ -140,3 +140,14 @@ it('keeps unverified local etymology destinations plain while preserving externa
 	expect(body).not.toContain(encodeURIComponent('σπίτιν'));
 	expect(body).toContain('https://en.wiktionary.org/wiki/hospitium');
 });
+
+it('displays optional original headword romanizations separately from IPA', () => {
+	const { body } = render(DictionaryEntry, {
+		props: { entry: { ...entry, romanizations: ['ʾav', 'av'] }, lang: 'he' }
+	});
+	expect(body).toContain('aria-label="Romanization"');
+	expect(body).toContain('ʾav; av');
+	expect(body).toContain('dir="ltr"');
+	const without = render(DictionaryEntry, { props: { entry, lang: 'he' } }).body;
+	expect(without).not.toContain('aria-label="Romanization"');
+});

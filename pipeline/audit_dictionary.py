@@ -101,7 +101,7 @@ DIRT_PATTERNS = {
 
 
 def _summary(record):
-    result = {k: record[k] for k in ("word", "pos", "senses", "gender", "pronunciation", "etymology", "details") if k in record}
+    result = {k: record[k] for k in ("word", "pos", "senses", "gender", "pronunciation", "etymology", "details", "romanizations") if k in record}
     if record.get("forms"):
         result["form_count"] = len(record["forms"])
         result["forms_sample"] = record["forms"][:20]
@@ -114,6 +114,8 @@ def _summary(record):
 
 def _strings(record):
     yield "word", record["word"]
+    for reading in record.get("romanizations", []):
+        yield "romanization", reading
     for sense in record["senses"]:
         yield "gloss", sense["gloss"]
         for example in sense.get("examples", []):
@@ -337,14 +339,14 @@ def audit_sqlite(path, code, source_report=None):
             result["highest_frequency"] = [dict(zip(("word", "pos", "freq"), r)) for r in conn.execute("SELECT word,pos,freq FROM entries ORDER BY freq DESC, word LIMIT 20")]
             columns = {row[1] for row in conn.execute("PRAGMA table_info(entries)")}
             selected = ["word", "pos", "senses", "gender", "forms", "pronunciation", "etymology"]
-            selected += [name for name in ("details", "form_details", "pronunciations") if name in columns]
+            selected += [name for name in ("details", "form_details", "pronunciations", "romanizations") if name in columns]
             fingerprints = set()
             for row in conn.execute("SELECT " + ",".join(selected) + " FROM entries"):
                 record = {}
                 for key, value in zip(selected, row):
                     if value is None:
                         continue
-                    if key in {"senses", "forms", "details", "form_details", "pronunciations"}:
+                    if key in {"senses", "forms", "details", "form_details", "pronunciations", "romanizations"}:
                         value = decode_entry_json(value)
                     record["formDetails" if key == "form_details" else key] = value
                 fingerprints.add(_record_fingerprint(record))

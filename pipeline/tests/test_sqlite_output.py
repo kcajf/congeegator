@@ -562,6 +562,7 @@ class TestExtendedDictionaries:
                 "word": entry["word"],
                 "word_key": "λόγος",
                 "search_key": "λογοσ",
+                "romanizations": None,
                 "pos": entry["pos"],
                 "freq": entry["freq"],
                 "gender": entry["gender"],
