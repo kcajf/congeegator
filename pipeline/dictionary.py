@@ -1,5 +1,6 @@
 import logging
 import re
+import unicodedata
 from typing import Any, Callable, Optional
 
 import msgspec
@@ -108,6 +109,21 @@ DICT_CONFIGS: list[DictLanguageConfig] = [
     DictLanguageConfig(code="fo", name="føroyskt", english_wiktionary_name="Faroese"),
     DictLanguageConfig(code="ang", name="Old English", english_wiktionary_name="Old English"),
     DictLanguageConfig(code="non", name="Old Norse", english_wiktionary_name="Old Norse"),
+    DictLanguageConfig(code="ar", name="العربية", english_wiktionary_name="Arabic"),
+    DictLanguageConfig(code="zh", name="中文", english_wiktionary_name="Chinese"),
+    DictLanguageConfig(code="ja", name="日本語", english_wiktionary_name="Japanese"),
+    DictLanguageConfig(code="ast", name="asturianu", english_wiktionary_name="Asturian"),
+    DictLanguageConfig(code="nv", name="Diné bizaad", english_wiktionary_name="Navajo"),
+    DictLanguageConfig(code="sq", name="shqip", english_wiktionary_name="Albanian"),
+    DictLanguageConfig(code="te", name="తెలుగు", english_wiktionary_name="Telugu"),
+    DictLanguageConfig(code="sw", name="Kiswahili", english_wiktionary_name="Swahili"),
+    DictLanguageConfig(code="hy", name="հայերեն", english_wiktionary_name="Armenian"),
+    DictLanguageConfig(code="th", name="ไทย", english_wiktionary_name="Thai"),
+    DictLanguageConfig(code="ceb", name="Cebuano", english_wiktionary_name="Cebuano"),
+    DictLanguageConfig(code="ta", name="தமிழ்", english_wiktionary_name="Tamil"),
+    DictLanguageConfig(code="bn", name="বাংলা", english_wiktionary_name="Bengali"),
+    DictLanguageConfig(code="pa", name="ਪੰਜਾਬੀ", english_wiktionary_name="Punjabi"),
+    DictLanguageConfig(code="ur", name="اردو", english_wiktionary_name="Urdu"),
 ]
 
 
@@ -233,6 +249,9 @@ def extract_form_items(entry: Entry, audit=None):
             if strip_diacritics(form.form) != strip_diacritics(entry.word):
                 continue
         text = _clean_text(form.form)
+        if text and entry.lang_code == "ja" and form.source == "conjugation":
+            text = re.sub(r"\s*\[[^\]]+\]$", "", text)
+            text = text.removeprefix("short form: ")
         if not text or text == "-":
             continue
         # Descriptions of compound paradigms are not spellings. Keeping them
@@ -439,9 +458,11 @@ def extract_examples(values) -> list[dict]:
 
 
 def entry_is_valid(entry: Entry) -> bool:
-    if entry.pos in EXCLUDED_POS:
+    script_entry = entry.lang_code in {"zh", "ja"} and entry.pos == "character"
+    stem_entry = entry.lang_code == "nv" and entry.pos == "stem"
+    if entry.pos in EXCLUDED_POS and not script_entry:
         return False
-    if entry.pos not in INCLUDED_POS:
+    if entry.pos not in INCLUDED_POS and not (script_entry or stem_entry):
         return False
     if not entry.word:
         return False
@@ -451,6 +472,13 @@ def entry_is_valid(entry: Entry) -> bool:
     }
     for c in _cat_names(entry.categories):
         if c in BAD_CATEGORIES:
+            # The pinned extract mislabels native Latin Navajo heads containing
+            # modifier-letter apostrophes (including the ordinary greeting).
+            if c == "Navajo terms in nonstandard scripts" and all(
+                not char.isalpha() or "LATIN" in unicodedata.name(char, "") or char == "ʼ"
+                for char in entry.word
+            ):
+                continue
             if c == "Persian terms in nonstandard scripts" and trusted_persian_head(entry):
                 continue
             return False
@@ -458,6 +486,14 @@ def entry_is_valid(entry: Entry) -> bool:
 
 
 def process_dict_entry(config: DictLanguageConfig, entry: Entry, audit=None, *, raw_form_details=False) -> dict[str, Any] | None:
+    if entry.lang_code in {"zh", "ja"} and entry.pos == "soft-redirect":
+        targets = [word for raw in entry.redirects if (word := _clean_text(raw)) and word != entry.word]
+        if not targets:
+            return None
+        return {"word": entry.word, "pos": "soft-redirect", "senses": [
+            {"gloss": f"See {word}.", "links": [{"word": word, "lang": entry.lang_code}]}
+            for word in dict.fromkeys(targets)
+        ]}
     if not entry_is_valid(entry):
         return None
     senses = extract_senses(entry)
@@ -482,6 +518,34 @@ def process_dict_entry(config: DictLanguageConfig, entry: Entry, audit=None, *, 
     if etymology:
         processed["etymology"] = etymology
     details = {}
+    if entry.lang_code in {"ar", "zh", "ja", "ast", "nv", "sq", "te", "sw", "hy", "th", "ceb", "ta", "bn", "pa", "ur"}:
+        readings = []
+        def add_reading(text, label):
+            if (text := _clean_text(text)) and not re.search(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", text):
+                item = {"text": text, "label": label}
+                if item not in readings:
+                    readings.append(item)
+        for form in entry.forms:
+            if "romanization" in form.tags and form.form:
+                add_reading(form.form, "Romanization")
+            if entry.lang_code in {"ar", "ur"} and "canonical" in form.tags and form.form:
+                if strip_diacritics(form.form) == strip_diacritics(entry.word):
+                    add_reading(form.form, "Vocalized spelling")
+            if entry.lang_code == "ja" and "canonical" in form.tags and form.ruby:
+                reading = entry.word
+                for spelling, kana in form.ruby:
+                    reading = reading.replace(spelling, kana, 1)
+                if reading != entry.word:
+                    add_reading(reading, "Reading")
+        for sound in entry.sounds:
+            if not isinstance(sound, dict):
+                continue
+            if entry.lang_code == "zh" and sound.get("zh_pron"):
+                add_reading(sound["zh_pron"], ", ".join(sound.get("tags", [])) or "Reading")
+            if entry.lang_code == "ja" and re.fullmatch(r"[ぁ-ゖァ-ヶー ・]+", sound.get("other", "")):
+                add_reading(sound["other"], "Reading")
+        if readings:
+            details["readings"] = readings
     etymology_links = extract_etymology_links(entry)
     if etymology_links:
         details["etymologyLinks"] = etymology_links

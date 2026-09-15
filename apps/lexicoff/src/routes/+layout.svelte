@@ -162,6 +162,8 @@
 	}
 
 	function handleKeydown(e: KeyboardEvent) {
+		// Enter confirms an IME candidate before it can select a dictionary result.
+		if (e.isComposing || e.keyCode === 229) return;
 		if (e.key === 'Enter' && searchResults.length > 0) {
 			e.preventDefault();
 			searchInput?.blur();

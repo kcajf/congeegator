@@ -1,5 +1,15 @@
 // Latin transliterations of the displayed native names, used only for sorting.
 const transliterations: Record<string, string> = {
+	ar: 'arabiyya',
+	bn: 'bangla',
+	hy: 'hayeren',
+	ja: 'nihongo',
+	pa: 'punjabi',
+	ta: 'tamil',
+	te: 'telugu',
+	th: 'thai',
+	ur: 'urdu',
+	zh: 'zhongwen',
 	el: 'ellinika',
 	fa: 'farsi',
 	he: 'ivrit',
