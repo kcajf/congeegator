@@ -21,6 +21,13 @@ export function dictionarySearchKey(text: string, lang: string): string {
 		// Optional short vowels; retain hamza and madda.
 		key = key.replace(/[\u064b-\u0652\u0670]/g, '');
 	}
+	if (lang === 'ar' || lang === 'ur') key = key.replace(/[\u064b-\u0652\u0670\u0640]/g, '');
+	if (lang === 'ur') key = key.replace(/ك/g, 'ک').replace(/ي/g, 'ی');
+	if (lang === 'ja') {
+		key = key
+			.normalize('NFKC')
+			.replace(/[ァ-ヶ]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0x60));
+	}
 	return key.normalize('NFC');
 }
 
