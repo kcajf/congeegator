@@ -49,9 +49,14 @@ const entryColumns = new Map<string, Set<string>>();
 
 async function init() {
 	try {
-		// One tab owns the pool at a time. Waiting tabs acquire it automatically
-		// when the owner closes; terminating the worker releases this Web Lock.
-		await navigator.locks.request('lexicoff-storage', async () => {
+		// One window owns the pool at a time. Report contention immediately so
+		// the user can close that window and retry instead of waiting for startup.
+		// Terminating the owning worker releases this Web Lock.
+		await navigator.locks.request('lexicoff-storage', { ifAvailable: true }, async (lock) => {
+			if (!lock) {
+				self.postMessage({ type: 'READY', sahPoolAvailable: false, storageBusy: true });
+				return;
+			}
 			try {
 				sqlite3 = await sqlite3InitModule({ print: console.log, printErr: console.error });
 				poolUtil = await sqlite3.installOpfsSAHPoolVfs({

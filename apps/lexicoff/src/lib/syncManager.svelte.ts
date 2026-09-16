@@ -4,6 +4,10 @@ import { manifest } from './dataUtils';
 import { storageErrorMessage } from './storageErrors';
 
 let worker: Worker | undefined;
+// Bound downloads and pending imports together; SQLite itself serializes imports.
+const maxConcurrentChanges = 2;
+let activeChanges = 0;
+const waitingChanges: (() => void)[] = [];
 
 export interface LangSyncInfo {
 	hash: string;
@@ -11,7 +15,7 @@ export interface LangSyncInfo {
 	receivedBytes?: number;
 	totalBytes?: number;
 	percent?: number | null;
-	stage?: 'downloading' | 'installing';
+	stage?: 'queued' | 'preparing' | 'downloading' | 'installing' | 'removing';
 	errorMessage?: string;
 }
 
@@ -55,20 +59,43 @@ function runDownloadWorker(lang: string, type: 'download' | 'delete'): Promise<s
 	});
 }
 
-async function changeLanguage(lang: string, remove: boolean) {
+function changeLanguage(lang: string, remove: boolean): Promise<void> {
 	if (
 		!browser ||
 		(!remove && !manifest.languages[lang]) ||
 		globalSync.map[lang]?.status === 'syncing'
 	)
-		return;
-	globalSync.map[lang] = { hash: storage.languages[lang]?.hash ?? '', status: 'syncing' };
+		return Promise.resolve();
+	globalSync.map[lang] = {
+		hash: storage.languages[lang]?.hash ?? '',
+		status: 'syncing',
+		stage: 'queued'
+	};
+	return runQueuedChange(lang, remove);
+}
+
+async function runQueuedChange(lang: string, remove: boolean) {
+	if (activeChanges < maxConcurrentChanges) activeChanges++;
+	else await new Promise<void>((resolve) => waitingChanges.push(resolve));
 	try {
+		await performChange(lang, remove);
+	} finally {
+		const next = waitingChanges.shift();
+		if (next) next();
+		else activeChanges--;
+	}
+}
+
+async function performChange(lang: string, remove: boolean) {
+	try {
+		globalSync.map[lang] = { ...globalSync.map[lang], stage: 'preparing' };
 		await storage.connect();
 		if (remove) {
+			globalSync.map[lang] = { ...globalSync.map[lang], stage: 'removing' };
 			await storage.removeDb(lang);
 			await runDownloadWorker(lang, 'delete');
 		} else {
+			globalSync.map[lang] = { ...globalSync.map[lang], stage: 'downloading' };
 			const hash = (await storage.hasDownload(lang, manifest.languages[lang].dataHash))
 				? manifest.languages[lang].dataHash
 				: await runDownloadWorker(lang, 'download');
