@@ -60,15 +60,21 @@
 					{#if isSyncing}
 						<div class="progress-area">
 							<span class="progress-text">
-								{#if info.stage === 'installing'}
+								{#if info.stage === 'queued'}
+									Queued…
+								{:else if info.stage === 'preparing'}
+									Preparing…
+								{:else if info.stage === 'removing'}
+									Removing…
+								{:else if info.stage === 'installing'}
 									Installing…
 								{:else if info.receivedBytes != null && info.totalBytes}
 									{formatBytes(info.receivedBytes)} / {formatBytes(info.totalBytes)}
 								{:else}
-									Syncing...
+									Downloading…
 								{/if}
 							</span>
-							{#if info.stage !== 'installing'}
+							{#if info.stage === 'downloading'}
 								<div class="progress-bar">
 									<div class="progress-fill" style="width: {info.percent ?? 0}%"></div>
 								</div>

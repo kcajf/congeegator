@@ -52,7 +52,14 @@ class Connection {
 				if (data.type === 'READY') {
 					clearTimeout(this.readyTimer);
 					if (data.sahPoolAvailable) resolve();
-					else this.close(new Error('Dictionary storage could not be opened.'));
+					else
+						this.close(
+							new Error(
+								data.storageBusy
+									? 'Dictionaries are in use in another Lexicoff window. Close other Lexicoff tabs or app windows, then retry.'
+									: 'Dictionary storage could not be opened.'
+							)
+						);
 					return;
 				}
 				const pending = this.active;

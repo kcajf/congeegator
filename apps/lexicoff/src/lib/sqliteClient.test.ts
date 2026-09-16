@@ -203,7 +203,30 @@ it('makes a query failure actionable on the affected dictionary', async () => {
 	expect(storage.languages.fr.status).toBe('error');
 	expect(storage.phase).toBe('ready');
 });
-it('bounds waiting for a storage lock with a retryable error', async () => {
+it('reports another window immediately and reopens installed dictionaries on retry', async () => {
+	FakeWorker.files = [['fr', 'current']];
+	const { storage } = await import('./sqliteClient.svelte');
+	const opened = expect(storage.connect()).rejects.toThrow(
+		'Close other Lexicoff tabs or app windows'
+	);
+	const worker = FakeWorker.instances[0];
+	worker.onmessage?.(
+		new MessageEvent('message', {
+			data: { type: 'READY', sahPoolAvailable: false, storageBusy: true }
+		})
+	);
+	await opened;
+	expect(storage.phase).toBe('error');
+	expect(storage.error).toContain('another Lexicoff window');
+	expect(worker.terminate).toHaveBeenCalledOnce();
+	expect(worker.postMessage).not.toHaveBeenCalled();
+	const retry = storage.restart();
+	FakeWorker.instances[1].ready();
+	await retry;
+	expect(storage.phase).toBe('ready');
+	expect(storage.languages.fr).toEqual({ hash: 'current', status: 'ready' });
+});
+it('bounds unresponsive storage startup with a retryable error', async () => {
 	const { storage } = await import('./sqliteClient.svelte');
 	const opened = expect(storage.connect()).rejects.toThrow('Close other Lexicoff tabs');
 	await vi.advanceTimersByTimeAsync(30000);
