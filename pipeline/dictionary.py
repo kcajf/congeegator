@@ -9,6 +9,7 @@ from .utils import _cat_names, strip_diacritics, to_phonetic_el
 from .wiktionary import Entry
 from .dictionary_quality import enhance_record, trusted_persian_head, labels
 
+from .romanizations import extract_romanizations
 from .form_quality import source_forms, normalize, build_details
 
 log = logging.getLogger(__name__)
@@ -129,7 +130,7 @@ DICT_CONFIGS: list[DictLanguageConfig] = [
 
 _LANGUAGE_ANCHORS = {c.english_wiktionary_name: c.code for c in DICT_CONFIGS}
 _NON_LEXICAL_FORM_TAGS = frozenset({
-    "table-tags", "inflection-template", "class", "romanization", "classifier", "auxiliary",
+    "table-tags", "inflection-template", "class", "romanization", "transliteration", "classifier", "auxiliary",
 })
 
 
@@ -504,6 +505,8 @@ def process_dict_entry(config: DictLanguageConfig, entry: Entry, audit=None, *, 
         "pos": entry.pos,
         "senses": senses,
     }
+    if romanizations := extract_romanizations(entry, _clean_text):
+        processed["romanizations"] = romanizations
     gender = extract_gender(entry)
     if gender:
         processed["gender"] = gender

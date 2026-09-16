@@ -165,6 +165,11 @@
 			</ul>
 		{/if}
 	</div>
+	{#if entry.romanizations?.length}
+		<p class="romanizations" aria-label="Romanization">
+			<bdi dir="ltr">{entry.romanizations.join('; ')}</bdi>
+		</p>
+	{/if}
 	{#if pronunciations.length > 3}
 		<details class="additional-pronunciations">
 			<summary>More pronunciations ({pronunciations.length - 3})</summary>
@@ -334,6 +339,11 @@
 </section>
 
 <style>
+	.romanizations {
+		margin: 0.25rem 0 0.5rem;
+		color: var(--text-muted);
+		font-style: italic;
+	}
 	.readings {
 		margin: 0.5rem 0;
 		overflow-wrap: anywhere;

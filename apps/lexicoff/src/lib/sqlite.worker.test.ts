@@ -2,6 +2,8 @@ import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 import { DatabaseSync } from 'node:sqlite';
 import { zstdCompressSync } from 'node:zlib';
 import { prepareSearchRequest } from './searchRequest';
+import romanizationFixtures from '../../../../shared/romanization-fixtures.json';
+import { romanizationKeys } from './romanizations';
 import { toPhoneticEl } from './phonetic';
 import entryJsonFixtures from './fixtures/entry-json.json';
 import { dictionarySearchKey, dictionaryWordKey } from './searchNormalization';
@@ -493,7 +495,10 @@ describe('linked entry compatibility and reverse forms', () => {
 });
 
 describe('extended dictionaries with real SQLite FTS', () => {
-	function database(lang: string, entries: { word: string; gloss: string; forms?: string[] }[]) {
+	function database(
+		lang: string,
+		entries: { word: string; gloss: string; forms?: string[]; romanizations?: string[] }[]
+	) {
 		const db = new DatabaseSync(':memory:');
 		db.exec(`
 			CREATE TABLE metadata (key TEXT, value TEXT);
@@ -536,8 +541,78 @@ describe('extended dictionaries with real SQLite FTS', () => {
 			);
 			db.prepare('INSERT INTO fuzzy(rowid, word, phonetic) VALUES (?, ?, ?)').run(id, alias, '');
 		}
+		if (entries.some((entry) => entry.romanizations)) {
+			db.exec(
+				'ALTER TABLE entries ADD COLUMN romanizations TEXT; CREATE TABLE romanized_lookup (key TEXT, entry_id INTEGER, PRIMARY KEY(key, entry_id)) WITHOUT ROWID;'
+			);
+			db.prepare('INSERT INTO metadata VALUES (?, ?)').run('romanization_version', '1');
+			for (const [id, entry] of entries.entries()) {
+				if (!entry.romanizations) continue;
+				db.prepare('UPDATE entries SET romanizations=? WHERE id=?').run(
+					JSON.stringify(entry.romanizations),
+					id
+				);
+				for (const reading of entry.romanizations) {
+					for (const { key } of romanizationKeys(lang, reading)) {
+						db.prepare('INSERT OR IGNORE INTO romanized_lookup VALUES (?, ?)').run(key, id);
+					}
+				}
+			}
+		}
 		return db;
 	}
+
+	it.each(romanizationFixtures)(
+		'searches source readings in $lang',
+		async ({ lang, reading, key }) => {
+			const db = database(lang, [{ word: 'entry', gloss: 'meaning', romanizations: [reading] }]);
+			const s = setup(db);
+			s.files.add(`/${lang}-aaaaaaaa.sqlite`);
+			await s.start();
+			await s.send('open', lang);
+			const response = await s.send('search', lang, key);
+			expect(response.error).toBeUndefined();
+			expect(response.result[0]).toMatchObject({ word: 'entry', romanizations: [reading] });
+		}
+	);
+
+	it('finds exact and prefix romanizations and keeps original display readings', async () => {
+		const db = database('ru', [
+			...Array.from({ length: 60 }, (_, i) => ({
+				word: `длинный${i}`,
+				gloss: 'prefix',
+				romanizations: [`sobakine${i}`]
+			})),
+			{ word: 'собаки', gloss: 'plural of dog', romanizations: ['sobáki'] },
+			{ word: 'значение', gloss: 'sobak definition' }
+		]);
+		const s = setup(db);
+		s.files.add('/ru-aaaaaaaa.sqlite');
+		await s.start();
+		await s.send('open', 'ru');
+		for (const query of ['sobaki', 'SOBÁKI', 'собаки']) {
+			const response = await s.send('search', 'ru', query);
+			expect(response.error).toBeUndefined();
+			expect(response.result[0]).toMatchObject({ word: 'собаки', romanizations: ['sobáki'] });
+		}
+		const prefix = await s.send('search', 'ru', 'sobak');
+		expect(prefix.result[0].word).toBe('значение');
+		expect(prefix.result.some((r: { word: string }) => r.word.startsWith('длинный'))).toBe(true);
+		expect((await s.send('getWord', 'ru', 'собаки')).result[0].romanizations).toEqual(['sobáki']);
+	});
+
+	it('keeps older databases searchable and gates unknown index versions', async () => {
+		const db = database('ru', [{ word: 'собака', gloss: 'dog', romanizations: ['sobaka'] }]);
+		db.exec(
+			"UPDATE metadata SET value='2' WHERE key='romanization_version'; DROP TABLE romanized_lookup;"
+		);
+		const s = setup(db);
+		s.files.add('/ru-aaaaaaaa.sqlite');
+		await s.start();
+		expect((await s.send('open', 'ru')).error).toBeUndefined();
+		expect((await s.send('search', 'ru', 'собака')).result[0].word).toBe('собака');
+		expect((await s.send('search', 'ru', 'sobaka')).result).toEqual([]);
+	});
 
 	it('ranks an exact romanized Greek headword above prefix and definition matches', async () => {
 		const db = database('el', [

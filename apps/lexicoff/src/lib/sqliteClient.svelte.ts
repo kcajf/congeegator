@@ -10,6 +10,7 @@ export type SearchResult = {
 	freq: number;
 	glosses: string[];
 	matchedGlossIdx?: number;
+	romanizations?: string[];
 };
 export interface InstalledLanguage {
 	hash: string;

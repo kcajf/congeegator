@@ -355,6 +355,11 @@
 							{:else}
 								<bdi lang={searchLangState.lang}>{item.word}</bdi>
 							{/if}
+							{#if item.romanizations?.length}
+								<span class="result-romanizations" aria-label="Romanization"
+									><bdi dir="ltr">{item.romanizations.join('; ')}</bdi></span
+								>
+							{/if}
 							{#if item.glosses.length > 0}
 								<span class="result-glosses" dir="ltr" lang="en">
 									{#each item.glosses as gloss, i (i)}
@@ -565,6 +570,12 @@
 		}
 	}
 
+	.result-romanizations {
+		display: block;
+		color: var(--text-muted);
+		font-size: 0.85em;
+		font-style: italic;
+	}
 	.result-glosses {
 		display: block;
 		font-size: 0.78em;

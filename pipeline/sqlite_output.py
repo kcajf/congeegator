@@ -15,6 +15,7 @@ import orjson
 import msgspec
 import zstandard
 
+from .romanizations import PROFILES, VERSION as ROMANIZATION_VERSION, romanization_keys
 from .packed_entries import PackedDictionaryEntries, PreparedDictionaryEntry
 
 from .utils import log_timing
@@ -184,6 +185,11 @@ def write_sqlite_database(
         conn.execute(f"PRAGMA threads={min(os.process_cpu_count() or 1, 4)}")
         extended = lang_code in EXTENDED_LANGUAGES
         conn.executescript(EXTENDED_SCHEMA_SQL if extended else SCHEMA_SQL)
+        romanized = lang_code in PROFILES
+        if romanized:
+            conn.execute('ALTER TABLE entries ADD COLUMN romanizations TEXT')
+            conn.execute('CREATE TABLE romanized_lookup (key TEXT NOT NULL, entry_id INTEGER NOT NULL, PRIMARY KEY (key, entry_id)) WITHOUT ROWID')
+            conn.execute('CREATE TABLE romanized_stage (key TEXT, entry_id INTEGER)')
         # Match FTS leaf blocks to the database pages and merge once after bulk
         # loading. The crisis limit still bounds the number of pending segments.
         for table in ("entries_fts", "fuzzy"):
@@ -234,6 +240,17 @@ def write_sqlite_database(
                         dictionary_search_key(entry["word"], lang_code),
                         _json_column(entry.get("pronunciations")),
                     )
+                if romanized:
+                    readings = entry.get('romanizations')
+                    if isinstance(readings, msgspec.Raw):
+                        readings = msgspec.json.decode(readings)
+                    row += (_json_column(readings),)
+                    keys = {}
+                    for reading in readings or ():
+                        for key, quality in romanization_keys(lang_code, reading):
+                            keys[key] = min(quality, keys.get(key, quality))
+                    conn.executemany('INSERT INTO romanized_stage VALUES (?, ?)',
+                                     ((key, i) for key in keys))
                 entry_rows.append(row)
 
                 details = entry.get("details")
@@ -274,14 +291,14 @@ def write_sqlite_database(
                 fuzzy_rows.append((i, word_key, phonetic))
 
                 if len(entry_rows) >= BATCH_SIZE:
-                    _flush_batch(conn, entry_rows, fts_rows, fuzzy_rows, extended)
+                    _flush_batch(conn, entry_rows, fts_rows, fuzzy_rows, extended, romanized)
                     entry_rows = []
                     fts_rows = []
                     fuzzy_rows = []
 
             # Flush remaining
             if entry_rows:
-                _flush_batch(conn, entry_rows, fts_rows, fuzzy_rows, extended)
+                _flush_batch(conn, entry_rows, fts_rows, fuzzy_rows, extended, romanized)
             if form_rows:
                 _flush_form_rows(conn, form_rows)
 
@@ -292,6 +309,10 @@ def write_sqlite_database(
             )
             conn.execute("DROP TABLE form_stage")
 
+        if romanized:
+            conn.execute('INSERT INTO romanized_lookup SELECT key, entry_id FROM romanized_stage ORDER BY key, entry_id')
+            conn.execute('DROP TABLE romanized_stage')
+
         with log_timing(f"{lang_code} sqlite indexes"):
             for statement in INDEX_STATEMENTS:
                 conn.execute(statement)
@@ -300,6 +321,8 @@ def write_sqlite_database(
 
         # Insert metadata
         conn.execute("INSERT INTO metadata (key, value) VALUES (?, ?)", ("lang", lang_code))
+        if romanized:
+            conn.execute('INSERT INTO metadata VALUES (?, ?)', ('romanization_version', ROMANIZATION_VERSION))
         # Compute once for the immutable download, never in the browser search queue.
         word_count = conn.execute("SELECT COUNT(DISTINCT word) FROM entries").fetchone()[0]
         conn.execute("INSERT INTO metadata (key, value) VALUES (?, ?)",
@@ -365,11 +388,14 @@ def _flush_batch(
     fts_rows: list[tuple],
     fuzzy_rows: list[tuple],
     extended: bool = False,
+    romanized: bool = False,
 ) -> None:
     columns = "id, word, word_key, pos, senses, freq, gender, forms, pronunciation, etymology, details, form_details"
     if extended:
         columns += ", search_key, pronunciations"
-    placeholders = ", ".join("?" for _ in range(14 if extended else 12))
+    if romanized:
+        columns += ", romanizations"
+    placeholders = ", ".join("?" for _ in range((14 if extended else 12) + int(romanized)))
     conn.executemany(
         f"INSERT INTO entries ({columns}) VALUES ({placeholders})",
         entry_rows,
