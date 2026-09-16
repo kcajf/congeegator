@@ -32,6 +32,7 @@ export interface DictExample {
 }
 
 export interface EntryDetails {
+	readings?: { text: string; label: string }[];
 	etymologyLinks?: WordLink[];
 	synonyms?: WordLink[];
 	antonyms?: WordLink[];

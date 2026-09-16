@@ -88,6 +88,7 @@ EXTENDED_LANGUAGES = frozenset({
     "grc", "az", "eu", "br", "et", "ka", "he", "hi", "is", "ga",
     "ko", "lt", "mk", "ms", "oc", "fa", "sa", "sh", "sk", "cy",
     "nn", "lv", "bg", "mt", "tl", "gd", "fo", "ang", "non",
+    "ar", "zh", "ja", "ast", "nv", "sq", "te", "sw", "hy", "th", "ceb", "ta", "bn", "pa", "ur",
 })
 EXTENDED_SCHEMA_SQL = SCHEMA_SQL.replace(
     "form_details TEXT\n", "form_details TEXT,\n    search_key TEXT NOT NULL,\n    pronunciations TEXT\n"
@@ -126,6 +127,15 @@ def dictionary_search_key(text: str, lang_code: str) -> str:
     if lang_code == "fa":
         text = text.replace("ي", "ی").replace("ك", "ک").replace("\u200c", "")
         text = "".join(c for c in text if not ("\u064b" <= c <= "\u0652" or c == "\u0670"))
+    if lang_code in {"ar", "ur"}:
+        # Optional vocalization and elongation, never hamza or madda.
+        text = "".join(c for c in text if not ("\u064b" <= c <= "\u0652" or c in "\u0670\u0640"))
+    if lang_code == "ur":
+        text = text.replace("ك", "ک").replace("ي", "ی")
+    if lang_code == "ja":
+        # Width variants and katakana input also find hiragana readings.
+        text = unicodedata.normalize("NFKC", text)
+        text = "".join(chr(ord(c) - 0x60) if "ァ" <= c <= "ヶ" else c for c in text)
     return unicodedata.normalize("NFC", text)
 
 
@@ -243,14 +253,23 @@ def write_sqlite_database(
                                      ((key, i) for key in keys))
                 entry_rows.append(row)
 
-                for form in forms or ():
+                details = entry.get("details")
+                if isinstance(details, msgspec.Raw):
+                    details = msgspec.json.decode(details)
+                aliases = [r["text"] for r in (details or {}).get("readings", [])]
+                for form in [*(forms or ()), *aliases]:
                     form_rows.extend((dictionary_word_key(form, lang_code), i))
+                    if len(form_rows) == 2 * FORM_BATCH_SIZE:
+                        _flush_form_rows(conn, form_rows)
+                        form_rows.clear()
+                    if lang_code in {"ar", "ur", "ja"}:
+                        form_rows.extend((dictionary_search_key(form, lang_code), i))
                     if len(form_rows) == 2 * FORM_BATCH_SIZE:
                         _flush_form_rows(conn, form_rows)
                         form_rows.clear()
 
                 # FTS columns
-                forms_text = " ".join(forms) if forms else ""
+                forms_text = " ".join([*(forms or ()), *aliases])
                 gloss_text = " ".join(
                     s.get("gloss", "") for s in entry["senses"]
                 )

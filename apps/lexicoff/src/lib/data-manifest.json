@@ -377,6 +377,111 @@
       "code": "non",
       "name": "Old Norse",
       "englishWiktionaryName": "Old Norse"
+    },
+    "ar": {
+      "dataHash": "368f8552",
+      "dataSize": 31728632,
+      "code": "ar",
+      "name": "العربية",
+      "englishWiktionaryName": "Arabic"
+    },
+    "zh": {
+      "dataHash": "6a241adc",
+      "dataSize": 135108428,
+      "code": "zh",
+      "name": "中文",
+      "englishWiktionaryName": "Chinese"
+    },
+    "ja": {
+      "dataHash": "41e1cbb5",
+      "dataSize": 33462205,
+      "code": "ja",
+      "name": "日本語",
+      "englishWiktionaryName": "Japanese"
+    },
+    "ast": {
+      "dataHash": "18756a6b",
+      "dataSize": 3899861,
+      "code": "ast",
+      "name": "asturianu",
+      "englishWiktionaryName": "Asturian"
+    },
+    "nv": {
+      "dataHash": "82f2f014",
+      "dataSize": 2672807,
+      "code": "nv",
+      "name": "Diné bizaad",
+      "englishWiktionaryName": "Navajo"
+    },
+    "sq": {
+      "dataHash": "b27b4258",
+      "dataSize": 6244725,
+      "code": "sq",
+      "name": "shqip",
+      "englishWiktionaryName": "Albanian"
+    },
+    "te": {
+      "dataHash": "8755f08b",
+      "dataSize": 3563042,
+      "code": "te",
+      "name": "తెలుగు",
+      "englishWiktionaryName": "Telugu"
+    },
+    "sw": {
+      "dataHash": "d3ffe3fd",
+      "dataSize": 4543240,
+      "code": "sw",
+      "name": "Kiswahili",
+      "englishWiktionaryName": "Swahili"
+    },
+    "hy": {
+      "dataHash": "cb393598",
+      "dataSize": 13605778,
+      "code": "hy",
+      "name": "հայերեն",
+      "englishWiktionaryName": "Armenian"
+    },
+    "th": {
+      "dataHash": "1c6c9c43",
+      "dataSize": 5205296,
+      "code": "th",
+      "name": "ไทย",
+      "englishWiktionaryName": "Thai"
+    },
+    "ceb": {
+      "dataHash": "94b198b0",
+      "dataSize": 2599601,
+      "code": "ceb",
+      "name": "Cebuano",
+      "englishWiktionaryName": "Cebuano"
+    },
+    "ta": {
+      "dataHash": "b883432f",
+      "dataSize": 10202139,
+      "code": "ta",
+      "name": "தமிழ்",
+      "englishWiktionaryName": "Tamil"
+    },
+    "bn": {
+      "dataHash": "ade4b0a1",
+      "dataSize": 4264685,
+      "code": "bn",
+      "name": "বাংলা",
+      "englishWiktionaryName": "Bengali"
+    },
+    "pa": {
+      "dataHash": "e5983f7a",
+      "dataSize": 3070638,
+      "code": "pa",
+      "name": "ਪੰਜਾਬੀ",
+      "englishWiktionaryName": "Punjabi"
+    },
+    "ur": {
+      "dataHash": "a7240380",
+      "dataSize": 3474343,
+      "code": "ur",
+      "name": "اردو",
+      "englishWiktionaryName": "Urdu"
     }
   }
 }

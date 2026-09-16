@@ -690,6 +690,13 @@ async function getWord(lang: string, word: string): Promise<unknown[]> {
 		(row) => (row[1] as string).normalize('NFC') === word.normalize('NFC')
 	);
 	if (exactSpelling.length) rows = exactSpelling;
+	if (!rows.length && ['ar', 'ur', 'ja'].includes(lang) && schemaColumns?.has('search_key')) {
+		rows = execQuery(
+			db,
+			`SELECT ${columns} FROM entries WHERE search_key = ? ORDER BY freq DESC, id`,
+			[dictionarySearchKey(word, lang)]
+		);
+	}
 	let matchedForm: string | undefined;
 	if (!rows.length) {
 		rows = execQuery(
@@ -697,7 +704,11 @@ async function getWord(lang: string, word: string): Promise<unknown[]> {
 			`SELECT ${columns} FROM entries
 			WHERE id IN (SELECT entry_id FROM form_lookup WHERE form_key = ?)
 			ORDER BY freq DESC, id`,
-			[dictionaryWordKey(word, lang)]
+			[
+				['ar', 'ur', 'ja'].includes(lang)
+					? dictionarySearchKey(word, lang)
+					: dictionaryWordKey(word, lang)
+			]
 		);
 		if (rows.length) matchedForm = word;
 	}

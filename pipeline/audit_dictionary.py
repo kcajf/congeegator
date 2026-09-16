@@ -34,6 +34,21 @@ from .wiktionary import Entry
 # Common nouns, verbs and adjectives, with diacritics and non-Latin scripts.
 # These are presence/definition/search probes, not a vocabulary coverage estimate.
 COMMON_WORDS = {
+    "ar": ["ماء", "كتاب", "كتب", "بيت", "جيد"],
+    "zh": ["水", "吃", "中國", "中国", "好"],
+    "ja": ["水", "食べる", "たべる", "日本", "良い"],
+    "ast": ["agua", "casa", "comer", "bonu", "ser"],
+    "nv": ["tó", "hooghan", "yáʼátʼééh", "shí"],
+    "sq": ["ujë", "shtëpi", "ha", "mirë", "jam"],
+    "te": ["నీరు", "ఇల్లు", "తిను", "మంచి"],
+    "sw": ["maji", "nyumba", "kula", "nzuri"],
+    "hy": ["ջուր", "տուն", "ուտել", "լավ"],
+    "th": ["น้ำ", "บ้าน", "กิน", "ดี"],
+    "ceb": ["tubig", "balay", "kaon", "maayo"],
+    "ta": ["நீர்", "வீடு", "உண்", "நல்ல"],
+    "bn": ["জল", "পানি", "বাড়ি", "খাওয়া", "ভালো"],
+    "pa": ["ਪਾਣੀ", "ਘਰ", "ਖਾਣਾ", "ਚੰਗਾ"],
+    "ur": ["پانی", "گھر", "کھانا", "اچھا"],
     "nn": ["hus", "vatn", "vera", "eta", "god", "eg", "ikkje", "ein", "ei", "eit"],
     "lv": ["māja", "ūdens", "būt", "ēst", "labs"],
     "bg": ["къща", "вода", "съм", "ям", "добър"],
@@ -135,7 +150,12 @@ def _strings(record):
                 for field in ("label", "sense"):
                     if link.get(field):
                         yield field, link[field]
-    for links in record.get("details", {}).values():
+    for reading in record.get("details", {}).get("readings", []):
+        yield "reading", reading["text"]
+        yield "reading_label", reading["label"]
+    for key, links in record.get("details", {}).items():
+        if key == "readings":
+            continue
         for link in links:
             yield "link", link["word"]
             for field in ("label", "sense"):

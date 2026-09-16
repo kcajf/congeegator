@@ -46,6 +46,9 @@
 		adj_noun: 'Adjectival noun',
 		adj_verb: 'Adjectival verb',
 		adnominal: 'Adnominal',
+		character: 'Character',
+		stem: 'Stem',
+		'soft-redirect': 'See also',
 		name: 'Proper noun'
 	};
 </script>
@@ -151,7 +154,7 @@
 		</h2>
 		{#if pronunciations.length > 0}
 			<ul class="pronunciations" aria-label="Pronunciation">
-				{#each pronunciations as pronunciation, i (i)}
+				{#each pronunciations.slice(0, 3) as pronunciation, i (i)}
 					<li>
 						<bdi dir="ltr">{pronunciation.ipa}</bdi>{#if pronunciation.label}
 							<span class="pronunciation-label">
@@ -166,6 +169,39 @@
 		<p class="romanizations" aria-label="Romanization">
 			<bdi dir="ltr">{entry.romanizations.join('; ')}</bdi>
 		</p>
+	{/if}
+	{#if pronunciations.length > 3}
+		<details class="additional-pronunciations">
+			<summary>More pronunciations ({pronunciations.length - 3})</summary>
+			<ul class="pronunciations" aria-label="Additional pronunciations">
+				{#each pronunciations.slice(3) as pronunciation, i (i)}
+					<li>
+						<bdi dir="ltr">{pronunciation.ipa}</bdi>{#if pronunciation.label}
+							<span class="pronunciation-label">
+								({formatPronunciationLabel(pronunciation.label)})</span
+							>
+						{/if}
+					</li>
+				{/each}
+			</ul>
+		</details>
+	{/if}
+	{#if entry.details?.readings?.length}
+		<div class="readings">
+			{#each entry.details.readings.slice(0, 4) as reading, i (i)}
+				<p><bdi>{reading.text}</bdi> <span class="pronunciation-label">({reading.label})</span></p>
+			{/each}
+			{#if entry.details.readings.length > 4}
+				<details>
+					<summary>More readings ({entry.details.readings.length - 4})</summary>
+					{#each entry.details.readings.slice(4) as reading, i (i)}
+						<p>
+							<bdi>{reading.text}</bdi> <span class="pronunciation-label">({reading.label})</span>
+						</p>
+					{/each}
+				</details>
+			{/if}
+		</div>
 	{/if}
 	<ol class="senses">
 		{#each entry.senses as sense, i (i)}
@@ -308,6 +344,13 @@
 		color: var(--text-muted);
 		font-style: italic;
 	}
+	.readings {
+		margin: 0.5rem 0;
+		overflow-wrap: anywhere;
+	}
+	.readings p {
+		margin: 0.25rem 0;
+	}
 	.pos-section {
 		margin: 1rem 0;
 		display: flow-root;
@@ -390,6 +433,8 @@
 	}
 
 	.pronunciations {
+		min-width: 0;
+		max-width: 100%;
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0.25rem 0.75rem;
@@ -400,6 +445,8 @@
 		font-size: 0.9rem;
 	}
 	.pronunciations li {
+		max-width: 100%;
+		overflow-wrap: anywhere;
 		margin: 0;
 	}
 	.pronunciation-label,

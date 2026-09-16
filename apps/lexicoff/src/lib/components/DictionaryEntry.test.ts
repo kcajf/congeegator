@@ -151,3 +151,28 @@ it('displays optional original headword romanizations separately from IPA', () =
 	const without = render(DictionaryEntry, { props: { entry, lang: 'he' } }).body;
 	expect(without).not.toContain('aria-label="Romanization"');
 });
+
+it('keeps new-language readings and additional pronunciations without a romanizations field', () => {
+	const { body } = render(DictionaryEntry, {
+		props: {
+			entry: {
+				...entry,
+				word: '食べる',
+				lang: 'ja',
+				pronunciations: Array.from({ length: 4 }, (_, i) => ({ ipa: `/reading-${i}/` })),
+				details: {
+					readings: [
+						{ text: 'たべる', label: 'Reading' },
+						{ text: 'taberu', label: 'Romanization' }
+					]
+				}
+			},
+			lang: 'ja'
+		}
+	});
+	expect(body).toContain('たべる');
+	expect(body).toContain('taberu');
+	expect(body).toContain('More pronunciations (1)');
+	expect(body).toContain('/reading-3/');
+	expect(body).not.toContain('aria-label="Romanization"');
+});
