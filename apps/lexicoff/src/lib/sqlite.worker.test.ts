@@ -83,7 +83,11 @@ function setup(realDb?: DatabaseSync) {
 		postMessage,
 		onmessage: undefined as unknown as (e: MessageEvent) => Promise<void>
 	};
-	const locks = { request: vi.fn((_name: string, run: () => Promise<void>) => run()) };
+	const locks = {
+		request: vi.fn(
+			(_name: string, _options: LockOptions, run: (lock: object | null) => Promise<void>) => run({})
+		)
+	};
 	vi.stubGlobal('self', worker);
 	vi.stubGlobal('navigator', {
 		locks,
@@ -249,20 +253,24 @@ describe('dictionary storage lifecycle', () => {
 		expect(s.raw.has('fr-aaaaaaaa.sqlite.zst')).toBe(false);
 	});
 
-	it('waits for another tab to release ownership instead of deleting its files', async () => {
+	it('reports another window immediately without opening or deleting its dictionaries', async () => {
 		const s = setup();
-		let acquire!: () => Promise<void>;
-		s.locks.request.mockImplementationOnce((_name, run) => {
-			acquire = run;
-			return new Promise(() => {});
-		});
+		s.files.add('/fr-aaaaaaaa.sqlite');
+		s.locks.request.mockImplementationOnce((_name, _options, run) => run(null));
 		await import('./sqlite.worker');
 		expect(mocks.init).not.toHaveBeenCalled();
-		void acquire();
-		await vi.waitFor(() =>
-			expect(s.postMessage).toHaveBeenCalledWith({ type: 'READY', sahPoolAvailable: true })
+		expect(s.locks.request).toHaveBeenCalledWith(
+			'lexicoff-storage',
+			{ ifAvailable: true },
+			expect.any(Function)
 		);
+		expect(s.postMessage).toHaveBeenCalledWith({
+			type: 'READY',
+			sahPoolAvailable: false,
+			storageBusy: true
+		});
 		expect(s.pool.removeVfs).not.toHaveBeenCalled();
+		expect([...s.files]).toEqual(['/fr-aaaaaaaa.sqlite']);
 	});
 });
 
