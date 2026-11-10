@@ -8,6 +8,7 @@ declare global {
 		interface PageState {
 			lexicoffHistoryId?: string;
 			lexicoffReadingScroll?: { x: number; y: number };
+			search?: { query: string; lang: string; scroll?: { x: number; y: number } };
 		}
 		// interface Platform { }
 	}
