@@ -4,7 +4,6 @@
 	import { resolve } from '$app/paths';
 	import { onMount, tick } from 'svelte';
 	import { manifest, langWiktionaryName } from '$lib/dataUtils';
-	import { searchLangState } from '$lib/searchLang.svelte';
 	import { trackViewport } from '$lib/viewport.svelte';
 	import {
 		TRAIL_STORAGE_KEY,
@@ -80,7 +79,6 @@
 		persist('sessionStorage', TRAIL_STORAGE_KEY, trail);
 
 		if (lang && word && lang in manifest.languages && !page.error) {
-			searchLangState.set(lang);
 			recent = addRecentWord(recent, { lang, word, viewedAt: Date.now() });
 			persist('localStorage', RECENT_STORAGE_KEY, recent);
 		}

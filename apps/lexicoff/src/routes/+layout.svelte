@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { afterNavigate, goto, replaceState } from '$app/navigation';
+	import { afterNavigate, beforeNavigate, goto, replaceState } from '$app/navigation';
 	import { manifest } from '$lib/dataUtils';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
@@ -101,7 +101,7 @@
 
 	let searchTerm = $state('');
 	$effect(() => {
-		if (!searchLangState.indexReady) searchTerm = '';
+		if (!searchLangState.indexReady && !page.state.search) searchTerm = '';
 	});
 	let searchInput: HTMLInputElement | undefined = $state();
 
@@ -109,11 +109,18 @@
 	let searchResultsQuery = $state('');
 	let previousSearchLang: string | undefined;
 	let searchStatus = $state<'idle' | 'searching' | 'complete' | 'error'>('idle');
+	let pendingSearchScroll: App.PageState['search'];
+
+	beforeNavigate(() => {
+		pendingSearchScroll = undefined;
+	});
 
 	afterNavigate((navigation) => {
-		const lang = page.params.lang || page.url.searchParams.get('lang');
+		const search = navigation.type === 'popstate' ? page.state.search : undefined;
+		pendingSearchScroll = search;
+		const lang = search?.lang || page.params.lang || page.url.searchParams.get('lang');
 		if (lang && lang in manifest.languages) searchLangState.set(lang);
-		const query = page.url.searchParams.get('q') || '';
+		const query = search?.query ?? page.url.searchParams.get('q') ?? '';
 		if (navigation.type === 'popstate' && !query) clearSearch();
 		else searchTerm = query;
 	});
@@ -121,7 +128,9 @@
 	function clearSearch() {
 		const readingScroll = page.state.lexicoffReadingScroll;
 		const entryId = page.state.lexicoffHistoryId;
+		pendingSearchScroll = undefined;
 		searchTerm = '';
+		if (page.state.search) replaceState('', { ...page.state, search: undefined });
 		// Search results temporarily replace the article and can clamp its scroll
 		// position. Restore the reading position after the article is visible again.
 		if (readingScroll) {
@@ -145,14 +154,20 @@
 	}
 
 	async function selectResult(item: SearchResult) {
+		const lang = searchLangState.lang;
 		const base = resolve('/[lang=lang]/[word]', {
-			lang: searchLangState.lang,
+			lang,
 			word: encodeURIComponent(item.word)
 		});
-		if (page.url.pathname !== base) await goto(base);
-		else clearSearch();
-
-		searchTerm = '';
+		if (page.url.pathname !== base) {
+			replaceState('', {
+				...page.state,
+				search: { query: searchTerm, lang, scroll: { x: window.scrollX, y: window.scrollY } }
+			});
+			await goto(base);
+		} else {
+			clearSearch();
+		}
 
 		await tick();
 
@@ -230,13 +245,14 @@
 		}
 
 		searchStatus = 'searching';
+		const returningSearch = pendingSearchScroll;
 		let cancelled = false;
 
 		// 30ms debounce — imperceptible on single keystrokes, catches burst typing
 		const timer = setTimeout(() => {
 			sqliteClient
 				.search(currentLang, originalQuery, phoneticQuery)
-				.then((results) => {
+				.then(async (results) => {
 					// Ignore every response from a superseded effect, including A → B → A.
 					if (cancelled) return;
 					// Verify query or language hasn't changed while waiting
@@ -245,6 +261,20 @@
 					searchResults = results;
 					searchResultsQuery = originalQuery;
 					searchStatus = 'complete';
+
+					const scroll = returningSearch?.scroll;
+					if (!scroll || !results.length) return;
+					// SvelteKit restores scroll before the asynchronous results are rendered.
+					await tick();
+					if (
+						!cancelled &&
+						pendingSearchScroll === returningSearch &&
+						returningSearch.query === searchTerm &&
+						returningSearch.lang === searchLangState.lang
+					) {
+						pendingSearchScroll = undefined;
+						window.scrollTo(scroll.x, scroll.y);
+					}
 				})
 				.catch((err: unknown) => {
 					if (cancelled) return;
@@ -299,6 +329,7 @@
 					bind:this={searchInput}
 					onkeydown={handleKeydown}
 					oninput={(event) => {
+						pendingSearchScroll = undefined;
 						rememberReadingPosition();
 						if (!event.currentTarget.value.trim()) clearSearch();
 						else searchTerm = event.currentTarget.value;
@@ -320,6 +351,7 @@
 
 			<LanguagePicker
 				onSelect={(focusSearch) => {
+					if (pendingSearchScroll?.lang !== searchLangState.lang) pendingSearchScroll = undefined;
 					if (focusSearch) searchInput?.focus();
 				}}
 			/>
