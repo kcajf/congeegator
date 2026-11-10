@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { afterNavigate, goto } from '$app/navigation';
+	import { afterNavigate, beforeNavigate, goto, replaceState } from '$app/navigation';
 	import { resolve } from '$app/paths';
+	import { page } from '$app/state';
 
 	import { dev } from '$app/environment';
 	import appleIcon180 from '$lib/assets/apple-touch-icon-180x180.png';
@@ -84,23 +85,34 @@
 	let searchInput: HTMLInputElement | undefined = $state();
 
 	let searchResults = $state<SearchResult[]>([]);
+	let pendingSearchScroll: App.PageState['search'];
 
-	// Clear search on any navigation (logo click, back button, etc.)
-	afterNavigate(() => {
-		searchTerm = '';
+	beforeNavigate(() => {
+		pendingSearchScroll = undefined;
+	});
+
+	afterNavigate((navigation) => {
+		const search = navigation.type === 'popstate' ? page.state.search : undefined;
+		pendingSearchScroll = search;
+		const lang = search?.lang ?? page.params.lang;
+		if (lang) searchLangState.set(lang);
+		searchTerm = search?.query ?? '';
 	});
 
 	async function selectResult(item: SearchResult) {
+		const lang = searchLangState.lang;
 		const base = resolve('/[lang=lang]/[verb]', {
-			lang: searchLangState.lang,
+			lang,
 			verb: item.root
 		});
 		const normalizedMatch = stripFormMarkers(item.matched);
 		const hash = item.matched !== item.root ? `#${encodeURIComponent(normalizedMatch)}` : '';
+		replaceState('', {
+			...page.state,
+			search: { query: searchTerm, lang, scroll: { x: window.scrollX, y: window.scrollY } }
+		});
 		// eslint-disable-next-line svelte/no-navigation-without-resolve -- base is already resolved above
 		await goto(base + hash);
-
-		searchTerm = '';
 
 		await tick();
 
@@ -117,7 +129,9 @@
 			searchInput?.blur(); // Dismiss mobile keyboard immediately
 			selectResult(searchResults[0]);
 		} else if (e.key === 'Escape') {
+			pendingSearchScroll = undefined;
 			searchTerm = '';
+			if (page.state.search) replaceState('', { ...page.state, search: undefined });
 			searchInput?.blur();
 		}
 	}
@@ -145,10 +159,11 @@
 		}
 
 		const dbKeys = prefixIds.map((id) => [snapshot!.key, id]);
+		const returningSearch = pendingSearchScroll;
 
 		db.verbs
 			.bulkGet(dbKeys)
-			.then((data) => {
+			.then(async (data) => {
 				if (
 					snapshot !== searchLangState.snapshot ||
 					currentLang !== searchLangState.lang ||
@@ -179,6 +194,19 @@
 					originalQuery,
 					currentLang
 				).slice(0, MAX_SEARCH_RESULTS);
+
+				const scroll = returningSearch?.scroll;
+				if (!scroll || !searchResults.length) return;
+				// SvelteKit restores scroll before the asynchronous results are rendered.
+				await tick();
+				if (
+					pendingSearchScroll === returningSearch &&
+					returningSearch.query === searchTerm &&
+					returningSearch.lang === searchLangState.lang
+				) {
+					pendingSearchScroll = undefined;
+					window.scrollTo(scroll.x, scroll.y);
+				}
 			})
 			.catch((err) => {
 				console.error('Search lookup failed:', err);
@@ -212,6 +240,12 @@
 				bind:value={searchTerm}
 				bind:this={searchInput}
 				onkeydown={handleKeydown}
+				oninput={(event) => {
+					pendingSearchScroll = undefined;
+					if (!event.currentTarget.value.trim() && page.state.search) {
+						replaceState('', { ...page.state, search: undefined });
+					}
+				}}
 				onfocus={() => searchInput?.select()}
 				type="text"
 				id="searchInput"
@@ -224,6 +258,7 @@
 
 		<LanguagePicker
 			onSelect={(focusSearch) => {
+				if (pendingSearchScroll?.lang !== searchLangState.lang) pendingSearchScroll = undefined;
 				if (focusSearch) searchInput?.focus();
 			}}
 		/>

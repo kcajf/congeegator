@@ -27,7 +27,7 @@
 		const lang = $page.url.searchParams.get('lang');
 		if (lang && lang in manifest.languages) {
 			searchLangState.set(lang);
-			replaceState(resolve('/'), {});
+			replaceState(resolve('/'), $page.state);
 		}
 	});
 

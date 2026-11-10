@@ -5,7 +5,9 @@ declare global {
 		// interface Error {}
 		// interface Locals {}
 		// interface PageData {}
-		// interface PageState {}
+		interface PageState {
+			search?: { query: string; lang: string; scroll?: { x: number; y: number } };
+		}
 		// interface Platform { }
 	}
 }
