@@ -10,6 +10,7 @@
 	import ToastStack from '$lib/components/ToastStack.svelte';
 	import { appTitle } from '$lib/defs';
 	import lexicoffIcon from '$lib/assets/lexicoff-icon.svg';
+	import lexicoffIconMarkup from '$lib/assets/lexicoff-icon.svg?raw';
 	import '$lib/disclosures.css';
 	import '$lib/theme.css';
 	import { theme } from '$lib/theme.svelte';
@@ -319,8 +320,10 @@
 					}
 				}}
 			>
-				<span class="logo-mark" style:mask-image={`url("${lexicoffIcon}")`} aria-hidden="true"
-				></span>
+				<span class="logo-mark" aria-hidden="true">
+					<!-- eslint-disable-next-line svelte/no-at-html-tags -- static SVG bundled with the app -->
+					{@html lexicoffIconMarkup}
+				</span>
 			</a>
 
 			<div class="search-container">
@@ -474,13 +477,14 @@
 	}
 
 	.logo-mark {
-		background: currentColor;
-		mask-size: contain;
-		mask-repeat: no-repeat;
-		mask-position: center;
-		display: block;
 		height: 2rem;
 		width: calc(2rem * 400 / 304);
+	}
+
+	.logo-mark :global(svg) {
+		display: block;
+		width: 100%;
+		height: 100%;
 	}
 
 	.container {
